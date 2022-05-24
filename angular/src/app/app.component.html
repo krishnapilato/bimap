@@ -1,0 +1,153 @@
+<form style="margin-left: 50px;margin-top: 50px;" onsubmit="saveData($event);" method="post" class="animate__animated animate__fadeInLeft" action="" autocomplete="off">
+
+  <h3> data enter area </h3> 
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+      <mat-label>Region</mat-label>
+      <input type="text" title="Region" placeholder="Pick one region" required matInput [formControl]="searchRegions" [matAutocomplete]="auto">  
+         <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+            <mat-option *ngFor="let province of provinces" [value]="province">
+              {{ province }}
+            </mat-option>
+         </mat-autocomplete>
+         <mat-error *ngIf="searchRegions.hasError('required')">Please select a region</mat-error>
+   </mat-form-field>
+
+   <br><br>
+
+   <mat-form-field class="thirty" appearance="outline">
+      <mat-label>Province</mat-label>
+      <input type="text" title="Province" placeholder="Pick one province" required aria-label="province" matInput [formControl]="searchTerm" [matAutocomplete]="auto">  
+         <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+            <mat-option *ngFor="let province of provinces" [value]="province">
+              {{ province }}
+            </mat-option>
+         </mat-autocomplete>
+         <mat-error *ngIf="searchTerm.hasError('required')">Please select a province</mat-error>
+   </mat-form-field>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Municipality</mat-label>
+      <input type="text" title="Municipality" placeholder="Pick one municipality" required matInput [formControl]="searchMunicipalities" [matAutocomplete]="auto">  
+         <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+            <mat-option *ngFor="let province of provinces" [value]="province">
+              {{ province }}
+          </mat-option>
+    </mat-autocomplete>
+    <mat-error *ngIf="searchMunicipalities.hasError('required')">Please select a municipality</mat-error>
+  </mat-form-field>
+
+   <br><br>
+
+   <mat-form-field appearance="outline" style="display: inline-block;width:16.6%;">
+    <mat-label>Address</mat-label>
+    <input matInput title="Address" [formControl]="address" placeholder="Ex. Via Umberto I" required (focusout)="focusOutFunction($event)">
+    <mat-error *ngIf="address.hasError('required')">Please write an address</mat-error>
+   </mat-form-field>
+   <mat-form-field appearance="outline" style="display: inline-block;margin-left:6px;width:60px;">
+    <mat-label>N°</mat-label>
+    <input type="number" minlength="1" [formControl]="number" matInput title="Number" placeholder="Ex. 54" required>
+    <mat-error *ngIf="number.hasError('required')">Mssing</mat-error>
+   </mat-form-field>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Good naming</mat-label>
+    <input matInput title="Good naming" [formControl]="goodNaming" placeholder="Ex. Chiesa di Santo Stefano" required>
+    <mat-error *ngIf="goodNaming.hasError('required')">Please write a good name</mat-error>
+  </mat-form-field>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Good ID</mat-label>
+    <input type="number" title="Good ID" [formControl]="gooodId" matInput placeholder="Ex. 0176" required min="0">
+    <mat-error *ngIf="gooodId.hasError('required')">Please write a good ID</mat-error>
+  </mat-form-field>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Id VIR</mat-label>
+    <input type="number" title="Id VIR" matInput [formControl]="idVir" placeholder="Ex. K8443H" required min="0">
+    <mat-error *ngIf="idVir.hasError('required')">Please write an id VIR</mat-error>
+  </mat-form-field>
+
+  <br><br>
+  
+  <mat-form-field appearance="outline" style="display: inline-block;width:10%;">
+    <mat-label style="margin: auto;">Latitude</mat-label>
+    <input type="text" class="text-center" title="Latitude" matInput placeholder="Ex. 46422694626503" id="latitude" readonly="readonly" value="0" required>
+  </mat-form-field>
+    <mat-form-field appearance="outline" style="display: inline-block;width:10%;">
+    <mat-label>Longitude</mat-label>
+    <input type="text" class="text-center" matInput title="Longitude" placeholder="Ex. 9.190426284267904" id="longitude" readonly="readonly" value="0" required>
+  </mat-form-field>
+
+  <br>
+
+  <mat-hint style="text-align: center;margin-left: 115px;font-size:10px;">double click on map to insert coordinates.</mat-hint>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Istat Code</mat-label>
+    <input matInput min="6" maxlength="6" title="Istat Code" placeholder="Ex. 015146">
+  </mat-form-field>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Provv Tutela</mat-label>
+    <input type="text" matInput title="Provv Tutela" placeholder="Ex. Chiesa di San Giovanni Battista">
+  </mat-form-field>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Property</mat-label>
+    <input type="text" matInput title="Property" placeholder="Ex. Something">
+  </mat-form-field>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Cadastre</mat-label>
+    <input type="text" matInput title="Cadastre" placeholder="Ex. Something">
+  </mat-form-field>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Transcription</mat-label>
+    <input type="text" matInput title="Transcription" placeholder="Ex. 13/02/2008 ai nn. 458/706">
+  </mat-form-field>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Constraint type</mat-label>
+    <input type="text" matInput title="Constraint type" placeholder="Ex. Something">
+  </mat-form-field>
+
+  <br><br>
+  
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Location</mat-label>
+    <input type="text" matInput title="Location" placeholder="Ex. Something">
+  </mat-form-field>
+
+  <br><br><br>
+
+  <button (click)="saveData($event);" title="Save data" type="submit" id="button" class="btn" style="background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 50px; margin-bottom: 50px;">
+    Save <i class="fa-solid fa-paper-plane" style="margin-left: 5px; font-size: 14px"></i>
+  </button>
+
+</form>
+
+<div class="animate__animated animate__fadeInRight" id="map"></div>
