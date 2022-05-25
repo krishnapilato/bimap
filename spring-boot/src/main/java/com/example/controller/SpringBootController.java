@@ -19,8 +19,8 @@ import com.example.repository.ListaComuniRepository;
 
 import lombok.AllArgsConstructor;
 
-@CrossOrigin(origins = "http://localhost:4200")
 @RestController
+@CrossOrigin(origins = {"http://localhost:4200", "**"})
 @AllArgsConstructor
 public class SpringBootController {
 	

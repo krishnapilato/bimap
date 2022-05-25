@@ -1,13 +1,16 @@
-<form style="margin-left: 50px;margin-top: 50px;" onsubmit="saveData($event);" method="post" class="animate__animated animate__fadeInLeft" action="" autocomplete="off">
+<form style="margin-left: 50px;margin-top: 50px;" autocomplete="off">
 
   <h3> data enter area </h3> 
+  <mat-hint style="font-size: 10px;" title="click on map to open StreetView -- double click on map to insert coordinates">
+    Click on StreetView icon to enable it &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; or &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; double click on map to insert coordinates
+  </mat-hint>
 
-  <br><br>
+  <br><br><br>
 
   <mat-form-field class="thirty" appearance="outline">
       <mat-label>Region</mat-label>
-      <input type="text" title="Region" placeholder="Pick one region" required matInput [formControl]="searchRegions" [matAutocomplete]="auto">  
-         <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+      <input  style="border-radius: 20px;" type="text" title="Region" placeholder="Pick one region" required matInput [formControl]="searchRegions" [matAutocomplete]="auto">  
+      <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
             <mat-option *ngFor="let province of provinces" [value]="province">
               {{ province }}
             </mat-option>
@@ -73,9 +76,9 @@
   <br><br>
 
   <mat-form-field class="thirty" appearance="outline">
-    <mat-label>Id VIR</mat-label>
-    <input type="number" title="Id VIR" matInput [formControl]="idVir" placeholder="Ex. K8443H" required min="0">
-    <mat-error *ngIf="idVir.hasError('required')">Please write an id VIR</mat-error>
+    <mat-label>Istat Code</mat-label>
+    <input type="number" title="Id VIR" matRipple matInput [formControl]="idVir" placeholder="Ex. K8443H" required min="0">
+    <mat-error *ngIf="idVir.hasError('required')">Please write an Istat Code</mat-error>
   </mat-form-field>
 
   <br><br>
@@ -89,65 +92,12 @@
     <input type="text" class="text-center" matInput title="Longitude" placeholder="Ex. 9.190426284267904" id="longitude" readonly="readonly" value="0" required>
   </mat-form-field>
 
-  <br>
-
-  <mat-hint style="text-align: center;margin-left: 115px;font-size:10px;">double click on map to insert coordinates.</mat-hint>
-
-  <br><br>
-
-  <mat-form-field class="thirty" appearance="outline">
-    <mat-label>Istat Code</mat-label>
-    <input matInput min="6" maxlength="6" title="Istat Code" placeholder="Ex. 015146">
-  </mat-form-field>
-
-  <br><br>
-
-  <mat-form-field class="thirty" appearance="outline">
-    <mat-label>Provv Tutela</mat-label>
-    <input type="text" matInput title="Provv Tutela" placeholder="Ex. Chiesa di San Giovanni Battista">
-  </mat-form-field>
-
-  <br><br>
-
-  <mat-form-field class="thirty" appearance="outline">
-    <mat-label>Property</mat-label>
-    <input type="text" matInput title="Property" placeholder="Ex. Something">
-  </mat-form-field>
-
-  <br><br>
-
-  <mat-form-field class="thirty" appearance="outline">
-    <mat-label>Cadastre</mat-label>
-    <input type="text" matInput title="Cadastre" placeholder="Ex. Something">
-  </mat-form-field>
-
-  <br><br>
-
-  <mat-form-field class="thirty" appearance="outline">
-    <mat-label>Transcription</mat-label>
-    <input type="text" matInput title="Transcription" placeholder="Ex. 13/02/2008 ai nn. 458/706">
-  </mat-form-field>
-
-  <br><br>
-
-  <mat-form-field class="thirty" appearance="outline">
-    <mat-label>Constraint type</mat-label>
-    <input type="text" matInput title="Constraint type" placeholder="Ex. Something">
-  </mat-form-field>
-
-  <br><br>
-  
-  <mat-form-field class="thirty" appearance="outline">
-    <mat-label>Location</mat-label>
-    <input type="text" matInput title="Location" placeholder="Ex. Something">
-  </mat-form-field>
-
   <br><br><br>
 
-  <button (click)="saveData($event);" title="Save data" type="submit" id="button" class="btn" style="background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 50px; margin-bottom: 50px;">
+  <button matRipple adiButton (click)="saveData($event);" title="Save data" type="submit" id="button" class="btn" style="background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 50px;">
     Save <i class="fa-solid fa-paper-plane" style="margin-left: 5px; font-size: 14px"></i>
   </button>
 
 </form>
 
-<div class="animate__animated animate__fadeInRight" id="map"></div>
+<div id="map" oncontextmenu="return false;"></div>

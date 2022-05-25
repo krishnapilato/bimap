@@ -5,6 +5,7 @@ import * as $ from "jquery";
 import { ApiService } from './api.service';
 import * as L from 'leaflet';
 import 'leaflet-easybutton';
+import 'leaflet-easybutton/src/easy-button.css';
 
 @Component({
   selector: 'app-root',
@@ -78,7 +79,7 @@ export class AppComponent implements OnInit {
 
     // Setting the map 
 
-    this.map = L.map('map', {layers: [googleTerrain]}).setView([45.10944000210847, 8.338010648085561], 8);
+    this.map = L.map('map', {layers: [googleTerrain]}).setView([45.2406927,10.27472], 8);
     this.map.options.minZoom = 3;
     L.control.scale({imperial: false}).addTo(this.map);
 
@@ -92,28 +93,25 @@ export class AppComponent implements OnInit {
     L.control.layers(baseLayers).addTo(this.map);
 
     // StreetView button control for map
-
-    var streetViewIcon = L.icon({iconUrl: 'https://icon-library.com/images/street-view-icon/street-view-icon-5.jpg', iconSize: [30, 30]});
-    var markerIcon = L.icon({iconUrl: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/66-512.png', iconSize: [30, 30]});
-		var marker: L.Marker<any>, flag = true, map = this.map,
+    
+    var markerIcon = L.icon({iconUrl: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/66-512.png', iconSize: [30, 30]}),
+    flag = true, map = this.map,
 		toggle = L.easyButton({
         id: 'toggle-streetview',
         states: [{
           stateName: 'add-markers',
-          icon: 'fa-solid fa-street-view fa-xl',
+          icon: 'fa-solid fa-street-view fa-lg',
           title: 'Turn on Street View Mode',
           onClick: function(control) {
-              marker = L.marker(map.getCenter(), {icon: streetViewIcon}).addTo(map);
-              map.on('move', function() { marker.setLatLng(map.getCenter()); });
+            alert("Click on map to open Street View! ");
               flag = false;
               control.state('remove-markers');
           }
         }, {
-          icon: 'fa-solid fa-arrow-rotate-left fa-beat-fade fa-lg',
+          icon: 'fa-solid fa-arrow-rotate-left',
           title: 'Turn off Street View Mode',
           stateName: 'remove-markers',
           onClick: function(control) {
-            map.removeLayer(marker);
             flag = true;
             control.state('add-markers');
           }
@@ -124,8 +122,10 @@ export class AppComponent implements OnInit {
     // StreetView control event
 
     const tmpl = 'https://www.google.com/maps?layer=c&cbll={lat},{lon}';
-    map.on('moveend', function() { 
-      if (!flag) window.open(tmpl.replace(/{lat}/g, map.getCenter().lat).replace(/{lon}/g, map.getCenter().lng), '"_self"'); 
+    map.on('click', function(e: any) { 
+      if (!flag) { 
+        window.open(tmpl.replace(/{lat}/g, e.latlng.lat).replace(/{lon}/g, e.latlng.lng), '"_self"'); 
+      }
     });
 
     // Double Click on map event
@@ -161,10 +161,14 @@ export class AppComponent implements OnInit {
   }
 
   public focusOutFunction(event: any) {
-    if(this.address.value != '') {
+    if(this.searchMunicipalities.value && this.address.value) {
       $.get('https://nominatim.openstreetmap.org/search?format=json&q=' + this.address.value + ', ' + this.searchMunicipalities.value, (data) => {
         this.map.setView([data[0]['lat'], data[0]['lon']], 17, {"animate": true, "duration": 1});
       });
     }
   }
+}
+
+function delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
 }

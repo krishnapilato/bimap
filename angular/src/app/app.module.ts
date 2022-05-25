@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon'
 
 @NgModule({
   declarations: [AppComponent],
@@ -24,7 +25,8 @@ import { MatInputModule } from '@angular/material/input';
     MatAutocompleteModule, 
     MatFormFieldModule,
     MatRippleModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    MatIconModule
   ],
   bootstrap: [AppComponent]
 })
