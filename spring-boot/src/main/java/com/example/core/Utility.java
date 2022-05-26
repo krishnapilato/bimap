@@ -8,41 +8,27 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.example.beans.FormModel;
 
 import lombok.Cleanup;
-import lombok.Getter;
 
-@Component
-@Getter
+@Service
 public class Utility {
 	
 	// Attributes 
 	
-	private final String DIRECTORY_PATH = "C:\\Simple Map Exercise\\",
-						 CSV_FILE_PATH = DIRECTORY_PATH + "csv_file.csv",
-						 API_KEY = "AAPK7266337594784c7c9697f97ba088105cEl7OdKemyJRfiWtq4lhcnaZ2IzPR2CHEUiuOQgJvXUladTHL_pxILh-ry4pNTsWf",
-						 JAWG_API_KEY = "SQw1WVEfXi6ZzeXSTkZRfwN0r1woIbzEokluS0c4j5hA1caok1J9CmoKMQmEhHmH";
+	private final String DIRECTORY_PATH = "C:\\Simple Map Exercise\\", CSV_FILE_PATH = DIRECTORY_PATH + "csv_file.csv";
 
 	// Create directory and files
 
 	public void createFiles() throws IOException {
 		Files.createDirectories(Paths.get(DIRECTORY_PATH));
 		new File(CSV_FILE_PATH).createNewFile();
-		
-		@Cleanup FileWriter fileWriter = new FileWriter(new File(CSV_FILE_PATH), false); 
-		fileWriter.append("Region" + ", ");
-		fileWriter.append("Province" + ", ");
-		fileWriter.append("Municipality" + ", ");
-		fileWriter.append("Number" + ", ");
-		fileWriter.append("Good Naming" + ", ");
-		fileWriter.append("Good ID" + ", ");
-		fileWriter.append("ID Vir" + ", ");
-		fileWriter.append("Latitude" + ", ");
-		fileWriter.append("Longitude" + "\n");
 	}
+	
+	// Count rows in a file
 	
 	public int countFileRows(String fileName) throws IOException {
 		@Cleanup BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
@@ -51,7 +37,7 @@ public class Utility {
 		return fileRows;
 	}
 	
-	// Write new data in a CSV file
+	// Write new data in a CSV file (change with OpenCSV)
 	
 	public void writeCSVFile(FormModel formModel) throws IOException {
 		@Cleanup FileWriter fileWriter = new FileWriter(new File(CSV_FILE_PATH), true); 

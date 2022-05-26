@@ -11,6 +11,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon'
+import { MatSnackBarModule} from '@angular/material/snack-bar';
 
 @NgModule({
   declarations: [AppComponent],
@@ -19,6 +20,7 @@ import { MatIconModule } from '@angular/material/icon'
     NgbModule,
     CommonModule,
     FormsModule,
+    MatSnackBarModule,
     ReactiveFormsModule,
     MatInputModule,
     HttpClientModule,

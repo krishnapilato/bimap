@@ -1,6 +1,5 @@
 package com.example.beans;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,15 +11,8 @@ import lombok.Data;
 @Entity
 @Table(name = "listacomuni")
 public class ListaComuni {
-	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@Column(name = "Comune")
-	private String comune;
-	@Column(name = "Regione")
-	private String regione;
-	@Column(name = "Provincia")
-	private String provincia;
-
+	private String comune, regione, provincia;
 }

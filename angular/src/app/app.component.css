@@ -1,5 +1,4 @@
 @import "~bootstrap/dist/css/bootstrap.css";
-@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 
 * {
   font-family: 'lato', 'arial', sans-serif;
@@ -7,7 +6,6 @@
 
 html {
   scroll-behavior: smooth !important;
-  overflow-y: hidden !important;
 }
 
 input {
@@ -16,16 +14,11 @@ input {
   font-weight: bold;
 }
 
-#latitude {
-  outline: none !important;
-}
-
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none !important;
   margin: 0 !important;
 }
-
 
 .thirty {
    width: 20%;
@@ -57,29 +50,9 @@ input::-webkit-inner-spin-button {
   margin-right: 30px;
   height: 1000px;  
   outline: none;
-  border-radius: 15px;
+  border-radius: 19px;
 }
 
 #map:active {
     cursor: move !important;
-}
-
-
-.leaflet-touch .leaflet-bar a {
-  border-radius: 20px;
-}
-
-.blink_me {
-  animation: blinker 1.55s linear infinite;
-}
-
-@keyframes blinker {
-  50% {
-    opacity: 0;
-  }
-}
-
-.mat-input-underline {
-
-    background-color: #FF0000;    /* replace this color with your accent color hex code */
 }

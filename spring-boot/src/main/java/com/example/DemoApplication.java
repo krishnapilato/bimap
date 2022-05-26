@@ -2,9 +2,6 @@ package com.example;
 
 /**
 	@author Khova Krishna Pilato
-
-	@name SME - Simple Map Exercise
-	Copyright (C) 2022  @khovakrishna-pilato (Github)
 */
 
 import org.springframework.boot.SpringApplication;
@@ -17,14 +14,8 @@ public class DemoApplication {
 	
 	private static final Utility utility = new Utility();
 
-	public static void main(String[] args) throws Exception {
-		// Creating Directory and Files
-		
+	public static void main(String[] args) throws Exception {		
 		utility.createFiles();
-
-		// Start web application
-
 		SpringApplication.run(DemoApplication.class, args);
-		//utility.start();
 	}
 }

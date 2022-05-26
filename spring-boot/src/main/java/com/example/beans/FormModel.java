@@ -15,10 +15,7 @@ public class FormModel {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String region, province, municipality, address;
-	private int number;
-	private String goodNaming;
-	private int goodID;
-	private int idVir;
+	private String region, province, municipality, address, goodNaming;
+	private int number, goodID, idVir;
 	private double latitude, longitude;
 }

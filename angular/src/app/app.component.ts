@@ -6,6 +6,7 @@ import { ApiService } from './api.service';
 import * as L from 'leaflet';
 import 'leaflet-easybutton';
 import 'leaflet-easybutton/src/easy-button.css';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-root',
@@ -45,7 +46,7 @@ export class AppComponent implements OnInit {
 
   // Constructor 
   
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private _snackbar: MatSnackBar) {}
 
   // OnInit method
 
@@ -75,11 +76,11 @@ export class AppComponent implements OnInit {
 
     // Default layer for map
 
-    var googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {noWrap: true, attribution: '<a target="_blank" href="https://about.google/brand-resource-center/products-and-services/geo-guidelines/#google-maps">Map data ©2022 Google</a>', maxZoom: 20.5, subdomains:['mt0','mt1','mt2','mt3'] });
+    var googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {noWrap: true, attribution: '<a target="_blank" href="https://www.google.com/intl/en_it/help/terms_maps">Map data ©2022 Google</a>', maxZoom: 20.5, subdomains:['mt0','mt1','mt2','mt3'] });
 
     // Setting the map 
 
-    this.map = L.map('map', {layers: [googleTerrain]}).setView([45.2406927,10.27472], 8);
+    this.map = L.map('map', {layers: [googleTerrain], zoomSnap: 0.10, zoomDelta: 0.25}).setView([45.2406927,10.27472], 8);
     this.map.options.minZoom = 3;
     L.control.scale({imperial: false}).addTo(this.map);
 
@@ -87,7 +88,7 @@ export class AppComponent implements OnInit {
 
     var baseLayers = {
       Terrain: googleTerrain,
-      Satellite: L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {maxZoom: 20.5, noWrap: true, subdomains:['mt0','mt1','mt2','mt3'], attribution: '<a target="_blank" href="https://about.google/brand-resource-center/products-and-services/geo-guidelines/#google-maps">Map data ©2022 Google</a>'}),
+      Satellite: L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {maxZoom: 20.5, noWrap: true, subdomains:['mt0','mt1','mt2','mt3'], attribution: '<a target="_blank" href="https://www.google.com/intl/en_it/help/terms_maps">Map data ©2022 Google</a>'}),
       OSM: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 20, noWrap: true, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
 		};
     L.control.layers(baseLayers).addTo(this.map);
@@ -95,7 +96,7 @@ export class AppComponent implements OnInit {
     // StreetView button control for map
     
     var markerIcon = L.icon({iconUrl: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/66-512.png', iconSize: [30, 30]}),
-    flag = true, map = this.map,
+    flag = true, map = this.map, snackbar = this._snackbar,
 		toggle = L.easyButton({
         id: 'toggle-streetview',
         states: [{
@@ -103,7 +104,7 @@ export class AppComponent implements OnInit {
           icon: 'fa-solid fa-street-view fa-lg',
           title: 'Turn on Street View Mode',
           onClick: function(control) {
-            alert("Click on map to open Street View! ");
+              snackbar.open('One click on map to open StreetView in Google Maps', 'Close', {duration: 5000, verticalPosition: 'bottom', horizontalPosition: 'end', panelClass: ['red-snackbar'],});
               flag = false;
               control.state('remove-markers');
           }
@@ -112,6 +113,7 @@ export class AppComponent implements OnInit {
           title: 'Turn off Street View Mode',
           stateName: 'remove-markers',
           onClick: function(control) {
+            snackbar.open('StreetView Mode closed', '', {duration: 2000, verticalPosition: 'bottom', horizontalPosition: 'end', panelClass: ['red-snackbar'],});
             flag = true;
             control.state('add-markers');
           }
@@ -131,7 +133,7 @@ export class AppComponent implements OnInit {
     // Double Click on map event
 
     map.on('dblclick', (e: { latlng: any; }) => {
-      if(confirm('Are you sure you want to add these points ' + e.latlng + ' ?')) {
+      if(confirm('Confirm you want to add these coordinates \n' + e.latlng.lat + ', ' + e.latlng.lng + ' ?')) {
         L.marker([e.latlng.lat, e.latlng.lng], {icon: markerIcon}).addTo(map);
         this.latitude = e.latlng.lat;
         this.longitude = e.latlng.lng;
@@ -157,6 +159,8 @@ export class AppComponent implements OnInit {
       this.formData.longitude = this.longitude;
       
       this.apiService.save(this.formData).subscribe((data: any) => { return data; });
+      var snackbar = this._snackbar;
+      snackbar.open('Data saved successfully', 'Close', {duration: 3000, verticalPosition: 'bottom', horizontalPosition: 'end', panelClass: ['red-snackbar'],});
     }
   }
 
@@ -167,8 +171,4 @@ export class AppComponent implements OnInit {
       });
     }
   }
-}
-
-function delay(ms: number) {
-    return new Promise( resolve => setTimeout(resolve, ms) );
 }

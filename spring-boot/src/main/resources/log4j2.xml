@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
 <Configuration>
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout
 				pattern="%style{%d{ISO8601}}{black} %highlight{%-5level }[%style{%t}{bright,blue}] 
-						 %style{%C{1.}}{bright,yellow}: %msg%n%throwable" />
+						 %style{%C{1.}}{bright,yellow}: %msg%n%throwable"/>
 		</Console>
-
 		<RollingFile name="RollingFile"
 			fileName="C:\Simple Map Exercise\LOGGING.log"
 			filePattern="C:\Simple Map Exercise\LOGGING%d{-dd-MMMM-yyyy-%i.log.gz">
@@ -15,21 +15,16 @@
 				</pattern>
 			</PatternLayout>
 			<Policies>
-				<!-- Rollover daily and when the file reaches 25 MegaBytes -->
 				<SizeBasedTriggeringPolicy size="25 MB" />
 				<TimeBasedTriggeringPolicy />
 			</Policies>
 		</RollingFile>
 	</Appenders>
-
 	<Loggers>
-		<!-- Root level is info -->
 		<Root level="info">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="RollingFile" />
 		</Root>
-		<!-- Application level is debug -->
 		<Logger name="com.onstairs" level="debug"></Logger>
 	</Loggers>
-
 </Configuration>

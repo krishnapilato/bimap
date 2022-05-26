@@ -20,36 +20,36 @@ import com.example.repository.ListaComuniRepository;
 import lombok.AllArgsConstructor;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:4200", "**"})
+@CrossOrigin(origins = "http://localhost:4200")
 @AllArgsConstructor
 public class SpringBootController {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SpringBootController.class);
 	
 	@Autowired
-	private final FormModelRepository formModelRepository;
+	private final ListaComuniRepository listaComuniRepository;
 	
 	@Autowired
-	private final ListaComuniRepository listaComuniRepository;
+	private final FormModelRepository formModelRepository;
 	
 	private final Utility utility = new Utility();
 	
-	@GetMapping("/searchRegione={keyword}")
-	public List<String> searchRegione(@PathVariable String keyword) {
-		logger.info("Getting regions containing this word: '" + keyword + "' [ http://localhost:8080/searchRegione=" + keyword + " ]");
-		return listaComuniRepository.searchRegione(keyword);
+	@GetMapping("/searchRegion={keyword}")
+	public List<String> searchRegion(@PathVariable String keyword) {
+		logger.info("Getting regions containing this word " + keyword);
+		return listaComuniRepository.searchRegion(keyword);
 	}
 	
-	@GetMapping("/searchProvinces={keyword}")
-	public List<String> searchProvinces(@PathVariable String keyword) {
-		logger.info("Getting provinces containing this word: '" + keyword + "' [ http://localhost:8080/searchProvinces=" + keyword + " ]");
-		return listaComuniRepository.searchProvincia(keyword);
+	@GetMapping("/searchProvince={keyword}")
+	public List<String> searchProvince(@PathVariable String keyword) {
+		logger.info("Getting provinces containing this word " + keyword);
+		return listaComuniRepository.searchProvince(keyword);
 	}
 	
-	@GetMapping("/searchMunicipalities={keyword}")
-	public List<String> searchMunicipalities(@PathVariable String keyword) {
-		logger.info("Getting municipalities containing this word: '" + keyword + "' [ http://localhost:8080/searchMunicipalities=" + keyword + " ]");
-		return listaComuniRepository.searchComune(keyword);
+	@GetMapping("/searchMunicipality={keyword}")
+	public List<String> searchMunicipality(@PathVariable String keyword) {
+		logger.info("Getting municipalities containing this word " + keyword);
+		return listaComuniRepository.searchMunicipality(keyword);
 	}
 	
     @PostMapping("/save")

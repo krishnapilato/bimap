@@ -1,6 +1,6 @@
 import { FormModel } from './formdata';
 import { Injectable } from '@angular/core';  
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { debounceTime, map } from 'rxjs/operators';
 
 @Injectable({
@@ -19,7 +19,7 @@ export class ApiService {
     // Get autocomplete search data for provinces
 
     searchRegions(province: string) {
-        var provincesList = this.httpService.get(this.URL + 'searchRegione=' + province).pipe(debounceTime(10), map((data: any) => {
+        var provincesList = this.httpService.get(this.URL + 'searchRegion=' + province).pipe(debounceTime(10), map((data: any) => {
             return (data.length != 0 ? data as any : ["No Regions Found"]); 
         }));
         return provincesList;  
@@ -28,7 +28,7 @@ export class ApiService {
     // Get autocomplete search data for provinces
 
     searchProvinces(province: string) {
-        var provincesList = this.httpService.get(this.URL + 'searchProvinces=' + province).pipe(debounceTime(1), map((data: any) => {
+        var provincesList = this.httpService.get(this.URL + 'searchProvince=' + province).pipe(debounceTime(1), map((data: any) => {
             return (data.length != 0 ? data as any : ["No Provinces Found"]); 
         }));
         return provincesList;  
@@ -37,7 +37,7 @@ export class ApiService {
     // Get autocomplete search data for municipalities
 
     searchMunicipalities(keyword: string) {
-        var municipalitiesList = this.httpService.get(this.URL + 'searchMunicipalities=' + keyword).pipe(debounceTime(1), map((data: any) => {
+        var municipalitiesList = this.httpService.get(this.URL + 'searchMunicipality=' + keyword).pipe(debounceTime(1), map((data: any) => {
             return (data.length != 0 ? data as any : ["No Municipalities Found"]);
         }));
         return municipalitiesList;  
