@@ -93,7 +93,7 @@ Start the client: the web app will open in the browser
 
 | Parameter | Type     | Description                       |
 | :-------- | :------- | :-------------------------------- |
-| `@RequestBody`      | `FormData Object` | **Required**. Save the object to form table and to csv_file |
+| `RequestBody FormModel`      | `FormModel Object` | **Required**. Save the object to form table and to csv_file |
 
 ## Technologies used:
 
