@@ -29,7 +29,7 @@ First of all go to the spring-boot folder directory
   cd first-full-stack-app-main/spring-boot
 ```
 
-Start the server if you have Maven installed or go to spring-boot/target and launch JAR file:
+Start the server if you have Maven installed or go to spring-boot/target and launch JAR file: open http://localhot:8080 in your browser and skip the steps below
 
 ```bash
   mvn-spring-boot:run
