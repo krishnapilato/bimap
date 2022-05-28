@@ -13,6 +13,7 @@ For building and running the application you need:
 - [JDK 17](https://www.oracle.com/java/technologies/downloads/#java17)
 - [Maven 3.8.5](https://maven.apache.org/download.cgi)
 - [MySQL Server 8.0.29](https://dev.mysql.com/downloads/mysql/)
+- [NodeJS 18.2.0](https://leafletjs.com)
 
 ## Run Locally
 
@@ -96,6 +97,5 @@ Start the client: the web app will open in the browser
 
 ## Technologies used:
 
-- [NodeJS 18.2.0](https://leafletjs.com)
 - [Leaflet 1.8.0](https://leafletjs.com)
 - [Google Maps Data](https://developers.google.com/maps)
