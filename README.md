@@ -94,6 +94,7 @@ Start the client: the web app will open in the browser
 | :-------- | :------- | :-------------------------------- |
 | `@RequestBody`      | `FormData Object` | **Required**. Save the object to form table and to csv_file |
 
-## Authors
+## Technologies used:
 
-- [@khovakrishna-pilato](https://github.com/khovakrishna-pilato)
+- [Leaflet](https://leafletjs.com)
+- [Google Maps Data](https://developers.google.com/maps)
