@@ -13,11 +13,11 @@ For building and running the application you need:
 - [JDK 17](https://www.oracle.com/java/technologies/downloads/#java17)
 - [Maven 3.8.5](https://maven.apache.org/download.cgi)
 - [MySQL Server 8.0.29](https://dev.mysql.com/downloads/mysql/)
-- [NodeJS 18.2.0](https://leafletjs.com)
+- [NodeJS 18.2.0](https://nodejs.org/en/)
 
 ## Run Locally
 
-Clone the project
+Clone the project with [Git](https://git-scm.com/downloads) or download the project zip and extract it wherever you want in your computer
 
 ```bash
   git clone https://github.com/khovakrishna-pilato/first-full-stack-app.git
@@ -29,19 +29,19 @@ First of all go to the spring-boot folder directory
   cd first-full-stack-app-main/spring-boot
 ```
 
-Start the server
+Start the server if you have Maven installed or go to spring-boot/target and launch JAR file:
 
 ```bash
   mvn-spring-boot:run
 ```
 
-Then go to the angular folder directory 
+Then go to the Angular folder directory 
 
 ```bash
   cd first-full-stack-app-main/angular
 ```
 
-Install dependencies
+Install dependencies with [NodeJS](https://nodejs.org/en/)
 
 ```bash
   npm install
