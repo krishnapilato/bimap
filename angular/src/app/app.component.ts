@@ -62,7 +62,6 @@ export class AppComponent implements OnInit {
     // Get autocomplete search data for provinces
 
     this.searchTerm.valueChanges.subscribe(term => {
-      this.provinces = [];
       if (term != '' && term.length > 0) this.apiService.searchProvinces(term).subscribe((data: any[]) => { this.provinces = data as any[]; });
       else this.provinces = [];
     });
@@ -76,7 +75,7 @@ export class AppComponent implements OnInit {
 
     // Default layer for map
 
-    var googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {noWrap: true, attribution: '<a target="_blank" href="https://www.google.com/intl/en_it/help/terms_maps">Map data ©2022 Google</a>', maxZoom: 20.5, subdomains:['mt0','mt1','mt2','mt3'] });
+    var googleTerrain = L.tileLayer('https://{s}.google.com/vt/lyrs=m@221097413,transit,traffic,bike,images&x={x}&y={y}&z={z}', {attribution: '<a target="_blank" href="https://cloud.google.com/maps-platform/terms">Map data ©2022 Google</a>', maxZoom: 20.25, subdomains:['mt0','mt1','mt2','mt3'] });
 
     // Setting the map 
 
@@ -87,33 +86,34 @@ export class AppComponent implements OnInit {
     // Custom base layers for map
 
     var baseLayers = {
-      Terrain: googleTerrain,
-      Satellite: L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {maxZoom: 20.5, noWrap: true, subdomains:['mt0','mt1','mt2','mt3'], attribution: '<a target="_blank" href="https://www.google.com/intl/en_it/help/terms_maps">Map data ©2022 Google</a>'}),
-      OSM: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 20, noWrap: true, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
+      Default: googleTerrain,
+      Satellite: L.tileLayer('http://{s}.google.com/vt/lyrs=y,transit,traffic,bike&&x={x}&y={y}&z={z}', {maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3'], attribution: '<a target="_blank" href="https://cloud.google.com/maps-platform/terms">Map data ©2022 Google</a>'}),
+      OSM: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 20, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
 		};
     L.control.layers(baseLayers).addTo(this.map);
 
     // StreetView button control for map
     
-    var markerIcon = L.icon({iconUrl: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/66-512.png', iconSize: [30, 30]}),
-    flag = true, map = this.map, snackbar = this._snackbar,
-		toggle = L.easyButton({
+    var streetViewIcon = L.icon({iconUrl: 'https://icon-library.com/images/street-view-icon/street-view-icon-5.jpg', iconSize: [30, 30]}),
+        markerIcon = L.icon({iconUrl: 'https://cdn1.iconfinder.com/data/icons/social-messaging-ui-color/254000/66-512.png', iconSize: [30, 30]}),
+        flag = true, map = this.map, snackbar = this._snackbar,
+      toggle = L.easyButton({
         id: 'toggle-streetview',
         states: [{
           stateName: 'add-markers',
           icon: 'fa-solid fa-street-view fa-lg',
-          title: 'Turn on Street View Mode',
+          title: 'Browse Street View Images',
           onClick: function(control) {
-              snackbar.open('One click on map to open StreetView in Google Maps', 'Close', {duration: 5000, verticalPosition: 'bottom', horizontalPosition: 'end', panelClass: ['red-snackbar'],});
+              snackbar.open('Double click on map to open StreetView in Google Maps', 'Close', {duration: 5000, verticalPosition: 'bottom', horizontalPosition: 'center', panelClass: ['red-snackbar'],});
               flag = false;
               control.state('remove-markers');
           }
         }, {
-          icon: 'fa-solid fa-arrow-rotate-left',
+          icon: 'fa-solid fa-arrow-rotate-left fa-fade',
           title: 'Turn off Street View Mode',
           stateName: 'remove-markers',
           onClick: function(control) {
-            snackbar.open('StreetView Mode closed', '', {duration: 2000, verticalPosition: 'bottom', horizontalPosition: 'end', panelClass: ['red-snackbar'],});
+            snackbar.open('StreetView Mode closed', 'Close', {duration: 2000, verticalPosition: 'bottom', horizontalPosition: 'center', panelClass: ['red-snackbar'],});
             flag = true;
             control.state('add-markers');
           }
@@ -124,17 +124,12 @@ export class AppComponent implements OnInit {
     // StreetView control event
 
     const tmpl = 'https://www.google.com/maps?layer=c&cbll={lat},{lon}';
-    map.on('click', function(e: any) { 
-      if (!flag) { 
-        window.open(tmpl.replace(/{lat}/g, e.latlng.lat).replace(/{lon}/g, e.latlng.lng), '"_self"'); 
-      }
-    });
+    map.on('dblclick', function(e: any) { if (!flag) window.open(tmpl.replace(/{lat}/g, e.latlng.lat).replace(/{lon}/g, e.latlng.lng), '"_self"'); });
 
     // Double Click on map event
 
     map.on('dblclick', (e: { latlng: any; }) => {
       if(confirm('Confirm you want to add these coordinates \n' + e.latlng.lat + ', ' + e.latlng.lng + ' ?')) {
-        L.marker([e.latlng.lat, e.latlng.lng], {icon: markerIcon}).addTo(map);
         this.latitude = e.latlng.lat;
         this.longitude = e.latlng.lng;
         $('#latitude').val(this.latitude);
@@ -144,7 +139,8 @@ export class AppComponent implements OnInit {
   }
 
   public saveData(event: any) {
-    if(confirm('Are you sure you want to save data?')) {
+    var snackbar = this._snackbar;
+    if(confirm('Are you sure you want to save data?') && this.latitude != null && this.longitude != null && this.searchTerm.value != '' && this.searchMunicipalities.value != '' && this.searchRegions.value != '' && this.searchRegions.value != 'Select Region') { 
       this.formData.region = this.searchRegions.value;
       this.formData.province = this.searchTerm.value;
       this.formData.municipality = this.searchMunicipalities.value;
@@ -159,8 +155,10 @@ export class AppComponent implements OnInit {
       this.formData.longitude = this.longitude;
       
       this.apiService.save(this.formData).subscribe((data: any) => { return data; });
-      var snackbar = this._snackbar;
-      snackbar.open('Data saved successfully', 'Close', {duration: 3000, verticalPosition: 'bottom', horizontalPosition: 'end', panelClass: ['red-snackbar'],});
+      snackbar.open('Data saved successfully', 'Close', {duration: 3000, verticalPosition: 'bottom', horizontalPosition: 'center', panelClass: ['red-snackbar'],});
+    }
+    else {
+      snackbar.open('Some problem occured when trying to save data', 'Close', {duration: 3000, verticalPosition: 'bottom', horizontalPosition: 'center', panelClass: ['red-snackbar'],});
     }
   }
 

@@ -9,10 +9,10 @@
 
   <mat-form-field class="thirty" appearance="outline">
       <mat-label>Region</mat-label>
-      <input  style="border-radius: 20px;" type="text" title="Region" placeholder="Pick one region" required matInput [formControl]="searchRegions" [matAutocomplete]="auto">  
+      <input type="text" title="Region" placeholder="Pick one region" required matInput [formControl]="searchRegions" [matAutocomplete]="auto">  
       <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-            <mat-option *ngFor="let province of provinces" [value]="province">
-              {{ province }}
+            <mat-option *ngFor="let region of provinces" [value]="region">
+              {{ region }}
             </mat-option>
          </mat-autocomplete>
          <mat-error *ngIf="searchRegions.hasError('required')">Please select a region</mat-error>
@@ -37,8 +37,8 @@
     <mat-label>Municipality</mat-label>
       <input type="text" title="Municipality" placeholder="Pick one municipality" required matInput [formControl]="searchMunicipalities" [matAutocomplete]="auto">  
          <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-            <mat-option *ngFor="let province of provinces" [value]="province">
-              {{ province }}
+            <mat-option *ngFor="let municipality of provinces" [value]="municipality">
+              {{ municipality }}
           </mat-option>
     </mat-autocomplete>
     <mat-error *ngIf="searchMunicipalities.hasError('required')">Please select a municipality</mat-error>
