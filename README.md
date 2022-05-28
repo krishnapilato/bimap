@@ -96,5 +96,6 @@ Start the client: the web app will open in the browser
 
 ## Technologies used:
 
-- [Leaflet](https://leafletjs.com)
+- [NodeJS 18.2.0](https://leafletjs.com)
+- [Leaflet 1.8.0](https://leafletjs.com)
 - [Google Maps Data](https://developers.google.com/maps)
