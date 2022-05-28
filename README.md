@@ -99,3 +99,4 @@ Start the client: the web app will open in the browser
 
 - [Leaflet 1.8.0](https://leafletjs.com)
 - [Google Maps Data](https://developers.google.com/maps)
+- [Open Street Map Data](https://www.openstreetmap.org/#map=8/45.905/8.990)
