@@ -5,6 +5,14 @@ The user can enter the required data such as the region and the name of the prop
 
 I'm trying to create a login, registration and forgotten password page so that the web app is as safe as possible.
  Also a way is in development to make my three API secure with API Key that will allow them to be used.
+ 
+## Requirements
+
+For building and running the application you need:
+
+- [JDK 17](https://www.oracle.com/java/technologies/downloads/#java17)
+- [Maven 3.8.5](https://maven.apache.org/download.cgi)
+- [MySQL Server 8.0.29](https://dev.mysql.com/downloads/mysql/)
 
 ## Run Locally
 
