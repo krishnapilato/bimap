@@ -6,7 +6,7 @@ export class FormModel {
 	number! : number;
 	goodNaming! : string;
 	goodID !: number;
-	idVir! : number;
+	istatCode! : number;
 	latitude! : number;
     longitude! : number;
 }

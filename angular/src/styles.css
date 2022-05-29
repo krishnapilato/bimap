@@ -1,11 +1,10 @@
-html, body { 
-  height: 100%; 
-}
+@import "~bootstrap/dist/css/bootstrap.css";
 
-body { 
-  margin: 0; 
-  font-family: Roboto, "Helvetica Neue", sans-serif; 
+* {
+  font-family: 'lato', 'arial', sans-serif;
 }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .noselect {
   -webkit-touch-callout: none;

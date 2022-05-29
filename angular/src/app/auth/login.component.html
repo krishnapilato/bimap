@@ -1,0 +1,44 @@
+<div class="card my-5" style="border: none;">
+    <div class="card-body">
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm" autocomplete="off">
+        <div class="form-group  text-center">
+          <h1>Welcome to my project: please login to start</h1>
+          <br><br>
+          <mat-form-field appearance="outline" style="width: 80%;outline:none; text-align: center">
+    <mat-label>Username</mat-label>
+    <input type="email" title="Username" [(ngModel)]="loginRequest.username" 
+            id="username" 
+            name="username" 
+            placeholder="Enter your email"
+            required #name="ngModel" matInput matRipple required min="2">
+  </mat-form-field>
+        </div>
+        <br>
+        <div class="form-group text-center">
+                    <mat-form-field appearance="outline" style="width: 80%;outline:none; text-align: center">
+    <mat-label>Password</mat-label>
+    <input type="password" title="Password" [(ngModel)]="loginRequest.password" 
+            id="password" 
+            name="password" 
+            placeholder="Enter your password"
+            required #password="ngModel" matInput matRipple required min="8">
+  </mat-form-field>
+        </div>
+         <br><br>
+         <div class="d-flex justify-content-center">
+          <button [disabled]="!loginForm.form.valid" class="btn  btn-primary">Login</button>
+        </div>
+        <br><br>
+        <!-- set functionality -->
+        <div class="d-flex justify-content-center">
+          <button class="btn  btn-secondary">
+            <a routerLink="/adduser" style="width: 300px;float:right; color: white;text-decoration: none;">Not have an account? Sign up!</a>
+          </button>
+          &nbsp;<button class="btn btn-secondary">Forgot password? Recover it!</button>
+        </div>
+        <br><br>
+        <div class="d-flex justify-content-center">
+        </div>
+      </form>
+    </div>
+  </div>

@@ -1,0 +1,108 @@
+<div class="wrap">
+    <div class="fleft">
+      <form style="margin-left: 50px;margin-top: 50px;" autocomplete="off">
+
+  <h3> data enter area </h3> 
+  <mat-hint style="font-size: 10px;" title="double click on map to insert coordinates">
+    duble click on map to insert coordinates
+  </mat-hint>
+
+  <br><br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+      <mat-label>Region</mat-label>
+      <input type="text" title="Region" placeholder="Pick one region" required matInput [formControl]="searchRegions" [matAutocomplete]="auto">  
+      <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+            <mat-option *ngFor="let region of provinces" [value]="region">
+              {{ region }}
+            </mat-option>
+         </mat-autocomplete>
+         <mat-error *ngIf="searchRegions.hasError('required')">Please select a region</mat-error>
+   </mat-form-field>
+
+   <br><br>
+
+   <mat-form-field class="thirty" appearance="outline">
+      <mat-label>Province</mat-label>
+      <input type="text" title="Province" placeholder="Pick one province" required aria-label="province" matInput [formControl]="searchTerm" [matAutocomplete]="auto">  
+         <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+            <mat-option *ngFor="let province of provinces" [value]="province">
+              {{ province }}
+            </mat-option>
+         </mat-autocomplete>
+         <mat-error *ngIf="searchTerm.hasError('required')">Please select a province</mat-error>
+   </mat-form-field>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Municipality</mat-label>
+      <input type="text" title="Municipality" placeholder="Pick one municipality" required matInput [formControl]="searchMunicipalities" [matAutocomplete]="auto">  
+         <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+            <mat-option *ngFor="let municipality of provinces" [value]="municipality">
+              {{ municipality }}
+          </mat-option>
+    </mat-autocomplete>
+    <mat-error *ngIf="searchMunicipalities.hasError('required')">Please select a municipality</mat-error>
+  </mat-form-field>
+
+   <br><br>
+
+   <mat-form-field appearance="outline" style="display: inline-block;width:62%;">
+    <mat-label>Address</mat-label>
+    <input matInput title="Address" [formControl]="address" placeholder="Ex. Via Umberto I" required (focusout)="focusOutFunction($event)">
+    <mat-error *ngIf="address.hasError('required')">Please write an address</mat-error>
+   </mat-form-field>
+   <mat-form-field appearance="outline" style="display: inline-block;margin-left:6px;width:60px;">
+    <mat-label>N°</mat-label>
+    <input type="number" minlength="1" [formControl]="number" matInput title="Number" placeholder="Ex. 54" required>
+    <mat-error *ngIf="number.hasError('required')">Mssing</mat-error>
+   </mat-form-field>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Good naming</mat-label>
+    <input matInput title="Good naming" [formControl]="goodNaming" placeholder="Ex. Chiesa di Santo Stefano" required>
+    <mat-error *ngIf="goodNaming.hasError('required')">Please write a good name</mat-error>
+  </mat-form-field>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Good ID</mat-label>
+    <input type="number" title="Good ID" [formControl]="gooodId" matInput placeholder="Ex. 0176" required min="0">
+    <mat-error *ngIf="gooodId.hasError('required')">Please write a good ID</mat-error>
+  </mat-form-field>
+
+  <br><br>
+
+  <mat-form-field class="thirty" appearance="outline">
+    <mat-label>Istat Code</mat-label>
+    <input type="number" title="ISTAT Code" matRipple matInput [formControl]="istatCode" placeholder="Ex. K8443H" required min="0">
+    <mat-error *ngIf="istatCode.hasError('required')">Please write an Istat Code</mat-error>
+  </mat-form-field>
+
+  <br><br>
+  
+  <mat-form-field appearance="outline" style="display: inline-block;width:40%;">
+    <mat-label style="margin: auto;">Latitude</mat-label>
+    <input type="number" class="text-center" title="Latitude" matInput placeholder="Ex. 46422694626503" id="latitude" readonly="readonly" value="0" required>
+  </mat-form-field>
+    <mat-form-field appearance="outline" style="display: inline-block;width:40%;">
+    <mat-label>Longitude</mat-label>
+    <input type="number" class="text-center" matInput title="Longitude" placeholder="Ex. 9.190426284267904" id="longitude" readonly="readonly" value="0" required>
+  </mat-form-field>
+
+  <br><br><br>
+
+  <button matRipple adiButton (click)="saveData($event);" title="Save data" type="submit" id="button" class="btn" style="background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 50px;">
+    Save <i class="fa-solid fa-paper-plane" style="margin-left: 5px; font-size: 14px"></i>
+  </button>
+
+</form>
+    </div>
+    <div class="fright" id="map" oncontextmenu="return false">
+    </div>
+</div>
+<a routerLink="/logout" class="btn btn-default" style="width: 150px;float:right">Logout</a>

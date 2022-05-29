@@ -1,0 +1,69 @@
+@import "~bootstrap/dist/css/bootstrap.css";
+
+* {
+  font-family: 'lato', 'arial', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth !important;
+}
+
+input {
+  color:#4285F4;
+  user-select:none;
+  font-weight: bold;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+.thirty {
+   width: 80%;
+  border-radius: 65px;
+}
+
+.btn { 
+  width: 80%; 
+  outline: none;
+  border: none;
+  outline: none !important;
+}
+
+.btn:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+#map {
+  cursor: default;
+  height: 1000px;  
+  width: 68%;
+  outline: none;
+  border-radius: 19px;
+}
+
+#map:active {
+  cursor: move !important;
+}
+
+.wrap {
+  width: 100%;
+  overflow: auto;
+}
+
+.fleft {
+  float:left; 
+  width: 30%;
+  height: 100%;
+}
+
+.fright {
+  margin-top: 20px;
+  margin-right: 10px;
+  float: right;
+  width: 70%;
+  height: 100%;
+}

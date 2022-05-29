@@ -1,11 +1,13 @@
 package com.example.controller;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,9 +16,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.beans.FormModel;
+import com.example.beans.User;
+import com.example.beans.UserStatus;
+import com.example.core.ApplicationRole;
 import com.example.core.Utility;
 import com.example.repository.FormModelRepository;
 import com.example.repository.ListaComuniRepository;
+import com.example.repository.UserRepository;
 
 import lombok.AllArgsConstructor;
 
@@ -36,6 +42,12 @@ public class SpringBootController {
 	
 	@Autowired
 	private final FormModelRepository formModelRepository;
+	
+	@Autowired
+	private final UserRepository userRepository;
+	
+	@Autowired
+	PasswordEncoder passwordEncoder;
 	
 	// Instancing Utility object
 	
@@ -67,4 +79,28 @@ public class SpringBootController {
     	formModelRepository.save(formdata);
     	utility.writeCSVFile(formdata);
     }
+    
+	@GetMapping("/users")
+	public List<User> getAllUsers() {
+		logger.info("Getting all users");
+		return userRepository.findAll();
+	}
+	
+	@PostMapping("/users")
+	public User create(@RequestBody User newUser) {
+		logger.info("Creating new user.");
+		if (logger.isDebugEnabled()) {
+			logger.debug("New user details: {}", newUser);
+		}
+
+		Date now = new Date();
+
+		newUser.setApplicationRole(ApplicationRole.USER);
+		newUser.setUserStatus(UserStatus.NOT_CONFIRMED);
+		newUser.setCreated(now);
+		newUser.setLastModified(now);
+		newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+
+		return this.userRepository.save(newUser);
+	}
 }

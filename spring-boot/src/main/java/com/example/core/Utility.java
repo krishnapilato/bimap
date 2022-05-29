@@ -48,7 +48,7 @@ public class Utility {
     	fileWriter.append(formModel.getNumber() + ", ");
     	fileWriter.append(formModel.getGoodNaming() + ", ");
     	fileWriter.append(formModel.getGoodID() + ", ");
-    	fileWriter.append(formModel.getIdVir() + ", ");
+    	fileWriter.append(formModel.getIstatCode() + ", ");
     	fileWriter.append(formModel.getLatitude() + ", ");
     	fileWriter.append(formModel.getLongitude() + "\n");
 	}
