@@ -56,7 +56,7 @@ Install Angular 13.3.5
 Start the client: the web app will open in the browser 
 
 ```bash
-  npm serve -o
+  ng serve -o
 ```
 
 ## API Reference
