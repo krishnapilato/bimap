@@ -4,5 +4,7 @@ export class LoginResponse {
     jwttoken!: string;
     user!: User;
 
-    constructor() {}
+    constructor() {
+
+    }
 }

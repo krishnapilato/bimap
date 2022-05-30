@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.beans.FormModel;
 import com.example.beans.User;
-import com.example.beans.UserStatus;
-import com.example.core.ApplicationRole;
+import com.example.enums.UserStatus;
+import com.example.enums.ApplicationRole;
 import com.example.core.Utility;
 import com.example.repository.FormModelRepository;
 import com.example.repository.ListaComuniRepository;
@@ -46,6 +46,8 @@ public class SpringBootController {
 	@Autowired
 	private final UserRepository userRepository;
 	
+	// Password encoder
+	
 	@Autowired
 	PasswordEncoder passwordEncoder;
 	
@@ -61,17 +63,23 @@ public class SpringBootController {
 		return listaComuniRepository.searchRegion(keyword);
 	}
 	
+	// GET Mapping to retrieve provinces
+	
 	@GetMapping("/searchProvince={keyword}")
 	public List<String> searchProvince(@PathVariable(required = true) String keyword) {
 		logger.info("Getting provinces containing this word " + keyword);
 		return listaComuniRepository.searchProvince(keyword);
 	}
 	
+	// GET Mapping to retrieve municipalities
+	
 	@GetMapping("/searchMunicipality={keyword}")
 	public List<String> searchMunicipality(@PathVariable(required = true) String keyword) {
 		logger.info("Getting municipalities containing this word " + keyword);
 		return listaComuniRepository.searchMunicipality(keyword);
 	}
+	
+	// POST Mapping to save FormModel Object
 	
     @PostMapping("/save")
     public void save(@RequestBody(required = true) FormModel formdata) throws IOException {
@@ -80,11 +88,7 @@ public class SpringBootController {
     	utility.writeCSVFile(formdata);
     }
     
-	@GetMapping("/users")
-	public List<User> getAllUsers() {
-		logger.info("Getting all users");
-		return userRepository.findAll();
-	}
+    // POST Mapping to save new user
 	
 	@PostMapping("/users")
 	public User create(@RequestBody User newUser) {
@@ -96,7 +100,10 @@ public class SpringBootController {
 		Date now = new Date();
 
 		newUser.setApplicationRole(ApplicationRole.USER);
-		newUser.setUserStatus(UserStatus.NOT_CONFIRMED);
+		
+		// Change to UserStatus.NOT_CONFIRMED when user verification feature will be active
+		
+		newUser.setUserStatus(UserStatus.CONFIRMED);
 		newUser.setCreated(now);
 		newUser.setLastModified(now);
 		newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));

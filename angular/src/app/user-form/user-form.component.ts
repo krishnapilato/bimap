@@ -24,6 +24,6 @@ export class UserFormComponent {
   }
 
   gotoUserList() {
-    this.router.navigate(['/main']);
+    this.router.navigate(['/login']);
   }
 }

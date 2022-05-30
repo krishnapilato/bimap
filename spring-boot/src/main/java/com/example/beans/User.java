@@ -9,24 +9,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.example.core.ApplicationRole;
+import com.example.enums.ApplicationRole;
+import com.example.enums.UserStatus;
 
 import lombok.Data;
 
-/**
- * Class for application user.
- * 
- */
 @Data
 @Entity
 @Table(name = "users")
 public class User {
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String name;
-	private String surname;
+	private String name, surname;
 	@Column(unique = true, length = 256)
 	private String email;
 	private String password;

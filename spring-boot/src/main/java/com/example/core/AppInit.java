@@ -8,30 +8,40 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.example.beans.User;
-import com.example.beans.UserStatus;
+import com.example.enums.ApplicationRole;
+import com.example.enums.UserStatus;
 import com.example.repository.UserRepository;
 
 @Component
 public class AppInit implements CommandLineRunner {
+	
+	// JPA Repository
+	
 	@Autowired
 	private UserRepository userRepository;
+	
+	// Password encoder
+	
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
 	@Override
 	public void run(String... args) throws Exception {
+		
+		// Saving first new administrator
+		
 		Date now = new Date();
 
-		User admin = new User();
-		admin.setName("Khova Krishna");
-		admin.setSurname("Pilato");
-		admin.setEmail("krishnak.pilato@gmail.com");
-		admin.setCreated(now);
-		admin.setLastModified(now);
-		admin.setPassword(passwordEncoder.encode("12345678"));
-		admin.setUserStatus(UserStatus.CONFIRMED);
-		admin.setApplicationRole(ApplicationRole.ADMINISTRATOR);
+		User administrator = new User();
+		administrator.setName("Khova Krishna");
+		administrator.setSurname("Pilato");
+		administrator.setEmail("krishnak.pilato@gmail.com");
+		administrator.setCreated(now);
+		administrator.setLastModified(now);
+		administrator.setPassword(passwordEncoder.encode("12345678"));
+		administrator.setUserStatus(UserStatus.CONFIRMED);
+		administrator.setApplicationRole(ApplicationRole.ADMINISTRATOR);
 
-		//userRepository.save(admin);
+		//userRepository.save(administrator);
 	}
 }

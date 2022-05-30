@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { User } from '../user';
-import { UserService } from '../user-service.service';
 import { FormModel } from './formdata';
 import * as L from 'leaflet';
 import * as $ from "jquery";

@@ -9,12 +9,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.example.beans.User;
-import com.example.beans.UserStatus;
+import com.example.enums.UserStatus;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-	@Query("select u from User u where u.email = ?1")
+	@Query("SELECT u FROM User u WHERE u.email = :emailAddress")
 	Optional<User> findByEmailAddress(String emailAddress);
 
-	@Query("select u from User u where u.userStatus = ?1 AND u.created < ?2")
+	@Query("SELECT u FROM User u WHERE u.userStatus = :userStatus AND u.created < :created")
 	Page<User> findExpired(UserStatus userStatus, Date created, Pageable pageable);
 }

@@ -7,7 +7,7 @@ import { UserFormComponent } from './app/user-form/user-form.component';
 import { UserListComponent } from './app/user-list/user-list.component';
 
 const routes: Routes = [
-  { path: '', component: LoginComponent },
+  { path: '', component: UserListComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
   { path: 'logout', component: LogoutComponent, canActivate: [AuthGuard] },
   { path: 'main', component: UserListComponent, canActivate: [AuthGuard] },
@@ -18,4 +18,4 @@ const routes: Routes = [
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

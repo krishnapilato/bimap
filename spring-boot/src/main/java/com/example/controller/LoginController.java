@@ -18,16 +18,24 @@ import com.example.repository.UserRepository;
 @RestController
 @CrossOrigin
 public class LoginController {
+
+	// Security Objects
+	
 	@Autowired
 	private AuthenticationManager authenticationManager;
+	
 	@Autowired
 	private JwtUtils jwtTokenUtil;
+	
+	// JPA Repository
+	
 	@Autowired
 	private UserRepository userRepository;
+	
+	// POST Mapping for login requests
 
 	@PostMapping("/login")
 	public LoginResponse createAuthenticationToken(@RequestBody LoginRequest loginRequest) {
-		// Auth request
 		authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 

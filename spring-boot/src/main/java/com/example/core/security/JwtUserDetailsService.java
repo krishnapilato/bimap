@@ -19,7 +19,6 @@ public class JwtUserDetailsService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		// Retrieves application custom User and creates Spring User
 		com.example.beans.User user = this.repository.findByEmailAddress(username)
 				.orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 		return new User(user.getEmail(), user.getPassword(), true, true, true, true,
