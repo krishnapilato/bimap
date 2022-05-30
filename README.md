@@ -47,10 +47,10 @@ Install dependencies with [NodeJS](https://nodejs.org/en/)
   npm install
 ```
 
-Install Angular 13.3.5
+Install Angular 13.3.2
 
 ```bash
-  npm install -g @angular/cli@13.3.5
+  npm install -g @angular/cli@13.3.2
 ```
 
 Start the client: the web app will open in the browser 
@@ -59,7 +59,7 @@ Start the client: the web app will open in the browser
   ng serve -o
 ```
 
-## API Reference
+## API Reference (cannot be used temporarily)
 
 #### Get regions
 
