@@ -9,11 +9,11 @@ import { ApiService } from './api.service';
 
 @Component({
   selector: 'app-user-list',
-  templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css'],
+  templateUrl: './main.component.html',
+  styleUrls: ['./main.component.css'],
   providers: [ApiService]
 })
-export class UserListComponent implements OnInit {
+export class MainComponent implements OnInit {
 
     // FormControl attributes
 

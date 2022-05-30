@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import { LoginComponent } from './auth/login.component';
-import { UserListComponent } from './user-list/user-list.component';
+import { MainComponent } from './main/main.component';
 import { UserFormComponent } from './user-form/user-form.component';
 import { AppRoutingModule } from 'src/app-routing.module';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -25,7 +25,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   declarations: [
     AppComponent,
     LoginComponent,
-    UserListComponent,
+    MainComponent,
     UserFormComponent,
     LogoutComponent
   ],

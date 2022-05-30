@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { User } from './user';
 import { environment } from 'src/environments/environment';
 
-
 @Injectable()
 export class UserService {
   private usersUrl: string;
