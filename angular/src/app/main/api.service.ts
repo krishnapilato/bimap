@@ -2,6 +2,8 @@ import { FormModel } from './formdata';
 import { Injectable } from '@angular/core';  
 import { HttpClient } from '@angular/common/http';
 import { debounceTime, map } from 'rxjs/operators';
+import { Tables } from './tables';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -42,6 +44,10 @@ export class ApiService {
         }));
         return municipalitiesList;  
     }  
+
+    public findAll(number: number): Observable<Tables[]> {
+        return this.httpService.get<Tables[]>(this.URL + 'findAll=' + number);
+    }
 
     // Save form data to backend
 

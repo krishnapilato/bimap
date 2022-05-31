@@ -8,8 +8,4 @@ export class User {
     applicationRole!: string;
     created!: Date;
     lastModified!: Date;
-
-    constructor() {
-        
-    }
 }

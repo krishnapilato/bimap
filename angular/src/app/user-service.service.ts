@@ -8,15 +8,9 @@ import { environment } from 'src/environments/environment';
 export class UserService {
   private usersUrl: string;
   
-  constructor(private http: HttpClient) {
-    this.usersUrl = environment.baseApiUrl + '/users';
-  }
+  constructor(private http: HttpClient) { this.usersUrl = environment.baseApiUrl + '/users'; }
 
-  public findAll(): Observable<User[]> {
-    return this.http.get<User[]>(this.usersUrl);
-  }
+  public findAll(): Observable<User[]> { return this.http.get<User[]>(this.usersUrl); }
 
-  public save(user: User) {
-    return this.http.post<User>(this.usersUrl, user);
-  }
+  public save(user: User) { return this.http.post<User>(this.usersUrl, user); }
 }

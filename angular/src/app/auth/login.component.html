@@ -1,5 +1,5 @@
 <div class="card my-5" style="border: none;">
-    <div class="card-body">
+    <div class="card-body" style="margin-top:180px;">
       <form (ngSubmit)="onSubmit()" #loginForm="ngForm" autocomplete="off">
         <div class="form-group  text-center">
           <h1>Welcome to my project: please login to start</h1>
@@ -8,9 +8,9 @@
     <mat-label>Email</mat-label>
     <input type="email" title="Username" [(ngModel)]="loginRequest.username" email="true"
             id="username" 
-            name="username" 
+            name="username"
             placeholder="Enter your email address"
-            required #email="ngModel" matInput matRipple min="2">
+            required #email="ngModel" matInput matRipple minlength="3" maxlength="100">
   </mat-form-field>
         </div>
         <br>
@@ -21,19 +21,12 @@
             id="password" 
             name="password" 
             placeholder="Enter your password"
-            required #password="ngModel" matInput matRipple minlength="8">
+            required #password="ngModel" matInput matRipple minlength="8" maxlength="16">
   </mat-form-field>
         </div>
          <br><br>
          <div class="d-flex justify-content-center">
-          <button [disabled]="!loginForm.form.valid" style="width: 80%;border-radius: 20px;" class="btn  btn-primary">Login</button>
-        </div>
-        <br><br>
-        <div class="d-flex justify-content-center">
-        <a class="btn  btn-secondary" routerLink="/adduser" style="width: 60%;border-radius: 20px; color: white;text-decoration: none;">Not have an account? Sign up!</a>
-        </div>
-        <br><br>
-        <div class="d-flex justify-content-center">
+          <button [disabled]="!loginForm.form.valid" style="width: 80%;border-radius: 20px;" class="btn  btn-primary">Login <i class="fa fa-arrow-right"></i></button>
         </div>
       </form>
     </div>

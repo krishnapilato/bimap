@@ -6,36 +6,36 @@
         <h5>(All fields are required)</h5><br><br>
         <mat-form-field appearance="outline" style="width: 80%;outline:none; text-align: center">
           <mat-label>Name</mat-label>
-          <input type="text" pattern="[a-zA-Z]*" title="Name" [(ngModel)]="user.name" id="name" name="name" placeholder="Enter your name" minlength="1" required #name="ngModel" matInput matRipple min="2">
+          <input type="text" pattern="[a-zA-Z]*" title="Name" [(ngModel)]="user.name" id="name" name="name" placeholder="Enter your name" minlength="1" required #name="ngModel" matInput maxlength="18">
         </mat-form-field>
       </div>
       <br><br>
       <div class="form-group  text-center">
         <mat-form-field appearance="outline" style="width: 80%;outline:none; text-align: center">
           <mat-label>Surname</mat-label>
-          <input type="text" pattern="[a-zA-Z]*" title="Surname" [(ngModel)]="user.surname" id="surname" name="surname" placeholder="Enter your surname" minlength="1" required #surname="ngModel" matInput matRipple min="2">
+          <input type="text" pattern="[a-zA-Z]*" title="Surname" [(ngModel)]="user.surname" id="surname" name="surname" placeholder="Enter your surname" minlength="1" required #surname="ngModel" matInput maxlength="18">
         </mat-form-field>
       </div>
       <br><br>
       <div class="form-group  text-center">
         <mat-form-field appearance="outline" style="width: 80%;outline:none; text-align: center">
           <mat-label>Email</mat-label>
-          <input email="true" type="email" title="Email" [(ngModel)]="user.email" id="email" name="email" placeholder="Enter your email" required #email="ngModel" matInput matRipple minlength="3">
+          <input email="true" type="email" title="Email" [(ngModel)]="user.email" id="email" name="email" placeholder="Enter your email" required #email="ngModel" matInput minlength="3" maxlength="100">
         </mat-form-field>
       </div>
       <br><br>
       <div class="form-group  text-center">
         <mat-form-field appearance="outline" style="width: 80%;outline:none; text-align: center">
           <mat-label>Password</mat-label>
-          <input type="password" title="Password" [(ngModel)]="user.password" id="password" name="password" placeholder="Enter your password" required #password="ngModel" matInput matRipple minlength="8">
+          <input type="password" title="Password" [(ngModel)]="user.password" id="password" name="password" placeholder="Enter your password" required #password="ngModel" matInput matRipple minlength="8" maxlength="16">
         </mat-form-field>
         <br>
       </div>
       <br><br>
       <div class="form-group  text-center">
-     <button type="submit" [disabled]="!userForm.form.valid" class="btn btn-primary" style="width: 80%; border-radius: 20px;">Sign up</button>
+     <button type="submit" [disabled]="!userForm.form.valid" class="btn btn-primary" style="width: 80%; border-radius: 20px;" matRipple>Sign up</button>
      <br><br><br>
-        <a class="btn  btn-secondary" routerLink="/login" style="width: 60%;border-radius: 20px; color: white;text-decoration: none;">Already have an account? Login!</a>
+        <a class="btn  btn-secondary" matRipple  routerLink="/main" style="width: 60%;border-radius: 20px; color: white;text-decoration: none;">Back to main page!</a>
       </div>
       </form>
     </div>

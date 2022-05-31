@@ -9,10 +9,9 @@ import { MainComponent } from './app/main/main.component';
 const routes: Routes = [
   { path: '', component: MainComponent, canActivate: [AuthGuard] },
   { path: 'login', component: LoginComponent },
-  {path: '**', component: MainComponent, canActivate: [AuthGuard] },
   { path: 'logout', component: LogoutComponent, canActivate: [AuthGuard] },
   { path: 'main', component: MainComponent, canActivate: [AuthGuard] },
-  { path: 'adduser', component: UserFormComponent }
+  { path: 'adduser', component: UserFormComponent, canActivate: [AuthGuard] }
 ];
 
 @NgModule({

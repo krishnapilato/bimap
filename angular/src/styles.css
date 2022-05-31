@@ -3,7 +3,7 @@
 * {
   font-family: 'lato', 'arial', sans-serif;
 }
-html, body { height: 100%; }
+html, body { height: 100%;}
 
 .noselect {
   -webkit-touch-callout: none;
@@ -12,4 +12,14 @@ html, body { height: 100%; }
        -moz-user-select: none; 
         -ms-user-select: none; 
             user-select: none; 
+}
+
+button {
+  outline: none;
+  border: none;
+}
+
+button:hover {
+  outline: none;
+  border: none;
 }

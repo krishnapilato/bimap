@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
 import { AppComponent } from './app.component';
 import { LoginComponent } from './auth/login.component';
 import { MainComponent } from './main/main.component';
@@ -20,6 +19,7 @@ import { CommonModule } from '@angular/common';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import {MatTableModule} from '@angular/material/table'
 
 @NgModule({
   declarations: [
@@ -39,6 +39,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     CommonModule,
     BrowserAnimationsModule,
     MatSnackBarModule,
+    MatTableModule,
     MatRippleModule,
     FormsModule,
     MatFormFieldModule,

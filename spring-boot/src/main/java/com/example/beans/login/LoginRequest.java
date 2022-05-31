@@ -1,4 +1,4 @@
-package com.example.beans;
+package com.example.beans.login;
 
 import lombok.Data;
 

@@ -96,13 +96,62 @@
 
   <br><br><br>
 
-  <button matRipple adiButton (click)="saveData($event);" title="Save data" type="submit" id="button" class="btn" style="background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 50px;">
+  <button matRipple adiButton (click)="saveData($event);" title="Save data" type="submit" id="button" class="btn" style="background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 50px; border-radius: 20px;">
     Save <i class="fa-solid fa-paper-plane" style="margin-left: 5px; font-size: 14px"></i>
   </button>
 
 </form>
     </div>
-    <div class="fright" id="map" oncontextmenu="return false">
-    </div>
+    <div class="fright" id="map" oncontextmenu="return false"></div>
 </div>
+    <a routerLink="/adduser" class="btn btn-default" style="width: 150px;float:right">Add User</a>
 <a routerLink="/logout" class="btn btn-default" style="width: 150px;float:right">Logout</a>
+<br><br><br>
+<div class="card my-5" style="height: 600px;" oncontextmenu="return false">
+    <div class="card-body">
+      <table id="myTable" class="table table-bordered table-striped">
+        <thead class="thead-dark" style="background-color: #0b57d0; color: white">
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">ID Bene</th>
+            <th scope="col">Province</th>
+            <th scope="col">Municipality</th>
+            <th scope="col">Address</th>
+            <th scope="col">Street number</th>
+            <th scope="col">Place</th>
+            <th scope="col">Denomination</th>
+            <th scope="col">Provv Tutela</th>
+            <th scope="col">Cadastre</th>
+            <th scope="col">Transcription</th>
+            <th scope="col">Constraint</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr (click)="rowClick($event);" *ngFor="let table of tables">
+            <td>{{ table.id }}</td>
+            <td>{{ table.idbene }}</td>
+            <td>{{ table.prov }}</td>
+            <td>{{ table.comune }}</td>
+            <td>{{ table.indirizzo }}</td>
+            <td>{{ table.civico }}</td>
+            <td>{{ table.localizzazione }}</td>
+            <td>{{ table.denominazione }}</td>
+            <td>{{ table.provv_tutela }}</td>
+            <td>{{ table.catato }}</td>
+            <td>{{ table.propr }}</td>
+            <td>{{ table.trascrizione }}</td>
+            <td>{{ table.vincolo }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <br><br>
+      <button matRipple adiButton (click)="showMoreData();" style="width: 170px;background: #0b57d0;color: white;border-radius: 20px; font-weight: bold; height: 20px border-radius: 20px;">Show more data</button>
+
+      <button matRipple adiButton style="margin-left: 100px; width: 170px;background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 20px; border-radius: 20px;" (click)="showLessData();">Show less data</button>
+
+      <button matRipple adiButton style="margin-left: 100px; width: 170px;background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 20px; border-radius: 20px;" (click)="showAllData();">Show all data</button>
+
+      <button id="end" matRipple adiButton style="margin-left: 100px; width: 170px;background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 20px; border-radius: 20px;" (click)="hideAllData();">Hide all data</button>
+    </div>
+  </div>
+<br><br>

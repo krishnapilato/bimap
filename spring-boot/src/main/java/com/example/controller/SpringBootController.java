@@ -16,12 +16,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.beans.FormModel;
+import com.example.beans.Tables;
 import com.example.beans.User;
-import com.example.enums.UserStatus;
-import com.example.enums.ApplicationRole;
 import com.example.core.Utility;
+import com.example.enums.ApplicationRole;
+import com.example.enums.UserStatus;
 import com.example.repository.FormModelRepository;
 import com.example.repository.ListaComuniRepository;
+import com.example.repository.TablesRepository;
 import com.example.repository.UserRepository;
 
 import lombok.AllArgsConstructor;
@@ -45,6 +47,9 @@ public class SpringBootController {
 	
 	@Autowired
 	private final UserRepository userRepository;
+	
+	@Autowired
+	private final TablesRepository tablesRepository;
 	
 	// Password encoder
 	
@@ -88,6 +93,12 @@ public class SpringBootController {
     	utility.writeCSVFile(formdata);
     }
     
+	@GetMapping("/findAll={number}")
+	public List<Tables> findAll(@PathVariable int number) {
+		logger.info("Finding all data in tables table");
+		return tablesRepository.findAllAndLimitTo(number);
+	}
+    
     // POST Mapping to save new user
 	
 	@PostMapping("/users")
@@ -101,7 +112,7 @@ public class SpringBootController {
 
 		newUser.setApplicationRole(ApplicationRole.USER);
 		
-		// Change to UserStatus.NOT_CONFIRMED when user verification feature will be active
+		// user email verification
 		
 		newUser.setUserStatus(UserStatus.CONFIRMED);
 		newUser.setCreated(now);
