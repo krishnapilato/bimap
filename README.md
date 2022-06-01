@@ -2,9 +2,6 @@
 
 This is a project born only with the aim of practicing with the technologies of Spring Boot and Angular.
 The user can enter the required data such as the region and the name of the property. There is also a map created thanks to Leaflet where for the moment it can only 'play', but its usefulness is expected very soon.
-
-I'm trying to create a login, registration and forgotten password page so that the web app is as safe as possible.
- Also a way is in development to make my three API secure with API Key that will allow them to be used.
  
 ## Requirements
 
@@ -29,7 +26,7 @@ First of all go to the spring-boot folder directory
   cd first-full-stack-app-main/spring-boot
 ```
 
-Start the server if you have Maven installed or go to spring-boot/target and launch JAR file: open http://localhot:8080 in your browser and skip the steps below
+Start the server if you have Maven installed or go to spring-boot/target and launch JAR file
 
 ```bash
   mvn-spring-boot:run
@@ -59,7 +56,7 @@ Start the client: the web app will open in the browser
   ng serve -o
 ```
 
-## API Reference (cannot be used temporarily)
+## API Reference
 
 #### Get regions
 
