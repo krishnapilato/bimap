@@ -68,6 +68,25 @@ input::-webkit-inner-spin-button {
   height: 100%;
 }
 
-table tbody tr:hover {
-  background-color: #4285F4;
+.mat-row:hover {
+  font-weight:bold;
+  font-size: 50px;
+}
+table {
+  width: 100%;
+}
+
+.mat-form-field {
+  font-size: 14px;
+  width: 100%;
+}
+
+td, th {
+  width: 25%;
+}
+
+.table-container {
+  margin-top: 10px;
+  max-height: 300px;
+  overflow: auto;
 }

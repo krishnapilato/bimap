@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { FormModel } from './formdata';
 import * as L from 'leaflet';
@@ -6,29 +6,10 @@ import * as $ from "jquery";
 import {MatSnackBar} from '@angular/material/snack-bar';
 import 'leaflet-easybutton';
 import { ApiService } from './api.service';
-import {MatTableDataSource, MatTableModule} from '@angular/material/table';
+import {MatTableDataSource} from '@angular/material/table';
 import { Tables } from './tables';
-import { data } from 'jquery';
-
-export interface PeriodicElement {
-  name: string;
-  position: number;
-  weight: number;
-  symbol: string;
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
-  {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He'},
-  {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li'},
-  {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
-  {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
-  {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
-  {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
-  {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
-  {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
-  {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
-];
+import {MatPaginator} from '@angular/material/paginator';
+import {MatSort} from '@angular/material/sort';
 
 @Component({
   selector: 'app-user-list',
@@ -38,16 +19,15 @@ const ELEMENT_DATA: PeriodicElement[] = [
 })
 export class MainComponent implements OnInit {
 
-    displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
-  dataSource = new MatTableDataSource(ELEMENT_DATA);
+  // Table attributes
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-    this._snackbar.open('Filtered data for ' + filterValue, 'Close', {duration: 1000});
-  }
+  displayedColumns: string[] = ['id', 'prov', 'comune', 'indirizzo', 'civico'];
+  dataSource = new MatTableDataSource<Tables>();
 
-    // FormControl attributes
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  // FormControl attributes
 
   public searchTerm : FormControl = new FormControl();
   public searchMunicipalities : FormControl = new FormControl();
@@ -60,6 +40,7 @@ export class MainComponent implements OnInit {
   public ilatitude : FormControl = new FormControl();
   public ilongitude : FormControl = new FormControl();
   public formData = new FormModel();
+  public results!: any;
 
   // provinces attribute for getting autcomplete search data
 
@@ -73,21 +54,27 @@ export class MainComponent implements OnInit {
 
   public latitude!: number;
   public longitude!: number;
-  public tables: Tables[] = [];
-  public maxNumber!: number;
 
-  constructor(private apiService: ApiService, private _snackbar: MatSnackBar) {
+  constructor(private apiService: ApiService, private _snackbar: MatSnackBar) {}
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+    if (this.dataSource.paginator) this.dataSource.paginator.firstPage(); 
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
   }
 
   ngOnInit() {
 
-    this.maxNumber = 10;
-     this.apiService.findAll(this.maxNumber).subscribe(data => {
-      this.tables = data;
+    // get all table data from ApiService
     
-    });
-
-        // Get autocomplete search data for regions
+    this.apiService.findAll().subscribe(data => {this.dataSource.data = data;});
+    
+    // Get autocomplete search data for regions
 
     this.searchRegions.valueChanges.subscribe(term => {
       if (term != '' && term.length > 0) this.apiService.searchRegions(term).subscribe((data: any[]) => { this.provinces = data as any[]; });
@@ -110,7 +97,7 @@ export class MainComponent implements OnInit {
 
         // Default layer for map
 
-    var googleTerrain = L.tileLayer('https://{s}.google.com/vt/lyrs=m@221097413,transit,traffic,bike,images&x={x}&y={y}&z={z}', {attribution: '<a target="_blank" href="https://cloud.google.com/maps-platform/terms">Map data ©2022 Google</a>', maxZoom: 20.25, subdomains:['mt0','mt1','mt2','mt3'] });
+    var googleTerrain = L.tileLayer('https://{s}.google.com/vt/lyrs=m@221097413,transit&x={x}&y={y}&z={z}', {attribution: '<a target="_blank" href="https://cloud.google.com/maps-platform/terms">Map data ©2022 Google</a>', maxZoom: 20.25, subdomains:['mt0','mt1','mt2','mt3'] });
 
     // Setting the map 
 
@@ -120,7 +107,7 @@ export class MainComponent implements OnInit {
 
     var baseLayers = {
       Default: googleTerrain,
-      Satellite: L.tileLayer('http://{s}.google.com/vt/lyrs=y,transit,traffic,bike&&x={x}&y={y}&z={z}', {maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3'], attribution: '<a target="_blank" href="https://cloud.google.com/maps-platform/terms">Map data ©2022 Google</a>'}),
+      Satellite: L.tileLayer('http://{s}.google.com/vt/lyrs=y,transit&&x={x}&y={y}&z={z}', {maxZoom: 20, subdomains:['mt0','mt1','mt2','mt3'], attribution: '<a target="_blank" href="https://cloud.google.com/maps-platform/terms">Map data ©2022 Google</a>'}),
       OSM: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 20, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'})
 		};
     L.control.layers(baseLayers).addTo(this.map);
@@ -174,33 +161,6 @@ export class MainComponent implements OnInit {
     // Base layer change and zoomend events on map
 
     map.on('baselayerchange', function onOverlayAdd(e: any) { snackbar.open('Layer changed to ' + e.name, 'Close', {duration: 2000}); });
-    map.on('zoomend', function onOverlayAdd(e: any) { snackbar.open('Zoom level changed to ' + parseInt(e.sourceTarget._zoom), 'Close', {duration: 100}); });
-  }
-
-  public rowClick(e: any): void {
-    alert(JSON.stringify(e));
-  }
-
-  public showMoreData(): void {
-    this.maxNumber += 10;
-    this.apiService.findAll(this.maxNumber).subscribe(data => { this.tables = data; });
-  }
-
-  public showLessData(): void {
-    if(this.maxNumber != 10) {
-      this.maxNumber -= 10;
-      this.apiService.findAll(this.maxNumber).subscribe(data => { this.tables = data; });
-    }
-  }
-  
-  public showAllData(): void {
-      this.maxNumber = 687;
-      this.apiService.findAll(this.maxNumber).subscribe(data => { this.tables = data; });
-  }
-
-  public hideAllData(): void {
-      this.maxNumber = 0;
-      this.tables = [];
   }
 
   public saveData(event: any) {
@@ -227,6 +187,19 @@ export class MainComponent implements OnInit {
     else {
       snackbar.open('Some problem occured when trying to save data', 'Close', {duration: 3000});
     }
+  }
+
+  scrollToTop() {  location.reload(); this._snackbar.open('Reload successfully', 'Close', {duration: 1000}); }
+
+  public getRecord(row: any): void {
+    this._snackbar.open('Data inserted successfully', 'Close', {duration: 3000});
+     $('#municipality').val(row.comune);
+     $('#address').val(row.indirizzo);
+     $('#streetnumber').val(row.civico);
+     $("html, body").animate({scrollTop: 0}, 1000);
+     $.get('https://nominatim.openstreetmap.org/search?format=json&q=' + row.comune + ', ' + row.indirizzo, (data) => {
+        this.map.setView([data[0]['lat'], data[0]['lon']], 17, {"animate": true, "duration": 0.5});
+      });
   }
 
   public focusOutFunction(event: any) {

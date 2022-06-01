@@ -93,10 +93,10 @@ public class SpringBootController {
     	utility.writeCSVFile(formdata);
     }
     
-	@GetMapping("/findAll={number}")
-	public List<Tables> findAll(@PathVariable int number) {
+	@GetMapping("/findAll")
+	public List<Tables> findAll() {
 		logger.info("Finding all data in tables table");
-		return tablesRepository.findAllAndLimitTo(number);
+		return tablesRepository.findAll();
 	}
     
     // POST Mapping to save new user

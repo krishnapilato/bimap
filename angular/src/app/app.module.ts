@@ -20,6 +20,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import {MatTableModule} from '@angular/material/table'
+import { MatPaginatorModule } from '@angular/material/paginator';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 @NgModule({
   declarations: [
@@ -33,17 +35,16 @@ import {MatTableModule} from '@angular/material/table'
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
+    MatTooltipModule,
     FormsModule,
+    MatPaginatorModule,
     BrowserAnimationsModule,
     MatAutocompleteModule,
     CommonModule,
-    BrowserAnimationsModule,
     MatSnackBarModule,
     MatTableModule,
     MatRippleModule,
-    FormsModule,
     MatFormFieldModule,
-    MatSnackBarModule,
     ReactiveFormsModule,
     MatInputModule,
   ],

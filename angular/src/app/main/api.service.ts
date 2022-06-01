@@ -45,8 +45,8 @@ export class ApiService {
         return municipalitiesList;  
     }  
 
-    public findAll(number: number): Observable<Tables[]> {
-        return this.httpService.get<Tables[]>(this.URL + 'findAll=' + number);
+    public findAll(): Observable<Tables[]> {
+        return this.httpService.get<Tables[]>(this.URL + 'findAll');
     }
 
     // Save form data to backend

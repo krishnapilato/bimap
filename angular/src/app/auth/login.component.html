@@ -18,7 +18,7 @@
                     <mat-form-field appearance="outline" style="width: 80%;outline:none; text-align: center">
     <mat-label>Password</mat-label>
     <input type="password" title="Password" [(ngModel)]="loginRequest.password" 
-            id="password" 
+            id="password" autocomplete="on"
             name="password" 
             placeholder="Enter your password"
             required #password="ngModel" matInput matRipple minlength="8" maxlength="16">

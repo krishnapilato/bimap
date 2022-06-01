@@ -2,16 +2,16 @@
     <div class="fleft">
       <form style="margin-left: 50px;margin-top: 50px;" autocomplete="off">
 
-  <h3> data enter area </h3> 
-  <mat-hint style="font-size: 10px;" title="double click on map to insert coordinates">
+  <h3 class="text-center"> data enter area </h3> 
+  <h6 style="font-weight: none; font-size: 10px;text-align: center;" #tooltip="matTooltip"matTooltip="duble click on map to insert coordinates" [matTooltipPosition]="'right'">
     duble click on map to insert coordinates
-  </mat-hint>
+  </h6>
 
   <br><br><br>
 
-  <mat-form-field class="thirty" appearance="outline">
+  <mat-form-field class="thirty" appearance="outline" class="text-center">
       <mat-label>Region</mat-label>
-      <input type="text" title="Region" placeholder="Pick one region" required matInput [formControl]="searchRegions" [matAutocomplete]="auto">  
+      <input type="text" #tooltip="matTooltip"matTooltip="Region" [matTooltipPosition]="'above'" placeholder="Pick one region" required matInput [formControl]="searchRegions" [matAutocomplete]="auto">  
       <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
             <mat-option *ngFor="let region of provinces" [value]="region">
               {{ region }}
@@ -22,9 +22,9 @@
 
    <br><br>
 
-   <mat-form-field class="thirty" appearance="outline">
+   <mat-form-field class="thirty" appearance="outline" class="text-center">
       <mat-label>Province</mat-label>
-      <input type="text" title="Province" placeholder="Pick one province" required aria-label="province" matInput [formControl]="searchTerm" [matAutocomplete]="auto">  
+      <input type="text" #tooltip="matTooltip"matTooltip="Province" [matTooltipPosition]="'above'" placeholder="Pick one province" required aria-label="province" matInput [formControl]="searchTerm" [matAutocomplete]="auto">  
          <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
             <mat-option *ngFor="let province of provinces" [value]="province">
               {{ province }}
@@ -35,9 +35,9 @@
 
   <br><br>
 
-  <mat-form-field class="thirty" appearance="outline">
+  <mat-form-field class="thirty" appearance="outline" class="text-center">
     <mat-label>Municipality</mat-label>
-      <input type="text" title="Municipality" placeholder="Pick one municipality" required matInput [formControl]="searchMunicipalities" [matAutocomplete]="auto">  
+      <input type="text" id="municipality" #tooltip="matTooltip"matTooltip="Municipality" [matTooltipPosition]="'above'" placeholder="Pick one municipality" required matInput [formControl]="searchMunicipalities" [matAutocomplete]="auto">  
          <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
             <mat-option *ngFor="let municipality of provinces" [value]="municipality">
               {{ municipality }}
@@ -48,55 +48,55 @@
 
    <br><br>
 
-   <mat-form-field appearance="outline" style="display: inline-block;width:62%;">
+   <mat-form-field appearance="outline" style="display: inline-block;width:86%;" class="text-center"> 
     <mat-label>Address</mat-label>
-    <input matInput title="Address" [formControl]="address" placeholder="Ex. Via Umberto I" required (focusout)="focusOutFunction($event)">
+    <input matInput #tooltip="matTooltip"matTooltip="Address" [matTooltipPosition]="'above'" id="address" [formControl]="address" placeholder="Ex. Via Umberto I" required (focusout)="focusOutFunction($event)">
     <mat-error *ngIf="address.hasError('required')">Please write an address</mat-error>
    </mat-form-field>
-   <mat-form-field appearance="outline" style="display: inline-block;margin-left:6px;width:60px;">
+   <mat-form-field appearance="outline" style="display: inline-block;margin-left:6px;width:60px;" class="text-center">
     <mat-label>N°</mat-label>
-    <input type="number" minlength="1" [formControl]="number" matInput title="Number" placeholder="Ex. 54" required>
+    <input type="number" minlength="1" [formControl]="number" id="streetnumber" matInput #tooltip="matTooltip"matTooltip="Street Number" [matTooltipPosition]="'above'" placeholder="Ex. 54" required>
     <mat-error *ngIf="number.hasError('required')">Mssing</mat-error>
    </mat-form-field>
 
   <br><br>
 
-  <mat-form-field class="thirty" appearance="outline">
+  <mat-form-field class="thirty" appearance="outline" class="text-center">
     <mat-label>Good naming</mat-label>
-    <input matInput title="Good naming" [formControl]="goodNaming" placeholder="Ex. Chiesa di Santo Stefano" required>
+    <input matInput #tooltip="matTooltip"matTooltip="Good name" [matTooltipPosition]="'above'" [formControl]="goodNaming" placeholder="Ex. Chiesa di Santo Stefano" required>
     <mat-error *ngIf="goodNaming.hasError('required')">Please write a good name</mat-error>
   </mat-form-field>
 
   <br><br>
 
-  <mat-form-field class="thirty" appearance="outline">
+  <mat-form-field class="thirty" appearance="outline" class="text-center">
     <mat-label>Good ID</mat-label>
-    <input type="number" title="Good ID" [formControl]="gooodId" matInput placeholder="Ex. 0176" required min="0">
-    <mat-error *ngIf="gooodId.hasError('required')">Please write a good ID</mat-error>
+    <input type="number" #tooltip="matTooltip"matTooltip="Good ID" [matTooltipPosition]="'above'" [formControl]="gooodId" matInput placeholder="Ex. 3614" required min="3614" max="7438">
+    <mat-error *ngIf="gooodId.hasError('required') || gooodId.hasError('min') || gooodId.hasError('max')">Please write a good ID (between 3614 and 7438)</mat-error>
   </mat-form-field>
 
   <br><br>
 
-  <mat-form-field class="thirty" appearance="outline">
+  <mat-form-field class="thirty" appearance="outline" class="text-center">
     <mat-label>Istat Code</mat-label>
-    <input type="number" title="ISTAT Code" matRipple matInput [formControl]="istatCode" placeholder="Ex. K8443H" required min="0">
-    <mat-error *ngIf="istatCode.hasError('required')">Please write an Istat Code</mat-error>
+    <input (input)="istatCode.setValue(istatCode.value.toUpperCase())" type="text" #tooltip="matTooltip"matTooltip="ISTAT Code" [matTooltipPosition]="'above'" matRipple matInput [formControl]="istatCode" placeholder="Ex. K8443H" required minlength="10" maxlength="10">
+    <mat-error *ngIf="istatCode.hasError('required') || !istatCode.hasError('minlength') || !istatCode.hasError('maxlength')">Please write an Istat Code (10 chars)</mat-error>
   </mat-form-field>
 
   <br><br>
   
-  <mat-form-field appearance="outline" style="display: inline-block;width:40%;">
-    <mat-label style="margin: auto;">Latitude</mat-label>
-    <input type="number" class="text-center" title="Latitude" matInput placeholder="Ex. 46422694626503" id="latitude" readonly="readonly" value="0" required>
+  <mat-form-field appearance="outline" style="display: inline-block;width:50%;" class="text-center">
+    <mat-label>Latitude</mat-label>
+    <input type="number" class="text-center" #tooltip="matTooltip"matTooltip="Latitude" [matTooltipPosition]="'above'" matInput placeholder="Ex. 46422694626503" id="latitude" readonly="readonly" value="0" required>
   </mat-form-field>
-    <mat-form-field appearance="outline" style="display: inline-block;width:40%;">
+    <mat-form-field appearance="outline" style="display: inline-block;width:50%;" class="text-center">
     <mat-label>Longitude</mat-label>
-    <input type="number" class="text-center" matInput title="Longitude" placeholder="Ex. 9.190426284267904" id="longitude" readonly="readonly" value="0" required>
+    <input type="number" class="text-center" matInput #tooltip="matTooltip"matTooltip="Longitude" [matTooltipPosition]="'above'" placeholder="Ex. 9.190426284267904" id="longitude" readonly="readonly" value="0" required>
   </mat-form-field>
 
   <br><br><br>
 
-  <button matRipple adiButton (click)="saveData($event);" title="Save data" type="submit" id="button" class="btn" style="background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 50px; border-radius: 20px;">
+  <button matRipple adiButton (click)="saveData($event);" #tooltip="matTooltip"matTooltip="Save data" [matTooltipPosition]="'above'" id="button" class="btn" style="width: 100%; background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 50px; border-radius: 80px;">
     Save <i class="fa-solid fa-paper-plane" style="margin-left: 5px; font-size: 14px"></i>
   </button>
 
@@ -104,54 +104,64 @@
     </div>
     <div class="fright" id="map" oncontextmenu="return false"></div>
 </div>
-    <a routerLink="/adduser" class="btn btn-default" style="width: 150px;float:right">Add User</a>
-<a routerLink="/logout" class="btn btn-default" style="width: 150px;float:right">Logout</a>
-<br><br><br>
-<div class="card my-5" style="height: 600px;" oncontextmenu="return false">
-    <div class="card-body">
-      <table id="myTable" class="table table-bordered table-striped">
-        <thead class="thead-dark" style="background-color: #0b57d0; color: white">
-          <tr>
-            <th scope="col">ID</th>
-            <th scope="col">ID Bene</th>
-            <th scope="col">Province</th>
-            <th scope="col">Municipality</th>
-            <th scope="col">Address</th>
-            <th scope="col">Street number</th>
-            <th scope="col">Place</th>
-            <th scope="col">Denomination</th>
-            <th scope="col">Provv Tutela</th>
-            <th scope="col">Cadastre</th>
-            <th scope="col">Transcription</th>
-            <th scope="col">Constraint</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr (click)="rowClick($event);" *ngFor="let table of tables">
-            <td>{{ table.id }}</td>
-            <td>{{ table.idbene }}</td>
-            <td>{{ table.prov }}</td>
-            <td>{{ table.comune }}</td>
-            <td>{{ table.indirizzo }}</td>
-            <td>{{ table.civico }}</td>
-            <td>{{ table.localizzazione }}</td>
-            <td>{{ table.denominazione }}</td>
-            <td>{{ table.provv_tutela }}</td>
-            <td>{{ table.catato }}</td>
-            <td>{{ table.propr }}</td>
-            <td>{{ table.trascrizione }}</td>
-            <td>{{ table.vincolo }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <br><br>
-      <button matRipple adiButton (click)="showMoreData();" style="width: 170px;background: #0b57d0;color: white;border-radius: 20px; font-weight: bold; height: 20px border-radius: 20px;">Show more data</button>
 
-      <button matRipple adiButton style="margin-left: 100px; width: 170px;background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 20px; border-radius: 20px;" (click)="showLessData();">Show less data</button>
-
-      <button matRipple adiButton style="margin-left: 100px; width: 170px;background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 20px; border-radius: 20px;" (click)="showAllData();">Show all data</button>
-
-      <button id="end" matRipple adiButton style="margin-left: 100px; width: 170px;background: #0b57d0;color: white;border-radius: 4px; font-weight: bold; height: 20px; border-radius: 20px;" (click)="hideAllData();">Hide all data</button>
-    </div>
-  </div>
 <br><br>
+
+<mat-form-field class="text-center" appearance="outline" style="width: 100%;">
+  <mat-label>Filter data in table</mat-label>
+  <input autocomplete="off"  class="text-center" matInput (keyup)="applyFilter($event)" #tooltip="matTooltip"
+          matTooltip="Filter data in table" [matTooltipPosition]="'above'"
+          matTooltipHideDelay="100" placeholder="Ex. AL" #input>
+</mat-form-field>
+
+         <div class="d-flex justify-content-center">
+          Double click on row to insert on form
+        </div>
+<br><br>
+<div class="table-container mat-elevation-z8" oncontextmenu="return false">
+  <table #tooltip="matTooltip"matTooltip="Table Content" [matTooltipPosition]="'above'" mat-table [dataSource]="dataSource" matSort matSortActive="created" matSortDisableClear matSortDirection="desc">
+
+    <!-- ID column  -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> ID </th>
+      <td mat-cell *matCellDef="let row"> {{row.id}} </td>
+    </ng-container>
+    
+    <!-- Municipality column  -->
+    <ng-container matColumnDef="comune">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Municipality </th>
+      <td mat-cell *matCellDef="let row"> {{row.comune}} </td>
+    </ng-container>
+
+    <!-- Province Column -->
+    <ng-container matColumnDef="prov">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Province </th>
+      <td mat-cell *matCellDef="let row"> {{row.prov}} </td>
+    </ng-container>
+
+    <!-- Address Column -->
+    <ng-container matColumnDef="indirizzo">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Address </th>
+      <td mat-cell *matCellDef="let row"> {{row.indirizzo}} </td>
+    </ng-container>
+
+    <!-- Street Number Column -->
+    <ng-container matColumnDef="civico">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Street Number </th>
+      <td mat-cell *matCellDef="let row"> {{row.civico}} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr (dblclick)="getRecord(row)"  mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" colspan="4">No data matching the filter "{{input.value}}"</td>
+    </tr>
+
+  </table>
+</div>
+<mat-paginator #tooltip="matTooltip"matTooltip="PageTable Options" [matTooltipPosition]="'below'" showFirstLastButtons [pageSizeOptions]="[5, 10, 25, 50, 100]"></mat-paginator>
+
+<a routerLink="/main" (click)="scrollToTop();" class="btn btn-success" style="border-radius: 150px;margin-left: 50px; width: 150px;float:center; margin-bottom: 50px;">Reload Main</a>
+    <a routerLink="/adduser" class="btn btn-secondary" style="border-radius: 150px;margin-left: 20px;width: 150px;text-align: center;margin-bottom: 50px;">Add User</a>
+<a routerLink="/logout" matRipple class="btn btn-danger" style="border-radius: 150px;margin-left: 20px; width: 150px;float:center; margin-bottom: 50px;">Logout</a>
