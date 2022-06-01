@@ -42,6 +42,6 @@ public class AppInit implements CommandLineRunner {
 		administrator.setUserStatus(UserStatus.CONFIRMED);
 		administrator.setApplicationRole(ApplicationRole.ADMINISTRATOR);
 
-		//userRepository.save(administrator);
+		userRepository.save(administrator);
 	}
 }

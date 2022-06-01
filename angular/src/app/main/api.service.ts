@@ -5,9 +5,7 @@ import { debounceTime, map } from 'rxjs/operators';
 import { Tables } from './tables';
 import { Observable } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root'
-})  
+@Injectable({providedIn: 'root'})  
 export class ApiService {  
 
     // Const url 

@@ -12,7 +12,6 @@ export class SecurityInterceptor implements HttpInterceptor {
         const loginResponse = this.authenticationService.loginResponseValue;
 
         const isLoggedIn = loginResponse && loginResponse.jwttoken;
-        console.log("intercepted");
         const isApiUrl = request.url.startsWith(environment.baseApiUrl);
 
         if (isLoggedIn && isApiUrl) {
