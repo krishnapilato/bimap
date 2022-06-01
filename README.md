@@ -44,10 +44,10 @@ Install dependencies with [NodeJS](https://nodejs.org/en/)
   npm install
 ```
 
-Install Angular 13.3.2
+Install Angular 13.0.3
 
 ```bash
-  npm install -g @angular/cli@13.3.2
+  npm install -g @angular/cli@13.0.3
 ```
 
 Start the client: the web app will open in the browser 
