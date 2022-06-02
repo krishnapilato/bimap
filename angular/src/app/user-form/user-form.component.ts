@@ -12,5 +12,5 @@ export class UserFormComponent {
 
   constructor(private router: Router, private userService: UserService) { this.user = new User(); }
 
-  onSubmit() { this.userService.save(this.user).subscribe(() => this.router.navigate(['/login'])); }
+  onSubmit() { this.userService.save(this.user).subscribe(() => this.router.navigate(['/listuser'])); }
 }

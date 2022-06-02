@@ -10,6 +10,9 @@ import {MatTableDataSource} from '@angular/material/table';
 import { Tables } from './tables';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
+import { AuthService } from "../auth/auth.service";
+import {MatButtonModule} from '@angular/material/button';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
   selector: 'app-user-list',
@@ -41,6 +44,7 @@ export class MainComponent implements OnInit {
   public ilongitude : FormControl = new FormControl();
   public formData = new FormModel();
   public results!: any;
+  public user : any;
 
   // provinces attribute for getting autcomplete search data
 
@@ -55,7 +59,7 @@ export class MainComponent implements OnInit {
   public latitude!: number;
   public longitude!: number;
 
-  constructor(private apiService: ApiService, private _snackbar: MatSnackBar) {}
+  constructor(private apiService: ApiService, private _snackbar: MatSnackBar, private authenticationService: AuthService) {}
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -69,6 +73,7 @@ export class MainComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.user = this.authenticationService.loginResponseValue;
 
     // get all table data from ApiService
     

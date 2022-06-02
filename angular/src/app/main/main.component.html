@@ -157,11 +157,11 @@
     <tr class="mat-row" *matNoDataRow>
       <td class="mat-cell" colspan="4">No data matching the filter "{{input.value}}"</td>
     </tr>
-
   </table>
 </div>
 <mat-paginator #tooltip="matTooltip"matTooltip="PageTable Options" [matTooltipPosition]="'below'" showFirstLastButtons [pageSizeOptions]="[5, 10, 25, 50, 100]"></mat-paginator>
 
-<a routerLink="/main" (click)="scrollToTop();" class="btn btn-success" style="border-radius: 150px;margin-left: 50px; width: 150px;float:center; margin-bottom: 50px;">Reload Main</a>
-    <a routerLink="/adduser" class="btn btn-secondary" style="border-radius: 150px;margin-left: 20px;width: 150px;text-align: center;margin-bottom: 50px;">Add User</a>
-<a routerLink="/logout" matRipple class="btn btn-danger" style="border-radius: 150px;margin-left: 20px; width: 150px;float:center; margin-bottom: 50px;">Logout</a>
+<div class="d-flex justify-content-center">
+  <button *ngIf="user.user.applicationRole === 'ADMINISTRATOR'" #tooltip="matTooltip"matTooltip="Admin Dashboard" [matTooltipPosition]="'below'" mat-raised-button style="height:40px;width: 160px;border-radius: 50px; margin-left:20px;" color="primary" routerLink="/listuser">Admin Dashboard</button>
+<button #tooltip="matTooltip"matTooltip="Logout" [matTooltipPosition]="'below'" mat-raised-button style="height:40px;width: 160px;border-radius: 50px; margin-left:20px;" color="accent" routerLink="/logout">Logout</button>
+</div>

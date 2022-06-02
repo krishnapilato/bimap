@@ -1,0 +1,77 @@
+<br><br><br>
+
+<h1 class="text-center">ADMIN DASHBOARD</h1>
+
+<br><br>
+
+<div class="d-flex justify-content-center">
+<mat-form-field class="text-center" appearance="outline" style="width: 60%;">
+  <mat-label>Filter data in table</mat-label>
+  <input autocomplete="off"  class="text-center" matInput (keyup)="applyFilter($event)" #tooltip="matTooltip"
+          matTooltip="Filter data in table" [matTooltipPosition]="'above'" placeholder="Ex. Krishna" #input>
+</mat-form-field></div>
+
+<br><br>
+<div class="table-container mat-elevation-z8">
+  <table mat-table matSort [dataSource]="dataSource">
+    
+    <!-- Name column  -->
+    <ng-container matColumnDef="name">
+      <th #tooltip="matTooltip"matTooltip="Name Column" [matTooltipPosition]="'above'" mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
+      <td mat-cell *matCellDef="let row"> {{row.name}} </td>
+    </ng-container>
+
+    <!-- Surname column  -->
+    <ng-container matColumnDef="surname">
+      <th #tooltip="matTooltip"matTooltip="Surname Column" [matTooltipPosition]="'above'" mat-header-cell *matHeaderCellDef mat-sort-header> Surname </th>
+      <td mat-cell *matCellDef="let row"> {{row.surname}} </td>
+    </ng-container>
+
+    <!-- Email column  -->
+    <ng-container matColumnDef="email">
+      <th #tooltip="matTooltip"matTooltip="Email Column" [matTooltipPosition]="'above'" mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
+      <td mat-cell *matCellDef="let row"> <a style="text-decoration: none; color: #000;" href="mailto:{row.email}">{{row.email}}</a></td>
+    </ng-container>
+
+            <!-- Surname column  -->
+    <ng-container matColumnDef="userStatus">
+      <th #tooltip="matTooltip"matTooltip="Status Column" [matTooltipPosition]="'above'" mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+      <td mat-cell *matCellDef="let row"> {{row.userStatus.toLowerCase()}} </td>
+    </ng-container>
+
+                <!-- Surname column  -->
+    <ng-container matColumnDef="applicationRole">
+      <th #tooltip="matTooltip"matTooltip="Role Column" [matTooltipPosition]="'above'" mat-header-cell *matHeaderCellDef mat-sort-header> Role </th>
+      <td mat-cell *matCellDef="let row"> {{row.applicationRole.toLowerCase()}} </td>
+    </ng-container>
+
+    <!-- Edit button column  -->
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> </th>
+      <td #tooltip="matTooltip"matTooltip="Remove User" [matTooltipPosition]="'below'" mat-cell *matCellDef="let row"><button style="background: transparent" (click)="deleteRow(row);"><mat-icon>delete</mat-icon></button></td>
+</ng-container>
+
+    <ng-container matColumnDef="actions2">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> </th>
+      <td #tooltip="matTooltip"matTooltip="Edit User" [matTooltipPosition]="'below'" mat-cell *matCellDef="let row"><button style="background: transparent" (click)="openDialog(row);">	<mat-icon>edit</mat-icon></button></td>
+</ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr  mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" colspan="4">No data matching the filter "{{input.value}}"</td>
+    </tr>
+    </table>
+  <mat-paginator class="d-flex justify-content-center" #tooltip="matTooltip"matTooltip="PageTable Options" [matTooltipPosition]="'below'" showFirstLastButtons [pageSizeOptions]="[5, 10, 25, 50, 100]"></mat-paginator>
+
+</div>
+
+<br><br><br><br><br><br>
+<div class="d-flex justify-content-center" style="margin-top: 100px;">
+<button #tooltip="matTooltip"matTooltip="Add User" [matTooltipPosition]="'below'" mat-raised-button style="height:40px;width: 60px;border-radius: 50px;" color="primary" routerLink="/adduser"><mat-icon>person_add</mat-icon></button>
+<button #tooltip="matTooltip"matTooltip="Home" [matTooltipPosition]="'below'" mat-raised-button style="height:40px;width: 60px;border-radius: 50px; margin-left:20px;" color="primary" routerLink="/main"><mat-icon>home</mat-icon></button>
+<button #tooltip="matTooltip"matTooltip="Logout" [matTooltipPosition]="'below'" mat-raised-button style="height:40px;width: 60px;border-radius: 50px; margin-left:20px;" color="accent" routerLink="/logout">	<mat-icon>exit_to_app</mat-icon></button>
+
+</div>

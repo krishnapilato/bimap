@@ -74,6 +74,7 @@ input::-webkit-inner-spin-button {
 }
 table {
   width: 100%;
+  overflow: auto;
 }
 
 .mat-form-field {

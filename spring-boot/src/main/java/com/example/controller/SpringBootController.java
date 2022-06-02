@@ -9,9 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -98,6 +100,13 @@ public class SpringBootController {
 		logger.info("Finding all data in tables table");
 		return tablesRepository.findAll();
 	}
+	
+	@GetMapping("/users")
+	public List<User> findUsers() {
+		logger.info("Finding all data in users table");
+		return userRepository.findAll();
+	}
+    
     
     // POST Mapping to save new user
 	
@@ -120,5 +129,28 @@ public class SpringBootController {
 		newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
 
 		return this.userRepository.save(newUser);
+	}
+	
+	@PutMapping("/users/{id}")
+	public User update(@RequestBody User updatedUser, @PathVariable Long id) {
+		logger.info("Updating user with email: {}.", id);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Updated user details: {}", updatedUser);
+		}
+		return userRepository.findById(id).map(user -> {
+			user.setLastModified(new Date());
+			user.setName(updatedUser.getName());
+			user.setSurname(updatedUser.getSurname());
+			user.setEmail(updatedUser.getEmail());
+			user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+			user.setApplicationRole(updatedUser.getApplicationRole());
+			return userRepository.save(user);
+		}).orElseThrow();
+	}
+	
+	@DeleteMapping("/users/{id}")
+	public void delete(@PathVariable Long id) {
+		logger.info("Deleting user with id: {}.", id);
+		userRepository.deleteById(id);
 	}
 }
