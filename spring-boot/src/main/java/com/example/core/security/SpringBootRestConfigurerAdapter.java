@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SpringBootRestConfigurerAdapter extends WebSecurityConfigurerAdapter {
-	@Autowired 
+	@Autowired
 	private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	@Autowired
 	private UserDetailsService jwtUserDetailsService;
@@ -44,17 +44,10 @@ public class SpringBootRestConfigurerAdapter extends WebSecurityConfigurerAdapte
 
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
-		httpSecurity
-			.csrf().disable()
-			.cors().and()
-			.formLogin().disable()
-			.authorizeRequests().antMatchers("/login").permitAll()
-			.anyRequest().authenticated()
-			.and()
-			.exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
-			.and()
-			.sessionManagement()
-			.sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+		httpSecurity.csrf().disable().cors().and().formLogin().disable().authorizeRequests().antMatchers("/login")
+				.permitAll().anyRequest().authenticated().and().exceptionHandling()
+				.authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 }

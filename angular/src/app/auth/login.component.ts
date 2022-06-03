@@ -1,19 +1,28 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
 import { LoginRequest } from './loginrequest';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: []
+  templateUrl: './login.component.html'
 })
 export class LoginComponent {
+  // Attribute
+
   loginRequest: LoginRequest;
 
-  constructor(private route: ActivatedRoute, private router: Router, private authService: AuthService) { 
+  // Constructor
+
+  constructor(private router: Router, private authService: AuthService) {
     this.loginRequest = new LoginRequest();
   }
 
-  onSubmit() { this.authService.login(this.loginRequest).subscribe(result => this.router.navigate(['/main'])); }
+  // On submit event
+
+  onSubmit() {
+    this.authService
+      .login(this.loginRequest)
+      .subscribe(() => this.router.navigate(['/main']));
+  }
 }

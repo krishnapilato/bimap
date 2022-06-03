@@ -1,1 +1,63 @@
-{"version":"0.0.0","name":"angulartest1","dependencies":{"@angular-devkit/architect":{"version":"0.1303.7"},"@angular-devkit/core":{"version":"13.3.7"},"@angular/animations":{"version":"13.0.3"},"@angular/cdk":{"version":"13.3.8"},"@angular/common":{"version":"13.0.3"},"@angular/compiler":{"version":"13.0.3"},"@angular/core":{"version":"13.0.3"},"@angular/forms":{"version":"13.0.3"},"@angular/material":{"version":"13.3.8"},"@angular/platform-browser-dynamic":{"version":"13.0.3"},"@angular/platform-browser":{"version":"13.0.3"},"@angular/router":{"version":"13.0.3"},"@fortawesome/fontawesome-free":{"version":"6.1.1"},"jquery":{"version":"3.6.0"},"leaflet-easybutton":{"version":"2.4.0"},"p-limit":{"version":"2.3.0"},"rxjs":{"version":"7.4.0"},"tslib":{"version":"2.4.0"},"zone.js":{"version":"0.11.4"}}}
+{
+  "version": "0.0.0",
+  "name": "angulartest1",
+  "dependencies": {
+    "@angular-devkit/architect": {
+      "version": "0.1303.7"
+    },
+    "@angular-devkit/core": {
+      "version": "13.3.7"
+    },
+    "@angular/animations": {
+      "version": "13.0.3"
+    },
+    "@angular/cdk": {
+      "version": "13.3.8"
+    },
+    "@angular/common": {
+      "version": "13.0.3"
+    },
+    "@angular/compiler": {
+      "version": "13.0.3"
+    },
+    "@angular/core": {
+      "version": "13.0.3"
+    },
+    "@angular/forms": {
+      "version": "13.0.3"
+    },
+    "@angular/material": {
+      "version": "13.3.8"
+    },
+    "@angular/platform-browser-dynamic": {
+      "version": "13.0.3"
+    },
+    "@angular/platform-browser": {
+      "version": "13.0.3"
+    },
+    "@angular/router": {
+      "version": "13.0.3"
+    },
+    "@fortawesome/fontawesome-free": {
+      "version": "6.1.1"
+    },
+    "jquery": {
+      "version": "3.6.0"
+    },
+    "leaflet-easybutton": {
+      "version": "2.4.0"
+    },
+    "p-limit": {
+      "version": "2.3.0"
+    },
+    "rxjs": {
+      "version": "7.4.0"
+    },
+    "tslib": {
+      "version": "2.4.0"
+    },
+    "zone.js": {
+      "version": "0.11.4"
+    }
+  }
+}

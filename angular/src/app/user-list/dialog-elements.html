@@ -1,58 +1,130 @@
-  <h1 class="text-center">Edit user data</h1>
+<h1 class="text-center">Edit user data</h1>
 
-  <p class="text-center">You are editing user with ID {{globalID}}</p>
+<p class="text-center">You are editing user with ID {{globalID}}</p>
 
-  <br><br>
+<br /><br />
 
-  <form  autocomplete="off">
-  
-  <mat-form-field appearance="outline" class="text-center" >
+<form autocomplete="off">
+  <mat-form-field appearance="outline" class="text-center">
     <mat-label>Surname</mat-label>
-    <input required minlength="1" maxlength="20" type="text" #tooltip="matTooltip"matTooltip="Surname" [formControl]="surname" [matTooltipPosition]="'above'" matInput placeholder="Ex. Pilato">
-    <mat-error *ngIf="surname.hasError('required') || !surname.hasError('minlength') || !surname.hasError('maxlength')">Please write a surname</mat-error>
-</mat-form-field>
-
-
-    <mat-form-field appearance="outline" class="text-center">
-    <mat-label>Name</mat-label>
-    <input required  minlength="1" maxlength="20" type="text" #tooltip="matTooltip"matTooltip="Name" [formControl]="name" [matTooltipPosition]="'above'" matInput placeholder="Ex. Krishna">
-    <mat-error *ngIf="name.hasError('required') || !name.hasError('minlength') || !name.hasError('maxlength')">Please write a name</mat-error>
-</mat-form-field>
-
-  <br>
-
-      <mat-form-field style="width: 100%" appearance="outline" class="text-center">
-    <mat-label>Email</mat-label>
-    <input required type="email" email="true" minlength="3" maxlength="30" #tooltip="matTooltip"matTooltip="Email" [formControl]="email" [matTooltipPosition]="'above'" matInput placeholder="Ex. krishnak.pilato@gmail.com">
-        <mat-error *ngIf="email.hasError('required') || !email.hasError('minlength') || !email.hasError('maxlength')">Please write a email</mat-error>
-</mat-form-field>
-
-  <br>
-
-    <mat-form-field appearance="outline" style="width: 100%;">
-    <mat-label>Application Role</mat-label>
-    <mat-select required [formControl]="applicationRole" #tooltip="matTooltip"matTooltip="Application Role" [matTooltipPosition]="'above'">
-    <mat-option *ngFor="let approle of approles" [value]="approle.value">
-      {{approle.viewValue}}
-    </mat-option>
-    </mat-select>
-     <mat-error *ngIf="applicationRole.hasError('required')">Please select an Application Role</mat-error>
+    <input
+      required
+      minlength="1"
+      maxlength="20"
+      type="text"
+      #tooltip="matTooltip"
+      matTooltip="Surname"
+      [formControl]="surname"
+      [matTooltipPosition]="'above'"
+      matInput
+      placeholder="Ex. Pilato"
+    />
+    <mat-error
+      *ngIf="surname.hasError('required') || !surname.hasError('minlength') || !surname.hasError('maxlength')"
+      >Please write a surname</mat-error
+    >
   </mat-form-field>
 
-  <br>
+  <mat-form-field appearance="outline" class="text-center">
+    <mat-label>Name</mat-label>
+    <input
+      required
+      minlength="1"
+      maxlength="20"
+      type="text"
+      #tooltip="matTooltip"
+      matTooltip="Name"
+      [formControl]="name"
+      [matTooltipPosition]="'above'"
+      matInput
+      placeholder="Ex. Krishna"
+    />
+    <mat-error
+      *ngIf="name.hasError('required') || !name.hasError('minlength') || !name.hasError('maxlength')"
+      >Please write a name</mat-error
+    >
+  </mat-form-field>
 
-        <mat-form-field style="width: 100%" appearance="outline" class="text-center">
+  <br />
+
+  <mat-form-field style="width: 100%" appearance="outline" class="text-center">
+    <mat-label>Email</mat-label>
+    <input
+      required
+      type="email"
+      email="true"
+      minlength="3"
+      maxlength="30"
+      #tooltip="matTooltip"
+      matTooltip="Email"
+      [formControl]="email"
+      [matTooltipPosition]="'above'"
+      matInput
+      placeholder="Ex. krishnak.pilato@gmail.com"
+    />
+    <mat-error
+      *ngIf="email.hasError('required') || !email.hasError('minlength') || !email.hasError('maxlength')"
+      >Please write a email</mat-error
+    >
+  </mat-form-field>
+
+  <br />
+
+  <mat-form-field appearance="outline" style="width: 100%;">
+    <mat-label>Application Role</mat-label>
+    <mat-select
+      required
+      [formControl]="applicationRole"
+      #tooltip="matTooltip"
+      matTooltip="Application Role"
+      [matTooltipPosition]="'above'"
+    >
+      <mat-option *ngFor="let approle of approles" [value]="approle.value">
+        {{approle.viewValue}}
+      </mat-option>
+    </mat-select>
+    <mat-error *ngIf="applicationRole.hasError('required')"
+      >Please select an Application Role</mat-error
+    >
+  </mat-form-field>
+
+  <br />
+
+  <mat-form-field style="width: 100%" appearance="outline" class="text-center">
     <mat-label>Password</mat-label>
-    <input required  minlength="8" maxlength="16" type="password" [formControl]="password" #tooltip="matTooltip"matTooltip="Password" [matTooltipPosition]="'above'" matInput placeholder="Ex. ********">
-        <mat-error *ngIf="password.hasError('required') || !password.hasError('minlength') || !password.hasError('maxlength')">Please write a password</mat-error>
-</mat-form-field>
+    <input
+      required
+      minlength="8"
+      maxlength="16"
+      type="password"
+      [formControl]="password"
+      #tooltip="matTooltip"
+      matTooltip="Password"
+      [matTooltipPosition]="'above'"
+      matInput
+      placeholder="Ex. ********"
+    />
+    <mat-error
+      *ngIf="password.hasError('required') || !password.hasError('minlength') || !password.hasError('maxlength')"
+      >Please write a password</mat-error
+    >
+  </mat-form-field>
 
-  <br><br>
+  <br /><br />
 
-<div class="d-flex justify-content-center">
- <button matRipple adiButton (click)="onNoClick($event);" #tooltip="matTooltip"matTooltip="Edit data" [matTooltipPosition]="'above'" mat-raised-button color="primary">
-    <span>Edit</span>
-    <mat-icon style="font-size: 20px;">edit</mat-icon>
-  </button>
+  <div class="d-flex justify-content-center">
+    <button
+      matRipple
+      adiButton
+      (click)="onNoClick($event);"
+      #tooltip="matTooltip"
+      matTooltip="Edit data"
+      [matTooltipPosition]="'above'"
+      mat-raised-button
+      color="primary"
+    >
+      <span>Edit</span>
+      <mat-icon style="font-size: 20px;">edit</mat-icon>
+    </button>
   </div>
-  </form>
+</form>

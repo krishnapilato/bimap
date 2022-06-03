@@ -1,33 +1,78 @@
 <div class="card my-5" style="border: none;">
-    <div class="card-body" style="margin-top:180px;">
-      <form (ngSubmit)="onSubmit()" #loginForm="ngForm" autocomplete="off">
-        <div class="form-group  text-center">
-          <h1>Welcome to my project: please login to start</h1>
-          <br><br>
-          <mat-form-field appearance="outline" style="width: 80%;outline:none; text-align: center">
-    <mat-label>Email</mat-label>
-    <input type="email" title="Username" [(ngModel)]="loginRequest.username" email="true"
-            id="username" 
+  <div class="card-body" style="margin-top:180px;">
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm" autocomplete="off">
+      <div class="form-group  text-center">
+        <h1>Welcome to my project: please login to start</h1>
+        <br /><br />
+        <mat-form-field
+          appearance="outline"
+          style="width: 60%;outline:none; text-align: center"
+        >
+          <mat-label>Email</mat-label>
+          <input
+            type="email"
+            title="Username"
+            [(ngModel)]="loginRequest.username"
+            email="true"
+            #tooltip="matTooltip"
+            matTooltip="Email"
+            [matTooltipPosition]="'above'"
+            id="username"
             name="username"
             placeholder="Enter your email address"
-            required #email="ngModel" matInput matRipple minlength="3" maxlength="100">
-  </mat-form-field>
-        </div>
-        <br>
-        <div class="form-group text-center">
-                    <mat-form-field appearance="outline" style="width: 80%;outline:none; text-align: center">
-    <mat-label>Password</mat-label>
-    <input type="password" title="Password" [(ngModel)]="loginRequest.password" 
-            id="password" autocomplete="on"
-            name="password" 
+            required
+            #email="ngModel"
+            matInput
+            matRipple
+            minlength="3"
+            maxlength="100"
+          />
+          <mat-icon matSuffix>email</mat-icon>
+        </mat-form-field>
+      </div>
+      <br />
+      <div class="form-group text-center">
+        <mat-form-field
+          appearance="outline"
+          style="width: 50%;outline:none; text-align: center"
+        >
+          <mat-label>Password</mat-label>
+          <input
+            type="password"
+            title="Password"
+            [(ngModel)]="loginRequest.password"
+            #tooltip="matTooltip"
+            matTooltip="Password"
+            [matTooltipPosition]="'above'"
+            id="password"
+            autocomplete="on"
+            name="password"
             placeholder="Enter your password"
-            required #password="ngModel" matInput matRipple minlength="8" maxlength="16">
-  </mat-form-field>
-        </div>
-         <br><br>
-         <div class="d-flex justify-content-center">
-          <button [disabled]="!loginForm.form.valid" style="width: 80%;border-radius: 20px;" class="btn  btn-primary">Login <i class="fa fa-arrow-right"></i></button>
-        </div>
-      </form>
-    </div>
+            required
+            #password="ngModel"
+            matInput
+            matRipple
+            minlength="8"
+            maxlength="16"
+          />
+          <mat-icon matSuffix>lock</mat-icon>
+        </mat-form-field>
+      </div>
+      <br /><br />
+      <div class="d-flex justify-content-center">
+        <button
+          type="submit"
+          [disabled]="!loginForm.form.valid"
+          #tooltip="matTooltip"
+          matTooltip="Login"
+          [matTooltipPosition]="'below'"
+          mat-raised-button
+          style="height:40px;width: 260px;border-radius: 50px; margin-left:20px;"
+          color="primary"
+        >
+          <mat-icon matSuffix>login</mat-icon>
+        </button>
+      </div>
+    </form>
   </div>
+</div>

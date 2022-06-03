@@ -7,15 +7,24 @@ import { environment } from 'src/environments/environment';
 @Injectable()
 export class UserService {
   private usersUrl: string;
-  
-  constructor(private http: HttpClient) { this.usersUrl = environment.baseApiUrl + '/users'; }
 
-  public findAll(): Observable<User[]> { return this.http.get<User[]>(this.usersUrl); }
+  constructor(private http: HttpClient) {
+    this.usersUrl = environment.baseApiUrl + '/users';
+  }
 
-  public save(user: User) { return this.http.post<User>(this.usersUrl, user); }
+  public findAll(): Observable<User[]> {
+    return this.http.get<User[]>(this.usersUrl);
+  }
 
-  
-  public update(user: User, id: number) { return this.http.put(this.usersUrl + '/' + id, user); }
+  public save(user: User) {
+    return this.http.post<User>(this.usersUrl, user);
+  }
 
-  public delete(id: number) { return this.http.delete(this.usersUrl + '/' + id); }
+  public update(user: User, id: number) {
+    return this.http.put(this.usersUrl + '/' + id, user);
+  }
+
+  public delete(id: number) {
+    return this.http.delete(this.usersUrl + '/' + id);
+  }
 }

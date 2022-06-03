@@ -1,7 +1,7 @@
-import { User } from "../user";
+import { User } from '../user';
 
 export class LoginResponse {
-    jwttoken!: string;
-    user!: User;
-    applicationRole!: string;
+  jwttoken!: string;
+  user!: User;
+  applicationRole!: string;
 }

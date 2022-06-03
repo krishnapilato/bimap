@@ -1,3 +1,5 @@
 package com.example.enums;
 
-public enum UserStatus { NOT_CONFIRMED, CONFIRMED }
+public enum UserStatus {
+    NOT_CONFIRMED, CONFIRMED
+}

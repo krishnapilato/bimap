@@ -8,9 +8,21 @@ import { UserService } from '../user-service.service';
   templateUrl: './user-form.component.html'
 })
 export class UserFormComponent {
+  // User Object Attribute
+
   user: User;
 
-  constructor(private router: Router, private userService: UserService) { this.user = new User(); }
+  // Constructor
 
-  onSubmit() { this.userService.save(this.user).subscribe(() => this.router.navigate(['/listuser'])); }
+  constructor(private router: Router, private userService: UserService) {
+    this.user = new User();
+  }
+
+  // On submit event
+
+  onSubmit() {
+    this.userService
+      .save(this.user)
+      .subscribe(() => this.router.navigate(['/listuser']));
+  }
 }

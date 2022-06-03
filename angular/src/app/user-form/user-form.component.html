@@ -1,48 +1,167 @@
 <div class="card my-5" style="border: none;">
-    <div class="card-body">
-      <form (ngSubmit)="onSubmit()" #userForm="ngForm">
+  <div class="card-body">
+    <form (ngSubmit)="onSubmit()" #userForm="ngForm">
       <div class="form-group  text-center">
-        <h1>Welcome to my project: please sign up to start using my app</h1><br>
-        <h5>(All fields are required)</h5><br><br>
-        <mat-form-field appearance="outline" style="width: 80%;outline:none; text-align: center">
+        <h1>Welcome to my project: please sign up to start using my app</h1>
+        <br />
+        <h5>(All fields are required)</h5>
+        <br /><br />
+        <mat-form-field
+          appearance="outline"
+          style="width: 80%;outline:none; text-align: center"
+          #tooltip="matTooltip"
+          matTooltip="Name"
+          [matTooltipPosition]="'above'"
+        >
           <mat-label>Name</mat-label>
-          <input type="text" pattern="[a-zA-Z]*" title="Name" [(ngModel)]="user.name" id="name" name="name" placeholder="Enter your name" minlength="1" required #name="ngModel" matInput maxlength="18">
+          <input
+            type="text"
+            pattern="[a-zA-Z]*"
+            title="Name"
+            [(ngModel)]="user.name"
+            id="name"
+            name="name"
+            placeholder="Enter your name"
+            minlength="1"
+            required
+            #name="ngModel"
+            matInput
+            maxlength="18"
+          />
+          <mat-icon matSuffix>person</mat-icon>
         </mat-form-field>
       </div>
-      <br><br>
-      <div class="form-group  text-center">
-        <mat-form-field appearance="outline" style="width: 80%;outline:none; text-align: center">
+      <br /><br />
+      <div
+        class="form-group  text-center"
+        #tooltip="matTooltip"
+        matTooltip="Surname"
+        [matTooltipPosition]="'above'"
+      >
+        <mat-form-field
+          appearance="outline"
+          style="width: 80%;outline:none; text-align: center"
+        >
           <mat-label>Surname</mat-label>
-          <input type="text" pattern="[a-zA-Z]*" title="Surname" [(ngModel)]="user.surname" id="surname" name="surname" placeholder="Enter your surname" minlength="1" required #surname="ngModel" matInput maxlength="18">
+          <input
+            type="text"
+            pattern="[a-zA-Z]*"
+            title="Surname"
+            [(ngModel)]="user.surname"
+            id="surname"
+            name="surname"
+            placeholder="Enter your surname"
+            minlength="1"
+            required
+            #surname="ngModel"
+            matInput
+            maxlength="18"
+          />
+          <mat-icon matSuffix>person_4</mat-icon>
         </mat-form-field>
       </div>
-      <br><br>
-      <div class="form-group  text-center">
-        <mat-form-field appearance="outline" style="width: 80%;outline:none; text-align: center">
+      <br /><br />
+      <div
+        class="form-group  text-center"
+        #tooltip="matTooltip"
+        matTooltip="Email"
+        [matTooltipPosition]="'above'"
+      >
+        <mat-form-field
+          appearance="outline"
+          style="width: 80%;outline:none; text-align: center"
+        >
           <mat-label>Email</mat-label>
-          <input email="true" type="email" title="Email" [(ngModel)]="user.email" id="email" name="email" placeholder="Enter your email" required #email="ngModel" matInput minlength="3" maxlength="100">
+          <input
+            email="true"
+            type="email"
+            title="Email"
+            [(ngModel)]="user.email"
+            id="email"
+            name="email"
+            placeholder="Enter your email"
+            required
+            #email="ngModel"
+            matInput
+            minlength="3"
+            maxlength="100"
+          />
+          <mat-icon matSuffix>email</mat-icon>
         </mat-form-field>
       </div>
-      <br><br>
-      <div class="form-group  text-center">
-        <mat-form-field appearance="outline" style="width: 80%;outline:none; text-align: center">
+      <br /><br />
+      <div
+        class="form-group  text-center"
+        #tooltip="matTooltip"
+        matTooltip="Password"
+        [matTooltipPosition]="'above'"
+      >
+        <mat-form-field
+          appearance="outline"
+          style="width: 80%;outline:none; text-align: center"
+        >
           <mat-label>Password</mat-label>
-          <input type="password" autocomplete="on" title="Password" [(ngModel)]="user.password" id="password" name="password" placeholder="Enter your password" required #password="ngModel" matInput matRipple minlength="8" maxlength="16">
+          <input
+            type="password"
+            autocomplete="on"
+            title="Password"
+            [(ngModel)]="user.password"
+            id="password"
+            name="password"
+            placeholder="Enter your password"
+            required
+            #password="ngModel"
+            matInput
+            matRipple
+            minlength="8"
+            maxlength="16"
+          />
+          <mat-icon matSuffix>lock</mat-icon>
         </mat-form-field>
-        <br>
+        <br />
       </div>
-      <br><br>
+      <br /><br />
       <div class="form-group  text-center">
-     <button type="submit" [disabled]="!userForm.form.valid" class="btn btn-primary" style="width: 80%; border-radius: 20px;" matRipple>Sign up</button>
-     <br><br><br>
+        <button
+          type="submit"
+          [disabled]="!userForm.form.valid"
+          #tooltip="matTooltip"
+          matTooltip="Sign Up"
+          [matTooltipPosition]="'above'"
+          mat-raised-button
+          style="height:40px;width: 260px;border-radius: 50px; margin-left:20px;"
+          color="primary"
+          routerLink="/listuser"
+        >
+          <mat-icon>app_registration</mat-icon>
+        </button>
+        <br /><br /><br /><br />
 
-     <div class="d-flex justify-content-center">
-
-    <a routerLink="/listuser" class="btn btn-secondary" style="border-radius: 150px;margin-left: 20px;width: 250px;text-align: center;margin-bottom: 50px;">Back to admin dashboard</a>
-<a routerLink="/logout" matRipple class="btn btn-danger" style="border-radius: 150px;margin-left: 20px; width: 250px;float:center; margin-bottom: 50px;">Logout</a>
-</div>
-
+        <div class="d-flex justify-content-center">
+          <button
+            #tooltip="matTooltip"
+            matTooltip="Admin Dashboard"
+            [matTooltipPosition]="'below'"
+            mat-raised-button
+            style="height:40px;width: 60px;border-radius: 50px;"
+            color="primary"
+            routerLink="/listuser"
+          >
+            <mat-icon>admin_panel_settings</mat-icon>
+          </button>
+          <button
+            #tooltip="matTooltip"
+            matTooltip="Logout"
+            [matTooltipPosition]="'below'"
+            mat-raised-button
+            style="height:40px;width: 60px;border-radius: 50px; margin-left:20px;"
+            color="accent"
+            routerLink="/logout"
+          >
+            <mat-icon>exit_to_app</mat-icon>
+          </button>
+        </div>
       </div>
-      </form>
-    </div>
+    </form>
   </div>
+</div>

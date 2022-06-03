@@ -14,19 +14,22 @@ import { LogoutComponent } from './auth/logout.component';
 import { MatRippleModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
-import { MatSnackBarModule} from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
-import {MatDialogModule} from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import {MatTableModule} from '@angular/material/table'
+import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import {MatTooltipModule} from '@angular/material/tooltip';
-import { UserListComponent, DialogElementsExampleDialog } from './user-list/user-list.component';
-import {MatSelectModule} from '@angular/material/select';
-import {MatButtonModule} from '@angular/material/button';
-import {MatIconModule} from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import {
+  UserListComponent,
+  DialogElementsExampleDialog
+} from './user-list/user-list.component';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
   declarations: [
@@ -57,10 +60,14 @@ import {MatIconModule} from '@angular/material/icon';
     MatRippleModule,
     MatFormFieldModule,
     ReactiveFormsModule,
-    MatInputModule,
+    MatInputModule
   ],
-  exports:[ MatTableModule ],
-  providers: [UserService, AuthService, { provide: HTTP_INTERCEPTORS, useClass: SecurityInterceptor, multi: true }],
+  exports: [MatTableModule],
+  providers: [
+    UserService,
+    AuthService,
+    { provide: HTTP_INTERCEPTORS, useClass: SecurityInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
