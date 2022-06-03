@@ -1,4 +1,4 @@
-# Map WebApp Exercise
+# Map WebApp Exercise (not read)
 
 This is a project born only with the aim of practicing with the technologies of Spring Boot and Angular.
 The user can enter the required data such as the region and the name of the property. There is also a map created thanks to Leaflet where for the moment it can only 'play', but its usefulness is expected very soon.
