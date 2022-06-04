@@ -125,6 +125,18 @@ export class MainComponent implements OnInit {
       }
     );
 
+    var googleStreetViewLayer = L.tileLayer(
+      'https://{s}.google.com/vt/?lyrs=svv|cb_client:apiv3&style=50&x={x}&y={y}&z={z}',
+      {
+        attribution:
+          '<a target="_blank" href="https://cloud.google.com/maps-platform/terms">Map data ©2022 Google</a>',
+        maxZoom: 20.25,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+      }
+    );
+
+    var cities = L.layerGroup([googleTerrain, googleStreetViewLayer]);
+
     // Setting the map
 
     this.map = L.map('map', {
@@ -167,6 +179,7 @@ export class MainComponent implements OnInit {
             icon: 'fa-solid fa-street-view fa-xl fa-bounce',
             title: 'Browse Street View Images',
             onClick: function(control) {
+              cities.addTo(map);
               snackbar.open(
                 'Double click on map to open StreetView in Google Maps',
                 'Close',
@@ -183,6 +196,8 @@ export class MainComponent implements OnInit {
             title: 'Turn off Street View Mode',
             stateName: 'remove-markers',
             onClick: function(control) {
+              map.removeLayer(cities);
+              map.addLayer(googleTerrain);
               snackbar.open('StreetView Mode closed', 'Close', {
                 duration: 2000
               });
@@ -204,9 +219,7 @@ export class MainComponent implements OnInit {
           tmpl.replace(/{lat}/g, e.latlng.lat).replace(/{lon}/g, e.latlng.lng),
           '"_self"'
         );
-
-        t.location.href='http://www.google.com';
-        console.log(t.location.href);
+        console.log(tmpl.replace(/{lat}/g, e.latlng.lat).replace(/{lon}/g, e.latlng.lng))
         }
     });
 

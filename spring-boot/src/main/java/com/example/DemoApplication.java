@@ -14,7 +14,7 @@ public class DemoApplication {
 	
 	private static final Utility utility = new Utility();
 
-	public static void main(String[] args) throws Exception {		
+	public static void main(String[] args) throws Exception {	
 		utility.createFiles();
 		SpringApplication.run(DemoApplication.class, args);
 	}

@@ -1,4 +1,4 @@
-<div class="wrap">
+<div class="wrap" sytòe="margin-top: 2000px;">
   <div class="fleft">
     <form style="margin-left: 50px;margin-top: 50px;" autocomplete="off">
       <h3 class="text-center">data enter area</h3>
@@ -384,48 +384,10 @@
     matTooltip="Logout"
     [matTooltipPosition]="'below'"
     mat-raised-button
-    style="margin-bottom: 150px;height:40px;width: 60px;border-radius: 50px; margin-left:20px;"
+    style="margin-bottom: -150px;height:40px;width: 60px;border-radius: 50px; margin-left:20px;"
     color="accent"
     routerLink="/logout"
   >
     <mat-icon>exit_to_app</mat-icon>
   </button>
 </div>
-<form (submit)="streetView()">
-  <div class="d-flex justify-content-center">
-    <mat-form-field
-      class="text-center"
-      appearance="outline"
-      style="width: 50%;"
-    >
-      <mat-label>Street View CODE</mat-label>
-      <input
-        autocomplete="off"
-        class="text-center"
-        matInput
-        [(ngModel)]="playerName"
-        placeholder="Enter code and press enter"
-        [ngModelOptions]="{ standalone: true }"
-        #tooltip="matTooltip"
-        matTooltip="StreetView URL"
-        [matTooltipPosition]="'above'"
-        matTooltipHideDelay="100"
-        minlength="10"
-        maxlength="30"
-        placeholder="Ex. 1s680JA81lFrI4r2zF5_E3LQ"
-        #input
-      />
-      <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
-  </div>
-</form>
-<iframe
-  id="iframee"
-  src="https://www.google.com/maps/embed?pb=!4v1!6m8!1m7!1sbtwI9LkEV_1i9y3c3bhdUQ!2m2!1d45.04245303557875!2d8.948897843681799!3f0!4f0!5f0"
-  width="100%"
-  height="550"
-  style="border:0;"
-  allowfullscreen=""
-  loading="lazy"
-  referrerpolicy="no-referrer-when-downgrade"
-></iframe>
