@@ -1,8 +1,16 @@
-# Map WebApp Exercise (not read)
+# Map WebApp Exercise
 
 This is a project born only with the aim of practicing with the technologies of Spring Boot and Angular.
-The user can enter the required data such as the region and the name of the property. There is also a map created thanks to Leaflet where for the moment it can only 'play', but its usefulness is expected very soon.
- 
+
+Access to this application is managed by the administrator who, thanks to the UI already implemented to manage users, can create new users, remove or modify the data of existing users. Only the administrators can see the Admin Dashboard button in the main page. 
+
+In the main screen (and the only one at the moment) of the application it is possible to enter data such as geographic information. At the end of the insertion of all the data the user can save the data.
+The data is written both to a table and to a CSV file, always accessible from the path C:\Simple Map Exercise\csv_file.csv.
+
+The user can change the type of map displayed between Default, Satellite and Open Street Map according to his personal tastes.
+
+Furthermore, thanks to the button with the Street View icon it is possible, only if the zoom is greater than 15, to view the streetview images of the point clicked twice. At the bottom of the page is the original Street View which is in development.
+
 ## Requirements
 
 For building and running the application you need:
@@ -13,6 +21,8 @@ For building and running the application you need:
 - [NodeJS 18.2.0](https://nodejs.org/en/)
 
 ## Run Locally
+
+This project for the moment can only be run locally with all the developer tools.
 
 Clone the project with [Git](https://git-scm.com/downloads) or download the project zip and extract it wherever you want in your computer
 
@@ -98,8 +108,60 @@ Start the client: the web app will open in the browser
 | :-------- | :------- | :-------------------------------- |
 | `RequestBody FormModel`      | `FormModel Object` | **Required**. Save the object to form table and to csv_file |
 
+#### Get all data in tables table
+
+```http
+  GET /findAll
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `-`      | `-` | Return alla data in tables table |
+
+#### Get all data in users table
+
+```http
+  GET /users
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `-`      | `-` | Return alla data in users table |
+
+####  Post user data
+
+```http
+  POST /users
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `RequestBody User`      | `User Object` | **Required**. Save the user object to table |
+
+####  Update user data
+
+```http
+  PUT /users/{id}
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `id`      | `Long` | **Required**. Update the user with id equal to the path variable |
+
+####  Delete user data
+
+```http
+  PUT /users/{id}
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `id`      | `Long` | **Required**. Delete the user with id equal to the path variable |
+
+
 ## Technologies used:
 
 - [Leaflet 1.8.0](https://leafletjs.com)
 - [Google Maps Data](https://developers.google.com/maps)
 - [Open Street Map Data](https://www.openstreetmap.org/#map=8/45.905/8.990)
+- [OpenLayers Street View](https://github.com/GastonZalba/ol-street-view)
