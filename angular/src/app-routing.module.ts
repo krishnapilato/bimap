@@ -7,6 +7,7 @@ import { UserFormComponent } from './app/user-form/user-form.component';
 import { MainComponent } from './app/main/main.component';
 import { UserListComponent } from './app/user-list/user-list.component';
 import { AdminAuthGuard } from './app/auth/admin.auth.guard';
+import { StreetviewComponent } from './app/streetview/streetview.component';
 
 const routes: Routes = [
   { 
@@ -37,6 +38,11 @@ const routes: Routes = [
     path: 'listuser',
     component: UserListComponent,
     canActivate: [AdminAuthGuard]
+  },
+  {
+    path: 'streetview',
+    component: StreetviewComponent,
+    canActivate: [AuthGuard]
   }
 ];
 

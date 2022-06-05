@@ -70,7 +70,7 @@
 
   <br />
 
-  <mat-form-field appearance="outline" style="width: 100%;">
+  <mat-form-field appearance="outline" style="width: 100%;"  class="text-center">
     <mat-label>Application Role</mat-label>
     <mat-select
       required
@@ -96,6 +96,7 @@
       required
       minlength="8"
       maxlength="16"
+      #x
       type="password"
       [formControl]="password"
       #tooltip="matTooltip"
@@ -106,7 +107,7 @@
     />
     <mat-error
       *ngIf="password.hasError('required') || !password.hasError('minlength') || !password.hasError('maxlength')"
-      >Please write a password</mat-error
+      >Please write a password (8-16 characters)</mat-error
     >
   </mat-form-field>
 

@@ -179,16 +179,18 @@ export class MainComponent implements OnInit {
             icon: 'fa-solid fa-street-view fa-xl fa-bounce',
             title: 'Browse Street View Images',
             onClick: function(control) {
-              cities.addTo(map);
-              snackbar.open(
-                'Double click on map to open StreetView in Google Maps',
-                'Close',
-                {
-                  duration: 5000
-                }
-              );
-              flag = false;
-              control.state('remove-markers');
+              if (map.getZoom() > 15) {
+                cities.addTo(map);
+                snackbar.open(
+                  'Double click on map to open StreetView in Google Maps',
+                  'Close',
+                  {
+                    duration: 5000
+                  }
+                );
+                flag = false;
+                control.state('remove-markers');
+              }
             }
           },
           {
@@ -214,13 +216,15 @@ export class MainComponent implements OnInit {
     const tmpl = 'https://www.google.com/maps?layer=c&cbll={lat},{lon}';
     map.on('dblclick', function(e: any) {
       if (!flag) {
-         var t!: any;
-        t= window.open(
+        var t!: any;
+        t = window.open(
           tmpl.replace(/{lat}/g, e.latlng.lat).replace(/{lon}/g, e.latlng.lng),
           '"_self"'
         );
-        console.log(tmpl.replace(/{lat}/g, e.latlng.lat).replace(/{lon}/g, e.latlng.lng))
-        }
+        console.log(
+          tmpl.replace(/{lat}/g, e.latlng.lat).replace(/{lon}/g, e.latlng.lng)
+        );
+      }
     });
 
     // Double Click on map event
@@ -250,9 +254,10 @@ export class MainComponent implements OnInit {
     });
   }
   streetView() {
-    const variable = "https://www.google.com/maps/embed?pb=!4v1!6m8!1m7!{id}!2m2!1d45.04245303557875!2d8.948897843681799!3f0!4f0!5f0";
+    const variable =
+      'https://www.google.com/maps/embed?pb=!4v1!6m8!1m7!{id}!2m2!1d45.04245303557875!2d8.948897843681799!3f0!4f0!5f0';
     const URL = variable.replace(/{id}/g, this.playerName);
-    $("#iframee").attr("src", URL);
+    $('#iframee').attr('src', URL);
   }
 
   saveData(event: any) {

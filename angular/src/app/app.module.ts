@@ -30,6 +30,7 @@ import {
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { StreetviewComponent } from './streetview/streetview.component';
 
 @NgModule({
   declarations: [
@@ -39,7 +40,8 @@ import { MatIconModule } from '@angular/material/icon';
     UserFormComponent,
     LogoutComponent,
     UserListComponent,
-    DialogElementsExampleDialog
+    DialogElementsExampleDialog,
+    StreetviewComponent
   ],
   imports: [
     BrowserModule,
