@@ -32,7 +32,7 @@ const routes: Routes = [
   { 
     path: 'adduser', 
     component: UserFormComponent, 
-    canActivate: [AuthGuard] 
+    canActivate: [AdminAuthGuard] 
   },
   {
     path: 'listuser',

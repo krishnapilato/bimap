@@ -57,6 +57,8 @@ export class MainComponent implements OnInit {
   public latitude!: number;
   public longitude!: number;
 
+  isShown!: boolean;
+
   constructor(
     private apiService: ApiService,
     private _snackbar: MatSnackBar,
@@ -75,6 +77,7 @@ export class MainComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.isShown = false;
     this.user = this.authenticationService.loginResponseValue;
 
     // get all table data from ApiService
@@ -179,7 +182,7 @@ export class MainComponent implements OnInit {
             icon: 'fa-solid fa-street-view fa-xl fa-bounce',
             title: 'Browse Street View Images',
             onClick: function(control) {
-              if (map.getZoom() > 15) {
+              if (map.getZoom() > 14) {
                 cities.addTo(map);
                 snackbar.open(
                   'Double click on map to open StreetView in Google Maps',
@@ -190,6 +193,12 @@ export class MainComponent implements OnInit {
                 );
                 flag = false;
                 control.state('remove-markers');
+              } else {
+                snackbar.open(
+                  'Zoom more in to enable Street View Mode',
+                  'Close',
+                  { duration: 2000 }
+                );
               }
             }
           },
@@ -252,6 +261,10 @@ export class MainComponent implements OnInit {
     map.on('baselayerchange', function onOverlayAdd(e: any) {
       snackbar.open('Layer changed to ' + e.name, 'Close', { duration: 2000 });
     });
+  }
+
+  toggleShow() {
+    this.isShown = !this.isShown;
   }
   streetView() {
     const variable =

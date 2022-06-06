@@ -27,4 +27,8 @@ export class UserService {
   public delete(id: number) {
     return this.http.delete(this.usersUrl + '/' + id);
   }
+
+  public sendEmail(email: string) {
+    return this.http.get(this.usersUrl + '/sendEmail=' + email);
+  }
 }

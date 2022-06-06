@@ -151,6 +151,17 @@
           </button>
           <button
             #tooltip="matTooltip"
+            matTooltip="Home"
+            [matTooltipPosition]="'below'"
+            mat-raised-button
+            style="height:40px;width: 60px;border-radius: 50px; margin-left:20px;"
+            color="primary"
+            routerLink="/main"
+          >
+            <mat-icon>home</mat-icon>
+          </button>
+          <button
+            #tooltip="matTooltip"
             matTooltip="Logout"
             [matTooltipPosition]="'below'"
             mat-raised-button

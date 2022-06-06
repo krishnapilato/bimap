@@ -62,6 +62,28 @@ export class UserListComponent implements OnInit, AfterViewInit {
     });
   }
 
+  public send(email: string): void {
+    if (
+      confirm('Are you sure to send email with credentials to ' + email + '?')
+    ) {
+      this._snackbar.open('Trying to send email to ' + email, '', {
+        duration: 1000
+      });
+      this.userService.sendEmail(email).subscribe(
+        data => {
+          this._snackbar.open('Email sent successfully to ' + email, '', {
+            duration: 2000
+          });
+        },
+        () => {
+          this._snackbar.open('Email not sent', '', {
+            duration: 2000
+          });
+        }
+      );
+    }
+  }
+
   public deleteRow(row: any) {
     if (confirm('Are you sure to delete this record?')) {
       this.userService.delete(row.id).subscribe(data => {
@@ -102,6 +124,10 @@ export class DialogElementsExampleDialog {
     public dialog: MatDialog,
     private _snackbar: MatSnackBar
   ) {}
+
+  cancel() {
+    this.dialog.closeAll();
+  }
 
   onNoClick(event: any): void {
     if (confirm('Are you sure to update this record?')) {

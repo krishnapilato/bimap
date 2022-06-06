@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,9 +115,9 @@ public class SpringBootController {
 	
 	@PostMapping("/users")
 	public User create(@RequestBody User newUser) {
-		logger.info("Creating new user.");
+		logger.info("Creating new user");
 		if (logger.isDebugEnabled()) {
-			logger.debug("New user details: {}", newUser);
+			logger.debug("New user details: " + newUser);
 		}
 
 		Date now = new Date();
@@ -133,9 +136,9 @@ public class SpringBootController {
 	
 	@PutMapping("/users/{id}")
 	public User update(@RequestBody User updatedUser, @PathVariable Long id) {
-		logger.info("Updating user with email: {}.", id);
+		logger.info("Updating user with email: ." + id);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Updated user details: {}", updatedUser);
+			logger.debug("Updated user details: " + updatedUser);
 		}
 		return userRepository.findById(id).map(user -> {
 			user.setLastModified(new Date());
@@ -150,7 +153,23 @@ public class SpringBootController {
 	
 	@DeleteMapping("/users/{id}")
 	public void delete(@PathVariable Long id) {
-		logger.info("Deleting user with id: {}.", id);
+		logger.info("Deleting user with id: {}." + id);
 		userRepository.deleteById(id);
+	}
+	
+	@GetMapping("/users/sendEmail={email}")
+	public void sendEmail(@PathVariable String email) throws AddressException, MessagingException, IOException {
+		logger.info("Sending user credentials to: " + email);
+		
+		User user = userRepository.findByEmailAddress(email).get();
+		String content = "<div style='text-align: center;font-family: sans-serif;'><h1>Hi " 
+					   + user.getName() + " !</h1><p>Here are your credentials for accessing the application:</p>"
+					   + "Email: " + user.getEmail() 
+					   + "<br>Password: "  + user.getPassword() 
+					   + "<br>Application role: "  + user.getApplicationRole() + "<br><br>"
+					   + "Click <a href='http://localhost:4200/login'>here</a> to login<br><br>"
+					   + "Best regards, <br> Admin Team</div>";
+		
+		utility.sendEmail(email, content);
 	}
 }

@@ -30,7 +30,7 @@ public class AppInit implements CommandLineRunner {
 		
 		// Saving first new administrator
 		
-		/*Date now = new Date();
+		Date now = new Date();
 
 		User administrator = new User();
 		administrator.setName("Khova Krishna");
@@ -41,55 +41,52 @@ public class AppInit implements CommandLineRunner {
 		administrator.setPassword(passwordEncoder.encode("12345678"));
 		administrator.setUserStatus(UserStatus.CONFIRMED);
 		administrator.setApplicationRole(ApplicationRole.ADMINISTRATOR);
-
 		userRepository.save(administrator);
 		
-		User administrator1 = new User();
-		administrator1.setName("Stefano");
-		administrator1.setSurname("Pilato");
-		administrator1.setEmail("stefano.pilato@gmail.com");
-		administrator1.setCreated(now);
-		administrator1.setLastModified(now);
-		administrator1.setPassword(passwordEncoder.encode("12345678"));
-		administrator1.setUserStatus(UserStatus.CONFIRMED);
-		administrator1.setApplicationRole(ApplicationRole.ADMINISTRATOR);
-
-		userRepository.save(administrator1);
+		// Saving other 4 users for testing
 		
-		User administrator2 = new User();
-		administrator2.setName("Monica");
-		administrator2.setSurname("Pozzi");
-		administrator2.setEmail("monica.pozzi@gmail.com");
-		administrator2.setCreated(now);
-		administrator2.setLastModified(now);
-		administrator2.setPassword(passwordEncoder.encode("12345678"));
-		administrator2.setUserStatus(UserStatus.CONFIRMED);
-		administrator2.setApplicationRole(ApplicationRole.ADMINISTRATOR);
-
-		userRepository.save(administrator2);
+		User user2 = new User();
+		user2.setName("Test2");
+		user2.setSurname("Test2");
+		user2.setEmail("test.test2@gmail.com");
+		user2.setCreated(now);
+		user2.setLastModified(now);
+		user2.setPassword(passwordEncoder.encode("12345678"));
+		user2.setUserStatus(UserStatus.CONFIRMED);
+		user2.setApplicationRole(ApplicationRole.ADMINISTRATOR);
+		userRepository.save(user2);
 		
-		User administrator3 = new User();
-		administrator3.setName("Paolo");
-		administrator3.setSurname("Gatto");
-		administrator3.setEmail("paolo@gatto@gmail.com");
-		administrator3.setCreated(now);
-		administrator3.setLastModified(now);
-		administrator3.setPassword(passwordEncoder.encode("12345678"));
-		administrator3.setUserStatus(UserStatus.CONFIRMED);
-		administrator3.setApplicationRole(ApplicationRole.ADMINISTRATOR);
-
-		userRepository.save(administrator3);
+		User user3 = new User();
+		user3.setName("Test3");
+		user3.setSurname("Test");
+		user3.setEmail("test.test3@gmail.com");
+		user3.setCreated(now);
+		user3.setLastModified(now);
+		user3.setPassword(passwordEncoder.encode("12345678"));
+		user3.setUserStatus(UserStatus.NOT_CONFIRMED);
+		user3.setApplicationRole(ApplicationRole.USER);
+		userRepository.save(user3);
 		
-		User administrator4 = new User();
-		administrator4.setName("Sara");
-		administrator4.setSurname("Testa");
-		administrator4.setEmail("sara.testa@gmail.com");
-		administrator4.setCreated(now);
-		administrator4.setLastModified(now);
-		administrator4.setPassword(passwordEncoder.encode("12345678"));
-		administrator4.setUserStatus(UserStatus.CONFIRMED);
-		administrator4.setApplicationRole(ApplicationRole.ADMINISTRATOR);
-
-		userRepository.save(administrator4);*/
+		User user4 = new User();
+		user4.setName("Test4");
+		user4.setSurname("Test");
+		user4.setEmail("test.test4@gmail.com");
+		user4.setCreated(now);
+		user4.setLastModified(now);
+		user4.setPassword(passwordEncoder.encode("12345678"));
+		user4.setUserStatus(UserStatus.CONFIRMED);
+		user4.setApplicationRole(ApplicationRole.USER);
+		userRepository.save(user4);
+		
+		User user5 = new User();
+		user5.setName("Test5");
+		user5.setSurname("Test");
+		user5.setEmail("test.test5@gmail.com");
+		user5.setCreated(now);
+		user5.setLastModified(now);
+		user5.setPassword(passwordEncoder.encode("12345678"));
+		user5.setUserStatus(UserStatus.NOT_CONFIRMED);
+		user5.setApplicationRole(ApplicationRole.MANAGER);
+		userRepository.save(user5);
 	}
 }

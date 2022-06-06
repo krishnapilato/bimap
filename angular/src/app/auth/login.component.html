@@ -11,7 +11,6 @@
           <mat-label>Email</mat-label>
           <input
             type="email"
-            title="Username"
             [(ngModel)]="loginRequest.username"
             email="true"
             #tooltip="matTooltip"
@@ -39,13 +38,12 @@
           <mat-label>Password</mat-label>
           <input
             type="password"
-            title="Password"
             [(ngModel)]="loginRequest.password"
             #tooltip="matTooltip"
             matTooltip="Password"
             [matTooltipPosition]="'above'"
             id="password"
-            autocomplete="on"
+            autocomplete="off"
             name="password"
             placeholder="Enter your password"
             required
