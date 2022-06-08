@@ -3,6 +3,7 @@ package com.example.controller;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -10,6 +11,9 @@ import javax.mail.internet.AddressException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,7 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.beans.FormModel;
 import com.example.beans.Tables;
 import com.example.beans.User;
+import com.example.beans.login.LoginResponse;
 import com.example.core.Utility;
+import com.example.core.security.JwtUtils;
 import com.example.enums.ApplicationRole;
 import com.example.enums.UserStatus;
 import com.example.repository.FormModelRepository;
@@ -61,6 +67,12 @@ public class SpringBootController {
 	@Autowired
 	PasswordEncoder passwordEncoder;
 	
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	
+	@Autowired
+	private JwtUtils jwtTokenUtil;
+	
 	// Instancing Utility object
 	
 	private final Utility utility = new Utility();
@@ -70,6 +82,17 @@ public class SpringBootController {
 	@GetMapping("/searchRegion={keyword}")
 	public List<String> searchRegion(@PathVariable(required = true) String keyword) {
 		logger.info("Getting regions containing this word " + keyword);
+		return listaComuniRepository.searchRegion(keyword);
+	}
+	
+	@GetMapping("/searchRegions={keyword}/{apikey}")
+	public List<String> retrieve(@PathVariable String keyword, @PathVariable String apikey) {
+		authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken("krishnak.pilato@gmail.com", "12345678"));
+		
+		User cde = new User();
+		jwtTokenUtil.generateToken(cde);
+		
 		return listaComuniRepository.searchRegion(keyword);
 	}
 	
