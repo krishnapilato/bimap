@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.beans.User;
 import com.example.beans.login.LoginRequest;
 import com.example.beans.login.LoginResponse;
-import com.example.beans.User;
 import com.example.core.security.JwtUtils;
 import com.example.repository.UserRepository;
 

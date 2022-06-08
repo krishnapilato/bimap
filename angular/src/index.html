@@ -1,6 +1,3 @@
-<?php
-echo "ciao";
-?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -33,9 +30,16 @@ echo "ciao";
       rel="stylesheet"
     />
     <script src="https://unpkg.com/ol-street-view@2.0.0"></script>
-    <link rel="stylesheet" href="https://unpkg.com/ol-street-view@2.0.0/dist/css/ol-street-view.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/ol-street-view@2.0.0/dist/css/ol-street-view.min.css"
+    />
   </head>
-  <body class="mat-typography noselect" unselectable="on">
+  <body
+    class="mat-typography noselect"
+    unselectable="on"
+    oncontextmenu="return false"
+  >
     <app-root></app-root>
   </body>
 </html>

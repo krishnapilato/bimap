@@ -34,4 +34,6 @@ public class User {
 	private Date created;
 	@Column(name = "last_modified")
 	private Date lastModified;
+	@Column(name = "`key`", unique = true)
+	private String key;
 }

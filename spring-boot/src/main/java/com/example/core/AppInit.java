@@ -32,7 +32,7 @@ public class AppInit implements CommandLineRunner {
 		
 		Date now = new Date();
 
-		User administrator = new User();
+		/*User administrator = new User();
 		administrator.setName("Khova Krishna");
 		administrator.setSurname("Pilato");
 		administrator.setEmail("krishnak.pilato@gmail.com");
@@ -41,10 +41,10 @@ public class AppInit implements CommandLineRunner {
 		administrator.setPassword(passwordEncoder.encode("12345678"));
 		administrator.setUserStatus(UserStatus.CONFIRMED);
 		administrator.setApplicationRole(ApplicationRole.ADMINISTRATOR);
+		administrator.setKey("CIAOO");
 		userRepository.save(administrator);
 		
 		// Saving other 4 users for testing
-		
 		User user2 = new User();
 		user2.setName("Test2");
 		user2.setSurname("Test2");
@@ -54,6 +54,7 @@ public class AppInit implements CommandLineRunner {
 		user2.setPassword(passwordEncoder.encode("12345678"));
 		user2.setUserStatus(UserStatus.CONFIRMED);
 		user2.setApplicationRole(ApplicationRole.ADMINISTRATOR);
+		user2.setKey("JRU8sE4u3755xBsw");
 		userRepository.save(user2);
 		
 		User user3 = new User();
@@ -65,6 +66,7 @@ public class AppInit implements CommandLineRunner {
 		user3.setPassword(passwordEncoder.encode("12345678"));
 		user3.setUserStatus(UserStatus.NOT_CONFIRMED);
 		user3.setApplicationRole(ApplicationRole.USER);
+		user3.setKey("J4evnj6ZKqLHJPFA");
 		userRepository.save(user3);
 		
 		User user4 = new User();
@@ -76,6 +78,7 @@ public class AppInit implements CommandLineRunner {
 		user4.setPassword(passwordEncoder.encode("12345678"));
 		user4.setUserStatus(UserStatus.CONFIRMED);
 		user4.setApplicationRole(ApplicationRole.USER);
+		user4.setKey("FNFr6JbgPhMbxa2U");
 		userRepository.save(user4);
 		
 		User user5 = new User();
@@ -87,6 +90,7 @@ public class AppInit implements CommandLineRunner {
 		user5.setPassword(passwordEncoder.encode("12345678"));
 		user5.setUserStatus(UserStatus.NOT_CONFIRMED);
 		user5.setApplicationRole(ApplicationRole.MANAGER);
-		userRepository.save(user5);
+		user5.setKey("TSPyv7HL7RGwHnMf");
+		userRepository.save(user5);*/
 	}
 }

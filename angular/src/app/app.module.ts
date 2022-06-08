@@ -26,7 +26,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
 import {
   UserListComponent,
-  DialogElementsExampleDialog
+  DialogElementsExampleDialog, EditingEmailDialog
 } from './user-list/user-list.component';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import { MatSelectModule } from '@angular/material/select';
@@ -43,6 +43,7 @@ import { StreetviewComponent } from './streetview/streetview.component';
     LogoutComponent,
     UserListComponent,
     DialogElementsExampleDialog,
+    EditingEmailDialog,
     StreetviewComponent
   ],
   imports: [

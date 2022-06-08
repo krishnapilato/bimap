@@ -55,7 +55,7 @@ public class SpringBootController {
 	
 	@Autowired
 	private final TablesRepository tablesRepository;
-	
+
 	// Password encoder
 	
 	@Autowired
@@ -159,7 +159,7 @@ public class SpringBootController {
 	
 	@GetMapping("/users/sendEmail={email}")
 	public void sendEmail(@PathVariable String email) throws AddressException, MessagingException, IOException {
-		logger.info("Sending user credentials to: " + email);
+		logger.info("Sending email to: " + email);
 		
 		User user = userRepository.findByEmailAddress(email).get();
 		String content = "<div style='text-align: center;font-family: sans-serif;'><h1>Hi " 
@@ -168,7 +168,7 @@ public class SpringBootController {
 					   + "<br>Password: "  + user.getPassword() 
 					   + "<br>Application role: "  + user.getApplicationRole() + "<br><br>"
 					   + "Click <a href='http://localhost:4200/login'>here</a> to login<br><br>"
-					   + "Best regards, <br> Admin Team</div>";
+					   + "Best regards, <br>The Admin Team</div>";
 		
 		utility.sendEmail(email, content);
 	}

@@ -2,7 +2,7 @@
   <div class="card-body">
     <form (ngSubmit)="onSubmit()" #userForm="ngForm">
       <div class="form-group  text-center">
-        <h1>Welcome to my project: please sign up to start using my app</h1>
+        <h1>Register a new user here!</h1>
         <br />
         <h5>(All fields are required)</h5>
         <br /><br />
@@ -120,7 +120,7 @@
         </mat-form-field>
         <br />
       </div>
-      <br /><br />
+      <br /><br /><br />
       <div class="form-group  text-center">
         <button
           type="submit"
@@ -135,7 +135,7 @@
         >
           <mat-icon>app_registration</mat-icon>
         </button>
-        <br /><br /><br /><br />
+        <br /><br /><br /><br /><br /><br /><br /><br>
 
         <div class="d-flex justify-content-center">
           <button
@@ -148,6 +148,17 @@
             routerLink="/listuser"
           >
             <mat-icon>admin_panel_settings</mat-icon>
+          </button>
+                    <button
+            #tooltip="matTooltip"
+            matTooltip="StreetView"
+            [matTooltipPosition]="'below'"
+            mat-raised-button
+            style="height:40px;width: 60px;margin-left: 20px; border-radius: 50px;"
+            color="primary"
+            routerLink="/streetview"
+          >
+            <mat-icon>streetview</mat-icon>
           </button>
           <button
             #tooltip="matTooltip"

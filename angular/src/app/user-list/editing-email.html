@@ -1,0 +1,34 @@
+<div class="container" style="width: 100%; ">
+  <h2>Are you sure to send email to {{globalEmail}}?</h2>
+
+  <br /><br />
+
+  <div class="d-flex justify-content-center">
+    <button
+      matRipple
+      adiButton
+      style="border-radius: 20px; width: 10%;overflow: hidden"
+      #tooltip="matTooltip"
+      matTooltip="Accept"
+      (click)="send();"
+      [matTooltipPosition]="'left'"
+      mat-raised-button
+      color="primary"
+    >
+      <mat-icon matSuffix>done</mat-icon>
+    </button>
+    <button
+      matRipple
+      adiButton
+      style="margin-left: 80px;border-radius: 20px; width: 10%;overflow: hidden"
+      (click)="cancel();"
+      #tooltip="matTooltip"
+      matTooltip="Reject"
+      [matTooltipPosition]="'right'"
+      mat-raised-button
+      color="accent"
+    >
+      <mat-icon matSuffix>close</mat-icon>
+    </button>
+  </div>
+</div>

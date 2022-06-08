@@ -35,6 +35,7 @@ input::-webkit-inner-spin-button {
   height: 1000px;
   outline: none;
   width: 68%;
+  border-radius: 1%;
   border: none;
 }
 

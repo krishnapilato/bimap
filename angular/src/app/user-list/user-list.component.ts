@@ -55,6 +55,11 @@ export class UserListComponent implements OnInit, AfterViewInit {
     dialogRef.componentInstance.globalDataSource = this.dataSource;
   }
 
+  public openEmailDialog(email: string): void {
+    let dialogRef = this.dialog.open(EditingEmailDialog);
+    dialogRef.componentInstance.globalEmail = email;
+  }
+
   ngOnInit() {
     this.whatuser = this.authenticationService.loginResponseValue;
     this.userService.findAll().subscribe(data => {
@@ -63,7 +68,8 @@ export class UserListComponent implements OnInit, AfterViewInit {
   }
 
   public send(email: string): void {
-    if (
+    this.openEmailDialog(email);
+    /*f (
       confirm('Are you sure to send email with credentials to ' + email + '?')
     ) {
       this._snackbar.open('Trying to send email to ' + email, '', {
@@ -81,7 +87,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
           });
         }
       );
-    }
+    }*/
   }
 
   public deleteRow(row: any) {
@@ -151,5 +157,47 @@ export class DialogElementsExampleDialog {
     } else {
       this.dialog.closeAll();
     }
+  }
+}
+
+@Component({
+  selector: 'editing-email',
+  templateUrl: 'editing-email.html',
+  providers: [UserService]
+})
+export class EditingEmailDialog {
+  public globalEmail!: string;
+
+  constructor(
+    private userService: UserService,
+    public dialog: MatDialog,
+    private _snackbar: MatSnackBar
+  ) {}
+
+  public send(): void {
+    this.dialog.closeAll();
+    this._snackbar.open('Trying to send email to ' + this.globalEmail, '', {
+      duration: 1000
+    });
+    this.userService.sendEmail(this.globalEmail).subscribe(
+      data => {
+        this._snackbar.open(
+          'Email sent successfully to ' + this.globalEmail,
+          '',
+          {
+            duration: 2000
+          }
+        );
+      },
+      () => {
+        this._snackbar.open('Email not sent', '', {
+          duration: 2000
+        });
+      }
+    );
+  }
+
+  cancel() {
+    this.dialog.closeAll();
   }
 }
