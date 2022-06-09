@@ -19,8 +19,10 @@ import io.jsonwebtoken.ExpiredJwtException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
+
 	@Autowired
 	private JwtUserDetailsService jwtUserDetailsService;
+
 	@Autowired
 	private JwtUtils jwtUtils;
 

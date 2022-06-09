@@ -14,6 +14,7 @@ import com.example.repository.UserRepository;
 
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
+	
 	@Autowired
 	private UserRepository repository;
 

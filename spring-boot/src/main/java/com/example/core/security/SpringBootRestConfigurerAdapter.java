@@ -3,7 +3,6 @@ package com.example.core.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -20,10 +19,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SpringBootRestConfigurerAdapter extends WebSecurityConfigurerAdapter {
+
 	@Autowired
 	private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+	
 	@Autowired
 	private UserDetailsService jwtUserDetailsService;
+	
 	@Autowired
 	private JwtRequestFilter jwtRequestFilter;
 
@@ -46,10 +48,9 @@ public class SpringBootRestConfigurerAdapter extends WebSecurityConfigurerAdapte
 	@Override
 	protected void configure(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.csrf().disable().cors().and().formLogin().disable().authorizeRequests().antMatchers("/login")
-				.permitAll().anyRequest().authenticated()//.and().antMatcher("searchRegion={keyword}").authorizeRequests()
-				.and().exceptionHandling()
-				.authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
+				.permitAll().anyRequest().authenticated()// .and().antMatcher("searchRegion={keyword}").authorizeRequests()
+				.and().exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
+				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS);
 		httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 	}
 }

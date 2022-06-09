@@ -27,8 +27,8 @@ export class LoginComponent {
 
   onSubmit() {
     this.authService.login(this.loginRequest).subscribe(
-      () => {
-        this.router.navigate(['/main']);
+      (data) => {
+        this.router.navigate(['/']);
       },
       () => {
         this._snackbar.open('Wrong credentials', 'Close', { duration: 2000 });

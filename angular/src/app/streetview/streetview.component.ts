@@ -5,13 +5,7 @@ import OSM from 'ol/source/OSM';
 import TileLayer from 'ol/layer/Tile';
 import View from 'ol/View';
 import StreetView from 'ol-street-view';
-import { FullScreen, defaults as defaultControls } from 'ol/control';
-import {
-  DragRotateAndZoom,
-  defaults as defaultInteractions
-} from 'ol/interaction';
 import { OverviewMap, defaults as overviewControls } from 'ol/control';
-import { ScaleLine } from 'ol/control';
 
 @Component({
   selector: 'app-streetview',
@@ -28,19 +22,18 @@ export class StreetviewComponent implements OnInit {
     }
 
     const overviewMapControl = new OverviewMap({
-      // see in overviewmap-custom.html to see the custom CSS used
       className: 'ol-overviewmap ol-custom-overviewmap',
       layers: [
         new TileLayer({
           source: new OSM({
             url:
-              'https://mt{0-3}.google.com/vt/lyrs=m@221097413,transit&x={x}&y={y}&z={z}' 
+              'https://mt{0-3}.google.com/vt/lyrs=m@221097413,transit&x={x}&y={y}&z={z}'
           })
         })
       ],
       collapseLabel: '\u00BB',
       label: '\u00AB',
-      collapsed: false
+      collapsed: true
     });
 
     var map = new Map({
@@ -71,10 +64,6 @@ export class StreetviewComponent implements OnInit {
       size: 'sm',
       resizable: true,
       sizeToggler: false,
-      defaultMapSize: 'expanded',
-      i18n: {
-        dragToInit: 'Drag and drop me'
-      },
       target: 'map'
     });
     map.addControl(streetView);

@@ -300,7 +300,6 @@ export class MainComponent implements OnInit {
       this.formData.longitude = this.longitude;
 
       this.apiService.save(this.formData).subscribe((data: any) => {
-        return data;
       });
       snackbar.open('Data saved successfully', 'Close', { duration: 3000 });
     } else {
