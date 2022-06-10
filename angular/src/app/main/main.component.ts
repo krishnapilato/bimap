@@ -264,11 +264,18 @@ export class MainComponent implements OnInit {
   }
 
   scrollToTop() {
-    $('html, body').animate({ scrollTop: 0 }, 10);
+    $('html, body').animate({ scrollTop: 0 }, 10);    
   }
 
   toggleShow() {
     this.isShown = !this.isShown;
+    if(this.isShown) {
+      $('html,body').animate({ scrollTop: document.body.scrollHeight + 53 }, 'fast');
+      this._snackbar.open('StreetView Map is now visible below', 'Close', { duration: 2000 });
+    }
+    else {
+      this._snackbar.open('StreetView Map is now hidden', 'Close', { duration: 2000 });
+    }
   }
   streetView() {
     const variable =

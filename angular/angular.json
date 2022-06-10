@@ -21,6 +21,12 @@
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
+            "allowedCommonJsDependencies": [
+              "rxjs-compat",
+              "ol-street-view",
+              "pbf",
+              "xml-utils/find-tags-by-name.js"
+            ],
             "tsConfig": "tsconfig.app.json",
             "assets": ["src/favicon.ico", "src/assets"],
             "styles": [
