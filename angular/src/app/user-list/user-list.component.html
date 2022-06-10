@@ -29,7 +29,13 @@
 
 <br /><br />
 <div class="table-container mat-elevation-z8">
-  <table mat-table matSort class=" justify-content-center" [dataSource]="dataSource">
+  <table
+    mat-table
+    matSort
+    class=" justify-content-center"
+    [dataSource]="dataSource"
+    *ngIf="dataSource.data.length > 0"
+  >
     <!-- Name column  -->
     <ng-container matColumnDef="name">
       <th
@@ -153,13 +159,21 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 
     <tr class="mat-row" *matNoDataRow>
-      <td class="mat-cell" colspan="4">
+      <td class="mat-cell" colspan="4" *ngIf="input.value.length > 0">
         No data matching the filter "{{ input.value }}"
       </td>
     </tr>
   </table>
 
+  <div class="text-center" *ngIf="dataSource.data.length === 0">
+    <h3>
+      The table data could not be loaded. 😪<br /><br />
+      Try starting the backend application please.
+    </h3>
+  </div>
+
   <mat-paginator
+    *ngIf="dataSource.data.length > 0"
     class="d-flex justify-content-center"
     #tooltip="matTooltip"
     matTooltip="PageTable Options"

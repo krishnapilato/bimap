@@ -24,6 +24,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {
   UserListComponent,
   DialogElementsExampleDialog, EditingEmailDialog
@@ -58,6 +59,7 @@ import { StreetviewComponent } from './streetview/streetview.component';
     MatSelectModule,
     MatIconModule,
     MatPaginatorModule,
+    MatSlideToggleModule,
     MatDialogModule,
     BrowserAnimationsModule,
     MatAutocompleteModule,

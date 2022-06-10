@@ -263,6 +263,10 @@ export class MainComponent implements OnInit {
     });
   }
 
+  scrollToTop() {
+    $('html, body').animate({ scrollTop: 0 }, 10);
+  }
+
   toggleShow() {
     this.isShown = !this.isShown;
   }

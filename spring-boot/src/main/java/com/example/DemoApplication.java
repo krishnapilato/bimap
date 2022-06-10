@@ -1,7 +1,7 @@
 package com.example;
 
 /**
-	Written by Khova Krishna Pilato, published under WTFPL: do what you want with it
+	Code written by Khova Krishna Pilato, published under WTFPL: do what you want with it
 */
 
 import org.springframework.boot.SpringApplication;
