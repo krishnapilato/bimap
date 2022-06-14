@@ -1,4 +1,4 @@
-# Map WebApp Exercise
+# WebApp Exercise
 
 This is a project born only with the aim of practicing with the technologies of Spring Boot and Angular.
 
@@ -13,12 +13,12 @@ Furthermore, thanks to the button with the Street View icon it is possible, only
 
 ## Requirements
 
-For building and running the application you need:
+For building and running the application I strongly recommend you to use: 
 
-- [JDK 17](https://www.oracle.com/java/technologies/downloads/#java17)
+- [JDK 17.0.3.1](https://www.oracle.com/java/technologies/downloads/#java17)
 - [Maven 3.8.5](https://maven.apache.org/download.cgi)
 - [MySQL Server 8.0.29](https://dev.mysql.com/downloads/mysql/)
-- [NodeJS 18.2.0](https://nodejs.org/en/)
+- [NodeJS 18.3.0](https://nodejs.org/en/)
 
 ## Run Locally
 
