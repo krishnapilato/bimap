@@ -20,18 +20,18 @@ import com.example.repository.UserRepository;
 public class LoginController {
 
 	// Security Objects
-	
+
 	@Autowired
 	private AuthenticationManager authenticationManager;
-	
+
 	@Autowired
 	private JwtUtils jwtTokenUtil;
-	
+
 	// JPA Repository
-	
+
 	@Autowired
 	private UserRepository userRepository;
-	
+
 	// POST Mapping to create authentication token
 
 	@PostMapping("/login")
@@ -39,15 +39,15 @@ public class LoginController {
 		authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
-		User user = this.userRepository.findByEmailAddress(loginRequest.getUsername())
-		.orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + loginRequest.getUsername()));
-		
+		User user = this.userRepository.findByEmailAddress(loginRequest.getUsername()).orElseThrow(
+				() -> new UsernameNotFoundException("User not found with username: " + loginRequest.getUsername()));
+
 		final String token = jwtTokenUtil.generateToken(user);
-		
+
 		LoginResponse response = new LoginResponse();
 		response.setJwttoken(token);
 		response.setUser(user);
-		
+
 		return response;
 	}
 }

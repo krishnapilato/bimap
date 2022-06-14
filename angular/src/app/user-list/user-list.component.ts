@@ -69,28 +69,9 @@ export class UserListComponent implements OnInit, AfterViewInit {
 
   public send(email: string): void {
     this.openEmailDialog(email);
-    /*f (
-      confirm('Are you sure to send email with credentials to ' + email + '?')
-    ) {
-      this._snackbar.open('Trying to send email to ' + email, '', {
-        duration: 1000
-      });
-      this.userService.sendEmail(email).subscribe(
-        data => {
-          this._snackbar.open('Email sent successfully to ' + email, '', {
-            duration: 2000
-          });
-        },
-        () => {
-          this._snackbar.open('Email not sent', '', {
-            duration: 2000
-          });
-        }
-      );
-    }*/
   }
 
-  public deleteRow(row: any) {
+  public deleteRow(row: any): void{
     if (confirm('Are you sure to delete this record?')) {
       this.userService.delete(row.id).subscribe(data => {
         this.dataSource.data = this.dataSource.data.filter(u => u !== row);
@@ -133,6 +114,7 @@ export class DialogElementsExampleDialog {
 
   cancel() {
     this.dialog.closeAll();
+    this._snackbar.open('Operation cancelled', 'Close', { duration: 2000 });
   }
 
   onNoClick(event: any): void {
@@ -199,5 +181,6 @@ export class EditingEmailDialog {
 
   cancel() {
     this.dialog.closeAll();
+    this._snackbar.open('Operation cancelled', 'Close', { duration: 2000 });
   }
 }

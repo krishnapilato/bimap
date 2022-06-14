@@ -23,7 +23,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	@Query("SELECT u FROM User u WHERE u.userStatus = :userStatus AND u.created < :created")
 	Page<User> findExpired(UserStatus userStatus, Date created, Pageable pageable);
-	
+
 	@Modifying
 	@Query("UPDATE User u SET u.surname = :surname, u.name = :name, u.email = :email, u.applicationRole = :applicationRole WHERE u.email = :emailID")
 	void update(String surname, String name, String email, ApplicationRole applicationRole, String emailID);

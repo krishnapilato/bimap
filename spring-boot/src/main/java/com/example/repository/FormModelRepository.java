@@ -5,5 +5,6 @@ import org.springframework.stereotype.Repository;
 
 import com.example.beans.*;
 
-@Repository 
-public interface FormModelRepository extends CrudRepository<FormModel, Long> {}
+@Repository
+public interface FormModelRepository extends CrudRepository<FormModel, Long> {
+}

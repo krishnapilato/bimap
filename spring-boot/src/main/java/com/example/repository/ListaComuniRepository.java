@@ -12,10 +12,10 @@ import com.example.beans.ListaComuni;
 public interface ListaComuniRepository extends JpaRepository<ListaComuni, Long> {
 	@Query(value = "SELECT DISTINCT regione FROM listacomuni WHERE regione LIKE %:keyword% ORDER BY regione ASC LIMIT 4", nativeQuery = true)
 	List<String> searchRegion(String keyword);
-	
+
 	@Query(value = "SELECT DISTINCT provincia FROM listacomuni WHERE provincia LIKE %:keyword% ORDER BY provincia ASC LIMIT 4", nativeQuery = true)
 	List<String> searchProvince(String keyword);
-	
+
 	@Query(value = "SELECT comune FROM listacomuni WHERE comune LIKE %:keyword% ORDER BY comune ASC LIMIT 4", nativeQuery = true)
 	List<String> searchMunicipality(String keyword);
 }
