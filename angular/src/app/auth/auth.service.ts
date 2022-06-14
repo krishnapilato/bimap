@@ -9,7 +9,6 @@ import { LoginResponse } from './loginresponse';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-
   // Attributes
 
   private loginUrl: string;
@@ -18,36 +17,43 @@ export class AuthService {
 
   // Constructor
 
-  constructor(private router: Router, private http: HttpClient, private _snackbar: MatSnackBar) {
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private _snackbar: MatSnackBar
+  ) {
     this.loginUrl = environment.baseApiUrl + '/login';
-    this.loginResponseSubject = new BehaviorSubject<LoginResponse>(JSON.parse(localStorage.getItem('LoginResponse') || "{}"));
+    this.loginResponseSubject = new BehaviorSubject<LoginResponse>(
+      JSON.parse(localStorage.getItem('LoginResponse') || '{}')
+    );
     this.loginResponse = this.loginResponseSubject.asObservable();
   }
 
   // Method to get login response value
 
-  public get loginResponseValue(): LoginResponse { 
-    return this.loginResponseSubject.value; 
+  public get loginResponseValue(): LoginResponse {
+    return this.loginResponseSubject.value;
   }
 
   // Method to get if user is logged in
 
-  public get isLogged() { 
-    return this.loginResponseValue.jwttoken != null; 
+  public get isLogged() {
+    return this.loginResponseValue.jwttoken != null;
   }
 
   // Method called when user try to login
 
   public login(loginRequest: LoginRequest) {
-    return this.http.post<LoginResponse>(this.loginUrl, loginRequest)
-      .pipe(map(loginResponse => {
+    return this.http.post<LoginResponse>(this.loginUrl, loginRequest).pipe(
+      map(loginResponse => {
         localStorage.setItem('LoginResponse', JSON.stringify(loginResponse));
         this.loginResponseSubject.next(loginResponse);
-        if(loginResponse) {
-          this._snackbar.open('Login successful', 'Close', {duration: 2000});
+        if (loginResponse) {
+          this._snackbar.open('Login successful', 'Close', { duration: 2000 });
         }
         return loginResponse;
-      }));
+      })
+    );
   }
 
   // Method called when the user wants to logout
@@ -56,6 +62,6 @@ export class AuthService {
     localStorage.removeItem('LoginResponse');
     this.loginResponseSubject.next(new LoginResponse());
     this.router.navigate(['/login']);
-    this._snackbar.open('Logout successful', 'Close', {duration: 2000});
+    this._snackbar.open('Logout successful', 'Close', { duration: 2000 });
   }
 }

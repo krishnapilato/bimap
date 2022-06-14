@@ -1,10 +1,10 @@
 <div class="card my-5" style="border: none;">
-  <div class="card-body" style="margin-top:180px;">
+  <div class="card-body" style="margin-top:160px;">
     <form (ngSubmit)="onSubmit()" #loginForm="ngForm" autocomplete="off">
       <div class="form-group  text-center">
-        <h1>Welcome to my project: please login to start</h1>
+        <h1>Welcome!<br><br>Please login to start</h1>
         <br /><br />
-        <mat-form-field 
+        <mat-form-field
           appearance="outline"
           style="width: 60%;outline:none; text-align: center"
         >
@@ -53,7 +53,7 @@
             minlength="8"
             maxlength="16"
           />
-          <mat-icon matSuffix>lock</mat-icon>
+          <mat-icon matSuffix>key</mat-icon>
         </mat-form-field>
       </div>
       <br /><br />

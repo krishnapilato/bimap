@@ -28,7 +28,7 @@ public class AppInit implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 
-		// Saving first new administrator
+		 // Saving first new administrator
 
 		 Date now = new Date();
 		  

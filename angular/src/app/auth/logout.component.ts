@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 
 @Component({
   selector: 'app-logout',
-  templateUrl: './logout.component.html'
+  template: '<div></div>'
 })
 export class LogoutComponent implements OnInit {
   // Constructor

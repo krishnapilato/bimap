@@ -46,7 +46,7 @@ public class LoginController {
 
 		LoginResponse response = new LoginResponse();
 		response.setJwttoken(token);
-		response.setUser(user);
+		response.setUser(user); // remove in production mode
 
 		return response;
 	}

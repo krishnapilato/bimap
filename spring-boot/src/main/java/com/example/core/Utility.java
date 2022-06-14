@@ -66,25 +66,26 @@ public class Utility {
 		fileWriter.append(formModel.getLongitude() + "\n");
 	}
 
-	public void sendEmail(String email, String content) throws AddressException, MessagingException, IOException {
-		Properties props = new Properties();
-		props.put("mail.smtp.auth", "true");
-		props.put("mail.smtp.starttls.enable", "true");
-		props.put("mail.smtp.host", "smtp.mailtrap.io");
-		props.put("mail.smtp.port", "2525");
+	public void sendEmail(String recipientEmail, String content) throws AddressException, MessagingException, IOException {
+		Properties properties = new Properties();
+		properties.put("mail.smtp.auth", "true");
+		properties.put("mail.smtp.starttls.enable", "true");
+		properties.put("mail.smtp.host", "smtp.mailtrap.io");
+		properties.put("mail.smtp.port", "2525");
 
-		Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
+		final Session session = Session.getInstance(properties, new jakarta.mail.Authenticator() {
 			protected PasswordAuthentication getPasswordAuthentication() {
 				return new PasswordAuthentication("59b1e4c1b90440", "94a25817592678");
 			}
 		});
-		Message msg = new MimeMessage(session);
-		msg.setFrom(new InternetAddress("system.admin@gmail.com", false));
+		
+		Message message = new MimeMessage(session);
+		message.setFrom(new InternetAddress("system.admin@gmail.com", false));
+		message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
+		message.setSubject("User Credentials");
+		message.setContent(content, "text/html");
 
-		msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
-		msg.setSubject("User Credentials");
-		msg.setContent(content, "text/html");
-
-		Transport.send(msg);
+		Transport.send(message);
+		properties.clear();
 	}
 }

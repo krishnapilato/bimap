@@ -6,7 +6,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html'
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
   // Attribute
@@ -27,10 +28,10 @@ export class LoginComponent {
 
   onSubmit() {
     this.authService.login(this.loginRequest).subscribe(
-      (data) => {
-        this.router.navigate(['/']);
+      (): void => {
+        this.router.navigate(['']);
       },
-      () => {
+      (): void => {
         this._snackbar.open('Wrong credentials', 'Close', { duration: 2000 });
       }
     );
