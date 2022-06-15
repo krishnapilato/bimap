@@ -7,8 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,7 +22,6 @@ import com.example.beans.FormModel;
 import com.example.beans.Tables;
 import com.example.beans.User;
 import com.example.core.Utility;
-import com.example.core.security.JwtUtils;
 import com.example.enums.ApplicationRole;
 import com.example.enums.UserStatus;
 import com.example.repository.FormModelRepository;
@@ -63,12 +61,6 @@ public class SpringBootController {
 	@Autowired
 	PasswordEncoder passwordEncoder;
 
-	@Autowired
-	private AuthenticationManager authenticationManager;
-
-	@Autowired
-	private JwtUtils jwtTokenUtil;
-
 	// Instancing Utility object
 
 	private final Utility utility = new Utility();
@@ -78,17 +70,6 @@ public class SpringBootController {
 	@GetMapping("/searchRegion={keyword}")
 	public List<String> searchRegion(@PathVariable(required = true) String keyword) {
 		logger.info("Getting regions containing this word " + keyword);
-		return listaComuniRepository.searchRegion(keyword);
-	}
-
-	@GetMapping("/searchRegions={keyword}/{apikey}")
-	public List<String> retrieve(@PathVariable String keyword, @PathVariable String apikey) {
-		authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken("krishnak.pilato@gmail.com", "12345678"));
-
-		User cde = new User();
-		jwtTokenUtil.generateToken(cde);
-
 		return listaComuniRepository.searchRegion(keyword);
 	}
 
@@ -132,7 +113,7 @@ public class SpringBootController {
 	// POST Mapping to save new user
 
 	@PostMapping("/users")
-	public User create(@RequestBody User newUser) {
+	public User create(@RequestBody(required = true) User newUser) {
 		logger.info("Creating new user");
 		if (logger.isDebugEnabled()) {
 			logger.debug("New user details: " + newUser);
@@ -153,7 +134,7 @@ public class SpringBootController {
 	}
 
 	@PutMapping("/users/{id}")
-	public User update(@RequestBody User updatedUser, @PathVariable Long id) {
+	public User update(@RequestBody(required = true) User updatedUser, @PathVariable(required = true) Long id) {
 		logger.info("Updating user with email: ." + id);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Updated user details: " + updatedUser);
@@ -170,22 +151,31 @@ public class SpringBootController {
 	}
 
 	@DeleteMapping("/users/{id}")
-	public void delete(@PathVariable Long id) {
+	public void delete(@PathVariable(required = true) Long id) {
 		logger.info("Deleting user with id: {}." + id);
 		userRepository.deleteById(id);
 	}
 
 	@GetMapping("/users/sendEmail={email}")
-	public void sendEmail(@PathVariable String email) throws AddressException, MessagingException, IOException {
-		logger.info("Sending email to: " + email);
+	public String sendEmail(@PathVariable(required = true) String email) {
+		logger.info("Trying to send email to: " + email);
+		
+		User user = this.userRepository.findByEmailAddress(email)
+				.orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + email));
 
-		User user = userRepository.findByEmailAddress(email).get();
 		String content = "<div style='text-align: center;font-family: sans-serif;'><h1>Hi " + user.getName()
 				+ " !</h1><p>Here are your credentials for accessing the application:</p>" + "Email: " + user.getEmail()
-				+ "<br>Password: " + user.getPassword() + "<br>Application role: " + user.getApplicationRole()
+				+ "<br>Password: 12345678" + "<br>Your application role is " + user.getApplicationRole().toString().toLowerCase()
 				+ "<br><br>" + "Click <a href='http://localhost:4200/login'>here</a> to login<br><br>"
 				+ "Best regards, <br>The Admin Team</div>";
-
-		utility.sendEmail(email, content);
+		
+		try {
+			utility.sendEmail(email, content);
+			logger.info("Email sent successfully to: " + email);
+			return "Email sent to: " + email;
+		} catch (MessagingException | IOException exception) {
+			logger.info("Problem to send email to: " + email);
+			return "Problem to send email because " + exception.getMessage().toLowerCase();
+		}
 	}
 }

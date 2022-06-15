@@ -1,10 +1,10 @@
-import { FormModel } from './formdata';
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { debounceTime, map } from 'rxjs/operators';
-import { Tables } from './tables';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { debounceTime, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { FormModel } from './formdata';
+import { Tables } from './tables';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {

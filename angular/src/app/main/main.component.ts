@@ -1,16 +1,16 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { FormModel } from './formdata';
-import * as L from 'leaflet';
-import * as $ from 'jquery';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import 'leaflet-easybutton';
-import { ApiService } from './api.service';
-import { MatTableDataSource } from '@angular/material/table';
-import { Tables } from './tables';
 import { MatPaginator } from '@angular/material/paginator';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import * as $ from 'jquery';
+import * as L from 'leaflet';
+import 'leaflet-easybutton';
 import { AuthService } from '../auth/auth.service';
+import { ApiService } from './api.service';
+import { FormModel } from './formdata';
+import { Tables } from './tables';
 
 @Component({
   selector: 'main-app',

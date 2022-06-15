@@ -1,13 +1,13 @@
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
+import { AuthService } from '../auth/auth.service';
 import { User } from '../user';
 import { UserService } from '../user-service.service';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
-import { FormControl } from '@angular/forms';
-import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-user-list',
@@ -138,6 +138,7 @@ export class DialogElementsExampleDialog {
       });
     } else {
       this.dialog.closeAll();
+      this._snackbar.open('Operation cancelled', 'Close', { duration: 2000 });
     }
   }
 }
@@ -162,17 +163,18 @@ export class EditingEmailDialog {
       duration: 1000
     });
     this.userService.sendEmail(this.globalEmail).subscribe(
-      data => {
+      (data) => {
         this._snackbar.open(
-          'Email sent successfully to ' + this.globalEmail,
-          '',
+          data.toString(),
+          'Close',
           {
             duration: 2000
           }
         );
       },
-      () => {
-        this._snackbar.open('Email not sent', '', {
+      (error) => {
+        console.log(error);
+        this._snackbar.open(error.error.text, 'Close', {
           duration: 2000
         });
       }

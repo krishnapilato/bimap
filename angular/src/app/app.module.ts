@@ -1,39 +1,37 @@
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { AppComponent } from './app.component';
-import { LoginComponent } from './auth/login.component';
-import { MainComponent } from './main/main.component';
-import { UserFormComponent } from './user-form/user-form.component';
-import { AppRoutingModule } from 'src/app-routing.module';
-import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
-import { UserService } from './user-service.service';
-import { AuthService } from './auth/auth.service';
-import { SecurityInterceptor } from './auth/auth.interceptor';
-import { LogoutComponent } from './auth/logout.component';
-import { MatRippleModule } from '@angular/material/core';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatInputModule } from '@angular/material/input';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
-import { MatDialogModule } from '@angular/material/dialog';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ReactiveFormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import {MatButtonToggleModule} from '@angular/material/button-toggle';
-import {MatSlideToggleModule} from '@angular/material/slide-toggle';
-import {
-  UserListComponent,
-  DialogElementsExampleDialog, EditingEmailDialog
-} from './user-list/user-list.component';
-import {MatToolbarModule} from '@angular/material/toolbar';
-import { MatSelectModule } from '@angular/material/select';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatRippleModule } from '@angular/material/core';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTableModule } from '@angular/material/table';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { AppRoutingModule } from 'src/app-routing.module';
+import { AppComponent } from './app.component';
+import { SecurityInterceptor } from './auth/auth.interceptor';
+import { AuthService } from './auth/auth.service';
+import { LoginComponent } from './auth/login.component';
+import { LogoutComponent } from './auth/logout.component';
+import { MainComponent } from './main/main.component';
 import { StreetviewComponent } from './streetview/streetview.component';
+import { UserFormComponent } from './user-form/user-form.component';
+import {
+  DialogElementsExampleDialog, EditingEmailDialog, UserListComponent
+} from './user-list/user-list.component';
+import { UserService } from './user-service.service';
 
 @NgModule({
   declarations: [

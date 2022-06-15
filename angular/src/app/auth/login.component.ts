@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
 import { LoginRequest } from './loginrequest';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-login',
@@ -31,8 +31,8 @@ export class LoginComponent {
       (): void => {
         this.router.navigate(['']);
       },
-      (): void => {
-        this._snackbar.open('Wrong credentials', 'Close', { duration: 2000 });
+      (error): void => {
+        this._snackbar.open("Can't login", 'Close', { duration: 4000 });
       }
     );
   }

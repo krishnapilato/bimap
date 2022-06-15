@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import StreetView from 'ol-street-view';
+import { defaults as overviewControls, OverviewMap } from 'ol/control';
+import TileLayer from 'ol/layer/Tile';
+import Map from 'ol/Map';
 import 'ol/ol.css';
 import XYZ from 'ol/source/XYZ';
-import Map from 'ol/Map';
-import TileLayer from 'ol/layer/Tile';
 import View from 'ol/View';
-import StreetView from 'ol-street-view';
-import { OverviewMap, defaults as overviewControls } from 'ol/control';
 
 @Component({
   selector: 'app-streetview',

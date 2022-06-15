@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
+import { AdminAuthGuard } from './app/auth/admin.auth.guard';
 import { AuthGuard } from './app/auth/auth.guard';
 import { LoginComponent } from './app/auth/login.component';
 import { LogoutComponent } from './app/auth/logout.component';
-import { UserFormComponent } from './app/user-form/user-form.component';
 import { MainComponent } from './app/main/main.component';
-import { UserListComponent } from './app/user-list/user-list.component';
-import { AdminAuthGuard } from './app/auth/admin.auth.guard';
 import { StreetviewComponent } from './app/streetview/streetview.component';
+import { UserFormComponent } from './app/user-form/user-form.component';
+import { UserListComponent } from './app/user-list/user-list.component';
 
 const routes: Routes = [
   { 
