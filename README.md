@@ -1,4 +1,4 @@
-# WebApp Exercise
+# Web App Exercise
 
 This is a project born only with the aim of practicing with the technologies of Spring Boot and Angular.
 
