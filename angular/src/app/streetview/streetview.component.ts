@@ -4,6 +4,7 @@ import { defaults as overviewControls, OverviewMap } from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
 import Map from 'ol/Map';
 import 'ol/ol.css';
+import { fromLonLat } from 'ol/proj';
 import XYZ from 'ol/source/XYZ';
 import View from 'ol/View';
 
@@ -40,9 +41,9 @@ export class StreetviewComponent implements OnInit {
       controls: overviewControls().extend([overviewMapControl]),
       layers: [
         new TileLayer({
+          maxZoom: 19,
           source: new XYZ({
             attributions: `&copy; ${new Date().getFullYear()} Google Maps <a href="https://www.google.com/help/terms_maps/" target="_blank">Terms of Service</a>`,
-            maxZoom: 19,
             url:
               'https://mt{0-3}.google.com/vt/lyrs=m@221097413,transit&x={x}&y={y}&z={z}'
           })
@@ -50,10 +51,13 @@ export class StreetviewComponent implements OnInit {
       ],
       target: 'map',
       view: new View({
-        center: [0, 0],
-        zoom: 1,
+        center: fromLonLat([9.173, 45.481]),
+        zoom: 13,
+        minZoom: 6,
+        maxZoom: 19,
         rotation: 0,
-        constrainResolution: true
+        constrainResolution: true,
+        constrainOnlyCenter: true
       })
     });
 

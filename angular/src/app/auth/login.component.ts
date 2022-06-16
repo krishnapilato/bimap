@@ -27,13 +27,13 @@ export class LoginComponent {
   // On submit event
 
   onSubmit() {
-    this.authService.login(this.loginRequest).subscribe(
-      (): void => {
-        this.router.navigate(['']);
+    this.authService.login(this.loginRequest).subscribe({
+      next: () => {
+        this.router.navigate(['/']);
       },
-      (error): void => {
-        this._snackbar.open("Can't login", 'Close', { duration: 4000 });
+      error: err => {
+        this._snackbar.open(err.message, 'Close', { duration: 3000 });
       }
-    );
+    });
   }
 }

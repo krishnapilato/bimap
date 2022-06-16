@@ -26,7 +26,7 @@ export class AuthGuard implements CanActivate {
     if (user.jwttoken) {
       return true;
     } else {
-      this._snackbar.open('You are not logged in!', 'Close', {
+      this._snackbar.open('You must be logged in to view that page', 'Close', {
         duration: 2000
       });
       this.router.navigate(['/login'], {

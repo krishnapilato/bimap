@@ -167,7 +167,9 @@ public class SpringBootController {
 				+ " !</h1><p>Here are your credentials for accessing the application:</p>" + "Email: " + user.getEmail()
 				+ "<br>Password: 12345678" + "<br>Your application role is " + user.getApplicationRole().toString().toLowerCase()
 				+ "<br><br>" + "Click <a href='http://localhost:4200/login'>here</a> to login<br><br>"
-				+ "Best regards, <br>The Admin Team</div>";
+				+ "Best regards, <br> This email was sent to you by TransferWise, trading as Wise. By using our services, you agree to our customer agreements.\r\n"
+				+ "\r\n"
+				+ "© TransferWise, trading as Wise 2022. All rights reserved.</div>";
 		
 		try {
 			utility.sendEmail(email, content);

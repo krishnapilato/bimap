@@ -7,6 +7,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import * as $ from 'jquery';
 import * as L from 'leaflet';
 import 'leaflet-easybutton';
+import StreetView from 'ol-street-view';
 import { AuthService } from '../auth/auth.service';
 import { ApiService } from './api.service';
 import { FormModel } from './formdata';
@@ -149,7 +150,6 @@ export class MainComponent implements OnInit {
     }).setView([45.2406927, 10.27472], 8);
     this.map.options.minZoom = 3;
     L.control.scale({ imperial: false }).addTo(this.map);
-
     var baseLayers = {
       Default: googleTerrain,
       Satellite: L.tileLayer(
@@ -182,24 +182,17 @@ export class MainComponent implements OnInit {
             icon: 'fa-solid fa-street-view fa-xl fa-bounce',
             title: 'Browse Street View Images',
             onClick: function(control) {
-              if (map.getZoom() > 14) {
-                cities.addTo(map);
-                snackbar.open(
-                  'Double click on map to open StreetView in Google Maps',
-                  'Close',
-                  {
-                    duration: 5000
-                  }
-                );
-                flag = false;
-                control.state('remove-markers');
-              } else {
-                snackbar.open(
-                  'Zoom more in to enable Street View Mode',
-                  'Close',
-                  { duration: 2000 }
-                );
-              }
+              $('.leaflet-control-layers').hide();
+              cities.addTo(map);
+              snackbar.open(
+                'Double click on map to open StreetView in Google Maps',
+                'Close',
+                {
+                  duration: 5000
+                }
+              );
+              flag = false;
+              control.state('remove-markers');
             }
           },
           {
@@ -207,6 +200,7 @@ export class MainComponent implements OnInit {
             title: 'Turn off Street View Mode',
             stateName: 'remove-markers',
             onClick: function(control) {
+              $('.leaflet-control-layers').show();
               map.removeLayer(cities);
               map.addLayer(googleTerrain);
               snackbar.open('StreetView Mode closed', 'Close', {
@@ -264,17 +258,23 @@ export class MainComponent implements OnInit {
   }
 
   scrollToTop() {
-    $('html, body').animate({ scrollTop: 0 }, 10);    
+    $('html, body').animate({ scrollTop: 0 }, 10);
   }
 
   toggleShow() {
     this.isShown = !this.isShown;
-    if(this.isShown) {
-      $('html,body').animate({ scrollTop: document.body.scrollHeight + 53 }, 'fast');
-      this._snackbar.open('StreetView Map is now visible below', 'Close', { duration: 2000 });
-    }
-    else {
-      this._snackbar.open('StreetView Map is now hidden', 'Close', { duration: 2000 });
+    if (this.isShown) {
+      $('html,body').animate(
+        { scrollTop: document.body.scrollHeight + 53 },
+        'fast'
+      );
+      this._snackbar.open('StreetView Map is now visible below', 'Close', {
+        duration: 2000
+      });
+    } else {
+      this._snackbar.open('StreetView Map is now hidden', 'Close', {
+        duration: 2000
+      });
     }
   }
   streetView() {
@@ -310,8 +310,7 @@ export class MainComponent implements OnInit {
       this.formData.latitude = this.latitude;
       this.formData.longitude = this.longitude;
 
-      this.apiService.save(this.formData).subscribe((data: any) => {
-      });
+      this.apiService.save(this.formData).subscribe((data: any) => {});
       snackbar.open('Data saved successfully', 'Close', { duration: 3000 });
     } else {
       snackbar.open('Some problem occured when trying to save data', 'Close', {
