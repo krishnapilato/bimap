@@ -80,6 +80,11 @@ export class UserListComponent implements OnInit, AfterViewInit {
         duration: 2000
       });
     }
+    else {
+      this._snackbar.open('Operation cancelled', 'Close', {
+        duration: 2000
+      });
+    }
   }
 }
 

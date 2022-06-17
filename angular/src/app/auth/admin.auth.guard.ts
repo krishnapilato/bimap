@@ -10,15 +10,11 @@ import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class AdminAuthGuard implements CanActivate {
-  // Constructor
-
   constructor(
     private router: Router,
     private authenticationService: AuthService,
     private _snackbar: MatSnackBar
   ) {}
-
-  // Method called when the user wants to access to an administrator page
 
   canActivate(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const user = this.authenticationService.loginResponseValue;
@@ -29,11 +25,9 @@ export class AdminAuthGuard implements CanActivate {
       });
       return true;
     } else {
-      this._snackbar.open(
-        'You are not logged in as an administrator!',
-        'Close',
-        { duration: 2000 }
-      );
+      this._snackbar.open('You are not logged in as administrator', 'Close', {
+        duration: 2000
+      });
       this.router.navigate(['/login'], {
         queryParams: { returnUrl: state.url }
       });

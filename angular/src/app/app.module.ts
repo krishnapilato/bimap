@@ -69,7 +69,6 @@ import { UserService } from './user-service.service';
     ReactiveFormsModule,
     MatInputModule
   ],
-  exports: [MatTableModule],
   providers: [
     UserService,
     AuthService,

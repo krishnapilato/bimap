@@ -8,17 +8,11 @@ import { UserService } from '../user-service.service';
   templateUrl: './user-form.component.html'
 })
 export class UserFormComponent {
-  // User Object Attribute
-
   user: User;
-
-  // Constructor
 
   constructor(private router: Router, private userService: UserService) {
     this.user = new User();
   }
-
-  // On submit event
 
   onSubmit() {
     this.userService

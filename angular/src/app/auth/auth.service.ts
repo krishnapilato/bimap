@@ -9,13 +9,9 @@ import { LoginResponse } from './loginresponse';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  // Attributes
-
   private loginUrl: string;
   private loginResponseSubject: BehaviorSubject<LoginResponse>;
   public loginResponse: Observable<LoginResponse>;
-
-  // Constructor
 
   constructor(
     private router: Router,
@@ -29,19 +25,13 @@ export class AuthService {
     this.loginResponse = this.loginResponseSubject.asObservable();
   }
 
-  // Method to get login response value
-
   public get loginResponseValue(): LoginResponse {
     return this.loginResponseSubject.value;
   }
 
-  // Method to get if user is logged in
-
   public get isLogged() {
     return this.loginResponseValue.jwttoken != null;
   }
-
-  // Method called when user try to login
 
   public login(loginRequest: LoginRequest) {
     return this.http.post<LoginResponse>(this.loginUrl, loginRequest).pipe(
@@ -55,8 +45,6 @@ export class AuthService {
       })
     );
   }
-
-  // Method called when the user wants to logout
 
   public logout() {
     localStorage.removeItem('LoginResponse');

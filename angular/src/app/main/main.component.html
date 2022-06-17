@@ -110,7 +110,7 @@
           [formControl]="address"
           placeholder="Ex. Via Umberto I"
           required
-          (focusout)="focusOutFunction($event)"
+          (focusout)="focusOutFunction()"
         />
         <mat-icon matSuffix>home</mat-icon>
         <mat-error *ngIf="address.hasError('required')"
@@ -268,7 +268,7 @@
           mat-raised-button
           style="height:40px;width: 460px;border-radius: 50px;"
           color="primary"
-          (click)="saveData($event)"
+          (click)="saveData()"
         >
           <mat-icon>save</mat-icon>
         </button>
@@ -314,31 +314,22 @@
     matSortDisableClear
     matSortDirection="desc"
   >
-    <!-- ID column  -->
     <ng-container matColumnDef="id">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
       <td mat-cell *matCellDef="let row">{{ row.id }}</td>
     </ng-container>
-
-    <!-- Municipality column  -->
     <ng-container matColumnDef="comune">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Municipality</th>
       <td mat-cell *matCellDef="let row">{{ row.comune }}</td>
     </ng-container>
-
-    <!-- Province Column -->
     <ng-container matColumnDef="prov">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Province</th>
       <td mat-cell *matCellDef="let row">{{ row.prov }}</td>
     </ng-container>
-
-    <!-- Address Column -->
     <ng-container matColumnDef="indirizzo">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Address</th>
       <td mat-cell *matCellDef="let row">{{ row.indirizzo }}</td>
     </ng-container>
-
-    <!-- Street Number Column -->
     <ng-container matColumnDef="civico">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Street Number</th>
       <td mat-cell *matCellDef="let row">{{ row.civico }}</td>
@@ -417,16 +408,16 @@
     style="margin-top: 50px; width: 100%; height: 100%;"
   ></iframe>
   <div class="d-flex justify-content-center">
-  <button
-    #tooltip="matTooltip"
-    matTooltip="Back to top"
-    [matTooltipPosition]="'left'"
-    (click)="scrollToTop();"
-    mat-raised-button
-    style="width: 360px;border-radius: 5px;"
-    color="primary"
-  >
-    <mat-icon>arrow_upward</mat-icon>
-  </button>
+    <button
+      #tooltip="matTooltip"
+      matTooltip="Back to top"
+      [matTooltipPosition]="'left'"
+      (click)="scrollToTop()"
+      mat-raised-button
+      style="width: 360px;border-radius: 5px;"
+      color="primary"
+    >
+      <mat-icon>arrow_upward</mat-icon>
+    </button>
   </div>
 </div>

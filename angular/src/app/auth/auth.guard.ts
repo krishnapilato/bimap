@@ -10,15 +10,11 @@ import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
-  // Constructor
-
   constructor(
     private router: Router,
     private authenticationService: AuthService,
     private _snackbar: MatSnackBar
   ) {}
-
-  // Method called when the user wants to access a page that requires authentication
 
   canActivate(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const user = this.authenticationService.loginResponseValue;

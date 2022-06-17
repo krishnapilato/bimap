@@ -7,7 +7,6 @@ import { MatTableDataSource } from '@angular/material/table';
 import * as $ from 'jquery';
 import * as L from 'leaflet';
 import 'leaflet-easybutton';
-import StreetView from 'ol-street-view';
 import { AuthService } from '../auth/auth.service';
 import { ApiService } from './api.service';
 import { FormModel } from './formdata';
@@ -20,15 +19,17 @@ import { Tables } from './tables';
   providers: [ApiService]
 })
 export class MainComponent implements OnInit {
-  // Table attributes
-
-  displayedColumns: string[] = ['id', 'prov', 'comune', 'indirizzo', 'civico'];
-  dataSource = new MatTableDataSource<Tables>();
+  public displayedColumns: string[] = [
+    'id',
+    'prov',
+    'comune',
+    'indirizzo',
+    'civico'
+  ];
+  public dataSource = new MatTableDataSource<Tables>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-
-  // FormControl attributes
 
   public searchTerm: FormControl = new FormControl();
   public searchMunicipalities: FormControl = new FormControl();
@@ -45,20 +46,14 @@ export class MainComponent implements OnInit {
   public user: any;
   public playerName!: string;
 
-  // provinces attribute for getting autcomplete search data
-
   public provinces = <any>[];
 
-  // map attribute for leaflet map
-
   private map: any;
-
-  // latitude and longitude attributes for map
 
   public latitude!: number;
   public longitude!: number;
 
-  isShown!: boolean;
+  public isShown!: boolean;
 
   constructor(
     private apiService: ApiService,
@@ -81,13 +76,9 @@ export class MainComponent implements OnInit {
     this.isShown = false;
     this.user = this.authenticationService.loginResponseValue;
 
-    // get all table data from ApiService
-
     this.apiService.findAll().subscribe(data => {
       this.dataSource.data = data;
     });
-
-    // Get autocomplete search data for regions
 
     this.searchRegions.valueChanges.subscribe(term => {
       if (term != '' && term.length > 0)
@@ -97,8 +88,6 @@ export class MainComponent implements OnInit {
       else this.provinces = [];
     });
 
-    // Get autocomplete search data for provinces
-
     this.searchTerm.valueChanges.subscribe(term => {
       if (term != '' && term.length > 0)
         this.apiService.searchProvinces(term).subscribe((data: any[]) => {
@@ -107,8 +96,6 @@ export class MainComponent implements OnInit {
       else this.provinces = [];
     });
 
-    // Get autocomplete search data for municipalities
-
     this.searchMunicipalities.valueChanges.subscribe(term => {
       if (term != '' && term.length > 0)
         this.apiService.searchMunicipalities(term).subscribe((data: any[]) => {
@@ -116,8 +103,6 @@ export class MainComponent implements OnInit {
         });
       else this.provinces = [];
     });
-
-    // Default layer for map
 
     var googleTerrain = L.tileLayer(
       'https://{s}.google.com/vt/lyrs=m@221097413,transit&x={x}&y={y}&z={z}',
@@ -140,8 +125,6 @@ export class MainComponent implements OnInit {
     );
 
     var cities = L.layerGroup([googleTerrain, googleStreetViewLayer]);
-
-    // Setting the map
 
     this.map = L.map('map', {
       layers: [googleTerrain],
@@ -168,8 +151,6 @@ export class MainComponent implements OnInit {
       })
     };
     L.control.layers(baseLayers).addTo(this.map);
-
-    // StreetView button control for map
 
     var flag = true,
       map = this.map,
@@ -214,23 +195,15 @@ export class MainComponent implements OnInit {
       });
     toggle.addTo(map);
 
-    // StreetView control event
-
     const tmpl = 'https://www.google.com/maps?layer=c&cbll={lat},{lon}';
     map.on('dblclick', function(e: any) {
       if (!flag) {
-        var t!: any;
-        t = window.open(
+        window.open(
           tmpl.replace(/{lat}/g, e.latlng.lat).replace(/{lon}/g, e.latlng.lng),
           '"_self"'
         );
-        console.log(
-          tmpl.replace(/{lat}/g, e.latlng.lat).replace(/{lon}/g, e.latlng.lng)
-        );
       }
     });
-
-    // Double Click on map event
 
     map.on('dblclick', (e: { latlng: any }) => {
       if (
@@ -249,8 +222,6 @@ export class MainComponent implements OnInit {
         this._snackbar.open('Coordinates added', 'Close', { duration: 2000 });
       }
     });
-
-    // Base layer change and zoomend events on map
 
     map.on('baselayerchange', function onOverlayAdd(e: any) {
       snackbar.open('Layer changed to ' + e.name, 'Close', { duration: 2000 });
@@ -277,14 +248,8 @@ export class MainComponent implements OnInit {
       });
     }
   }
-  streetView() {
-    const variable =
-      'https://www.google.com/maps/embed?pb=!4v1!6m8!1m7!{id}!2m2!1d45.04245303557875!2d8.948897843681799!3f0!4f0!5f0';
-    const URL = variable.replace(/{id}/g, this.playerName);
-    $('#iframee').attr('src', URL);
-  }
 
-  saveData(event: any) {
+  saveData() {
     var snackbar = this._snackbar;
     if (
       confirm('Are you sure you want to save data?') &&
@@ -341,7 +306,7 @@ export class MainComponent implements OnInit {
     );
   }
 
-  focusOutFunction(event: any) {
+  focusOutFunction() {
     if (this.searchMunicipalities.value && this.address.value) {
       $.get(
         'https://nominatim.openstreetmap.org/search?format=json&q=' +

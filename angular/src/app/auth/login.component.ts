@@ -6,15 +6,10 @@ import { LoginRequest } from './loginrequest';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css']
+  templateUrl: './login.component.html'
 })
 export class LoginComponent {
-  // Attribute
-
   loginRequest: LoginRequest;
-
-  // Constructor
 
   constructor(
     private router: Router,
@@ -24,12 +19,10 @@ export class LoginComponent {
     this.loginRequest = new LoginRequest();
   }
 
-  // On submit event
-
-  onSubmit() {
+  onSubmit(): void {
     this.authService.login(this.loginRequest).subscribe({
       next: () => {
-        this.router.navigate(['/']);
+        this.router.navigate(['']);
       },
       error: err => {
         this._snackbar.open(err.message, 'Close', { duration: 3000 });

@@ -1,5 +1,5 @@
 @import "~bootstrap/dist/css/bootstrap.css";
-@import 'ol-street-view/lib/style/css/ol-street-view.css';
+@import "ol-street-view/lib/style/css/ol-street-view.css";
 
 input {
   color: #4285f4;

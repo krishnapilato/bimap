@@ -8,67 +8,53 @@ import { Tables } from './tables';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  // URL Attribute
-
   private URL: string;
-
-  // Constructor
 
   constructor(private httpService: HttpClient) {
     this.URL = environment.baseApiUrl + '/';
   }
 
-  // Get autocomplete search data for regions
-
-  searchRegions(province: string) {
+  public searchRegions(keyword: string): Observable<string[]> {
     var provincesList = this.httpService
-      .get(this.URL + 'searchRegion=' + province)
+      .get(this.URL + 'searchRegion=' + keyword)
       .pipe(
         debounceTime(10),
         map((data: any) => {
-          return data.length != 0 ? (data as any) : ['No Regions Found'];
+          return data.length != 0 ? (data as any) : ['No data found'];
         })
       );
     return provincesList;
   }
 
-  // Get autocomplete search data for provinces
-
-  searchProvinces(province: string) {
+  public searchProvinces(keyword: string): Observable<string[]> {
     var provincesList = this.httpService
-      .get(this.URL + 'searchProvince=' + province)
+      .get(this.URL + 'searchProvince=' + keyword)
       .pipe(
         debounceTime(1),
         map((data: any) => {
-          return data.length != 0 ? (data as any) : ['No Provinces Found'];
+          return data.length != 0 ? (data as any) : ['No data found'];
         })
       );
     return provincesList;
   }
 
-  // Get autocomplete search data for municipalities
-
-  searchMunicipalities(keyword: string) {
+  public searchMunicipalities(keyword: string): Observable<string[]> {
     var municipalitiesList = this.httpService
       .get(this.URL + 'searchMunicipality=' + keyword)
       .pipe(
         debounceTime(1),
         map((data: any) => {
-          return data.length != 0 ? (data as any) : ['No Municipalities Found'];
+          return data.length != 0 ? (data as any) : ['No data found'];
         })
       );
     return municipalitiesList;
   }
 
-  // Find all data from table
-
-  findAll(): Observable<Tables[]> {
+  public findAll(): Observable<Tables[]> {
     return this.httpService.get<Tables[]>(this.URL + 'findAll');
   }
 
-  // Save FormModel object to table
-
-  save(formdata: FormModel) {
+  public save(formdata: FormModel): Observable<FormModel> {
     return this.httpService.post<FormModel>(this.URL + 'save', formdata);
   }
 }

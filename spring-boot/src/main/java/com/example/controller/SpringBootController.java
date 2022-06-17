@@ -135,7 +135,7 @@ public class SpringBootController {
 
 	@PutMapping("/users/{id}")
 	public User update(@RequestBody(required = true) User updatedUser, @PathVariable(required = true) Long id) {
-		logger.info("Updating user with email: ." + id);
+		logger.info("Updating user with id: ." + id);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Updated user details: " + updatedUser);
 		}
@@ -147,7 +147,7 @@ public class SpringBootController {
 			user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
 			user.setApplicationRole(updatedUser.getApplicationRole());
 			return userRepository.save(user);
-		}).orElseThrow();
+		}).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
 	}
 
 	@DeleteMapping("/users/{id}")

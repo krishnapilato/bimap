@@ -1,5 +1,8 @@
 import {
-  HttpEvent, HttpHandler, HttpInterceptor, HttpRequest
+  HttpEvent,
+  HttpHandler,
+  HttpInterceptor,
+  HttpRequest
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -8,12 +11,7 @@ import { AuthService } from './auth.service';
 
 @Injectable()
 export class SecurityInterceptor implements HttpInterceptor {
-  // Constructor
-
   constructor(private authenticationService: AuthService) {}
-
-  // Intercept the user requests when the user try to access to restricted services
-  // and add authorization header with jwt token if available
 
   intercept(
     request: HttpRequest<any>,
