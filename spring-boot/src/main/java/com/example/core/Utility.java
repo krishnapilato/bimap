@@ -75,7 +75,7 @@ public class Utility {
 
 		final Session session = Session.getInstance(properties, new jakarta.mail.Authenticator() {
 			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication("59b1e4c1b90440", "94a25817592678");
+				return new PasswordAuthentication("9a4f765dbe185a", "929d826701bafa");
 			}
 		});
 		

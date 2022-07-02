@@ -30,7 +30,6 @@ import com.example.repository.TablesRepository;
 import com.example.repository.UserRepository;
 
 import jakarta.mail.MessagingException;
-import jakarta.mail.internet.AddressException;
 import lombok.AllArgsConstructor;
 
 @CrossOrigin(origins = "http://localhost:4200")

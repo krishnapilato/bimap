@@ -8,6 +8,8 @@ import * as $ from 'jquery';
 import * as L from 'leaflet';
 import 'leaflet-easybutton';
 import { AuthService } from '../auth/auth.service';
+import { LoginResponse } from '../auth/loginresponse';
+import { User } from '../user';
 import { ApiService } from './api.service';
 import { FormModel } from './formdata';
 import { Tables } from './tables';
@@ -43,12 +45,12 @@ export class MainComponent implements OnInit {
   public ilongitude: FormControl = new FormControl();
   public formData = new FormModel();
   public results!: any;
-  public user: any;
+  public user!: LoginResponse;
   public playerName!: string;
 
   public provinces = <any>[];
 
-  private map: any;
+  private map!: L.Map;
 
   public latitude!: number;
   public longitude!: number;
@@ -226,6 +228,8 @@ export class MainComponent implements OnInit {
     map.on('baselayerchange', function onOverlayAdd(e: any) {
       snackbar.open('Layer changed to ' + e.name, 'Close', { duration: 2000 });
     });
+
+    
   }
 
   scrollToTop() {

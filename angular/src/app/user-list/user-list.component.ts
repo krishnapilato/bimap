@@ -1,3 +1,4 @@
+import { LoginResponse } from './../auth/loginresponse';
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -26,7 +27,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
     'actions2'
   ];
   dataSource = new MatTableDataSource<User>();
-  public whatuser!: any;
+  public whatuser!: LoginResponse;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -38,12 +39,12 @@ export class UserListComponent implements OnInit, AfterViewInit {
     public dialog: MatDialog
   ) {}
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
 
-  applyFilter(event: Event) {
+  applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
     if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
@@ -60,7 +61,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
     dialogRef.componentInstance.globalEmail = email;
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.whatuser = this.authenticationService.loginResponseValue;
     this.userService.findAll().subscribe(data => {
       this.dataSource.data = data;
@@ -71,16 +72,15 @@ export class UserListComponent implements OnInit, AfterViewInit {
     this.openEmailDialog(email);
   }
 
-  public deleteRow(row: any): void{
+  public deleteRow(row: any): void {
     if (confirm('Are you sure to delete this record?')) {
-      this.userService.delete(row.id).subscribe(data => {
+      this.userService.delete(row.id).subscribe(() => {
         this.dataSource.data = this.dataSource.data.filter(u => u !== row);
       });
       this._snackbar.open('Record deleted successfully', '', {
         duration: 2000
       });
-    }
-    else {
+    } else {
       this._snackbar.open('Operation cancelled', 'Close', {
         duration: 2000
       });
@@ -108,7 +108,8 @@ export class DialogElementsExampleDialog {
   approles: any[] = [
     { value: 'USER', viewValue: 'USER' },
     { value: 'MANAGER', viewValue: 'MANAGER' },
-    { value: 'ADMINISTRATOR', viewValue: 'ADMINISTRATOR' }
+    { value: 'ADMINISTRATOR', viewValue: 'ADMINISTRATOR' },
+    { value: 'SUPERADMINISTRATOR', viewValue: 'SUPERADMINISTRATOR' }
   ];
 
   constructor(
@@ -117,7 +118,7 @@ export class DialogElementsExampleDialog {
     private _snackbar: MatSnackBar
   ) {}
 
-  cancel() {
+  cancel(): void {
     this.dialog.closeAll();
     this._snackbar.open('Operation cancelled', 'Close', { duration: 2000 });
   }
@@ -164,26 +165,23 @@ export class EditingEmailDialog {
 
   public send(): void {
     this.dialog.closeAll();
-    this._snackbar.open('Trying to send email to ' + this.globalEmail, '', {
-      duration: 1000
-    });
-    this.userService.sendEmail(this.globalEmail).subscribe(
-      (data) => {
-        this._snackbar.open(
-          data.toString(),
-          'Close',
-          {
-            duration: 2000
-          }
-        );
-      },
-      (error) => {
-        console.log(error);
-        this._snackbar.open(error.error.text, 'Close', {
-          duration: 2000
-        });
+    this._snackbar.open(
+      'Trying to send email to ' + this.globalEmail,
+      'Close',
+      {
+        duration: 1000
       }
     );
+    this.userService.sendEmail(this.globalEmail).subscribe({
+      next: data => {
+        this._snackbar.open(data.toString(), 'Close', {
+          duration: 2000
+        });
+      },
+      error: err => {
+        this._snackbar.open(err.error.text, 'Close', { duration: 3000 });
+      }
+    });
   }
 
   cancel() {

@@ -14,7 +14,7 @@ export class UserFormComponent {
     this.user = new User();
   }
 
-  onSubmit() {
+  onSubmit(): void {
     this.userService
       .save(this.user)
       .subscribe(() => this.router.navigate(['/listuser']));

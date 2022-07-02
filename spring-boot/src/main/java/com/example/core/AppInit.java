@@ -1,15 +1,10 @@
 package com.example.core;
 
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.example.beans.User;
-import com.example.enums.ApplicationRole;
-import com.example.enums.UserStatus;
 import com.example.repository.UserRepository;
 
 @Component
@@ -28,9 +23,9 @@ public class AppInit implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 
-		 // Saving first new administrator
+		// Saving first new administrator
 
-		 Date now = new Date();
+		 /*Date now = new Date();
 		  
 		 User administrator = new User(); administrator.setName("Khova Krishna");
 		 administrator.setSurname("Pilato");
@@ -74,6 +69,6 @@ public class AppInit implements CommandLineRunner {
 		 user5.setPassword(passwordEncoder.encode("12345678"));
 		 user5.setUserStatus(UserStatus.NOT_CONFIRMED);
 		 user5.setApplicationRole(ApplicationRole.MANAGER);
-		 user5.setKey("TSPyv7HL7RGwHnMf"); userRepository.save(user5);
+		 user5.setKey("TSPyv7HL7RGwHnMf"); userRepository.save(user5);*/
 	}
 }
