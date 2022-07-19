@@ -1,6 +1,6 @@
 import { LoginResponse } from './../auth/loginresponse';
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -94,11 +94,11 @@ export class UserListComponent implements OnInit, AfterViewInit {
   providers: [UserService]
 })
 export class DialogElementsExampleDialog {
-  public surname: FormControl = new FormControl();
-  public name: FormControl = new FormControl();
-  public email: FormControl = new FormControl();
-  public applicationRole: FormControl = new FormControl();
-  public password: FormControl = new FormControl();
+  public surname: UntypedFormControl = new UntypedFormControl();
+  public name: UntypedFormControl = new UntypedFormControl();
+  public email: UntypedFormControl = new UntypedFormControl();
+  public applicationRole: UntypedFormControl = new UntypedFormControl();
+  public password: UntypedFormControl = new UntypedFormControl();
 
   public globalID!: number;
   public globalDataSource = new MatTableDataSource<User>();

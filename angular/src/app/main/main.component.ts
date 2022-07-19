@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort } from '@angular/material/sort';
@@ -33,16 +33,16 @@ export class MainComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  public searchTerm: FormControl = new FormControl();
-  public searchMunicipalities: FormControl = new FormControl();
-  public searchRegions: FormControl = new FormControl();
-  public address: FormControl = new FormControl();
-  public number: FormControl = new FormControl();
-  public goodNaming: FormControl = new FormControl();
-  public gooodId: FormControl = new FormControl();
-  public istatCode: FormControl = new FormControl();
-  public ilatitude: FormControl = new FormControl();
-  public ilongitude: FormControl = new FormControl();
+  public searchTerm: UntypedFormControl = new UntypedFormControl();
+  public searchMunicipalities: UntypedFormControl = new UntypedFormControl();
+  public searchRegions: UntypedFormControl = new UntypedFormControl();
+  public address: UntypedFormControl = new UntypedFormControl();
+  public number: UntypedFormControl = new UntypedFormControl();
+  public goodNaming: UntypedFormControl = new UntypedFormControl();
+  public gooodId: UntypedFormControl = new UntypedFormControl();
+  public istatCode: UntypedFormControl = new UntypedFormControl();
+  public ilatitude: UntypedFormControl = new UntypedFormControl();
+  public ilongitude: UntypedFormControl = new UntypedFormControl();
   public formData = new FormModel();
   public results!: any;
   public user!: LoginResponse;

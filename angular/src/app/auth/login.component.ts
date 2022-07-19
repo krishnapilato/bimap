@@ -25,7 +25,8 @@ export class LoginComponent {
         this.router.navigate(['']);
       },
       error: err => {
-        this._snackbar.open(err.message, 'Close', { duration: 3000 });
+        console.log(err)
+        this._snackbar.open("Unauthorized. Please login again", 'Close', { duration: 3000 });
       }
     });
   }

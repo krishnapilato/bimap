@@ -107,5 +107,7 @@
       }
     }
   },
-  "defaultProject": "angulartest1"
+  "cli": {
+    "analytics": "a2d566a5-6e41-482c-b5e6-d28e10dfc3d4"
+  }
 }

@@ -1,10 +1,15 @@
 package com.example.core;
 
+import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import com.example.beans.User;
+import com.example.enums.ApplicationRole;
+import com.example.enums.UserStatus;
 import com.example.repository.UserRepository;
 
 @Component
