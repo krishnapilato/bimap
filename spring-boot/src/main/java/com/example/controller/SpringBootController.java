@@ -158,18 +158,18 @@ public class SpringBootController {
 	@GetMapping("/users/sendEmail={email}")
 	public String sendEmail(@PathVariable(required = true) String email) {
 		logger.info("Trying to send email to: " + email);
-		
+
 		User user = this.userRepository.findByEmailAddress(email)
 				.orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + email));
 
 		String content = "<div style='text-align: center;font-family: sans-serif;'><h1>Hi " + user.getName()
 				+ " !</h1><p>Here are your credentials for accessing the application:</p>" + "Email: " + user.getEmail()
-				+ "<br>Password: 12345678" + "<br>Your application role is " + user.getApplicationRole().toString().toLowerCase()
-				+ "<br><br>" + "Click <a href='http://localhost:4200/login'>here</a> to login<br><br>"
+				+ "<br>Password: 12345678" + "<br>Your application role is "
+				+ user.getApplicationRole().toString().toLowerCase() + "<br><br>"
+				+ "Click <a href='http://localhost:4200/login'>here</a> to login<br><br>"
 				+ "Best regards, <br> This email was sent to you by TransferWise, trading as Wise. By using our services, you agree to our customer agreements.\r\n"
-				+ "\r\n"
-				+ "© TransferWise, trading as Wise 2022. All rights reserved.</div>";
-		
+				+ "\r\n" + "© TransferWise, trading as Wise 2022. All rights reserved.</div>";
+
 		try {
 			utility.sendEmail(email, content);
 			logger.info("Email sent successfully to: " + email);

@@ -35,7 +35,7 @@ export class AuthService {
 
   public login(loginRequest: LoginRequest) {
     return this.http.post<LoginResponse>(this.loginUrl, loginRequest).pipe(
-      map(loginResponse => {
+      map((loginResponse) => {
         localStorage.setItem('LoginResponse', JSON.stringify(loginResponse));
         this.loginResponseSubject.next(loginResponse);
         if (loginResponse) {

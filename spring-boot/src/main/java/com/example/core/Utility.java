@@ -1,7 +1,6 @@
 package com.example.core;
 
 import java.io.BufferedReader;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -9,6 +8,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
+import java.util.Random;
 
 import org.springframework.stereotype.Service;
 
@@ -65,6 +65,16 @@ public class Utility {
 		fileWriter.append(formModel.getLatitude() + ", ");
 		fileWriter.append(formModel.getLongitude() + "\n");
 	}
+	
+	private static String generateRandomEmail(int length) {
+        final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        StringBuilder stringBuilder = new StringBuilder();
+        Random random = new Random();
+        while (stringBuilder.length() < length) { 
+            stringBuilder.append(CHARACTERS.charAt((int)(random.nextFloat() * CHARACTERS.length())));
+        }
+        return stringBuilder.toString().toLowerCase() + "@gmail.com";
+    }
 
 	public void sendEmail(String recipientEmail, String content) throws AddressException, MessagingException, IOException {
 		Properties properties = new Properties();
@@ -80,7 +90,7 @@ public class Utility {
 		});
 		
 		Message message = new MimeMessage(session);
-		message.setFrom(new InternetAddress("system.admin@gmail.com", false));
+		message.setFrom(new InternetAddress(generateRandomEmail(16), false));
 		message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
 		message.setSubject("User Credentials");
 		message.setContent(content, "text/html");

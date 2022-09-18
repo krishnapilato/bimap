@@ -25,7 +25,14 @@
               "rxjs-compat",
               "ol-street-view",
               "pbf",
-              "xml-utils/find-tags-by-name.js"
+              "xml-utils/find-tags-by-name.js",
+              "xml-utils/get-attribute.js",
+              "web-worker",
+              "mapbox-to-css-font",
+              "webfont-matcher/lib/fonts/google.js",
+              "rbush",
+              "jquery",
+              "leaflet"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": ["src/favicon.ico", "src/assets"],
@@ -33,7 +40,7 @@
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.css",
               "node_modules/leaflet/dist/leaflet.css",
-               "node_modules/ol/ol.css",
+              "node_modules/ol/ol.css",
               "node_modules/@fortawesome/fontawesome-free/css/all.css"
             ],
             "scripts": ["node_modules/@fortawesome/fontawesome-free/js/all.js"]
