@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.example.beans.FormModel;
 import com.example.beans.Tables;
@@ -63,6 +65,15 @@ public class SpringBootController {
 	// Instancing Utility object
 
 	private final Utility utility = new Utility();
+
+	// Loading Home View
+
+	@RequestMapping("/")
+	public ModelAndView home() {
+		ModelAndView modelAndView = new ModelAndView();
+		modelAndView.setViewName("home.html");
+		return modelAndView;
+	}
 
 	// GET to retrieve regions
 
