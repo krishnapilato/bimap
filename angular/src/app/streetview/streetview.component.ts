@@ -34,7 +34,7 @@ export class StreetviewComponent implements OnInit {
       ],
       collapseLabel: '\u00BB',
       label: '\u00AB',
-      collapsed: true
+      collapsed: false
     });
 
     var map = new Map({
