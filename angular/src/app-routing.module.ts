@@ -10,44 +10,44 @@ import { UserFormComponent } from './app/user-form/user-form.component';
 import { UserListComponent } from './app/user-list/user-list.component';
 
 const routes: Routes = [
-  { 
-    path: '', 
-    component: MainComponent, 
-    canActivate: [AuthGuard] 
+  {
+    path: '',
+    component: MainComponent,
+    canActivate: [AuthGuard],
   },
-  { 
-    path: 'login', 
-    component: LoginComponent 
+  {
+    path: 'login',
+    component: LoginComponent,
   },
-  { 
-    path: 'logout', 
-    component: LogoutComponent, 
-    canActivate: [AuthGuard] 
+  {
+    path: 'logout',
+    component: LogoutComponent,
+    canActivate: [AuthGuard],
   },
-  { 
+  {
     path: 'main',
-    component: MainComponent, 
-    canActivate: [AuthGuard] 
+    component: MainComponent,
+    canActivate: [AuthGuard],
   },
-  { 
-    path: 'adduser', 
-    component: UserFormComponent, 
-    canActivate: [AdminAuthGuard] 
+  {
+    path: 'adduser',
+    component: UserFormComponent,
+    canActivate: [AdminAuthGuard],
   },
   {
     path: 'listuser',
     component: UserListComponent,
-    canActivate: [AdminAuthGuard]
+    canActivate: [AdminAuthGuard],
   },
   {
     path: 'streetview',
     component: StreetviewComponent,
-    canActivate: [AuthGuard]
-  }
+    canActivate: [AuthGuard],
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class AppRoutingModule {}
