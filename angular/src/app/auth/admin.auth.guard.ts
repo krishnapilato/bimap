@@ -21,7 +21,7 @@ export class AdminAuthGuard implements CanActivate {
 
     if (user.jwttoken && user.user.applicationRole === 'ADMINISTRATOR') {
       this._snackbar.open('Welcome ' + user.user.name, 'Close', {
-        duration: 2000
+        duration: 1000
       });
       return true;
     } else {

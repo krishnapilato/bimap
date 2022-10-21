@@ -61,8 +61,8 @@ p {
 }
 
 .home-button {
-user-select: none;
--webkit-user-drag: none;
+	user-select: none;
+	-webkit-user-drag: none;
 	color: white;
 	text-decoration: none;
 	border: 2px white solid;
@@ -149,10 +149,10 @@ user-select: none;
 }
 </style>
 </head>
-<body class="noselect">
+<body class="noselect" oncontextmenu="return false;">
 	<section class="section-one">
 		<div class="container">
-			<h1 class="animate__animated animate__bounce animate__delay-2s">
+			<h1 class="animate__animated animate__bounce">
 				The page you’re looking for<br>can’t be found!
 			</h1>
 			<br>

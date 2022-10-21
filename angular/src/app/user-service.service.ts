@@ -16,6 +16,10 @@ export class UserService {
     return this.http.get<User[]>(this.usersUrl);
   }
 
+  public checkIfEmailExists(email: string): Observable<boolean> {
+    return this.http.get<boolean>(environment.baseApiUrl + "/emailStatus=" + email);
+  }
+
   public save(user: User): Observable<User> {
     return this.http.post<User>(this.usersUrl, user);
   }

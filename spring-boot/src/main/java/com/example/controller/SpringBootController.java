@@ -99,6 +99,18 @@ public class SpringBootController {
 		return listaComuniRepository.searchMunicipality(keyword);
 	}
 
+	// GET Mapping to retrieve all emails
+
+	@GetMapping("/emailStatus={email}")
+	public boolean retrieveEmails(@PathVariable(required = true) String email) {
+		logger.info("Checking if email exists!");
+		if (this.userRepository.findByEmail(email) == (null)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 	// POST Mapping to save FormModel Object
 
 	@PostMapping("/save")
