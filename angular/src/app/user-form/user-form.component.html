@@ -29,7 +29,7 @@
             maxlength="18"
             />
           <mat-icon matSuffix>badge</mat-icon>
-          <mat-error *ngIf="user.name || !user.name">Cannot contain numbers or
+          <mat-error *ngIf="user.name || !user.name">Cannot be empty or contain numbers or
             symbols</mat-error>
         </mat-form-field>
       </div>
@@ -58,7 +58,7 @@
             maxlength="18"
             />
           <mat-icon matSuffix>person</mat-icon>
-          <mat-error *ngIf="user.surname || !user.surname">Cannot contain
+          <mat-error *ngIf="user.surname || !user.surname">Cannot be empty or contain
             numbers or symbols</mat-error>
         </mat-form-field>
       </div>
@@ -75,6 +75,7 @@
           <input
             (focusout)="onFocusOutEvent()"
             (blur)="onFocusOutEvent()"
+            (ngModelChange)="onFocusOutEvent()"
             email="true"
             type="email"
             autocomplete="off"
