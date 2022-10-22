@@ -1,6 +1,6 @@
 <div class="card my-5" style="border: none">
   <div class="card-body">
-    <form (ngSubmit)="onSubmit()" #userForm="ngForm">
+    <form (ngSubmit)="onSubmit()" #userForm="ngForm" autocomplete="off">
       <div class="form-group text-center">
         <h1 class="animate__animated animate__bounceInDown">
           Register a new user here
@@ -133,7 +133,7 @@
           type="submit"
           [disabled]="!userForm.form.valid"
           #tooltip="matTooltip"
-          matTooltip="Sign Up"
+          matTooltip="Register new user"
           [matTooltipPosition]="'above'"
           mat-raised-button
           style="
@@ -143,6 +143,7 @@
           margin-left: 20px;
           "
           color="primary">
+          <label>Register new user</label>&nbsp;
           <mat-icon>app_registration</mat-icon>
         </button>
         <br /><br /><br /><br /><br /><br /><br /><br />
