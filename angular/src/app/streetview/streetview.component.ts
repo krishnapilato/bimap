@@ -11,7 +11,7 @@ import View from 'ol/View';
 @Component({
   selector: 'app-streetview',
   template: '<div id="map" oncontextmenu="return false"></div>',
-  styleUrls: ['./streetview.component.css'],
+  styleUrls: ['./streetview.component.css']
 })
 export class StreetviewComponent implements OnInit {
   ngOnInit(): void {
