@@ -27,8 +27,8 @@ export class StreetviewComponent implements OnInit {
       layers: [
         new TileLayer({
           source: new XYZ({
-            //http://{s}.google.com/vt/lyrs=y,transit&&x={x}&y={y}&z={z}
-            url: 'https://mt{0-3}.google.com/vt/lyrs=y,transit&x={x}&y={y}&z={z}',
+            //https://{s}.google.com/vt/lyrs=m@221097413,transit&x={x}&y={y}&z={z}
+            url: 'https://mt{0-3}.google.com/vt/lyrs=m@221097413,transit&x={x}&y={y}&z={z}',
           }),
         }),
       ],
@@ -44,7 +44,7 @@ export class StreetviewComponent implements OnInit {
           maxZoom: 19,
           source: new XYZ({
             attributions: `&copy; ${new Date().getFullYear()} Google Maps <a href="https://www.google.com/help/terms_maps/" target="_blank">Terms of Service</a>`,
-            url: 'https://mt{0-3}.google.com/vt/lyrs=y,transit&x={x}&y={y}&z={z}',
+            url: 'https://mt{0-3}.google.com/vt/lyrs=m@221097413,transit&x={x}&y={y}&z={z}',
           }),
         }),
       ],
