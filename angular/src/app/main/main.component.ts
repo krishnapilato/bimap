@@ -152,6 +152,7 @@ export class MainComponent implements OnInit {
       }),
     };
     L.control.layers(baseLayers).addTo(this.map);
+    console.log(L.version);
 
     var flag = true,
       map = this.map,
