@@ -99,7 +99,7 @@ public class SpringBootController {
 		return listaComuniRepository.searchMunicipality(keyword);
 	}
 
-	// GET Mapping to retrieve all emails
+	// GET Mapping to retrieve all email
 
 	@GetMapping("/emailStatus={email}")
 	public boolean retrieveEmails(@PathVariable(required = true) String email) {
