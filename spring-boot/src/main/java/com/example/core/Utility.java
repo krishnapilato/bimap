@@ -10,18 +10,19 @@ import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.Random;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
 import org.springframework.stereotype.Service;
 
 import com.example.beans.FormModel;
 
-import jakarta.mail.Message;
-import jakarta.mail.MessagingException;
-import jakarta.mail.PasswordAuthentication;
-import jakarta.mail.Session;
-import jakarta.mail.Transport;
-import jakarta.mail.internet.AddressException;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeMessage;
 import lombok.Cleanup;
 
 @Service
@@ -65,30 +66,32 @@ public class Utility {
 		fileWriter.append(formModel.getLatitude() + ", ");
 		fileWriter.append(formModel.getLongitude() + "\n");
 	}
-	
-	private static String generateRandomEmail(int length) {
-        final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        StringBuilder stringBuilder = new StringBuilder();
-        Random random = new Random();
-        while (stringBuilder.length() < length) { 
-            stringBuilder.append(CHARACTERS.charAt((int)(random.nextFloat() * CHARACTERS.length())));
-        }
-        return stringBuilder.toString().toLowerCase() + "@gmail.com";
-    }
 
-	public void sendEmail(String recipientEmail, String content) throws AddressException, MessagingException, IOException {
+	private static String generateRandomEmail(int length) {
+		final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		StringBuilder stringBuilder = new StringBuilder();
+		Random random = new Random();
+		while (stringBuilder.length() < length) {
+			stringBuilder.append(CHARACTERS.charAt((int) (random.nextFloat() * CHARACTERS.length())));
+		}
+		return stringBuilder.toString().toLowerCase() + "@gmail.com";
+	}
+
+	public void sendEmail(String recipientEmail, String content)
+			throws AddressException, MessagingException, IOException {
 		Properties properties = new Properties();
 		properties.put("mail.smtp.auth", "true");
 		properties.put("mail.smtp.starttls.enable", "true");
 		properties.put("mail.smtp.host", "smtp.mailtrap.io");
 		properties.put("mail.smtp.port", "2525");
 
-		final Session session = Session.getInstance(properties, new jakarta.mail.Authenticator() {
+		final Session session = Session.getInstance(properties, new javax.mail.Authenticator() {
+			@Override
 			protected PasswordAuthentication getPasswordAuthentication() {
 				return new PasswordAuthentication("9a4f765dbe185a", "929d826701bafa");
 			}
 		});
-		
+
 		Message message = new MimeMessage(session);
 		message.setFrom(new InternetAddress(generateRandomEmail(16), false));
 		message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));

@@ -17,7 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@SuppressWarnings("deprecation")
 public class SpringBootRestConfigurerAdapter extends WebSecurityConfigurerAdapter {
 
 	@Autowired

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
+import javax.mail.MessagingException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +33,6 @@ import com.example.repository.ListaComuniRepository;
 import com.example.repository.TablesRepository;
 import com.example.repository.UserRepository;
 
-import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
 
 @CrossOrigin(origins = "http://localhost:4200")

@@ -27,7 +27,6 @@ export class StreetviewComponent implements OnInit {
       layers: [
         new TileLayer({
           source: new XYZ({
-            //https://{s}.google.com/vt/lyrs=m@221097413,transit&x={x}&y={y}&z={z}
             url: 'https://mt{0-3}.google.com/vt/lyrs=m@221097413,transit&x={x}&y={y}&z={z}',
           }),
         }),
