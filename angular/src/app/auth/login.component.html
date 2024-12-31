@@ -1,26 +1,17 @@
-<div class="bg">
-<div class="card my-5" style="height: 90%;border: none; border-radius: 150px;">
-  <div class="card-body" style="margin-top: 160px">
-    <form (ngSubmit)="onSubmit()" #loginForm="ngForm" autocomplete="off">
-      <div class="form-group text-center">
-        <h1>
-          Welcome to my web application!<br /><br />Please login to continue
-        </h1>
-        <br />
-        <mat-icon matSuffix>expand_more</mat-icon>
-        <br />
-        <br /><br />
-        <mat-form-field
-          appearance="outline"
-          style="width: 60%; outline: none; text-align: center">
+<div class="modern-bg">
+  <div class="modern-card shadow-lg">
+    <div class="card-header text-center py-5">
+      <h1 class="display-4">Welcome Back!</h1>
+      <p class="lead">Please login to access your account</p>
+    </div>
+    <div class="card-body px-5 py-6">
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm" autocomplete="off">
+        <!-- Email Field -->
+        <mat-form-field appearance="outline" class="w-100 mb-4">
           <mat-label>Email</mat-label>
           <input
             type="email"
             [(ngModel)]="loginRequest.username"
-            email="true"
-            #tooltip="matTooltip"
-            matTooltip="Email"
-            [matTooltipPosition]="'above'"
             id="username"
             name="username"
             placeholder="Enter your email address"
@@ -30,26 +21,20 @@
             matRipple
             minlength="3"
             maxlength="100"
-            />
+          />
           <mat-icon matSuffix>email</mat-icon>
-          <mat-error *ngIf="loginRequest.username || !loginRequest.username">Wrong
-            email grammar</mat-error>
+          <mat-error *ngIf="email.invalid && email.touched">
+            Please enter a valid email.
+          </mat-error>
         </mat-form-field>
-      </div>
-      <br /><br /><br />
-      <div class="form-group text-center">
-        <mat-form-field
-          appearance="outline"
-          style="width: 50%; outline: none; text-align: center">
+
+        <!-- Password Field -->
+        <mat-form-field appearance="outline" class="w-100 mb-4">
           <mat-label>Password</mat-label>
           <input
             type="password"
             [(ngModel)]="loginRequest.password"
-            #tooltip="matTooltip"
-            matTooltip="Password"
-            [matTooltipPosition]="'above'"
             id="password"
-            autocomplete="off"
             name="password"
             placeholder="Enter your password"
             required
@@ -58,33 +43,27 @@
             matRipple
             minlength="8"
             maxlength="16"
-            />
+          />
           <mat-icon matSuffix>lock</mat-icon>
-          <mat-error *ngIf="loginRequest.password || !loginRequest.password">Password
-            too short</mat-error>
+          <mat-error *ngIf="password.invalid && password.touched">
+            Password must be at least 8 characters long.
+          </mat-error>
         </mat-form-field>
-      </div>
-      <br /><br />
-      <div class="d-flex justify-content-center">
-        <button
-          type="submit"
-          [disabled]="!loginForm.form.valid"
-          #tooltip="matTooltip"
-          matTooltip="Login"
-          [matTooltipPosition]="'below'"
-          mat-raised-button
-          style="
-          height: 40px;
-          width: 260px;
-          border-radius: 50px;
-          margin-left: 20px;
-          "
-          color="primary">
-          <label>Login</label>&nbsp;
-          <mat-icon matSuffix>login</mat-icon>
-        </button>
-      </div>
-    </form>
+
+        <!-- Submit Button -->
+        <div class="text-center mt-4">
+          <button
+            type="submit"
+            [disabled]="!loginForm.form.valid"
+            mat-raised-button
+            color="primary"
+            class="px-6 py-3 rounded-full text-white font-bold shadow-lg hover:shadow-xl"
+          >
+            Login
+            <mat-icon matSuffix>login</mat-icon>
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 </div>

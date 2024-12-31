@@ -1,27 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import StreetView from 'ol-street-view';
-import { defaults as overviewControls, OverviewMap } from 'ol/control';
-import TileLayer from 'ol/layer/Tile';
 import Map from 'ol/Map';
-import 'ol/ol.css';
+import View from 'ol/View';
+import { defaults as defaultControls, OverviewMap } from 'ol/control';
+import TileLayer from 'ol/layer/Tile';
 import { fromLonLat } from 'ol/proj';
 import XYZ from 'ol/source/XYZ';
-import View from 'ol/View';
 
 @Component({
   selector: 'app-streetview',
-  template: '<div id="map" oncontextmenu="return false"></div>',
-  styleUrls: ['./streetview.component.css']
+  template:
+    '<div #mapContainer id="map" class="map-container" oncontextmenu="return false"></div>',
+  styleUrls: ['./streetview.component.css'],
 })
-export class StreetviewComponent implements OnInit {
-  ngOnInit(): void {
-    if (!localStorage.getItem('reload')) {
-      localStorage.setItem('reload', 'no reload');
-      location.reload();
-    } else {
-      localStorage.removeItem('reload');
-    }
+export class StreetviewComponent implements AfterViewInit {
+  @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef;
 
+  ngAfterViewInit(): void {
+    this.initializeMap();
+  }
+
+  private initializeMap(): void {
     const overviewMapControl = new OverviewMap({
       className: 'ol-overviewmap ol-custom-overviewmap',
       layers: [
@@ -36,20 +35,18 @@ export class StreetviewComponent implements OnInit {
       collapsed: false,
     });
 
-    var map = new Map({
-      controls: overviewControls().extend([overviewMapControl]),
+    const map = new Map({
+      target: this.mapContainer.nativeElement,
       layers: [
         new TileLayer({
-          maxZoom: 19,
           source: new XYZ({
             attributions: `&copy; ${new Date().getFullYear()} Google Maps <a href="https://www.google.com/help/terms_maps/" target="_blank">Terms of Service</a>`,
             url: 'https://mt{0-3}.google.com/vt/lyrs=m@221097413,transit&x={x}&y={y}&z={z}',
           }),
         }),
       ],
-      target: 'map',
       view: new View({
-        center: fromLonLat([9.173, 45.481]),
+        center: fromLonLat([9.173, 45.481]), // Coordinates for Milan, Italy
         zoom: 13,
         minZoom: 6,
         maxZoom: 19,
@@ -57,16 +54,18 @@ export class StreetviewComponent implements OnInit {
         constrainResolution: true,
         constrainOnlyCenter: true,
       }),
+      controls: defaultControls().extend([overviewMapControl]),
     });
 
-    var streetView = new StreetView({
-      apiKey: '',
+    const streetView = new StreetView({
+      apiKey: '', // Add your Google Maps API key here
       language: 'en',
       size: 'sm',
       resizable: true,
       sizeToggler: true,
-      target: 'map',
+      target: this.mapContainer.nativeElement,
     });
+
     map.addControl(streetView);
   }
 }

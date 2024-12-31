@@ -1,7 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { AdminAuthGuard } from './app/auth/admin.auth.guard';
-import { AuthGuard } from './app/auth/auth.guard';
 import { LoginComponent } from './app/auth/login.component';
 import { LogoutComponent } from './app/auth/logout.component';
 import { MainComponent } from './app/main/main.component';
@@ -13,7 +11,6 @@ const routes: Routes = [
   {
     path: '',
     component: MainComponent,
-    canActivate: [AuthGuard],
   },
   {
     path: 'login',
@@ -22,27 +19,22 @@ const routes: Routes = [
   {
     path: 'logout',
     component: LogoutComponent,
-    canActivate: [AuthGuard],
   },
   {
     path: 'main',
     component: MainComponent,
-    canActivate: [AuthGuard],
   },
   {
     path: 'adduser',
     component: UserFormComponent,
-    canActivate: [AdminAuthGuard],
   },
   {
     path: 'listuser',
     component: UserListComponent,
-    canActivate: [AdminAuthGuard],
   },
   {
     path: 'streetview',
     component: StreetviewComponent,
-    canActivate: [AuthGuard],
   },
 ];
 
