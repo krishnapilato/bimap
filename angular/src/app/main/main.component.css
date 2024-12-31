@@ -22,6 +22,7 @@
 
 /* Input Card */
 .input-card {
+  box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2); /* Optional shadow for better focus */
   opacity: 0.98;
   width: 350px;
   border-radius: 16px;
@@ -86,4 +87,8 @@
 
 .btn-close:hover {
   color: #000;
+}
+
+textarea {
+    resize: none;
 }
