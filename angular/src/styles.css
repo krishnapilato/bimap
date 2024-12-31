@@ -47,6 +47,10 @@ button:hover {
     border-radius: 10px;
 }
 
+body {
+  background: linear-gradient(135deg, #000000, #ffffff) !important; /* Dark gradient */
+}
+
 #ol-street-view--panorama {
     display: none;
     background-color: #555555 !important;
