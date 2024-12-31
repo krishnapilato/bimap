@@ -68,3 +68,13 @@ button:hover {
     -webkit-filter: invert(1);
     filter: invert(1);
 }
+
+.mat-option{
+  word-wrap:break-word !important;
+  white-space:normal !important;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.mat-option-text{
+  line-height:initial !important;
+}

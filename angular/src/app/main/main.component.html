@@ -1,423 +1,95 @@
-<div class="wrap" sytòe="margin-top: 2000px;">
-  <div class="fleft">
-    <form style="margin-left: 50px;margin-top: 50px;" autocomplete="off">
-      <h3 class="text-center">data enter area</h3>
-      <h6
-        style="font-weight: none; font-size: 10px;text-align: center;"
-        #tooltip="matTooltip"
-        matTooltip="duble click on map to insert coordinates"
-        [matTooltipPosition]="'right'"
-      >
-        duble click on map to insert coordinates
-      </h6>
+<div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light position-relative">
+  <!-- Map Section -->
+  <div class="map-container position-relative">
+    <div id="map" class="map w-100 h-100"></div>
 
-      <br /><br /><br />
-
-      <mat-form-field class="thirty" appearance="outline" class="text-center">
-        <mat-label>Region</mat-label>
-        <input
-          type="text"
-          #tooltip="matTooltip"
-          matTooltip="Region"
-          [matTooltipPosition]="'above'"
-          placeholder="Pick one region"
-          required
-          matInput
-          [formControl]="searchRegions"
-          [matAutocomplete]="auto"
-        />
-        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-          <mat-option *ngFor="let region of provinces" [value]="region">
-            {{ region }}
-          </mat-option>
-        </mat-autocomplete>
-        <mat-icon matSuffix>pin_drop</mat-icon>
-        <mat-error *ngIf="searchRegions.hasError('required')"
-          >Please select a region</mat-error
-        >
-      </mat-form-field>
-      <br /><br />
-
-      <mat-form-field class="thirty" appearance="outline" class="text-center">
-        <mat-label>Province</mat-label>
-        <input
-          type="text"
-          #tooltip="matTooltip"
-          matTooltip="Province"
-          [matTooltipPosition]="'above'"
-          placeholder="Pick one province"
-          required
-          aria-label="province"
-          matInput
-          [formControl]="searchTerm"
-          [matAutocomplete]="auto"
-        />
-        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-          <mat-option *ngFor="let province of provinces" [value]="province">
-            {{ province }}
-          </mat-option>
-        </mat-autocomplete>
-        <mat-icon matSuffix>pin_drop</mat-icon>
-        <mat-error *ngIf="searchTerm.hasError('required')"
-          >Please select a province</mat-error
-        >
-      </mat-form-field>
-
-      <br /><br />
-
-      <mat-form-field class="thirty" appearance="outline" class="text-center">
-        <mat-label>Municipality</mat-label>
-        <input
-          type="text"
-          id="municipality"
-          #tooltip="matTooltip"
-          matTooltip="Municipality"
-          [matTooltipPosition]="'above'"
-          placeholder="Pick one municipality"
-          required
-          matInput
-          [formControl]="searchMunicipalities"
-          [matAutocomplete]="auto"
-        />
-        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-          <mat-option
-            *ngFor="let municipality of provinces"
-            [value]="municipality"
-          >
-            {{ municipality }}
-          </mat-option>
-        </mat-autocomplete>
-        <mat-icon matSuffix>pin_drop</mat-icon>
-        <mat-error *ngIf="searchMunicipalities.hasError('required')"
-          >Please select a municipality</mat-error
-        >
-      </mat-form-field>
-
-      <br /><br />
-
-      <mat-form-field
-        appearance="outline"
-        style="display: inline-block;width:86%;"
-        class="text-center"
-      >
-        <mat-label>Address</mat-label>
-        <input
-          matInput
-          #tooltip="matTooltip"
-          matTooltip="Address"
-          [matTooltipPosition]="'above'"
-          id="address"
-          [formControl]="address"
-          placeholder="Ex. Via Umberto I"
-          required
-          (focusout)="focusOutFunction()"
-        />
-        <mat-icon matSuffix>home</mat-icon>
-        <mat-error *ngIf="address.hasError('required')"
-          >Please write an address</mat-error
-        >
-      </mat-form-field>
-      <mat-form-field
-        appearance="outline"
-        style="display: inline-block;margin-left:6px;width:60px;"
-        class="text-center"
-      >
-        <mat-label>N°</mat-label>
-        <input
-          type="number"
-          minlength="1"
-          [formControl]="number"
-          id="streetnumber"
-          matInput
-          #tooltip="matTooltip"
-          matTooltip="Street Number"
-          [matTooltipPosition]="'above'"
-          placeholder="Ex. 54"
-          required
-        />
-        <mat-error *ngIf="number.hasError('required')">Mssing</mat-error>
-      </mat-form-field>
-
-      <br /><br />
-
-      <mat-form-field class="thirty" appearance="outline" class="text-center">
-        <mat-label>Good naming</mat-label>
-        <input
-          matInput
-          #tooltip="matTooltip"
-          matTooltip="Good name"
-          [matTooltipPosition]="'above'"
-          [formControl]="goodNaming"
-          placeholder="Ex. Chiesa di Santo Stefano"
-          required
-        />
-        <mat-error *ngIf="goodNaming.hasError('required')"
-          >Please write a good name</mat-error
-        >
-      </mat-form-field>
-
-      <br /><br />
-
-      <mat-form-field class="thirty" appearance="outline" class="text-center">
-        <mat-label>Good ID</mat-label>
-        <input
-          type="number"
-          #tooltip="matTooltip"
-          matTooltip="Good ID"
-          [matTooltipPosition]="'above'"
-          [formControl]="gooodId"
-          matInput
-          placeholder="Ex. 3614"
-          required
-          min="3614"
-          max="7438"
-        />
-        <mat-icon matSuffix>badge</mat-icon>
-        <mat-error
-          *ngIf="
-            gooodId.hasError('required') ||
-            gooodId.hasError('min') ||
-            gooodId.hasError('max')
-          "
-          >Please write a good ID (between 3614 and 7438)</mat-error
-        >
-      </mat-form-field>
-
-      <br /><br />
-
-      <mat-form-field class="thirty" appearance="outline" class="text-center">
-        <mat-label>Istat Code</mat-label>
-        <input
-          (input)="istatCode.setValue(istatCode.value.toUpperCase())"
-          type="text"
-          #tooltip="matTooltip"
-          matTooltip="ISTAT Code"
-          [matTooltipPosition]="'above'"
-          matRipple
-          matInput
-          [formControl]="istatCode"
-          placeholder="Ex. K8443H"
-          required
-          minlength="10"
-          maxlength="10"
-        />
-        <mat-icon matSuffix>code</mat-icon>
-        <mat-error
-          *ngIf="
-            istatCode.hasError('required') ||
-            !istatCode.hasError('minlength') ||
-            !istatCode.hasError('maxlength')
-          "
-        >
-          Please write an Istat Code (10 chars)</mat-error
-        >
-      </mat-form-field>
-
-      <br /><br />
-
-      <mat-form-field
-        appearance="outline"
-        style="display: inline-block;width:50%;"
-        class="text-center"
-      >
-        <mat-label>Latitude</mat-label>
-        <input
-          type="number"
-          class="text-center"
-          #tooltip="matTooltip"
-          matTooltip="Latitude"
-          [matTooltipPosition]="'above'"
-          matInput
-          placeholder="Ex. 46422694626503"
-          id="latitude"
-          readonly="readonly"
-          value="0"
-          required
-        />
-        <mat-icon matSuffix>more_horiz</mat-icon>
-      </mat-form-field>
-      <mat-form-field
-        appearance="outline"
-        style="display: inline-block;width:50%;"
-        class="text-center"
-      >
-        <mat-label>Longitude</mat-label>
-        <input
-          type="number"
-          class="text-center"
-          matInput
-          #tooltip="matTooltip"
-          matTooltip="Longitude"
-          [matTooltipPosition]="'above'"
-          placeholder="Ex. 9.190426284267904"
-          id="longitude"
-          readonly="readonly"
-          value="0"
-          required
-        />
-        <mat-icon matSuffix>more_vert</mat-icon>
-      </mat-form-field>
-
-      <br /><br /><br />
-
-      <div class="d-flex justify-content-center">
+    <!-- Floating Input Card -->
+    <div
+      class="input-card bg-white shadow-lg rounded-lg p-4 position-absolute"
+      [class.hidden]="!isCardVisible"
+    >
+      <!-- Card Header -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Data Input Panel</h5>
         <button
-          #tooltip="matTooltip"
-          matTooltip="Save"
-          [matTooltipPosition]="'below'"
-          mat-raised-button
-          style="height:40px;width: 460px;border-radius: 50px;"
-          color="primary"
-          (click)="saveData()"
+          class="btn-close"
+          matTooltip="Close the input panel"
+          matTooltipPosition="left"
+          (click)="toggleCard()"
         >
-          <mat-icon>save</mat-icon>
+          <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
-    </form>
-  </div>
-  <div class="fright" id="map" oncontextmenu="return false"></div>
-</div>
+      <!-- Autocomplete Fields -->
+      <form>
+        <!-- Regions -->
+        <mat-form-field appearance="fill" class="w-100 mb-3">
+          <mat-label>Select Region</mat-label>
+          <input
+            matInput
+            [matAutocomplete]="regionAutocomplete"
+            [(ngModel)]="selectedRegion"
+            (ngModelChange)="onRegionChange($event)"
+            name="region"
+            placeholder="Choose a region"
+          />
+          <mat-autocomplete #regionAutocomplete="matAutocomplete">
+            <mat-option *ngFor="let region of filteredRegions" [value]="region">
+              {{ region }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
 
-<br /><br />
-<div class="d-flex justify-content-center">
-  <mat-form-field class="text-center" appearance="outline" style="width: 50%;">
-    <mat-label>Filter data in table</mat-label>
-    <input
-      autocomplete="off"
-      class="text-center"
-      matInput
-      (keyup)="applyFilter($event)"
-      #tooltip="matTooltip"
-      matTooltip="Filter data in table"
-      [matTooltipPosition]="'above'"
-      matTooltipHideDelay="100"
-      placeholder="Ex. AL"
-      #input
-    />
-    <mat-icon matSuffix>search</mat-icon>
-  </mat-form-field>
-</div>
+        <!-- Provinces -->
+        <mat-form-field appearance="fill" class="w-100 mb-3">
+          <mat-label>Select Province</mat-label>
+          <input
+            matInput
+            [matAutocomplete]="provinceAutocomplete"
+            [(ngModel)]="selectedProvince"
+            (ngModelChange)="onProvinceChange($event)"
+            name="province"
+            placeholder="Choose a province"
+          />
+          <mat-autocomplete #provinceAutocomplete="matAutocomplete">
+            <mat-option *ngFor="let province of filteredProvinces" [value]="province">
+              {{ province }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
 
-<div class="d-flex justify-content-center">
-  Double click on row to insert on form
-</div>
-<br /><br />
-<div class="table-container mat-elevation-z8" oncontextmenu="return false">
-  <table
-    #tooltip="matTooltip"
-    matTooltip="Table Content"
-    [matTooltipPosition]="'above'"
-    mat-table
-    [dataSource]="dataSource"
-    matSort
-    matSortActive="created"
-    matSortDisableClear
-    matSortDirection="desc"
-  >
-    <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-      <td mat-cell *matCellDef="let row">{{ row.id }}</td>
-    </ng-container>
-    <ng-container matColumnDef="comune">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Municipality</th>
-      <td mat-cell *matCellDef="let row">{{ row.comune }}</td>
-    </ng-container>
-    <ng-container matColumnDef="prov">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Province</th>
-      <td mat-cell *matCellDef="let row">{{ row.prov }}</td>
-    </ng-container>
-    <ng-container matColumnDef="indirizzo">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Address</th>
-      <td mat-cell *matCellDef="let row">{{ row.indirizzo }}</td>
-    </ng-container>
-    <ng-container matColumnDef="civico">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Street Number</th>
-      <td mat-cell *matCellDef="let row">{{ row.civico }}</td>
-    </ng-container>
+        <!-- Cities -->
+        <mat-form-field appearance="fill" class="w-100 mb-3">
+          <mat-label>Select City</mat-label>
+          <input
+            matInput
+            [matAutocomplete]="cityAutocomplete"
+            [(ngModel)]="selectedCity"
+            name="city"
+            placeholder="Choose a city"
+          />
+          <mat-autocomplete #cityAutocomplete="matAutocomplete">
+            <mat-option *ngFor="let city of filteredCities" [value]="city">
+              {{ city }}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr
-      (dblclick)="getRecord(row)"
-      mat-row
-      *matRowDef="let row; columns: displayedColumns"
-    ></tr>
+        <!-- Button -->
+        <button class="btn btn-primary btn-lg w-100 fw-bold">Submit</button>
+      </form>
+    </div>
 
-    <tr class="mat-row" *matNoDataRow>
-      <td class="mat-cell" colspan="4">
-        No data matching the filter "{{ input.value }}"
-      </td>
-    </tr>
-  </table>
-</div>
-<mat-paginator
-  #tooltip="matTooltip"
-  matTooltip="PageTable Options"
-  [matTooltipPosition]="'below'"
-  showFirstLastButtons
-  [pageSizeOptions]="[5, 10, 25, 50, 100]"
-></mat-paginator>
-<div class="d-flex justify-content-center">
-  <button
-    *ngIf="user.user.applicationRole === 'ADMINISTRATOR'"
-    #tooltip="matTooltip"
-    matTooltip="Admin Dashboard"
-    [matTooltipPosition]="'left'"
-    mat-raised-button
-    style="height:40px;width: 60px;border-radius: 50px;"
-    color="primary"
-    routerLink="/listuser"
-  >
-    <mat-icon>admin_panel_settings</mat-icon>
-  </button>
-  <button
-    #tooltip="matTooltip"
-    matTooltip="StreetView Map (separated)"
-    [matTooltipPosition]="'below'"
-    mat-raised-button
-    style="margin-left: 20px;height:40px;width: 60px;border-radius: 50px;"
-    color="primary"
-    routerLink="/streetview"
-  >
-    <mat-icon>streetview</mat-icon>
-  </button>
-  <button
-    #tooltip="matTooltip"
-    matTooltip="Logout"
-    [matTooltipPosition]="'right'"
-    mat-raised-button
-    style="margin-bottom: -150px;height:40px;width: 60px;border-radius: 50px; margin-left:20px; margin-bottom: 50px;"
-    color="accent"
-    routerLink="/logout"
-  >
-    <mat-icon>exit_to_app</mat-icon>
-  </button>
-</div>
-<div class="d-flex justify-content-center">
-  <mat-slide-toggle color="primary" (click)="toggleShow()"
-    >Open StreetView below</mat-slide-toggle
-  >
-</div>
-<div
-  *ngIf="isShown"
-  id="divshow"
-  style="margin-top: 10px; width: 100%; height: 100%;"
->
-  <iframe
-    id="iframe"
-    src="http://localhost:4200/streetview"
-    style="margin-top: 50px; width: 100%; height: 100%;"
-  ></iframe>
-  <div class="d-flex justify-content-center">
+    <!-- Floating Action Button -->
     <button
-      #tooltip="matTooltip"
-      matTooltip="Back to top"
-      [matTooltipPosition]="'left'"
-      (click)="scrollToTop()"
-      mat-raised-button
-      style="width: 360px;border-radius: 5px;"
-      color="primary"
+      class="floating-action-btn"
+      *ngIf="!isCardVisible"
+      (click)="toggleCard()"
+      matTooltip="Click to open the input panel"
+      matTooltipPosition="above"
+      aria-label="Open Input Panel"
     >
-      <mat-icon>arrow_upward</mat-icon>
+      <mat-icon>edit</mat-icon>
     </button>
   </div>
 </div>

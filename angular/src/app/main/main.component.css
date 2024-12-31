@@ -1,89 +1,81 @@
-@import "~bootstrap/dist/css/bootstrap.css";
-@import "ol-street-view/lib/style/css/ol-street-view.css";
-
-input {
-  color: #4285f4;
-  user-select: none;
-  font-weight: bold;
-}
-
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none !important;
-  margin: 0 !important;
-}
-
-.thirty {
-  width: 80%;
-  border-radius: 65px;
-}
-
-.btn {
-  width: 80%;
-  outline: none;
-  border: none;
-  outline: none !important;
-}
-
-.btn:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-#map {
-  cursor: default;
-  height: 1000px;
-  outline: none;
-  width: 68%;
-  border-radius: 1%;
-  border: none;
-}
-
-#map:active {
-  cursor: move !important;
-}
-
-.wrap {
+/* Map Container */
+.map-container {
   width: 100%;
-  overflow: auto;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
 }
 
-.fleft {
-  float: left;
-  width: 30%;
+/* Map */
+.map {
+  width: 100%;
   height: 100%;
 }
 
-.fright {
-  margin-top: 20px;
-  margin-right: 10px;
-  float: right;
-  width: 70%;
-  height: 100%;
+/* Input Card */
+.input-card {
+  opacity: 0.98;
+  width: 350px;
+  border-radius: 16px;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-.mat-row:hover {
-  font-weight: bold;
-  font-size: 50px;
+.input-card.hidden {
+  transform: translateX(150%);
+  opacity: 0;
 }
 
-table {
-  width: 100%;
-  overflow: auto;
+/* Floating Action Button */
+.floating-action-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #000000, #2b2e31);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: none;
+  z-index: 1000;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.mat-form-field {
-  font-size: 14px;
-  width: 100%;
+.floating-action-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
 }
 
-td,
-th {
-  width: 25%;
+/* Form Controls */
+.form-control {
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: border-color 0.3s ease;
 }
 
-.table-container {
-  margin-top: 10px;
-  max-height: 300px;
-  overflow: auto;
+.form-control:focus {
+  border-color: #2196f3;
+  box-shadow: 0 0 5px rgba(33, 150, 243, 0.5);
+}
+
+/* Close Button */
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: #333;
+  cursor: pointer;
+}
+
+.btn-close:hover {
+  color: #000;
 }
