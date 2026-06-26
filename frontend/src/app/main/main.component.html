@@ -1,0 +1,336 @@
+<mat-sidenav-container class="layout-container">
+  <mat-sidenav #sidenav mode="side" opened class="form-sidenav">
+    <div class="form-wrapper">
+      <h2>Form Fields</h2>
+      <p>Enter data below:</p>
+      <br />
+      <form #form="ngForm" autocomplete="off" class="form">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Region</mat-label>
+          <mat-icon matPrefix>landscape</mat-icon>
+          <input
+            matInput
+            type="text"
+            id="region"
+            name="region"
+            [formControl]="searchRegions"
+            [matAutocomplete]="auto"
+            placeholder="Search for a region"
+            minlength="1"
+          />
+          <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+            @for (region of provinces; track region) {
+              <mat-option [value]="region">
+                {{ region }}
+              </mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+        <br />
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Province</mat-label>
+          <mat-icon matPrefix>location_city</mat-icon>
+          <input
+            matInput
+            type="text"
+            id="province"
+            name="province"
+            [formControl]="searchTerm"
+            [matAutocomplete]="autoProvince"
+            placeholder="Search for a province"
+            minlength="1"
+          />
+          <mat-autocomplete autoActiveFirstOption #autoProvince="matAutocomplete">
+            @for (province of provinces; track province) {
+              <mat-option [value]="province">
+                {{ province }}
+              </mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+        <br />
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>Municipality</mat-label>
+          <mat-icon matPrefix>place</mat-icon>
+          <input
+            matInput
+            type="text"
+            id="municipality"
+            name="municipality"
+            [formControl]="searchMunicipalities"
+            [matAutocomplete]="autoMunicipality"
+            placeholder="Search for a municipality"
+            minlength="1"
+          />
+          <mat-autocomplete autoActiveFirstOption #autoMunicipality="matAutocomplete">
+            @for (municipality of provinces; track municipality) {
+              <mat-option [value]="municipality">
+                {{ municipality }}
+              </mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
+        <br />
+        <mat-form-field appearance="outline" style="display: inline-block; width: 90%">
+          <mat-label>Address</mat-label>
+          <mat-icon matPrefix>home</mat-icon>
+          <input
+            matInput
+            #tooltip="matTooltip"
+            matTooltip="Address"
+            [matTooltipPosition]="'above'"
+            id="address"
+            [formControl]="address"
+            placeholder="Enter your address"
+            (focusout)="focusOutFunction()"
+          />
+        </mat-form-field>
+        <mat-form-field
+          appearance="outline"
+          style="display: inline-block; margin-left: 5px; width: 4.4rem"
+          class="text-center"
+        >
+          <mat-label>N°</mat-label>
+          <input
+            type="number"
+            min="1"
+            [formControl]="number"
+            id="streetnumber"
+            matInput
+            #tooltip="matTooltip"
+            matTooltip="Street Number"
+            [matTooltipPosition]="'above'"
+            placeholder="12"
+          />
+        </mat-form-field>
+        <mat-form-field
+          style="margin-top: 5rem"
+          class="thirty"
+          appearance="outline"
+          class="text-center"
+        >
+          <mat-label>Good naming</mat-label>
+          <mat-icon matPrefix>badge</mat-icon>
+          <input
+            matInput
+            #tooltip="matTooltip"
+            matTooltip="Good name"
+            placeholder="Enter a good name"
+            [matTooltipPosition]="'above'"
+            [formControl]="goodNaming"
+          />
+        </mat-form-field>
+        <br />
+        <mat-form-field class="thirty" appearance="outline" class="text-center">
+          <mat-label>Good ID</mat-label>
+          <mat-icon matPrefix>format_list_numbered_rtl</mat-icon>
+          <input
+            type="number"
+            #tooltip="matTooltip"
+            matTooltip="Good ID"
+            [matTooltipPosition]="'above'"
+            [formControl]="gooodId"
+            placeholder="Enter a number between 3614 and 7438"
+            matInput
+            min="3614"
+            max="7438"
+          />
+        </mat-form-field>
+        <br />
+        <mat-form-field class="thirty" appearance="outline" class="text-center">
+          <mat-label>Istat Code</mat-label>
+          <input
+            (input)="istatCode.setValue(istatCode.value.toUpperCase())"
+            type="text"
+            #tooltip="matTooltip"
+            matTooltip="ISTAT Code (058091)"
+            [matTooltipPosition]="'above'"
+            placeholder="Enter an ISTAT code"
+            matRipple
+            matInput
+            [formControl]="istatCode"
+            minlength="6"
+            maxlength="6"
+          />
+          <mat-icon matPrefix>qr_code</mat-icon>
+        </mat-form-field>
+
+        <p style="margin-top: 5rem">
+          To fill these fields, please double-click your desired location on the map:
+        </p>
+        <br />
+        <mat-form-field appearance="outline" class="text-center form-field">
+          <mat-label>Latitude</mat-label>
+          <mat-icon matPrefix>explore</mat-icon>
+          <input
+            type="number"
+            class="text-center"
+            matTooltip="Latitude"
+            [matTooltipPosition]="'above'"
+            matInput
+            placeholder="46422694626503"
+            id="latitude"
+            readonly="readonly"
+            [formControl]="ilatitude"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="text-center form-field">
+          <mat-label>Longitude</mat-label>
+          <mat-icon matPrefix>explore</mat-icon>
+          <input
+            type="number"
+            class="text-center"
+            matInput
+            matTooltip="Longitude"
+            [matTooltipPosition]="'above'"
+            placeholder="9.190426284267904"
+            id="longitude"
+            readonly="readonly"
+            [formControl]="ilongitude"
+          />
+        </mat-form-field>
+
+        <div style="margin-top: 1rem" class="d-flex justify-content-center">
+          <button
+            #tooltip="matTooltip"
+            matTooltip="Save"
+            [matTooltipPosition]="'below'"
+            mat-raised-button
+            style="height: 40px; width: 20rem; border-radius: 50px"
+            color="primary"
+            (click)="saveData()"
+          >
+            Save <mat-icon matPrefix>save</mat-icon>
+          </button>
+        </div>
+      </form>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <div id="map" class="map-container"></div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+<div class="table-wrapper">
+  
+  <div class="table-container mat-elevation-z8" oncontextmenu="return false">
+    
+    <table
+      mat-table
+      [dataSource]="dataSource"
+      matSort
+      matSortActive="created"
+      matSortDisableClear
+      matSortDirection="desc"
+    >
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+        <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="comune">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Municipality</th>
+        <td mat-cell *matCellDef="let row">{{ row.comune }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="prov">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Province</th>
+        <td mat-cell *matCellDef="let row">{{ row.prov }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="indirizzo">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Address</th>
+        <td mat-cell *matCellDef="let row">{{ row.indirizzo }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="civico">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Street Number</th>
+        <td mat-cell *matCellDef="let row">{{ row.civico }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      
+      <tr
+        mat-row
+        class="clickable-row"
+        *matRowDef="let row; columns: displayedColumns"
+        (dblclick)="getRecord(row)"
+      ></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-cell" colspan="5">
+          No data matching the filter
+        </td>
+      </tr>
+    </table>
+
+    <mat-paginator
+      matTooltip="Page Options"
+      matTooltipPosition="below"
+      showFirstLastButtons
+      [pageSizeOptions]="[5, 10, 25, 50, 100]"
+    ></mat-paginator>
+
+  </div>
+</div>
+<div class="action-bar">
+  
+  @if (user.user.applicationRole === 'ADMINISTRATOR') {
+    <button
+      mat-mini-fab
+      color="primary"
+      matTooltip="Admin Dashboard"
+      matTooltipPosition="left"
+      routerLink="/listuser"
+    >
+      <mat-icon>admin_panel_settings</mat-icon>
+    </button>
+  }
+
+  <button
+    mat-mini-fab
+    color="primary"
+    matTooltip="StreetView Map"
+    matTooltipPosition="below"
+    routerLink="/streetview"
+  >
+    <mat-icon>streetview</mat-icon>
+  </button>
+
+  <button
+    mat-mini-fab
+    color="warn" 
+    matTooltip="Logout"
+    matTooltipPosition="right"
+    routerLink="/logout"
+  >
+    <mat-icon>exit_to_app</mat-icon>
+  </button>
+
+</div>
+<br /><br />
+
+<div class="d-flex justify-content-center">
+  <mat-slide-toggle color="secondary" (click)="toggleShow()">Open StreetView below</mat-slide-toggle>
+</div>
+
+@if (isShown) {
+  <div id="divshow" style="margin-top: 10px; width: 100%; height: 100%">
+    <iframe src="http://localhost:4200/streetview" style="width: 100%; height: 100%"></iframe>
+    <div class="d-flex justify-content-center">
+      <button
+        #tooltip="matTooltip"
+        matTooltip="Back to top"
+        [matTooltipPosition]="'left'"
+        (click)="scrollToTop()"
+        mat-raised-button
+        style="width: 360px; border-radius: 20px"
+        color="primary"
+      >
+        <mat-icon>arrow_upward</mat-icon> Back to top
+      </button>
+    </div>
+  </div>
+}

@@ -28,9 +28,9 @@ public class AppInit implements CommandLineRunner {
 	@Override
 	public void run(String... args) {
 
-		// Saving first new administrator
+		 // Saving first administrator
 
-		 /*Date now = new Date();
+		 Date now = new Date();
 		  
 		 User administrator = new User(); administrator.setName("Khova Krishna");
 		 administrator.setSurname("Pilato");
@@ -39,7 +39,7 @@ public class AppInit implements CommandLineRunner {
 		 administrator.setPassword(passwordEncoder.encode("12345678"));
 		 administrator.setUserStatus(UserStatus.CONFIRMED);
 		 administrator.setApplicationRole(ApplicationRole.ADMINISTRATOR);
-		 administrator.setKey("CIAOO"); userRepository.save(administrator);
+		 administrator.setKey("CIAOO"); saveIfMissing(administrator);
 		 
 		 // Saving other 4 users for testing 
 		 
@@ -50,7 +50,7 @@ public class AppInit implements CommandLineRunner {
 		 user2.setPassword(passwordEncoder.encode("12345678"));
 		 user2.setUserStatus(UserStatus.CONFIRMED);
 		 user2.setApplicationRole(ApplicationRole.ADMINISTRATOR);
-		 user2.setKey("JRU8sE4u3755xBsw"); userRepository.save(user2);
+		 user2.setKey("JRU8sE4u3755xBsw"); saveIfMissing(user2);
 		 
 		 User user3 = new User(); user3.setName("Test3"); user3.setSurname("Test");
 		 user3.setEmail("test.test3@gmail.com"); user3.setCreated(now);
@@ -58,7 +58,7 @@ public class AppInit implements CommandLineRunner {
 		 user3.setPassword(passwordEncoder.encode("12345678"));
 		 user3.setUserStatus(UserStatus.NOT_CONFIRMED);
 		 user3.setApplicationRole(ApplicationRole.USER);
-		 user3.setKey("J4evnj6ZKqLHJPFA"); userRepository.save(user3);
+		 user3.setKey("J4evnj6ZKqLHJPFA"); saveIfMissing(user3);
 		  
 		 User user4 = new User(); user4.setName("Test4"); user4.setSurname("Test");
 		 user4.setEmail("test.test4@gmail.com"); user4.setCreated(now);
@@ -66,7 +66,7 @@ public class AppInit implements CommandLineRunner {
 		 user4.setPassword(passwordEncoder.encode("12345678"));
 		 user4.setUserStatus(UserStatus.CONFIRMED);
 		 user4.setApplicationRole(ApplicationRole.USER);
-		 user4.setKey("FNFr6JbgPhMbxa2U"); userRepository.save(user4);
+		 user4.setKey("FNFr6JbgPhMbxa2U"); saveIfMissing(user4);
 		 
 		 User user5 = new User(); user5.setName("Test5"); user5.setSurname("Test");
 		 user5.setEmail("test.test5@gmail.com"); user5.setCreated(now);
@@ -74,6 +74,12 @@ public class AppInit implements CommandLineRunner {
 		 user5.setPassword(passwordEncoder.encode("12345678"));
 		 user5.setUserStatus(UserStatus.NOT_CONFIRMED);
 		 user5.setApplicationRole(ApplicationRole.MANAGER);
-		 user5.setKey("TSPyv7HL7RGwHnMf"); userRepository.save(user5);*/
+		 user5.setKey("TSPyv7HL7RGwHnMf"); saveIfMissing(user5);
+	}
+
+	private void saveIfMissing(User user) {
+		if (userRepository.findByEmailAddress(user.getEmail()).isEmpty()) {
+			userRepository.save(user);
+		}
 	}
 }

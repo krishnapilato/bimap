@@ -1,0 +1,134 @@
+<div style="width: 100%; padding: 2rem; box-sizing: border-box; font-family: Roboto, 'Helvetica Neue', sans-serif;">
+  
+  <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; font-weight: 500; color: #2c3e50; text-align: center;">
+    Edit User Data
+  </h2>
+  
+  <p style="margin: 0 0 2rem 0; font-size: 1rem; color: #555; text-align: center;">
+    You are editing user with ID <strong style="color: #3f51b5;">{{ globalID }}</strong>
+  </p>
+
+  <form autocomplete="off" style="display: flex; flex-direction: column; gap: 1.5rem;">
+    
+    <div style="display: flex; gap: 1rem; width: 100%;">
+      <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-label>Surname</mat-label>
+        <input
+          matInput
+          required
+          minlength="1"
+          maxlength="20"
+          type="text"
+          matTooltip="Surname"
+          matTooltipPosition="above"
+          [formControl]="surname"
+          placeholder="Ex. Pilato"
+        />
+        @if (surname.hasError('required') || surname.hasError('minlength') || surname.hasError('maxlength')) {
+          <mat-error>Please enter a valid surname</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="flex: 1;">
+        <mat-label>Name</mat-label>
+        <input
+          matInput
+          required
+          minlength="1"
+          maxlength="20"
+          type="text"
+          matTooltip="Name"
+          matTooltipPosition="above"
+          [formControl]="name"
+          placeholder="Ex. Krishna"
+        />
+        @if (name.hasError('required') || name.hasError('minlength') || name.hasError('maxlength')) {
+          <mat-error>Please enter a valid name</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" style="width: 100%;">
+      <mat-label>Email</mat-label>
+      <input
+        matInput
+        required
+        type="email"
+        email="true"
+        minlength="3"
+        maxlength="30"
+        matTooltip="Email"
+        matTooltipPosition="above"
+        [formControl]="email"
+        placeholder="Ex. krishnak.pilato@gmail.com"
+      />
+      @if (email.hasError('required') || email.hasError('email') || email.hasError('minlength') || email.hasError('maxlength')) {
+        <mat-error>Please enter a valid email</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" style="width: 100%;">
+      <mat-label>Application Role</mat-label>
+      <mat-select
+        required
+        [formControl]="applicationRole"
+        matTooltip="Application Role"
+        matTooltipPosition="above"
+      >
+        @for (approle of approles; track approle.value) {
+          <mat-option [value]="approle.value">
+            {{ approle.viewValue }}
+          </mat-option>
+        }
+      </mat-select>
+      @if (applicationRole.hasError('required')) {
+        <mat-error>Please select an Application Role</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" style="width: 100%;">
+      <mat-label>Password</mat-label>
+      <input
+        matInput
+        required
+        minlength="8"
+        maxlength="16"
+        type="password"
+        matTooltip="Password"
+        matTooltipPosition="above"
+        [formControl]="password"
+        placeholder="Ex. ********"
+      />
+      @if (password.hasError('required') || password.hasError('minlength') || password.hasError('maxlength')) {
+        <mat-error>Please enter a password (8-16 characters)</mat-error>
+      }
+    </mat-form-field>
+
+    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 1rem;">
+      <button
+        adiButton
+        mat-raised-button
+        color="primary"
+        matTooltip="Edit data"
+        matTooltipPosition="left"
+        (click)="onNoClick($event)"
+        style="border-radius: 50px; min-width: 80px; height: 48px; display: flex; justify-content: center; align-items: center;"
+      >
+        <mat-icon style="margin: 0;">edit</mat-icon>
+      </button>
+      
+      <button
+        adiButton
+        mat-raised-button
+        color="accent"
+        matTooltip="Cancel"
+        matTooltipPosition="right"
+        (click)="cancel()"
+        style="border-radius: 50px; min-width: 80px; height: 48px; display: flex; justify-content: center; align-items: center;"
+      >
+        <mat-icon style="margin: 0;">close</mat-icon>
+      </button>
+    </div>
+    
+  </form>
+</div>

@@ -1,0 +1,147 @@
+<div
+  style="
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  "
+>
+  <form
+    (ngSubmit)="onSubmit()"
+    #userForm="ngForm"
+    autocomplete="off"
+    style="display: flex; flex-direction: column; gap: 1.5rem"
+  >
+    <div style="text-align: center">
+      <h1 class="animate__animated animate__bounceInDown" style="margin-bottom: 0.5rem">
+        Register a new user
+      </h1>
+      <mat-icon class="animate__animated animate__bounceInDown">expand_more</mat-icon>
+    </div>
+
+    <mat-form-field appearance="outline" style="width: 100%">
+      <mat-label>Name</mat-label>
+      <mat-icon matPrefix style="margin-right: 10px; color: #757575">badge</mat-icon>
+      <input
+        matInput
+        [(ngModel)]="user.name"
+        name="name"
+        #name="ngModel"
+        required
+        minlength="1"
+        maxlength="18"
+        pattern="[a-zA-Z]*"
+        placeholder="Enter your name"
+      />
+      @if (name.invalid && (name.dirty || name.touched)) {
+        <mat-error>Name must be 1-18 letters (no numbers/symbols)</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" style="width: 100%">
+      <mat-label>Surname</mat-label>
+      <mat-icon matPrefix style="margin-right: 10px; color: #757575">person</mat-icon>
+      <input
+        matInput
+        [(ngModel)]="user.surname"
+        name="surname"
+        #surname="ngModel"
+        required
+        minlength="1"
+        maxlength="18"
+        pattern="[a-zA-Z]*"
+        placeholder="Enter your surname"
+      />
+      @if (surname.invalid && (surname.dirty || surname.touched)) {
+        <mat-error>Surname must be 1-18 letters (no numbers/symbols)</mat-error>
+      }
+    </mat-form-field>
+
+    <div style="display: flex; flex-direction: column">
+      <mat-form-field appearance="outline" style="width: 100%">
+        <mat-label>Email</mat-label>
+        <mat-icon matPrefix style="margin-right: 10px; color: #757575">email</mat-icon>
+        <input
+          matInput
+          [(ngModel)]="user.email"
+          name="email"
+          #email="ngModel"
+          required
+          email
+          minlength="3"
+          maxlength="100"
+          (ngModelChange)="onFocusOutEvent()"
+          placeholder="Enter your email"
+        />
+        @if (email.invalid && (email.dirty || email.touched)) {
+          <mat-error>Invalid email format</mat-error>
+        }
+      </mat-form-field>
+      @if (emailStatus) {
+        <small style="color: #f44336; margin-top: -0.5rem; padding-left: 0.5rem"
+          >Email already exists!</small
+        >
+      }
+    </div>
+
+    <mat-form-field appearance="outline" style="width: 100%">
+      <mat-label>Password</mat-label>
+      <mat-icon matPrefix style="margin-right: 10px; color: #757575">lock</mat-icon>
+
+      <input
+        matInput
+        [type]="hidePassword ? 'password' : 'text'"
+        [(ngModel)]="user.password"
+        name="password"
+        #password="ngModel"
+        required
+        minlength="8"
+        maxlength="32"
+        placeholder="Enter your password"
+      />
+
+      @if (user.password && user.password.length > 2) {
+        <button
+          matSuffix
+          mat-icon-button
+          type="button"
+          (click)="togglePasswordVisibility()"
+          [attr.aria-label]="'Hide password'"
+        >
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+      }
+
+      @if (password.invalid && (password.dirty || password.touched)) {
+        <mat-error>Password must be 8-32 characters</mat-error>
+      }
+    </mat-form-field>
+
+    <button
+      type="submit"
+      [disabled]="userForm.invalid"
+      mat-raised-button
+      color="primary"
+      style="height: 48px; border-radius: 50px; font-weight: 600"
+      class="animate__animated animate__bounceInUp"
+    >
+      Register new user <mat-icon style="margin-left: 8px">app_registration</mat-icon>
+    </button>
+
+    <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem">
+      <button mat-mini-fab color="primary" matTooltip="Admin" routerLink="/listuser">
+        <mat-icon>admin_panel_settings</mat-icon>
+      </button>
+      <button mat-mini-fab color="primary" matTooltip="StreetView" routerLink="/streetview">
+        <mat-icon>streetview</mat-icon>
+      </button>
+      <button mat-mini-fab color="primary" matTooltip="Home" routerLink="/">
+        <mat-icon>home</mat-icon>
+      </button>
+      <button mat-mini-fab color="accent" matTooltip="Logout" routerLink="/logout">
+        <mat-icon>exit_to_app</mat-icon>
+      </button>
+    </div>
+  </form>
+</div>

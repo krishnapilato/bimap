@@ -1,0 +1,74 @@
+<div class="bg-container">
+  <div class="login-card">
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm" autocomplete="off" class="login-form">
+      <div class="form-header">
+        <h2>Welcome.</h2>
+        <p>Please login to continue.</p>
+      </div>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Email</mat-label>
+        <mat-icon matPrefix>email</mat-icon>
+        <input
+          matInput
+          type="email"
+          id="username"
+          name="username"
+          [(ngModel)]="loginRequest.username"
+          required
+          email
+          #email="ngModel"
+          placeholder="name@example.com"
+          minlength="3"
+          maxlength="100"
+        />
+        <mat-error *ngIf="email.invalid && email.touched">
+          Please enter a valid email address
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="form-field">
+        <mat-label>Password</mat-label>
+        <mat-icon matPrefix>lock</mat-icon>
+
+        <input
+          matInput
+          [type]="hidePassword ? 'password' : 'text'"
+          id="password"
+          name="password"
+          [(ngModel)]="loginRequest.password"
+          required
+          #password="ngModel"
+          placeholder="Enter your password"
+          minlength="8"
+          maxlength="16"
+        />
+
+        <button
+          *ngIf="loginRequest.password && loginRequest.password.length >= 2"
+          mat-icon-button
+          matSuffix
+          (click)="hidePassword = !hidePassword"
+          type="button"
+          tabindex="-1"
+        >
+          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+
+        <mat-error *ngIf="password.invalid && password.touched">
+          Password must be at least 8 characters
+        </mat-error>
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        [disabled]="!loginForm.form.valid"
+        class="submit-btn"
+      >
+        Login &nbsp;<mat-icon>login</mat-icon>
+      </button>
+    </form>
+  </div>
+</div>

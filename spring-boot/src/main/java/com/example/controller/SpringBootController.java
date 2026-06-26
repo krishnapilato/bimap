@@ -71,7 +71,7 @@ public class SpringBootController {
 	@RequestMapping("/")
 	public ModelAndView home() {
 		ModelAndView modelAndView = new ModelAndView();
-		modelAndView.setViewName("home.html");
+		modelAndView.setViewName("redirect:/home.html");
 		return modelAndView;
 	}
 
