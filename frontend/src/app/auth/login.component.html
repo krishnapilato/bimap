@@ -1,14 +1,18 @@
 <div class="bg-container">
   <div class="login-card">
     <form (ngSubmit)="onSubmit()" #loginForm="ngForm" autocomplete="off" class="login-form">
+      
       <div class="form-header">
-        <h2>Welcome.</h2>
-        <p>Please login to continue.</p>
+        <div class="logo-circle">
+          <mat-icon style="color: #1976d2;">lock_person</mat-icon>
+        </div>
+        <h2>Sign in to your account</h2>
+        <p>Welcome back! Please enter your details.</p>
       </div>
 
       <mat-form-field appearance="outline" class="form-field">
-        <mat-label>Email</mat-label>
-        <mat-icon matPrefix>email</mat-icon>
+        <mat-label>Email Address</mat-label>
+        <mat-icon matPrefix style="margin-right: 8px; color: #757575;">email</mat-icon>
         <input
           matInput
           type="email"
@@ -18,7 +22,7 @@
           required
           email
           #email="ngModel"
-          placeholder="name@example.com"
+          placeholder="e.g. name@company.com"
           minlength="3"
           maxlength="100"
         />
@@ -27,10 +31,9 @@
         </mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="form-field">
+      <mat-form-field appearance="outline" class="form-field password-field">
         <mat-label>Password</mat-label>
-        <mat-icon matPrefix>lock</mat-icon>
-
+        <mat-icon matPrefix style="margin-right: 8px; color: #757575;">lock</mat-icon>
         <input
           matInput
           [type]="hidePassword ? 'password' : 'text'"
@@ -43,7 +46,6 @@
           minlength="8"
           maxlength="16"
         />
-
         <button
           *ngIf="loginRequest.password && loginRequest.password.length >= 2"
           mat-icon-button
@@ -51,10 +53,10 @@
           (click)="hidePassword = !hidePassword"
           type="button"
           tabindex="-1"
+          matTooltip="Toggle password visibility"
         >
-          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          <mat-icon style="color: #757575;">{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
         </button>
-
         <mat-error *ngIf="password.invalid && password.touched">
           Password must be at least 8 characters
         </mat-error>
@@ -67,8 +69,9 @@
         [disabled]="!loginForm.form.valid"
         class="submit-btn"
       >
-        Login &nbsp;<mat-icon>login</mat-icon>
+        Sign In
       </button>
+      
     </form>
   </div>
 </div>

@@ -1,21 +1,45 @@
 package com.example.beans;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
-@Table(name = "tables")
+@Table(name = "tables", indexes = {@Index(name = "idx_tables_comune", columnList = "comune"), @Index(name = "idx_tables_prov", columnList = "prov")})
 public class Tables {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	private Long idbene;
-	private String prov, comune, indirizzo;
-	private int civico;
-	private String localizzazione, denominazione, provv_tutela, proprietà, catato, trascrizione, vincolo;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Long idbene;
+
+    private String prov;
+
+    private String comune;
+
+    private String indirizzo;
+
+    private Integer civico;
+
+    private String localizzazione;
+
+    private String denominazione;
+
+    @Column(name = "provv_tutela")
+    private String provvTutela;
+
+    @Column(name = "proprieta")
+    private String proprieta;
+
+    @Column(name = "catato")
+    private String catato;
+
+    private String trascrizione;
+
+    private String vincolo;
 }

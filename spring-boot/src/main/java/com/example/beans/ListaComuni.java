@@ -1,18 +1,24 @@
 package com.example.beans;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
-@Table(name = "listacomuni")
+@Table(name = "listacomuni", indexes = {@Index(name = "idx_comuni_comune", columnList = "comune"), @Index(name = "idx_comuni_regione", columnList = "regione"), @Index(name = "idx_comuni_provincia", columnList = "provincia")})
 public class ListaComuni {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	private String comune, regione, provincia;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String comune;
+
+    private String regione;
+
+    private String provincia;
 }

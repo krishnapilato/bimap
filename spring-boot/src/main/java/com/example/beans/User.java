@@ -1,66 +1,90 @@
 package com.example.beans;
 
-import java.util.Date;
-
 import com.example.enums.ApplicationRole;
 import com.example.enums.UserStatus;
+import jakarta.persistence.*;
+import lombok.*;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-import lombok.Data;
+import java.time.Instant;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {@Index(name = "idx_user_email", columnList = "email")})
 public class User {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
 
-	private String name, surname;
-	@Column(name = "full_name", nullable = false)
-	private String fullName;
-	@Column(unique = true, length = 256)
-	private String email;
-	private String password;
-	@Column(name = "user_status")
-	private UserStatus userStatus;
-	@Column(name = "application_role")
-	private ApplicationRole applicationRole;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(name = "created_at", nullable = false)
-	private Date created;
-	@Column(name = "updated_at", nullable = false)
-	private Date lastModified;
-	@Column(name = "`key`", unique = true)
-	private String key;
+    private String name;
+    private String surname;
 
-	@Column(name = "account_non_expired", nullable = false)
-	private boolean accountNonExpired = true;
+    @Column(name = "full_name", nullable = false)
+    private String fullName;
 
-	@Column(name = "account_non_locked", nullable = false)
-	private boolean accountNonLocked = true;
+    @Column(unique = true, length = 256, nullable = false)
+    private String email;
 
-	@Column(nullable = false)
-	private boolean locked = false;
+    @Column(nullable = false)
+    private String password;
 
-	@Column(name = "credentials_non_expired", nullable = false)
-	private boolean credentialsNonExpired = true;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_status")
+    private UserStatus userStatus;
 
-	@Column(nullable = false)
-	private boolean enabled = true;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "application_role")
+    private ApplicationRole applicationRole;
 
-	@PrePersist
-	@PreUpdate
-	private void updateFullName() {
-		String firstName = name == null ? "" : name.trim();
-		String lastName = surname == null ? "" : surname.trim();
-		fullName = (firstName + " " + lastName).trim();
-	}
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant created;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant lastModified;
+
+    @Column(name = "`key`", unique = true)
+    private String key;
+
+    @Column(name = "account_non_expired", nullable = false)
+    private boolean accountNonExpired = true;
+
+    @Column(name = "account_non_locked", nullable = false)
+    private boolean accountNonLocked = true;
+
+    @Column(nullable = false)
+    private boolean locked = false;
+
+    @Column(name = "credentials_non_expired", nullable = false)
+    private boolean credentialsNonExpired = true;
+
+    @Column(nullable = false)
+    private boolean enabled = true;
+
+    @PrePersist
+    protected void onCreate() {
+        Instant now = Instant.now();
+
+        if (created == null) {
+            created = now;
+        }
+        lastModified = now;
+
+        computeFullName();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        lastModified = Instant.now();
+        computeFullName();
+    }
+
+    private void computeFullName() {
+        String first = name == null ? "" : name.trim();
+        String last = surname == null ? "" : surname.trim();
+        this.fullName = (first + " " + last).trim();
+    }
 }

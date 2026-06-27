@@ -1,27 +1,49 @@
 <div
   style="
-    max-width: 600px;
-    margin: 2rem auto;
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-width: 480px;
+    margin: 3rem auto;
+    padding: 2.5rem;
+    background-color: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    font-family: 'Roboto', 'Helvetica Neue', sans-serif;
   "
 >
   <form
     (ngSubmit)="onSubmit()"
     #userForm="ngForm"
     autocomplete="off"
-    style="display: flex; flex-direction: column; gap: 1.5rem"
+    style="display: flex; flex-direction: column; gap: 1.25rem"
   >
-    <div style="text-align: center">
-      <h1 class="animate__animated animate__bounceInDown" style="margin-bottom: 0.5rem">
-        Register a new user
-      </h1>
-      <mat-icon class="animate__animated animate__bounceInDown">expand_more</mat-icon>
+    <!-- Header Section -->
+    <div
+      style="text-align: center; margin-bottom: 1rem"
+      class="animate__animated animate__fadeInDown"
+    >
+      <div
+        style="
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+          width: 48px;
+          height: 48px;
+          background-color: #e3f2fd;
+          border-radius: 50%;
+          margin-bottom: 1rem;
+        "
+      >
+        <mat-icon style="color: #1976d2">person_add</mat-icon>
+      </div>
+      <h1 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #333">Register New User</h1>
+      <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.9rem">
+        Please fill in the details to create an account
+      </p>
     </div>
 
+    <!-- Form Fields -->
     <mat-form-field appearance="outline" style="width: 100%">
-      <mat-label>Name</mat-label>
+      <mat-label>First Name</mat-label>
       <mat-icon matPrefix style="margin-right: 10px; color: #757575">badge</mat-icon>
       <input
         matInput
@@ -32,7 +54,7 @@
         minlength="1"
         maxlength="18"
         pattern="[a-zA-Z]*"
-        placeholder="Enter your name"
+        placeholder="e.g. Jane"
       />
       @if (name.invalid && (name.dirty || name.touched)) {
         <mat-error>Name must be 1-18 letters (no numbers/symbols)</mat-error>
@@ -40,7 +62,7 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" style="width: 100%">
-      <mat-label>Surname</mat-label>
+      <mat-label>Last Name</mat-label>
       <mat-icon matPrefix style="margin-right: 10px; color: #757575">person</mat-icon>
       <input
         matInput
@@ -51,7 +73,7 @@
         minlength="1"
         maxlength="18"
         pattern="[a-zA-Z]*"
-        placeholder="Enter your surname"
+        placeholder="e.g. Doe"
       />
       @if (surname.invalid && (surname.dirty || surname.touched)) {
         <mat-error>Surname must be 1-18 letters (no numbers/symbols)</mat-error>
@@ -59,8 +81,8 @@
     </mat-form-field>
 
     <div style="display: flex; flex-direction: column">
-      <mat-form-field appearance="outline" style="width: 100%">
-        <mat-label>Email</mat-label>
+      <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 0">
+        <mat-label>Email Address</mat-label>
         <mat-icon matPrefix style="margin-right: 10px; color: #757575">email</mat-icon>
         <input
           matInput
@@ -72,23 +94,30 @@
           minlength="3"
           maxlength="100"
           (ngModelChange)="onFocusOutEvent()"
-          placeholder="Enter your email"
+          placeholder="name@company.com"
         />
         @if (email.invalid && (email.dirty || email.touched)) {
-          <mat-error>Invalid email format</mat-error>
+          <mat-error>Please enter a valid email format</mat-error>
         }
       </mat-form-field>
       @if (emailStatus) {
-        <small style="color: #f44336; margin-top: -0.5rem; padding-left: 0.5rem"
-          >Email already exists!</small
+        <div
+          style="
+            color: #f44336;
+            font-size: 12px;
+            margin-top: -12px;
+            padding: 0 16px;
+            margin-bottom: 16px;
+          "
         >
+          Email already exists!
+        </div>
       }
     </div>
 
     <mat-form-field appearance="outline" style="width: 100%">
       <mat-label>Password</mat-label>
       <mat-icon matPrefix style="margin-right: 10px; color: #757575">lock</mat-icon>
-
       <input
         matInput
         [type]="hidePassword ? 'password' : 'text'"
@@ -98,49 +127,84 @@
         required
         minlength="8"
         maxlength="32"
-        placeholder="Enter your password"
+        placeholder="Create a strong password"
       />
-
       @if (user.password && user.password.length > 2) {
         <button
           matSuffix
           mat-icon-button
           type="button"
           (click)="togglePasswordVisibility()"
-          [attr.aria-label]="'Hide password'"
+          [attr.aria-label]="'Toggle password visibility'"
         >
-          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          <mat-icon style="color: #757575">{{
+            hidePassword ? 'visibility_off' : 'visibility'
+          }}</mat-icon>
         </button>
       }
-
       @if (password.invalid && (password.dirty || password.touched)) {
-        <mat-error>Password must be 8-32 characters</mat-error>
+        <mat-error>Password must be between 8 and 32 characters</mat-error>
       }
     </mat-form-field>
 
+    <!-- Submit Button -->
     <button
       type="submit"
       [disabled]="userForm.invalid"
-      mat-raised-button
+      mat-flat-button
       color="primary"
-      style="height: 48px; border-radius: 50px; font-weight: 600"
-      class="animate__animated animate__bounceInUp"
+      style="
+        height: 48px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+      "
+      class="animate__animated animate__fadeInUp"
     >
-      Register new user <mat-icon style="margin-left: 8px">app_registration</mat-icon>
+      Register User
     </button>
 
-    <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1rem">
-      <button mat-mini-fab color="primary" matTooltip="Admin" routerLink="/listuser">
+    <!-- Divider -->
+    <hr style="border: 0; border-top: 1px solid #e0e0e0; margin: 1.5rem 0" />
+
+    <!-- Navigation Actions -->
+    <div style="display: flex; justify-content: center; gap: 1.25rem">
+      <button
+        mat-mini-fab
+        color="primary"
+        matTooltip="Admin Dashboard"
+        routerLink="/listuser"
+        style="box-shadow: none; background-color: #f5f5f5; color: #555"
+      >
         <mat-icon>admin_panel_settings</mat-icon>
       </button>
-      <button mat-mini-fab color="primary" matTooltip="StreetView" routerLink="/streetview">
+      <button
+        mat-mini-fab
+        color="primary"
+        matTooltip="StreetView"
+        routerLink="/streetview"
+        style="box-shadow: none; background-color: #f5f5f5; color: #555"
+      >
         <mat-icon>streetview</mat-icon>
       </button>
-      <button mat-mini-fab color="primary" matTooltip="Home" routerLink="/">
+      <button
+        mat-mini-fab
+        color="primary"
+        matTooltip="Home"
+        routerLink="/"
+        style="box-shadow: none; background-color: #f5f5f5; color: #555"
+      >
         <mat-icon>home</mat-icon>
       </button>
-      <button mat-mini-fab color="accent" matTooltip="Logout" routerLink="/logout">
-        <mat-icon>exit_to_app</mat-icon>
+      <button
+        mat-mini-fab
+        color="warn"
+        matTooltip="Logout"
+        routerLink="/logout"
+        style="box-shadow: none; background-color: #ffebee; color: #d32f2f"
+      >
+        <mat-icon>logout</mat-icon>
       </button>
     </div>
   </form>

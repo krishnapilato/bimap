@@ -1,28 +1,27 @@
 package com.example.core.security;
 
-import java.util.Arrays;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.example.repository.UserRepository;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class JwtUserDetailsService implements UserDetailsService {
 
-	@Autowired
-	private UserRepository repository;
+    private final UserRepository repository;
 
-	@Override
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		com.example.beans.User user = this.repository.findByEmailAddress(username)
-				.orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
-		return new User(user.getEmail(), user.getPassword(), true, true, true, true,
-				Arrays.asList(new SimpleGrantedAuthority(user.getApplicationRole().toString())));
-	}
+    @Override
+    public UserDetails loadUserByUsername(@NonNull String username) {
+
+        var user = repository.findByEmailAddress(username).orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), List.of(new SimpleGrantedAuthority(user.getApplicationRole().name())));
+    }
 }

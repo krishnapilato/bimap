@@ -15,7 +15,7 @@ export class ApiService {
   }
 
   public searchRegions(keyword: string): Observable<string[]> {
-    var provincesList = this.httpService.get(this.URL + 'searchRegion=' + keyword).pipe(
+    var provincesList = this.httpService.get(this.URL + 'regions/' + keyword).pipe(
       debounceTime(10),
       map((data: any) => {
         return data.length != 0 ? (data as any) : ['No data found'];
@@ -25,7 +25,7 @@ export class ApiService {
   }
 
   public searchProvinces(keyword: string): Observable<string[]> {
-    var provincesList = this.httpService.get(this.URL + 'searchProvince=' + keyword).pipe(
+    var provincesList = this.httpService.get(this.URL + 'provinces/' + keyword).pipe(
       debounceTime(1),
       map((data: any) => {
         return data.length != 0 ? (data as any) : ['No data found'];
@@ -35,7 +35,7 @@ export class ApiService {
   }
 
   public searchMunicipalities(keyword: string): Observable<string[]> {
-    var municipalitiesList = this.httpService.get(this.URL + 'searchMunicipality=' + keyword).pipe(
+    var municipalitiesList = this.httpService.get(this.URL + 'municipalities/' + keyword).pipe(
       debounceTime(1),
       map((data: any) => {
         return data.length != 0 ? (data as any) : ['No data found'];
@@ -45,10 +45,10 @@ export class ApiService {
   }
 
   public findAll(): Observable<Tables[]> {
-    return this.httpService.get<Tables[]>(this.URL + 'findAll');
+    return this.httpService.get<Tables[]>(this.URL + 'tables');
   }
 
   public save(formdata: FormModel): Observable<FormModel> {
-    return this.httpService.post<FormModel>(this.URL + 'save', formdata);
+    return this.httpService.post<FormModel>(this.URL + 'form', formdata);
   }
 }

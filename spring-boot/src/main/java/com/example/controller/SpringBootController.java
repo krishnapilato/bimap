@@ -1,25 +1,5 @@
 package com.example.controller;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
-
 import com.example.beans.FormModel;
 import com.example.beans.Tables;
 import com.example.beans.User;
@@ -30,176 +10,174 @@ import com.example.repository.FormModelRepository;
 import com.example.repository.ListaComuniRepository;
 import com.example.repository.TablesRepository;
 import com.example.repository.UserRepository;
-
 import jakarta.mail.MessagingException;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
-@CrossOrigin(origins = "http://localhost:4200")
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+
 @RestController
-@AllArgsConstructor
+@RequestMapping
+@CrossOrigin(origins = "http://localhost:4200")
+@RequiredArgsConstructor
 public class SpringBootController {
 
-	// Log4j logger
+    private static final Logger logger = LoggerFactory.getLogger(SpringBootController.class);
 
-	private static final Logger logger = LoggerFactory.getLogger(SpringBootController.class);
+    private final ListaComuniRepository listaComuniRepository;
+    private final FormModelRepository formModelRepository;
+    private final UserRepository userRepository;
+    private final TablesRepository tablesRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final Utility utility;
 
-	// JPA Repositories
+    // HOME
+    @GetMapping("/")
+    public ModelAndView home() {
+        return new ModelAndView("redirect:/home.html");
+    }
 
-	@Autowired
-	private final ListaComuniRepository listaComuniRepository;
+    // REGIONS
+    @GetMapping("/regions/{keyword}")
+    public List<String> searchRegion(@PathVariable String keyword) {
+        logger.info("Searching regions: {}", keyword);
+        return listaComuniRepository.searchRegion(keyword);
+    }
 
-	@Autowired
-	private final FormModelRepository formModelRepository;
+    // PROVINCES
+    @GetMapping("/provinces/{keyword}")
+    public List<String> searchProvince(@PathVariable String keyword) {
+        logger.info("Searching provinces: {}", keyword);
+        return listaComuniRepository.searchProvince(keyword);
+    }
 
-	@Autowired
-	private final UserRepository userRepository;
+    // MUNICIPALITIES
+    @GetMapping("/municipalities/{keyword}")
+    public List<String> searchMunicipality(@PathVariable String keyword) {
+        logger.info("Searching municipalities: {}", keyword);
+        return listaComuniRepository.searchMunicipality(keyword);
+    }
 
-	@Autowired
-	private final TablesRepository tablesRepository;
+    // EMAIL EXISTS CHECK
+    @GetMapping("/emails/{email}")
+    public boolean emailExists(@PathVariable String email) {
+        logger.info("Checking email existence: {}", email);
+        return userRepository.findByEmail(email).isPresent();
+    }
 
-	// Password encoder
+    // SAVE FORM
+    @PostMapping("/form")
+    public void save(@RequestBody FormModel formdata) throws IOException {
+        logger.info("Saving form data");
+        formModelRepository.save(formdata);
+        utility.writeCSVFile(formdata);
+    }
 
-	@Autowired
-	PasswordEncoder passwordEncoder;
+    // TABLES
+    @GetMapping("/tables")
+    public List<Tables> findAllTables() {
+        return tablesRepository.findAll();
+    }
 
-	// Instancing Utility object
+    // USERS
+    @GetMapping("/users")
+    public List<User> findUsers() {
+        return userRepository.findAll();
+    }
 
-	private final Utility utility = new Utility();
+    // CREATE USER
+    @PostMapping("/users")
+    public User create(@RequestBody User newUser) {
 
-	// Loading Home View
+        logger.info("Creating user: {}", newUser.getEmail());
 
-	@RequestMapping("/")
-	public ModelAndView home() {
-		ModelAndView modelAndView = new ModelAndView();
-		modelAndView.setViewName("redirect:/home.html");
-		return modelAndView;
-	}
+        var now = new Date();
 
-	// GET to retrieve regions
+        newUser.setApplicationRole(ApplicationRole.USER);
+        newUser.setUserStatus(UserStatus.CONFIRMED);
+        newUser.setCreated(now.toInstant());
+        newUser.setLastModified(now.toInstant());
+        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
 
-	@GetMapping("/searchRegion={keyword}")
-	public List<String> searchRegion(@PathVariable(required = true) String keyword) {
-		logger.info("Getting regions containing this word " + keyword);
-		return listaComuniRepository.searchRegion(keyword);
-	}
+        return userRepository.save(newUser);
+    }
 
-	// GET Mapping to retrieve provinces
+    // UPDATE USER
+    @PutMapping("/users/{id}")
+    public User update(@RequestBody User updatedUser, @PathVariable Long id) {
 
-	@GetMapping("/searchProvince={keyword}")
-	public List<String> searchProvince(@PathVariable(required = true) String keyword) {
-		logger.info("Getting provinces containing this word " + keyword);
-		return listaComuniRepository.searchProvince(keyword);
-	}
+        logger.info("Updating user id: {}", id);
 
-	// GET Mapping to retrieve municipalities
+        return userRepository.findById(id).map(user -> {
+            user.setName(updatedUser.getName());
+            user.setSurname(updatedUser.getSurname());
+            user.setEmail(updatedUser.getEmail());
+            user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+            user.setApplicationRole(updatedUser.getApplicationRole());
+            user.setLastModified(new Date().toInstant());
+            return userRepository.save(user);
+        }).orElseThrow(() -> new UsernameNotFoundException("User not found: " + id));
+    }
 
-	@GetMapping("/searchMunicipality={keyword}")
-	public List<String> searchMunicipality(@PathVariable(required = true) String keyword) {
-		logger.info("Getting municipalities containing this word " + keyword);
-		return listaComuniRepository.searchMunicipality(keyword);
-	}
+    // DELETE USER
+    @DeleteMapping("/users/{id}")
+    public void delete(@PathVariable Long id) {
+        logger.info("Deleting user: {}", id);
+        userRepository.deleteById(id);
+    }
 
-	// GET Mapping to retrieve all email
+    @GetMapping("/users/{email}/send-email")
+    public String sendEmail(@PathVariable String email) {
+        logger.info("Sending email to {}", email);
 
-	@GetMapping("/emailStatus={email}")
-	public boolean retrieveEmails(@PathVariable(required = true) String email) {
-		logger.info("Checking if email exists!");
-		if (this.userRepository.findByEmail(email) == (null)) {
-			return false;
-		} else {
-			return true;
-		}
-	}
+        var user = userRepository.findByEmailAddress(email).orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-	// POST Mapping to save FormModel Object
+        // Define the professional template as a text block
+// Inside your sendEmail method:
+        String content = """
+                <!DOCTYPE html>
+                <html>
+                <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px;">
+                    <div style="max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                        <div style="background-color: #1976d2; padding: 25px; text-align: center; color: #ffffff;">
+                            <h2 style="margin: 0;">Account Information</h2>
+                        </div>
+                        <div style="padding: 30px;">
+                            <h3 style="margin-top: 0;">Hello %s,</h3>
+                            <p>Your account has been updated in our system. Here are your credentials:</p>
+                            <div style="background-color: #f4f7fa; padding: 20px; border-radius: 8px; border-left: 5px solid #1976d2; margin: 20px 0;">
+                                <p style="margin: 5px 0;"><strong>Email:</strong> %s</p>
+                                <p style="margin: 5px 0;"><strong>Role:</strong> %s</p>
+                                <p style="margin: 15px 0 5px 0; border-top: 1px solid #d1d9e0; padding-top: 10px;">
+                                    <strong>Temporary Password:</strong> <span style="background: #fff; padding: 2px 6px; border-radius: 4px; border: 1px dashed #1976d2;">%s</span>
+                                </p>
+                            </div>
+                            <p style="font-size: 0.9em; color: #666;">Please change this password upon your first login.</p>
+                        </div>
+                        <div style="padding: 15px; text-align: center; font-size: 0.75rem; color: #999; background-color: #f9f9f9;">
+                            &copy; 2026 BiMap. This is an automated message.
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """.formatted(user.getName(), user.getEmail(), user.getApplicationRole().name().toUpperCase(), "12345678"
+        );
 
-	@PostMapping("/save")
-	public void save(@RequestBody(required = true) FormModel formdata) throws IOException {
-		logger.info("Saving " + formdata + " to table and CSV file");
-		formModelRepository.save(formdata);
-		utility.writeCSVFile(formdata);
-	}
-
-	@GetMapping("/findAll")
-	public List<Tables> findAll() {
-		logger.info("Finding all data in tables table");
-		return tablesRepository.findAll();
-	}
-
-	@GetMapping("/users")
-	public List<User> findUsers() {
-		logger.info("Finding all data in users table");
-		return userRepository.findAll();
-	}
-
-	// POST Mapping to save new user
-
-	@PostMapping("/users")
-	public User create(@RequestBody(required = true) User newUser) {
-		logger.info("Creating new user");
-		if (logger.isDebugEnabled()) {
-			logger.debug("New user details: " + newUser);
-		}
-
-		Date now = new Date();
-
-		newUser.setApplicationRole(ApplicationRole.USER);
-
-		// user email verification
-
-		newUser.setUserStatus(UserStatus.CONFIRMED);
-		newUser.setCreated(now);
-		newUser.setLastModified(now);
-		newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
-
-		return this.userRepository.save(newUser);
-	}
-
-	@PutMapping("/users/{id}")
-	public User update(@RequestBody(required = true) User updatedUser, @PathVariable(required = true) Long id) {
-		logger.info("Updating user with id: ." + id);
-		if (logger.isDebugEnabled()) {
-			logger.debug("Updated user details: " + updatedUser);
-		}
-		return userRepository.findById(id).map(user -> {
-			user.setLastModified(new Date());
-			user.setName(updatedUser.getName());
-			user.setSurname(updatedUser.getSurname());
-			user.setEmail(updatedUser.getEmail());
-			user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-			user.setApplicationRole(updatedUser.getApplicationRole());
-			return userRepository.save(user);
-		}).orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
-	}
-
-	@DeleteMapping("/users/{id}")
-	public void delete(@PathVariable(required = true) Long id) {
-		logger.info("Deleting user with id: {}." + id);
-		userRepository.deleteById(id);
-	}
-
-	@GetMapping("/users/sendEmail={email}")
-	public String sendEmail(@PathVariable(required = true) String email) {
-		logger.info("Trying to send email to: " + email);
-
-		User user = this.userRepository.findByEmailAddress(email)
-				.orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + email));
-
-		String content = "<div style='text-align: center;font-family: sans-serif;'><h1>Hi " + user.getName()
-				+ " !</h1><p>Here are your credentials for accessing the application:</p>" + "Email: " + user.getEmail()
-				+ "<br>Password: 12345678" + "<br>Your application role is "
-				+ user.getApplicationRole().toString().toLowerCase() + "<br><br>"
-				+ "Click <a href='http://localhost:4200/login'>here</a> to login<br><br>"
-				+ "Best regards, <br> This email was sent to you by TransferWise, trading as Wise. By using our services, you agree to our customer agreements.\r\n"
-				+ "\r\n" + "© TransferWise, trading as Wise 2022. All rights reserved.</div>";
-
-		try {
-			utility.sendEmail(email, content);
-			logger.info("Email sent successfully to: " + email);
-			return "Email sent to: " + email;
-		} catch (MessagingException | IOException exception) {
-			logger.info("Problem to send email to: " + email);
-			return "Problem to send email because " + exception.getMessage().toLowerCase();
-		}
-	}
+        try {
+            utility.sendEmail(email, content);
+            return "Email sent to " + email;
+        } catch (MessagingException e) {
+            logger.error("Email failed: {}", email, e);
+            return "Email failed: " + e.getMessage();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

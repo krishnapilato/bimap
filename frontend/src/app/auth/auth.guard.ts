@@ -14,7 +14,7 @@ export class AuthGuard implements CanActivate {
   canActivate(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const user = this.authenticationService.loginResponseValue;
 
-    if (user.jwttoken) {
+    if (user.jwtToken) {
       return true;
     } else {
       this._snackbar.open('You must be logged in to view that page', 'Close', {

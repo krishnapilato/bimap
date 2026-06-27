@@ -11,11 +11,11 @@ export class SecurityInterceptor implements HttpInterceptor {
   public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const loginResponse = this.authenticationService.loginResponseValue;
 
-    const isLoggedIn = loginResponse && loginResponse.jwttoken;
+    const isLoggedIn = loginResponse && loginResponse.jwtToken;
     const isApiUrl = request.url.startsWith(environment.baseApiUrl);
 
     if (isLoggedIn && isApiUrl)
-      request = request.clone({ setHeaders: { Authorization: `Bearer ${loginResponse.jwttoken}` } });
+      request = request.clone({ setHeaders: { Authorization: `Bearer ${loginResponse.jwtToken}` } });
 
     return next.handle(request);
   }

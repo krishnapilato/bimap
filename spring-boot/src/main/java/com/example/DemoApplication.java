@@ -1,20 +1,23 @@
 package com.example;
 
-/**
- * Code written by Khova Krishna Pilato, published under WTFPL: do what you want with it
- */
-
 import com.example.core.Utility;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DemoApplication {
+@RequiredArgsConstructor
+public class DemoApplication implements CommandLineRunner {
 
-    private static final Utility utility = new Utility();
+    private final Utility utility;
 
-    public static void main(String[] args) throws Exception {
-        utility.createFiles();
+    public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class, args);
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
+        utility.createFiles();
     }
 }

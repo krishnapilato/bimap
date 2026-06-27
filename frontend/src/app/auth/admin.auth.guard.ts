@@ -14,7 +14,7 @@ export class AdminAuthGuard implements CanActivate {
   canActivate(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     const user = this.authenticationService.loginResponseValue;
 
-    if (user.jwttoken && user.user.applicationRole === 'ADMINISTRATOR') {
+    if (user.jwtToken && user.user.applicationRole === 'ADMINISTRATOR') {
       this._snackbar.open('Welcome ' + user.user.name, 'Close', {
         duration: 1000,
       });

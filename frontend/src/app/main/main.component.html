@@ -1,7 +1,7 @@
 <mat-sidenav-container class="layout-container">
   <mat-sidenav #sidenav mode="side" opened class="form-sidenav">
     <div class="form-wrapper">
-      <h2>Form Fields</h2>
+      <h2>Data Entry</h2>
       <p>Enter data below:</p>
       <br />
       <form #form="ngForm" autocomplete="off" class="form">
@@ -109,7 +109,7 @@
           appearance="outline"
           class="text-center"
         >
-          <mat-label>Good naming</mat-label>
+          <mat-label>Good name</mat-label>
           <mat-icon matPrefix>badge</mat-icon>
           <input
             matInput
@@ -282,6 +282,7 @@
       mat-mini-fab
       color="primary"
       matTooltip="Admin Dashboard"
+      style="box-shadow: none; background-color: #f5f5f5; color: #555"
       matTooltipPosition="left"
       routerLink="/listuser"
     >
@@ -294,6 +295,7 @@
     color="primary"
     matTooltip="StreetView Map"
     matTooltipPosition="below"
+    style="box-shadow: none; background-color: #f5f5f5; color: #555"
     routerLink="/streetview"
   >
     <mat-icon>streetview</mat-icon>
@@ -301,8 +303,8 @@
 
   <button
     mat-mini-fab
-    color="warn" 
     matTooltip="Logout"
+    style="box-shadow: none; background-color: #ffebee; color: #d32f2f"
     matTooltipPosition="right"
     routerLink="/logout"
   >
@@ -312,7 +314,7 @@
 </div>
 <br /><br />
 
-<div class="d-flex justify-content-center">
+<!-- <div class="d-flex justify-content-center">
   <mat-slide-toggle color="secondary" (click)="toggleShow()">Open StreetView below</mat-slide-toggle>
 </div>
 
@@ -333,4 +335,6 @@
       </button>
     </div>
   </div>
-}
+} -->
+
+

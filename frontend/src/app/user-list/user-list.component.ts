@@ -47,7 +47,6 @@ export class UserListComponent implements OnInit, AfterViewInit {
     'userStatus',
     'applicationRole',
     'actions',
-    'actions2',
   ];
   dataSource = new MatTableDataSource<User>();
   public whatuser!: LoginResponse;
@@ -146,8 +145,7 @@ export class DialogElementsExampleDialog {
   approles: any[] = [
     { value: 'USER', viewValue: 'USER' },
     { value: 'MANAGER', viewValue: 'MANAGER' },
-    { value: 'ADMINISTRATOR', viewValue: 'ADMINISTRATOR' },
-    { value: 'SUPERADMINISTRATOR', viewValue: 'SUPERADMINISTRATOR' },
+    { value: 'ADMINISTRATOR', viewValue: 'ADMINISTRATOR' }
   ];
 
   constructor(

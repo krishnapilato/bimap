@@ -1,56 +1,105 @@
+/* Main Background Container */
 .bg-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #2a2929;
-  background-size: 400% 400%;
-  animation: gradienty 15s ease infinite;
+  /* Clean, subtle corporate gradient instead of heavy dark gray */
+  background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
   padding: 20px;
   box-sizing: border-box;
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
 }
 
+/* The Login Card */
 .login-card {
   background: #ffffff;
-  padding: 48px 40px;
-  border-radius: 24px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 2.5rem 2.5rem;
+  border-radius: 12px; /* Reduced from 24px for a sharper, enterprise feel */
+  box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 }
 
+/* Header & Typography */
 .form-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
+}
+
+.logo-circle {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 56px;
+  height: 56px;
+  background-color: #e3f2fd;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
+
+.logo-circle mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
 }
 
 .form-header h2 {
-  margin: 0 0 8px 0;
-  font-weight: 500;
-  font-size: 28px;
-  color: #333333;
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #2c3e50;
 }
 
 .form-header p {
   margin: 0;
   color: #666666;
-  font-size: 16px;
+  font-size: 0.95rem;
 }
 
+/* Form Fields */
 .form-field {
   width: 100%;
 }
 
+/* Removes bottom margin on password field to make room for 'Forgot password' */
+.password-field {
+  margin-bottom: -0.5rem; 
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.forgot-password-link {
+  color: #1976d2;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.forgot-password-link:hover {
+  color: #0d47a1;
+  text-decoration: underline;
+}
+
+/* Submit Button */
 .submit-btn {
   height: 48px;
-  border-radius: 24px;
-  font-size: 16px;
-  margin-top: 12px;
+  border-radius: 8px; /* Standard rounded rectangle */
+  font-size: 1rem;
+  font-weight: 500;
   width: 100%;
+  margin-top: 0.5rem;
+  letter-spacing: 0.5px;
 }

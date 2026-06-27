@@ -1,53 +1,39 @@
 package com.example.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.example.beans.User;
 import com.example.beans.login.LoginRequest;
 import com.example.beans.login.LoginResponse;
 import com.example.core.security.JwtUtils;
 import com.example.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/auth")
 @CrossOrigin
+@RequiredArgsConstructor
 public class LoginController {
 
-	// Security Objects
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
+    private final UserRepository userRepository;
 
-	@Autowired
-	private AuthenticationManager authenticationManager;
+    @PostMapping("/login")
+    public LoginResponse login(@RequestBody LoginRequest request) {
 
-	@Autowired
-	private JwtUtils jwtTokenUtil;
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.username(), request.password()));
+        } catch (AuthenticationException ex) {
+            throw new UsernameNotFoundException("Invalid credentials");
+        }
 
-	// JPA Repository
+        var user = userRepository.findByEmailAddress(request.username()).orElseThrow(() -> new UsernameNotFoundException("User not found: " + request.username()));
 
-	@Autowired
-	private UserRepository userRepository;
+        var token = jwtUtils.generateToken(user);
 
-	// POST Mapping to create authentication token
-
-	@PostMapping("/login")
-	public LoginResponse createAuthenticationToken(@RequestBody LoginRequest loginRequest) {
-		authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
-		User user = this.userRepository.findByEmailAddress(loginRequest.getUsername()).orElseThrow(
-				() -> new UsernameNotFoundException("User not found with username: " + loginRequest.getUsername()));
-
-		final String token = jwtTokenUtil.generateToken(user);
-
-		LoginResponse response = new LoginResponse();
-		response.setJwttoken(token);
-		response.setUser(user); // remove in production mode
-
-		return response;
-	}
+        return new LoginResponse(token, user);
+    }
 }

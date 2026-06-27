@@ -14,7 +14,7 @@ export class AuthService {
   public loginResponse: Observable<LoginResponse>;
 
   constructor(private router: Router, private http: HttpClient, private _snackbar: MatSnackBar) {
-    this.loginUrl = environment.baseApiUrl + '/login';
+    this.loginUrl = environment.baseApiUrl + '/auth/login';
     this.loginResponseSubject = new BehaviorSubject<LoginResponse>(JSON.parse(localStorage.getItem('LoginResponse') || '{}'));
     this.loginResponse = this.loginResponseSubject.asObservable();
   }
@@ -24,7 +24,7 @@ export class AuthService {
   }
 
   public get isLogged(): boolean { 
-    return this.loginResponseValue.jwttoken != null; 
+    return this.loginResponseValue.jwtToken != null; 
   }
 
   public login(loginRequest: LoginRequest): Observable<LoginResponse> {

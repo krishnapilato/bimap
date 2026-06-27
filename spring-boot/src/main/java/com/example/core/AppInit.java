@@ -1,85 +1,55 @@
 package com.example.core;
 
-import java.util.Date;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
-
 import com.example.beans.User;
 import com.example.enums.ApplicationRole;
 import com.example.enums.UserStatus;
 import com.example.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class AppInit implements CommandLineRunner {
 
-	// JPA Repository
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-	@Autowired
-	private UserRepository userRepository;
+    @Override
+    public void run(String... args) {
 
-	// Password encoder
+        var now = Instant.now();
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+        List<User> users = List.of(admin(now), user("Test2", "test.test2@gmail.com", ApplicationRole.ADMINISTRATOR, UserStatus.CONFIRMED, "JRU8sE4u3755xBsw", now), user("Test3", "test.test3@gmail.com", ApplicationRole.USER, UserStatus.NOT_CONFIRMED, "J4evnj6ZKqLHJPFA", now), user("Test4", "test.test4@gmail.com", ApplicationRole.USER, UserStatus.CONFIRMED, "FNFr6JbgPhMbxa2U", now), user("Test5", "test.test5@gmail.com", ApplicationRole.MANAGER, UserStatus.NOT_CONFIRMED, "TSPyv7HL7RGwHnMf", now));
 
-	@Override
-	public void run(String... args) {
+        users.forEach(this::saveIfMissing);
+    }
 
-		 // Saving first administrator
+    private User admin(Instant now) {
+        return user("Khova Krishna", "krishnak.pilato@gmail.com", ApplicationRole.ADMINISTRATOR, UserStatus.CONFIRMED, "CIAOO", now);
+    }
 
-		 Date now = new Date();
-		  
-		 User administrator = new User(); administrator.setName("Khova Krishna");
-		 administrator.setSurname("Pilato");
-		 administrator.setEmail("krishnak.pilato@gmail.com");
-		 administrator.setCreated(now); administrator.setLastModified(now);
-		 administrator.setPassword(passwordEncoder.encode("12345678"));
-		 administrator.setUserStatus(UserStatus.CONFIRMED);
-		 administrator.setApplicationRole(ApplicationRole.ADMINISTRATOR);
-		 administrator.setKey("CIAOO"); saveIfMissing(administrator);
-		 
-		 // Saving other 4 users for testing 
-		 
-		 User user2 = new User();
-		 user2.setName("Test2"); user2.setSurname("Test2");
-		 user2.setEmail("test.test2@gmail.com"); user2.setCreated(now);
-		 user2.setLastModified(now);
-		 user2.setPassword(passwordEncoder.encode("12345678"));
-		 user2.setUserStatus(UserStatus.CONFIRMED);
-		 user2.setApplicationRole(ApplicationRole.ADMINISTRATOR);
-		 user2.setKey("JRU8sE4u3755xBsw"); saveIfMissing(user2);
-		 
-		 User user3 = new User(); user3.setName("Test3"); user3.setSurname("Test");
-		 user3.setEmail("test.test3@gmail.com"); user3.setCreated(now);
-		 user3.setLastModified(now);
-		 user3.setPassword(passwordEncoder.encode("12345678"));
-		 user3.setUserStatus(UserStatus.NOT_CONFIRMED);
-		 user3.setApplicationRole(ApplicationRole.USER);
-		 user3.setKey("J4evnj6ZKqLHJPFA"); saveIfMissing(user3);
-		  
-		 User user4 = new User(); user4.setName("Test4"); user4.setSurname("Test");
-		 user4.setEmail("test.test4@gmail.com"); user4.setCreated(now);
-		 user4.setLastModified(now);
-		 user4.setPassword(passwordEncoder.encode("12345678"));
-		 user4.setUserStatus(UserStatus.CONFIRMED);
-		 user4.setApplicationRole(ApplicationRole.USER);
-		 user4.setKey("FNFr6JbgPhMbxa2U"); saveIfMissing(user4);
-		 
-		 User user5 = new User(); user5.setName("Test5"); user5.setSurname("Test");
-		 user5.setEmail("test.test5@gmail.com"); user5.setCreated(now);
-		 user5.setLastModified(now);
-		 user5.setPassword(passwordEncoder.encode("12345678"));
-		 user5.setUserStatus(UserStatus.NOT_CONFIRMED);
-		 user5.setApplicationRole(ApplicationRole.MANAGER);
-		 user5.setKey("TSPyv7HL7RGwHnMf"); saveIfMissing(user5);
-	}
+    private User user(String name, String email, ApplicationRole role, UserStatus status, String key, Instant now) {
+        var u = new User();
+        u.setName(name);
+        u.setSurname(name);
+        u.setEmail(email);
+        u.setCreated(now);
+        u.setLastModified(now);
+        u.setPassword(passwordEncoder.encode("12345678"));
+        u.setUserStatus(status);
+        u.setApplicationRole(role);
+        u.setKey(key);
+        return u;
+    }
 
-	private void saveIfMissing(User user) {
-		if (userRepository.findByEmailAddress(user.getEmail()).isEmpty()) {
-			userRepository.save(user);
-		}
-	}
+    private void saveIfMissing(User user) {
+        if (userRepository.findByEmailAddress(user.getEmail()).isEmpty()) {
+            userRepository.save(user);
+        }
+    }
 }

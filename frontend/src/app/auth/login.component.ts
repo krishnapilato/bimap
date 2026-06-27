@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -38,6 +38,7 @@ export class LoginComponent {
   hidePassword = true;
 
   onSubmit(): void {
+    console.log('Login request:', this.loginRequest);
     this.authService.login(this.loginRequest).subscribe({
       next: () => {
         this.router.navigate(['main']);

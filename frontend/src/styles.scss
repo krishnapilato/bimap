@@ -6,6 +6,7 @@
 @use '@angular/material' as mat;
 
 html {
+  overflow-x: hidden;
   height: 100%;
   @include mat.theme(
     (

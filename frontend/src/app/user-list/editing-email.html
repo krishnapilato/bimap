@@ -1,38 +1,68 @@
-<div style="width: 100%; padding: 2rem 1.5rem; box-sizing: border-box; text-align: center; font-family: Roboto, 'Helvetica Neue', sans-serif;">
-  
-  <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; font-weight: 500; color: #2c3e50;">
-    Confirm Email
+<div
+  style="
+    width: 100%;
+    padding: 1.5rem 2rem;
+    box-sizing: border-box;
+    text-align: center;
+    font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  "
+>
+  <div
+    style="
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      width: 48px;
+      height: 48px;
+      background-color: #e8eaf6;
+      border-radius: 50%;
+      margin-bottom: 1rem;
+    "
+  >
+    <mat-icon style="color: #3f51b5">mail_outline</mat-icon>
+  </div>
+
+  <h2 style="margin: 0 0 0.5rem 0; font-size: 1.25rem; font-weight: 600; color: #333">
+    Send Email Confirmation
   </h2>
-  
-  <p style="margin: 0 0 2.5rem 0; font-size: 1rem; color: #555;">
-    Are you sure you want to send an email to <br/>
-    <strong style="color: #3f51b5;">{{ globalEmail }}</strong>?
+
+  <p style="margin: 0 0 2rem 0; font-size: 0.95rem; color: #555; line-height: 1.5">
+    Are you sure you want to send an email to <br />
+    <span
+      style="
+        display: inline-block;
+        margin-top: 0.5rem;
+        padding: 0.35rem 0.75rem;
+        background-color: #f5f5f5;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        font-weight: 500;
+        color: #333;
+      "
+    >
+      {{ globalEmail }}
+    </span>
   </p>
 
-  <div style="display: flex; justify-content: center; gap: 2rem;">
+  <div style="display: flex; justify-content: center; gap: 1rem">
     <button
-      adiButton
-      mat-raised-button
-      color="primary"
-      matTooltip="Accept"
-      matTooltipPosition="left"
-      (click)="send()"
-      style="border-radius: 50px; min-width: 80px; height: 48px; display: flex; justify-content: center; align-items: center;"
+      mat-stroked-button
+      (click)="cancel()"
+      style="border-radius: 8px; height: 44px; padding: 0 1.5rem; font-weight: 500; color: #555"
     >
-      <mat-icon style="margin: 0;">done</mat-icon>
+      Cancel
     </button>
 
     <button
-      adiButton
-      mat-raised-button
-      color="accent"
-      matTooltip="Reject"
-      matTooltipPosition="right"
-      (click)="cancel()"
-      style="border-radius: 50px; min-width: 80px; height: 48px; display: flex; justify-content: center; align-items: center;"
+      mat-flat-button
+      color="primary"
+      (click)="send()"
+      style="border-radius: 8px; height: 44px; padding: 0 1.5rem; font-weight: 500"
     >
-      <mat-icon style="margin: 0;">close</mat-icon>
+      <mat-icon style="margin-right: 6px; font-size: 20px; width: 20px; height: 20px"
+        >send</mat-icon
+      >
+      Send Email
     </button>
   </div>
-  
 </div>
