@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -109,19 +110,24 @@ public class SpringBootController {
         return userRepository.save(newUser);
     }
 
-    // UPDATE USER
-    @PutMapping("/users/{id}")
-    public User update(@RequestBody User updatedUser, @PathVariable Long id) {
+    @PatchMapping("/users/{id}")
+    public User update(@RequestBody User req, @PathVariable Long id) {
 
         logger.info("Updating user id: {}", id);
 
         return userRepository.findById(id).map(user -> {
-            user.setName(updatedUser.getName());
-            user.setSurname(updatedUser.getSurname());
-            user.setEmail(updatedUser.getEmail());
-            user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-            user.setApplicationRole(updatedUser.getApplicationRole());
-            user.setLastModified(new Date().toInstant());
+
+            user.setName(req.getName());
+            user.setSurname(req.getSurname());
+            user.setEmail(req.getEmail());
+            user.setApplicationRole(req.getApplicationRole());
+
+            if (req.getPassword() != null && !req.getPassword().isBlank()) {
+                user.setPassword(passwordEncoder.encode(req.getPassword()));
+            }
+
+            user.setLastModified(Instant.now());
+
             return userRepository.save(user);
         }).orElseThrow(() -> new UsernameNotFoundException("User not found: " + id));
     }
@@ -167,8 +173,7 @@ public class SpringBootController {
                     </div>
                 </body>
                 </html>
-                """.formatted(user.getName(), user.getEmail(), user.getApplicationRole().name().toUpperCase(), "12345678"
-        );
+                """.formatted(user.getName(), user.getEmail(), user.getApplicationRole().name().toUpperCase(), "12345678");
 
         try {
             utility.sendEmail(email, content);

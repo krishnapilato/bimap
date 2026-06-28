@@ -113,12 +113,6 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
       doubleClickZoom: false,
     }).setView([this.initialLat, this.initialLng], 16);
 
-    L.control
-      .attribution({
-        prefix: 'BiMap 2026 - Leaflet & Google Maps',
-      })
-      .addTo(this.leafletMap);
-
     this.handleMapDoubleClick();
 
     L.layerGroup([googleRoad, streetViewCoverage]).addTo(this.leafletMap);
@@ -146,7 +140,7 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
       enableCloseButton: false,
       motionTracking: true,
       clickToGo: true,
-      fullscreenControl: false,
+      fullscreenControl: true,
       disableDefaultUI: true,
       panControl: false,
       zoomControl: false,

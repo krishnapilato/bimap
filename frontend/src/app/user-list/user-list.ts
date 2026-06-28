@@ -273,13 +273,15 @@ export class DialogElementsExampleDialog {
   providers: [UserService],
 })
 export class EditingEmailDialog {
-  public globalEmail = '';
+  private readonly data = inject<{ email: string }>(MAT_DIALOG_DATA);
+  public globalEmail = this.data.email;
 
   private readonly userService = inject(UserService);
   private readonly dialogRef = inject(MatDialogRef<EditingEmailDialog>);
   private readonly snackBar = inject(MatSnackBar);
 
   send(): void {
+    console.log(`Sending email to ${this.globalEmail}...`);
     this.snackBar.open(`Sending email to ${this.globalEmail}...`, 'Close', { duration: 1000 });
 
     this.userService.sendEmail(this.globalEmail).subscribe({
@@ -295,6 +297,7 @@ export class EditingEmailDialog {
         this.snackBar.open(`Error sending email to ${this.globalEmail}`, 'Close', {
           duration: 3000,
         });
+        this.dialogRef.close(true);
       },
     });
   }

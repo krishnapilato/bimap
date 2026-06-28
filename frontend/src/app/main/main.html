@@ -7,7 +7,7 @@
   <span class="spacer"></span>
 
   <div class="header-actions">
-    @if (user?.user?.applicationRole === 'ADMINISTRATOR') {
+    @if (user.user.applicationRole === 'ADMINISTRATOR') {
       <button mat-stroked-button matTooltip="Admin" class="admin-btn" routerLink="/listuser">
         <mat-icon>admin_panel_settings</mat-icon>
       </button>
@@ -121,7 +121,7 @@
           <mat-form-field appearance="outline">
             <mat-label>Good Name</mat-label>
             <mat-icon matPrefix>badge</mat-icon>
-            <input matInput formControlName="goodNaming" placeholder="Enter name">
+            <input matInput formControlName="goodNaming" placeholder="Enter name" />
           </mat-form-field>
 
           <mat-form-field appearance="outline">
