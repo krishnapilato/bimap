@@ -1,67 +1,26 @@
-<div
-  style="
-    width: 100%;
-    padding: 1.5rem 2rem;
-    box-sizing: border-box;
-    text-align: center;
-    font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-  "
->
-  <div
-    style="
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      width: 48px;
-      height: 48px;
-      background-color: #e8eaf6;
-      border-radius: 50%;
-      margin-bottom: 1rem;
-    "
-  >
-    <mat-icon style="color: #3f51b5">mail_outline</mat-icon>
+<div class="dialog-container">
+  <!-- Header & Icon -->
+  <div class="dialog-header">
+    <div class="icon-wrapper animate__animated animate__zoomIn">
+      <mat-icon color="primary">mail_outline</mat-icon>
+    </div>
+    <h2 class="dialog-title">Send Email Confirmation</h2>
   </div>
 
-  <h2 style="margin: 0 0 0.5rem 0; font-size: 1.25rem; font-weight: 600; color: #333">
-    Send Email Confirmation
-  </h2>
+  <!-- Content Body -->
+  <div class="dialog-body">
+    <p class="dialog-message">Are you sure you want to send an email to</p>
+    <div class="email-badge">
+      <mat-icon class="badge-icon">alternate_email</mat-icon>
+      <span>{{ globalEmail }}</span>
+    </div>
+  </div>
 
-  <p style="margin: 0 0 2rem 0; font-size: 0.95rem; color: #555; line-height: 1.5">
-    Are you sure you want to send an email to <br />
-    <span
-      style="
-        display: inline-block;
-        margin-top: 0.5rem;
-        padding: 0.35rem 0.75rem;
-        background-color: #f5f5f5;
-        border: 1px solid #e0e0e0;
-        border-radius: 6px;
-        font-weight: 500;
-        color: #333;
-      "
-    >
-      {{ globalEmail }}
-    </span>
-  </p>
-
-  <div style="display: flex; justify-content: center; gap: 1rem">
-    <button
-      mat-stroked-button
-      (click)="cancel()"
-      style="border-radius: 8px; height: 44px; padding: 0 1.5rem; font-weight: 500; color: #555"
-    >
-      Cancel
-    </button>
-
-    <button
-      mat-flat-button
-      color="primary"
-      (click)="send()"
-      style="border-radius: 8px; height: 44px; padding: 0 1.5rem; font-weight: 500"
-    >
-      <mat-icon style="margin-right: 6px; font-size: 20px; width: 20px; height: 20px"
-        >send</mat-icon
-      >
+  <!-- Actions -->
+  <div class="dialog-actions">
+    <button mat-stroked-button class="action-btn cancel-btn" (click)="cancel()">Cancel</button>
+    <button mat-flat-button color="primary" class="action-btn send-btn" (click)="send()">
+      <mat-icon>send</mat-icon>
       Send Email
     </button>
   </div>

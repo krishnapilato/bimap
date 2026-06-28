@@ -1,166 +1,225 @@
-/* Container Layout */
-.dashboard-container {
-  max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 1.5rem;
-  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+/* GLOBAL RESETS */
+:host {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  min-height: 100vh;
+  background-color: #f4f7f9;
+  font-family: 'Roboto', sans-serif;
 }
 
-/* Header Styling */
-.dashboard-header {
-  text-align: center;
-  margin-bottom: 1rem;
-}
+.text-primary { color: #3f51b5; }
+.spacer { flex: 1 1 auto; }
 
-.header-icon {
-  display: inline-flex;
-  justify-content: center;
+/* -----------------------------
+   APP HEADER
+------------------------------ */
+.app-header {
+  display: flex;
   align-items: center;
-  width: 56px;
-  height: 56px;
-  background-color: #e8eaf6;
-  border-radius: 50%;
-  color: #3f51b5;
-  margin-bottom: 1rem;
+  padding: 0 24px;
+  height: 64px;
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  z-index: 10;
 }
 
-.header-icon mat-icon {
-  font-size: 32px;
-  width: 32px;
-  height: 32px;
+.brand-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.dashboard-header h1 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.75rem;
-  font-weight: 500;
-  color: #333;
+.brand-logo { font-size: 28px; height: 28px; width: 28px; }
+.brand-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: #1e293b; }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .user-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: #f5f5f5;
-  padding: 0.5rem 1rem;
-  border-radius: 50px;
-  color: #555;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.user-badge mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-  color: #4caf50;
-}
-
-/* Search Field */
-.search-container {
   display: flex;
-  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+  font-weight: 500;
+  font-size: 14px;
+}
+.user-badge mat-icon { color: #10b981; }
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background-color: #cbd5e1;
+  margin: 0 8px;
+}
+
+.logout-btn { border-radius: 20px; }
+
+/* -----------------------------
+   WORKSPACE & LAYOUT
+------------------------------ */
+.workspace-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.page-header p {
+  margin: 8px 0 0;
+  font-size: 15px;
+  color: #64748b;
+}
+
+/* -----------------------------
+   DATA CARD & TOOLBAR
+------------------------------ */
+.data-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  gap: 16px;
 }
 
 .search-field {
   width: 100%;
-  max-width: 600px;
+  max-width: 400px;
 }
 
-/* Table Styling */
-.table-container {
-  width: 100%;
-  background: #ffffff;
+/* Remove bottom padding from Angular Material input inside the toolbar */
+.table-toolbar ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
+.table-toolbar ::ng-deep .mat-mdc-text-field-wrapper { background-color: #ffffff; }
+
+.add-user-btn {
+  height: 48px;
   border-radius: 8px;
-  overflow: hidden;
+  padding: 0 24px;
+  font-size: 15px;
+  letter-spacing: 0.5px;
 }
 
-.user-table {
+/* -----------------------------
+   TABLE STYLING
+------------------------------ */
+.table-responsive {
   width: 100%;
+  overflow-x: auto;
 }
 
-.mat-row {
+.user-table { width: 100%; }
+
+.user-table th.mat-header-cell {
+  color: #475569;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 16px;
+}
+
+.user-table td.mat-cell {
+  padding: 16px;
+  color: #334155;
+  border-bottom-color: #f1f5f9;
+}
+
+.hover-row:hover {
+  background-color: #f8fafc;
   transition: background-color 0.2s ease;
 }
 
-.mat-row:hover {
-  background-color: #f9f9f9; /* Replaced the breaking font-size: 50px */
-}
-
-/* Email Link Styling */
+/* Specific Cell Elements */
 .email-link {
-  color: #1976d2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #2563eb;
   text-decoration: none;
-  font-weight: 500;
   cursor: pointer;
+  font-weight: 500;
   transition: color 0.2s;
 }
+.email-link:hover { color: #1d4ed8; text-decoration: underline; }
+.email-icon { font-size: 18px; height: 18px; width: 18px; opacity: 0.7; }
 
-.email-link:hover {
-  color: #0d47a1;
-  text-decoration: underline;
+.role-text { color: #64748b; font-weight: 500; }
+
+.action-header { text-align: right; }
+.action-cell { text-align: right; white-space: nowrap; }
+
+/* -----------------------------
+   STATUS BADGES
+------------------------------ */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: inline-block;
+  background-color: #f1f5f9;
+  color: #64748b;
 }
 
-/* Actions Column */
-.action-header {
-  text-align: right;
-  padding-right: 2rem !important;
-}
+/* Add logic colors matching what your backend outputs. Example: */
+.status-badge.active { background-color: #dcfce7; color: #166534; }
+.status-badge.inactive { background-color: #fee2e2; color: #991b1b; }
+.status-badge.pending { background-color: #fef9c3; color: #854d0e; }
 
-.action-cell {
-  text-align: right;
-  white-space: nowrap;
-  padding-right: 1rem !important;
-}
-
-/* Empty State */
+/* -----------------------------
+   EMPTY STATE
+------------------------------ */
 .empty-state {
   text-align: center;
-  padding: 3rem 1rem;
-  color: #757575;
+  padding: 64px 24px !important;
 }
-
-/* Status Badges (Optional - adjust to your specific statuses) */
-.status-badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  background-color: #e0e0e0;
-  color: #424242;
+.empty-icon {
+  font-size: 64px;
+  height: 64px;
+  width: 64px;
+  color: #cbd5e1;
+  margin-bottom: 16px;
 }
+.empty-state h3 { margin: 0; font-size: 18px; color: #1e293b; }
+.empty-state p { margin: 8px 0 0; color: #64748b; }
 
-.status-badge.active {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-}
-
-.status-badge.inactive {
-  background-color: #ffebee;
-  color: #c62828;
-}
-
-/* Navigation Actions */
-.nav-actions {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  margin-top: 2rem;
-  padding-top: 2rem;
-}
-
-/* Gray Navigation Buttons */
-.gray-nav-btn {
-  background-color: #e0e0e0 !important;
-  color: #555555 !important;
-}
-
-.gray-nav-btn:hover {
-  background-color: #d5d5d5 !important;
-  color: #333333 !important;
+/* -----------------------------
+   RESPONSIVE (MOBILE)
+------------------------------ */
+@media (max-width: 768px) {
+  .workspace-container { padding: 16px; }
+  
+  .table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-field { max-width: 100%; }
+  .hide-on-mobile { display: none; }
 }

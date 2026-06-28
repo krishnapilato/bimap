@@ -24,19 +24,19 @@ public class AppInit implements CommandLineRunner {
 
         var now = Instant.now();
 
-        List<User> users = List.of(admin(now), user("Test2", "test.test2@gmail.com", ApplicationRole.ADMINISTRATOR, UserStatus.CONFIRMED, "JRU8sE4u3755xBsw", now), user("Test3", "test.test3@gmail.com", ApplicationRole.USER, UserStatus.NOT_CONFIRMED, "J4evnj6ZKqLHJPFA", now), user("Test4", "test.test4@gmail.com", ApplicationRole.USER, UserStatus.CONFIRMED, "FNFr6JbgPhMbxa2U", now), user("Test5", "test.test5@gmail.com", ApplicationRole.MANAGER, UserStatus.NOT_CONFIRMED, "TSPyv7HL7RGwHnMf", now));
+        List<User> users = List.of(admin(now), user("Test2", "Surname2", "test.test2@gmail.com", ApplicationRole.ADMINISTRATOR, UserStatus.CONFIRMED, "JRU8sE4u3755xBsw", now), user("Test3", "Surname3", "test.test3@gmail.com", ApplicationRole.USER, UserStatus.NOT_CONFIRMED, "J4evnj6ZKqLHJPFA", now), user("Test4", "Surname4", "test.test4@gmail.com", ApplicationRole.USER, UserStatus.CONFIRMED, "FNFr6JbgPhMbxa2U", now), user("Test5", "Surname5", "test.test5@gmail.com", ApplicationRole.MANAGER, UserStatus.NOT_CONFIRMED, "TSPyv7HL7RGwHnMf", now));
 
         users.forEach(this::saveIfMissing);
     }
 
     private User admin(Instant now) {
-        return user("Khova Krishna", "krishnak.pilato@gmail.com", ApplicationRole.ADMINISTRATOR, UserStatus.CONFIRMED, "CIAOO", now);
+        return user("Khova Krishna", "Pilato", "krishnak.pilato@gmail.com", ApplicationRole.ADMINISTRATOR, UserStatus.CONFIRMED, "CIAOO", now);
     }
 
-    private User user(String name, String email, ApplicationRole role, UserStatus status, String key, Instant now) {
+    private User user(String name, String surname, String email, ApplicationRole role, UserStatus status, String key, Instant now) {
         var u = new User();
         u.setName(name);
-        u.setSurname(name);
+        u.setSurname(surname);
         u.setEmail(email);
         u.setCreated(now);
         u.setLastModified(now);

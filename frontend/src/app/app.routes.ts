@@ -4,9 +4,8 @@ import { AuthGuard } from './auth/auth.guard';
 import { LoginComponent } from './auth/login.component';
 import { LogoutComponent } from './auth/logout.component';
 import { MainComponent } from './main/main.component';
-import { StreetviewComponent } from './streetview/streetview.component';
-import { UserListComponent } from './user-list/user-list.component';
 import { UserFormComponent } from './user-form/user-form.component';
+import { UserListComponent } from './user-list/user-list.component';
 
 export const routes: Routes = [
   {
@@ -24,11 +23,6 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
-    path: 'streetview',
-    component: StreetviewComponent,
-    canActivate: [AuthGuard],
-  },
-  {
     path: 'logout',
     component: LogoutComponent,
     canActivate: [AuthGuard],
@@ -43,4 +37,9 @@ export const routes: Routes = [
     component: UserListComponent,
     canActivate: [AdminAuthGuard],
   },
+  {
+    path: '**',
+    component: MainComponent,
+    canActivate: [AuthGuard],
+  }
 ];

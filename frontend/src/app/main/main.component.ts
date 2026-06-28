@@ -8,20 +8,22 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { RouterModule } from '@angular/router';
 import $ from 'jquery';
 import * as L from 'leaflet';
 import 'leaflet-easybutton';
 import { AuthService } from '../auth/auth.service';
 import { LoginResponse } from '../auth/loginresponse';
+import { StreetviewComponent } from '../streetview/streetview.component';
 import { ApiService } from './api.service';
 import { FormModel } from './formdata';
 import { Tables } from './tables';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'main-app',
@@ -47,6 +49,8 @@ import { RouterModule } from '@angular/router';
     MatSidenavModule,
     MatSlideToggleModule,
     RouterModule,
+    MatToolbarModule,
+    StreetviewComponent,
   ],
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.css'],
@@ -54,7 +58,7 @@ import { RouterModule } from '@angular/router';
 })
 export class MainComponent implements OnInit {
   public displayedColumns: string[] = ['id', 'prov', 'comune', 'indirizzo', 'civico'];
-  public dataSource = new MatTableDataSource<Tables>();
+  public dataSource: MatTableDataSource<Tables> = new MatTableDataSource<Tables>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -70,7 +74,7 @@ export class MainComponent implements OnInit {
   public ilatitude: UntypedFormControl = new UntypedFormControl();
   public ilongitude: UntypedFormControl = new UntypedFormControl();
   public formData = new FormModel();
-  public results!: any;
+  public results!: string[];
   public user!: LoginResponse;
   public playerName!: string;
 
@@ -104,20 +108,23 @@ export class MainComponent implements OnInit {
     this.isShown = false;
     this.user = this.authenticationService.loginResponseValue;
 
-    this.apiService.findAll().subscribe((data) => this.dataSource.data = data );
+    this.apiService.findAll().subscribe((data) => (this.dataSource.data = data));
 
     this.searchRegions.valueChanges.subscribe((term: string) => {
-      if (term !== '' && term.length > 0) this.apiService.searchRegions(term).subscribe((data) => this.provinces = data );
+      if (term !== '' && term.length > 0)
+        this.apiService.searchRegions(term).subscribe((data) => (this.provinces = data));
       else this.provinces = [];
     });
 
     this.searchTerm.valueChanges.subscribe((term: string) => {
-      if (term !== '' && term.length > 0) this.apiService.searchProvinces(term).subscribe((data) => this.provinces = data );
+      if (term !== '' && term.length > 0)
+        this.apiService.searchProvinces(term).subscribe((data) => (this.provinces = data));
       else this.provinces = [];
     });
 
     this.searchMunicipalities.valueChanges.subscribe((term: string) => {
-      if (term !== '' && term.length > 0) this.apiService.searchMunicipalities(term).subscribe((data) => this.provinces = data );
+      if (term !== '' && term.length > 0)
+        this.apiService.searchMunicipalities(term).subscribe((data) => (this.provinces = data));
       else this.provinces = [];
     });
 
@@ -143,7 +150,7 @@ export class MainComponent implements OnInit {
 
     var cities = L.layerGroup([googleTerrain, googleStreetViewLayer]);
 
-    this.map = L.map('map', {
+    /* this.map = L.map('map', {
       layers: [googleTerrain],
       zoomSnap: 0.1,
       zoomDelta: 0.25,
@@ -246,14 +253,31 @@ export class MainComponent implements OnInit {
         this.latitude = e.latlng.lat;
         this.longitude = e.latlng.lng;
         $('#latitude').val(this.latitude);
-        $('#longitude').val(this.longitude);
+        $('#longitude').val(this.longitude);        
+        $('#latitude').focus();
+        $('#longitude').focus()
         this._snackbar.open('Coordinates added', 'Close', { duration: 2000 });
       }
     });
 
     map.on('baselayerchange', function onOverlayAdd(e: any) {
       snackbar.open('Layer changed to ' + e.name, 'Close', { duration: 2000 });
-    });
+    });*/
+  }
+
+  onCoordinatesPicked(coords: { lat: number; lng: number }): void {
+    // 1. Update your local variables if you still need them
+    this.latitude = coords.lat;
+    this.longitude = coords.lng;
+
+    // 2. Update the Form Controls directly (The Angular Way!)
+    // This automatically updates the UI inputs, no jQuery required.
+    this.ilatitude.setValue(coords.lat.toFixed(6));
+    this.ilongitude.setValue(coords.lng.toFixed(6));
+
+    // Optional: If you want to trigger form validation/status updates
+    this.ilatitude.markAsTouched();
+    this.ilongitude.markAsTouched();
   }
 
   scrollToTop() {

@@ -1,13 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -17,6 +21,7 @@ import { AuthService } from '../auth/auth.service';
 import { User } from '../user';
 import { LoginResponse } from './../auth/loginresponse';
 import { UserService } from './user-service.service';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-user-list',
@@ -31,6 +36,7 @@ import { UserService } from './user-service.service';
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
+    MatDialogModule,
     CommonModule,
     RouterModule,
   ],
@@ -72,10 +78,14 @@ export class UserListComponent implements OnInit, AfterViewInit {
     if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
   }
 
+  // UPDATED: Passing the entire row and the data source via the 'data' property
   public openDialog(row: any): void {
-    let dialogRef = this.dialog.open(DialogElementsExampleDialog);
-    dialogRef.componentInstance.globalID = row.id;
-    dialogRef.componentInstance.globalDataSource = this.dataSource;
+    this.dialog.open(DialogElementsExampleDialog, {
+      data: {
+        user: row,
+        dataSource: this.dataSource,
+      },
+    });
   }
 
   public openEmailDialog(email: string): void {
@@ -120,42 +130,53 @@ export class UserListComponent implements OnInit, AfterViewInit {
     MatTooltipModule,
     MatIconModule,
     MatSelectModule,
-    MatIconModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
     ReactiveFormsModule,
     CommonModule,
     RouterModule,
+    MatDialogModule,
   ],
+  standalone: true,
   providers: [UserService],
 })
 export class DialogElementsExampleDialog {
-  public surname: UntypedFormControl = new UntypedFormControl();
-  public name: UntypedFormControl = new UntypedFormControl();
-  public email: UntypedFormControl = new UntypedFormControl();
-  public applicationRole: UntypedFormControl = new UntypedFormControl();
-  public password: UntypedFormControl = new UntypedFormControl();
+  // Declare controls but initialize them in the constructor with injected data
+  public surname: UntypedFormControl;
+  public name: UntypedFormControl;
+  public email: UntypedFormControl;
+  public applicationRole: UntypedFormControl;
+  public password: UntypedFormControl;
 
   public globalID!: number;
-  public globalDataSource = new MatTableDataSource<User>();
+  public globalDataSource!: MatTableDataSource<User>;
 
   private newUser: User = new User();
 
   approles: any[] = [
     { value: 'USER', viewValue: 'USER' },
     { value: 'MANAGER', viewValue: 'MANAGER' },
-    { value: 'ADMINISTRATOR', viewValue: 'ADMINISTRATOR' }
+    { value: 'ADMINISTRATOR', viewValue: 'ADMINISTRATOR' },
   ];
 
   constructor(
     private userService: UserService,
-    public dialog: MatDialog,
+    public dialogRef: MatDialogRef<DialogElementsExampleDialog>, // Inject DialogRef
+    @Inject(MAT_DIALOG_DATA) public data: any, // Inject Passed Data
     private _snackbar: MatSnackBar,
-  ) {}
+  ) {
+    // 1. Assign the global variables from the injected data
+    this.globalID = this.data.user.id;
+    this.globalDataSource = this.data.dataSource;
+
+    // 2. Precompile the form values using the injected user data
+    this.name = new UntypedFormControl(this.data.user.name);
+    this.surname = new UntypedFormControl(this.data.user.surname);
+    this.email = new UntypedFormControl(this.data.user.email);
+    this.applicationRole = new UntypedFormControl(this.data.user.applicationRole);
+    this.password = new UntypedFormControl('');
+  }
 
   cancel(): void {
-    this.dialog.closeAll();
+    this.dialogRef.close(); // Only close this specific dialog
     this._snackbar.open('Operation cancelled', 'Close', { duration: 2000 });
   }
 
@@ -171,13 +192,15 @@ export class DialogElementsExampleDialog {
         this.userService.findAll().subscribe((data) => {
           this.globalDataSource.data = data;
         });
-        this.dialog.closeAll();
+
+        this.dialogRef.close(); // Only close this specific dialog
+
         this._snackbar.open('Record with ID ' + this.globalID + ' updated successfully', '', {
           duration: 2000,
         });
       });
     } else {
-      this.dialog.closeAll();
+      this.dialogRef.close();
       this._snackbar.open('Operation cancelled', 'Close', { duration: 2000 });
     }
   }
@@ -186,6 +209,131 @@ export class DialogElementsExampleDialog {
 @Component({
   selector: 'editing-email',
   templateUrl: 'editing-email.html',
+  styles: [
+    `
+      /* Container Layout */
+      .dialog-container {
+        width: 100%;
+        max-width: 400px; /* Ensures the dialog doesn't stretch too wide on desktop */
+        padding: 32px 24px;
+        box-sizing: border-box;
+        text-align: center;
+        font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+        background-color: #ffffff;
+      }
+
+      /* -----------------------------
+   HEADER & ICON
+------------------------------ */
+      .dialog-header {
+        margin-bottom: 24px;
+      }
+
+      .icon-wrapper {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 64px;
+        height: 64px;
+        background-color: #eef2ff; /* Soft primary tint */
+        border-radius: 50%;
+        margin-bottom: 16px;
+      }
+
+      .icon-wrapper mat-icon {
+        transform: scale(1.3);
+      }
+
+      .dialog-title {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+        color: #1e293b;
+        letter-spacing: -0.5px;
+      }
+
+      /* -----------------------------
+   BODY & TEXT
+------------------------------ */
+      .dialog-body {
+        margin-bottom: 32px;
+      }
+
+      .dialog-message {
+        margin: 0 0 16px 0;
+        font-size: 15px;
+        color: #64748b;
+        line-height: 1.5;
+      }
+
+      /* Highlighting the target email */
+      .email-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-weight: 500;
+        color: #334155;
+        font-size: 15px;
+        word-break: break-all; /* Prevents long emails from breaking the layout */
+      }
+
+      .badge-icon {
+        font-size: 18px;
+        height: 18px;
+        width: 18px;
+        color: #94a3b8;
+      }
+
+      /* -----------------------------
+   BUTTON ACTIONS
+------------------------------ */
+      .dialog-actions {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+      }
+
+      .action-btn {
+        height: 48px;
+        border-radius: 8px;
+        padding: 0 24px;
+        font-weight: 600;
+        font-size: 15px;
+        letter-spacing: 0.5px;
+        flex: 1; /* Makes buttons equal width */
+      }
+
+      .cancel-btn {
+        color: #64748b;
+        border-color: #cbd5e1;
+      }
+
+      .send-btn mat-icon {
+        margin-right: 6px;
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+
+      /* -----------------------------
+   RESPONSIVE (MOBILE)
+------------------------------ */
+      @media (max-width: 400px) {
+        .dialog-actions {
+          flex-direction: column-reverse; /* Puts primary action on top for mobile */
+          gap: 12px;
+        }
+        .action-btn {
+          width: 100%;
+        }
+      }
+    `,
+  ],
+  standalone: true,
   imports: [
     MatFormFieldModule,
     MatInputModule,
@@ -221,12 +369,15 @@ export class EditingEmailDialog {
     });
     this.userService.sendEmail(this.globalEmail).subscribe({
       next: (data) => {
-        this._snackbar.open(data.toString(), 'Close', {
+        this._snackbar.open('Email sent successfully to ' + this.globalEmail, 'Close', {
           duration: 2000,
         });
       },
       error: (err) => {
-        this._snackbar.open(err.error.text, 'Close', { duration: 3000 });
+        console.error('Error sending email:', err);
+        this._snackbar.open('Error sending email to ' + this.globalEmail, 'Close', {
+          duration: 3000,
+        });
       },
     });
   }

@@ -1,77 +1,270 @@
-.layout-container {
-  width: 90vw;
-  max-height: 90vh;
-  height: 100%;
-  margin: 5vh auto;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+/* GLOBAL RESETS & VARIABLES */
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f4f7f9; /* Soft, cool gray background */
+  font-family: 'Roboto', sans-serif;
 }
 
-.form-sidenav {
-  width: 35%;
-  min-width: 320px;
-  padding: 20px;
-  background-color: #f8f9fa;
-  box-sizing: border-box;
+.text-primary { color: #3f51b5; }
+.w-100 { width: 100%; }
+.mt-3 { margin-top: 16px; }
+
+/* -----------------------------
+   HEADER / TOOLBAR 
+------------------------------ */
+.app-header {
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  height: 64px;
+  background: #ffffff;
+  z-index: 10;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.brand-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  font-size: 28px;
+  height: 28px;
+  width: 28px;
+}
+
+.brand-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: #333;
+}
+
+.spacer { flex: 1 1 auto; }
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background-color: #e0e0e0;
+  margin: 0 8px;
+}
+
+.action-icon { color: #5f6368; }
+.logout-btn { border-radius: 20px; }
+
+/* -----------------------------
+   WORKSPACE & LAYOUT
+------------------------------ */
+.workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden; /* Contains the scroll areas */
+}
+
+/* -----------------------------
+   SIDEBAR (LEFT PANEL)
+------------------------------ */
+.sidebar {
+  width: 420px;
+  min-width: 420px;
+  background: #ffffff;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #e0e0e0;
+}
+
+.panel-header {
+  padding: 24px 24px 16px;
+  background: #f8fafc;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.panel-header h2 { margin: 0; font-size: 22px; font-weight: 600; color: #1e293b; }
+.panel-header p { margin: 6px 0 0; font-size: 14px; color: #64748b; }
+
+/* Form Groupings */
+.modern-form {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-card h3 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+/* Grid Systems for Inputs */
+.grid-2-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.grid-address {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 16px;
+}
+
+mat-form-field { width: 100%; }
+.mat-mdc-form-field-bottom-align { display: none; } /* Removes excess bottom spacing from Angular Material */
+
+/* Special Instruction Card */
+.highlight-card {
+  background: #eef2ff;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px dashed #a5b4fc;
+}
+
+.instruction-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4338ca;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.action-footer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-block {
+  width: 100%;
+  height: 48px;
+  font-size: 16px;
+  border-radius: 8px;
+  letter-spacing: 0.5px;
+}
+
+/* -----------------------------
+   MAIN CONTENT (MAP & TABLE)
+------------------------------ */
+.content-panel {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+}
+
+.map-card {
+  flex: 1; /* Takes available space */
+  min-height: 350px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
 }
 
 .map-container {
+  width: 100%;
   height: 100%;
-  width: 100%;
 }
 
-.toggle-btn {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  z-index: 1000;
-  background: white;
-  border-radius: 50%;
-}
-
-.mat-mdc-form-field {
-  width: 100%;
-}
-
-.action-bar {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 24px;
-  padding: 20px;
-
-  margin-top: auto;
-  margin-bottom: 50px;
-}
-
-.table-wrapper {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  padding: 24px 0;
-}
-
-.table-container {
-  width: 80%;
-
+.table-card {
+  background: #fff;
   border-radius: 12px;
-
   overflow: hidden;
-  background-color: white;
+  border: 1px solid #e2e8f0;
 }
 
-table {
+/* Table Enhancements */
+.table-responsive {
   width: 100%;
+  overflow-x: auto; /* Horizontal scroll on small screens */
 }
 
-.empty-cell {
-  text-align: center;
-  padding: 24px !important;
-  color: #666;
+table { width: 100%; }
+
+.badge {
+  background: #e2e8f0;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
 }
 
 .clickable-row:hover {
-  background-color: #f5f5f5;
+  background-color: #f8fafc;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px !important;
+  color: #94a3b8;
+}
+
+.empty-icon {
+  font-size: 48px;
+  height: 48px;
+  width: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+/* -----------------------------
+   RESPONSIVE DESIGN (MOBILE)
+------------------------------ */
+@media (max-width: 960px) {
+  .workspace {
+    flex-direction: column;
+    overflow-y: auto; /* Let the whole page scroll vertically */
+  }
+
+  .sidebar {
+    width: 100%;
+    min-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+    overflow: visible; /* Prevents double scrollbars */
+  }
+
+  .content-panel {
+    padding: 16px;
+    gap: 16px;
+    overflow: visible;
+  }
+  
+  .map-card {
+    min-height: 300px;
+    flex: none; /* Disables flex-grow on mobile so it stays a fixed height */
+  }
+
+  .hide-on-mobile {
+    display: none; /* Hide text inside buttons on small screens */
+  }
+
+  .app-header {
+    padding: 0 16px;
+  }
 }

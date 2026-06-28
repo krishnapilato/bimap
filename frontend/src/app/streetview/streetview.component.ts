@@ -8,6 +8,8 @@ import {
   effect,
   OnDestroy,
   inject,
+  EventEmitter,
+  Output,
 } from '@angular/core';
 import * as L from 'leaflet';
 import { CommonModule } from '@angular/common';
@@ -38,11 +40,7 @@ declare var google: any;
       </div>
 
       <!-- Resizer -->
-      <div 
-        class="resizer" 
-        (mousedown)="onMouseDown($event)"
-        (dblclick)="resetSplit()">
-      </div>
+      <div class="resizer" (mousedown)="onMouseDown($event)" (dblclick)="resetSplit()"></div>
 
       <!-- Right Panel: Street View -->
       <div class="map-panel" [style.width.%]="100 - leftWidth()">
@@ -66,8 +64,8 @@ declare var google: any;
     `
       :host {
         display: block;
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100%; /* Fill the parent map-card */
         background: #0a0a0a;
         overflow: hidden;
       }
@@ -75,18 +73,12 @@ declare var google: any;
       .map-container {
         display: flex;
         flex-direction: row;
-        width: 94vw;
-        height: 92vh;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        border-radius: 20px;
+        width: 100%; /* Changed from 94vw */
+        height: 100%; /* Changed from 92vh */
+        position: relative; /* Changed from absolute */
+        /* Removed top, left, and transform properties so it stays in the grid */
+        border-radius: 12px; /* Matched to your map-card border radius */
         overflow: hidden;
-        box-shadow: 
-          0 25px 70px -10px rgba(0, 0, 0, 0.8),
-          inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
-        border: 1px solid #1f1f1f;
         background: #111;
       }
 
@@ -111,7 +103,9 @@ declare var google: any;
         cursor: col-resize;
         z-index: 1000;
         position: relative;
-        transition: background 0.2s ease, width 0.2s ease;
+        transition:
+          background 0.2s ease,
+          width 0.2s ease;
         box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
       }
 
@@ -188,12 +182,7 @@ declare var google: any;
 
       /* Google Tiles Dark Mode */
       .google-dark-tiles {
-        filter: 
-          invert(95%) 
-          hue-rotate(180deg) 
-          brightness(85%) 
-          contrast(92%) 
-          saturate(110%);
+        filter: invert(95%) hue-rotate(180deg) brightness(85%) contrast(92%) saturate(110%);
       }
 
       /* Leaflet Adjustments */
@@ -226,6 +215,7 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   currentCoords = signal<string>('45.481, 9.173');
 
   private readonly destroy$ = new AbortController();
+  @Output() mapDoubleClick = new EventEmitter<{lat: number, lng: number}>();
 
   ngAfterViewInit(): void {
     this.initLeaflet();
@@ -279,22 +269,17 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   }
 
   private updateCurrentCoords(lat: number, lng: number): void {
-    this.currentCoords.set(
-      `${lat.toFixed(4)}, ${lng.toFixed(4)}`
-    );
+    this.currentCoords.set(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
   }
 
   // ====================== MAP INITIALIZATION ======================
   private initLeaflet(): void {
-    const googleRoad = L.tileLayer(
-      'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
-      {
-        attribution: '© Google',
-        maxZoom: 21,
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-        className: 'google-dark-tiles',
-      }
-    );
+    const googleRoad = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+      attribution: '© Google',
+      maxZoom: 21,
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      className: 'google-dark-tiles',
+    });
 
     const streetViewCoverage = L.tileLayer(
       'https://{s}.google.com/vt/?lyrs=svv|cb_client:apiv3&style=50&x={x}&y={y}&z={z}',
@@ -302,13 +287,16 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
         maxZoom: 21,
         subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
         opacity: 0.35,
-      }
+      },
     );
 
     this.leafletMap = L.map('leafletMap', {
       zoomControl: true,
       attributionControl: true,
+      doubleClickZoom: false,
     }).setView([this.initialLat, this.initialLng], 16);
+
+    this.handleMapDoubleClick();
 
     L.layerGroup([googleRoad, streetViewCoverage]).addTo(this.leafletMap);
 
@@ -352,31 +340,23 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
 
     // Street View changes → Sync Leaflet
     if (this.streetViewPanorama) {
-      google.maps.event.addListener(
-        this.streetViewPanorama,
-        'position_changed',
-        () => {
-          const pos = this.streetViewPanorama!.getPosition();
-          if (!pos) return;
+      google.maps.event.addListener(this.streetViewPanorama, 'position_changed', () => {
+        const pos = this.streetViewPanorama!.getPosition();
+        if (!pos) return;
 
-          const lat = pos.lat();
-          const lng = pos.lng();
+        const lat = pos.lat();
+        const lng = pos.lng();
 
-          this.currentMarker?.setLatLng([lat, lng]);
-          this.leafletMap?.panTo([lat, lng], { animate: true });
-          this.updateCurrentCoords(lat, lng);
-        }
-      );
+        this.currentMarker?.setLatLng([lat, lng]);
+        this.leafletMap?.panTo([lat, lng], { animate: true });
+        this.updateCurrentCoords(lat, lng);
+      });
 
-      google.maps.event.addListener(
-        this.streetViewPanorama,
-        'pov_changed',
-        () => {
-          const pov = this.streetViewPanorama!.getPov();
-          this.currentHeading = pov.heading;
-          this.updateMarkerRotation(this.currentHeading);
-        }
-      );
+      google.maps.event.addListener(this.streetViewPanorama, 'pov_changed', () => {
+        const pov = this.streetViewPanorama!.getPov();
+        this.currentHeading = pov.heading;
+        this.updateMarkerRotation(this.currentHeading);
+      });
     }
   }
 
@@ -390,10 +370,22 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
     this.updateCurrentCoords(lat, lng);
   }
 
+  private handleMapDoubleClick(): void {
+    if (!this.leafletMap) return;
+
+    this.leafletMap.on('dblclick', (e: L.LeafletMouseEvent) => {
+      const { lat, lng } = e.latlng;
+      this.updatePosition(lat, lng);
+
+      // 2. Emit the coordinates to the parent
+      this.mapDoubleClick.emit({ lat, lng });
+    });
+  }
+
   // ====================== FOV MARKER ======================
   private createFovIcon(heading: number): L.DivIcon {
     const svgHtml = `
-      <svg width="62" height="62" viewBox="0 0 62 62" style="transform: rotate(${heading}deg); transform-origin: center;">
+      <svg id="fov-svg" width="62" height="62" viewBox="0 0 62 62" style="transform: rotate(${heading}deg); transform-origin: center;">
         <defs>
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
