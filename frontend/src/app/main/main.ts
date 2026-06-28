@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import {
   AfterViewInit,
   Component,
@@ -26,7 +25,6 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 
-import * as L from 'leaflet';
 
 import { AuthService } from '../auth/auth.service';
 import { LoginResponse } from '../auth/loginresponse';
@@ -74,16 +72,15 @@ export class MainComponent implements OnInit, AfterViewInit {
   public isShown = signal(false);
   public provinces: string[] = [];
 
-  private map!: L.Map;
   public latitude: number | null = null;
   public longitude: number | null = null;
 
   public displayedColumns: string[] = ['id', 'prov', 'comune', 'indirizzo', 'civico'];
   public dataSource = new MatTableDataSource<Tables>();
 
-  readonly paginator = viewChild.required(MatPaginator);
-  readonly sort = viewChild.required(MatSort);
-  readonly streetView = viewChild(StreetviewComponent);
+  private readonly paginator = viewChild.required(MatPaginator);
+  private readonly sort = viewChild.required(MatSort);
+  private readonly streetView = viewChild(StreetviewComponent);
 
   public mainForm: FormGroup = this.fb.group({
     searchRegions: ['', Validators.required],
@@ -119,78 +116,49 @@ export class MainComponent implements OnInit, AfterViewInit {
   }
 
   private setupAutocomplete(controlName: string, apiCall: (term: string) => any): void {
-    this.mainForm
-      .get(controlName)
-      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((term: string) => {
-        if (term?.trim().length > 0) {
-          apiCall(term).subscribe((data: string[]) => (this.provinces = data));
-        } else {
-          this.provinces = [];
-        }
+    this.mainForm.get(controlName)?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((term: string) => {
+        if (term?.trim().length > 0) apiCall(term).subscribe((data: string[]) => (this.provinces = data));
+        else this.provinces = [];
       });
   }
 
-  applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+  public applyFilter(event: Event): void {
+    this.dataSource.filter = (event.target as HTMLInputElement).value.trim().toLowerCase();
     if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
   }
 
-  onCoordinatesPicked(coords: { lat: number; lng: number }): void {
+  public onCoordinatesPicked(coords: { lat: number; lng: number }): void {
     this.latitude = coords.lat;
     this.longitude = coords.lng;
 
-    this.mainForm.patchValue({
-      ilatitude: coords.lat.toFixed(6),
-      ilongitude: coords.lng.toFixed(6),
-    });
+    this.mainForm.patchValue({ ilatitude: coords.lat.toFixed(6), ilongitude: coords.lng.toFixed(6) });
   }
 
-  saveData(): void {
-    if (
-      this.mainForm.valid &&
-      this.latitude &&
-      this.longitude &&
-      confirm('Are you sure you want to save data?')
-    ) {
-      const formData = {
-        ...this.mainForm.getRawValue(),
-        latitude: this.latitude,
-        longitude: this.longitude,
-      };
+  public saveData(): void {
+    if (this.mainForm.valid && this.latitude && this.longitude && confirm('Are you sure you want to save data?')) {
+      const formData = {...this.mainForm.getRawValue(), latitude: this.latitude, longitude: this.longitude};
 
       this.apiService.save(formData).subscribe({
         next: () => this.snackbar.open('Data saved successfully', 'Close', { duration: 3000 }),
-        error: () => this.snackbar.open('Failed to save data', 'Close', { duration: 3000 }),
+        error: () => this.snackbar.open('Failed to save data', 'Close', { duration: 3000 })
       });
     } else {
       this.mainForm.markAllAsTouched();
-      this.snackbar.open('Please fill out all required fields and pick coordinates.', 'Close', {
-        duration: 3000,
-      });
+      this.snackbar.open('Please fill out all required fields and pick coordinates.', 'Close', { duration: 3000 });
     }
   }
 
-  getRecord(row: any): void {
+  public getRecord(row: any): void {
     this.snackbar.open('Data inserted successfully', 'Close', { duration: 3000 });
 
     const normalizedAddress = this.normalizeAddress(row.indirizzo);
 
-    this.mainForm.patchValue({
-      searchMunicipalities: row.comune,
-      address: normalizedAddress,
-      number: row.civico === 0 ? '' : row.civico.toString(),
-    });
+    this.mainForm.patchValue({searchMunicipalities: row.comune, address: normalizedAddress, number: row.civico === 0 ? '' : row.civico.toString()});
 
-    this.panMapToAddress(
-      row.comune,
-      normalizedAddress,
-      row.civico === 0 ? '' : row.civico.toString(),
-    );
+    this.panMapToAddress(row.comune, normalizedAddress, row.civico === 0 ? '' : row.civico.toString());
   }
 
-  focusOutFunction(): void {
+  public focusOut(): void {
     const municipality = this.mainForm.get('searchMunicipalities')?.value;
     const address = this.mainForm.get('address')?.value;
     const number = this.mainForm.get('number')?.value;
@@ -199,20 +167,14 @@ export class MainComponent implements OnInit, AfterViewInit {
   }
 
   private panMapToAddress(municipality: string, address: string, number: string): void {
-    // const url = `https://nominatim.openstreetmap.org/search?format=json&q=${address}, ${municipality}`;
+    //? `https://nominatim.openstreetmap.org/search?format=json&q=`;
     const fullAddress = `${address} - ${number}, ${municipality}, Italy`;
 
     this.geocoder.geocode({ address: fullAddress }, (results: any, status: any) => {
       if (status === 'OK' && results.length > 0) {
         const location = results[0].geometry.location;
-
-        const lat = location.lat();
-        const lng = location.lng();
-
-        this.streetView()?.panTo(lat, lng);
-      } else {
-        console.error('Geocoding failed:', status);
-      }
+        this.streetView()?.panTo(location.lat(), location.lng());
+      } else console.error('Geocoding failed:', status);
     });
   }
 

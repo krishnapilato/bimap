@@ -46,12 +46,6 @@ export class UserFormComponent {
     this.user = new User();
   }
 
-  ngOnInit() {
-    this.userService
-      .checkIfEmailExists(this.user.email)
-      .subscribe((data) => (this.emailStatus = data));
-  }
-
   onFocusOutEvent(): void {
     this.userService
       .checkIfEmailExists(this.user.email)
@@ -59,16 +53,28 @@ export class UserFormComponent {
     console.log('' + this.emailStatus);
   }
 
-  onSubmit(): void {
-    this.userService.save(this.user).subscribe({
-      next: () => {
-        this.router.navigate(['/listuser']);
+  public onSubmit(): void {
+    this.userService.checkIfEmailExists(this.user.email).subscribe({
+      next: (exists) => {
+        if (exists) {
+          this._snackbar.open('Email already exists.', 'Close', {
+            duration: 3000,
+          });
+          return;
+        }
+
+        this.userService.save(this.user).subscribe({
+          next: () => this.router.navigate(['/listuser']),
+          error: (err) => {
+            console.error(err);
+            this._snackbar.open("Can't save new user: retry!", 'Close', {
+              duration: 3000,
+            });
+          },
+        });
       },
       error: (err) => {
-        console.log(err);
-        this._snackbar.open("Can't save new user: retry!", 'Close', {
-          duration: 3000,
-        });
+        console.error(err);
       },
     });
   }

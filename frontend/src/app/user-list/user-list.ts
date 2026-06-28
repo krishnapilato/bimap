@@ -1,7 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, DestroyRef, inject, Inject, OnInit, viewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  DestroyRef,
+  inject,
+  Inject,
+  OnInit,
+  viewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import {
   MAT_DIALOG_DATA,
@@ -19,6 +27,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { switchMap } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
 import { LoginResponse } from '../auth/loginresponse';
 import { User } from '../user';
@@ -65,7 +74,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
 
   readonly dataSource = new MatTableDataSource<User>();
 
-  public whatUser!: LoginResponse;
+  whatUser!: LoginResponse;
 
   readonly paginator = viewChild(MatPaginator);
   readonly sort = viewChild(MatSort);
@@ -76,14 +85,17 @@ export class UserListComponent implements OnInit, AfterViewInit {
     this.userService
       .findAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((users: User[]) => {
+      .subscribe((users) => {
         this.dataSource.data = users;
       });
   }
 
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator()!;
-    this.dataSource.sort = this.sort()!;
+    const paginator = this.paginator();
+    const sort = this.sort();
+
+    if (paginator) this.dataSource.paginator = paginator;
+    if (sort) this.dataSource.sort = sort;
   }
 
   applyFilter(event: Event): void {
@@ -103,32 +115,36 @@ export class UserListComponent implements OnInit, AfterViewInit {
   }
 
   openEmailDialog(email: string): void {
-    const dialogRef = this.dialog.open(EditingEmailDialog);
-
-    dialogRef.componentInstance.globalEmail = email;
-  }
-
-  send(email: string): void {
-    this.openEmailDialog(email);
+    this.dialog.open(EditingEmailDialog, {
+      data: { email },
+    });
   }
 
   deleteRow(user: User): void {
-    if (!confirm('Are you sure you want to delete this record?')) {
-      this.snackBar.open('Operation cancelled', 'Close', {
-        duration: 2000,
-      });
+    const confirmed = confirm('Are you sure you want to delete this record?');
+    if (!confirmed) {
+      this.snackBar.open('Operation cancelled', 'Close', { duration: 2000 });
       return;
     }
 
     this.userService
       .delete(user.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.dataSource.data = this.dataSource.data.filter((u) => u.id !== user.id);
+      .subscribe({
+        next: () => {
+          this.dataSource.data = this.dataSource.data.filter((u) => u.id !== user.id);
 
-        this.snackBar.open('Record deleted successfully', '', {
-          duration: 2000,
-        });
+          this.snackBar.open('Record deleted successfully', 'Close', {
+            duration: 2000,
+          });
+        },
+        error: (err) => {
+          console.error(err);
+
+          this.snackBar.open('Delete failed', 'Close', {
+            duration: 3000,
+          });
+        },
       });
   }
 }
@@ -136,6 +152,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
 @Component({
   selector: 'dialog-elements',
   templateUrl: 'dialog-elements.html',
+  styleUrls: ['editing-email.scss'],
   imports: [
     MatFormFieldModule,
     MatInputModule,
@@ -154,19 +171,16 @@ export class UserListComponent implements OnInit, AfterViewInit {
   providers: [UserService],
 })
 export class DialogElementsExampleDialog {
-  // Declare controls but initialize them in the constructor with injected data
-  public surname: UntypedFormControl;
-  public name: UntypedFormControl;
-  public email: UntypedFormControl;
-  public applicationRole: UntypedFormControl;
-  public password: UntypedFormControl;
+  name = new FormControl<string | null>(null);
+  surname = new FormControl<string | null>(null);
+  email = new FormControl<string | null>(null, [Validators.email]);
+  applicationRole = new FormControl<string | null>(null);
+  password = new FormControl<string | null>(null);
 
-  public globalID!: number;
-  public globalDataSource!: MatTableDataSource<User>;
+  globalID!: number;
+  globalDataSource!: MatTableDataSource<User>;
 
-  private newUser: User = new User();
-
-  approles: any[] = [
+  approles = [
     { value: 'USER', viewValue: 'USER' },
     { value: 'MANAGER', viewValue: 'MANAGER' },
     { value: 'ADMINISTRATOR', viewValue: 'ADMINISTRATOR' },
@@ -174,180 +188,70 @@ export class DialogElementsExampleDialog {
 
   constructor(
     private userService: UserService,
-    public dialogRef: MatDialogRef<DialogElementsExampleDialog>, // Inject DialogRef
-    @Inject(MAT_DIALOG_DATA) public data: any, // Inject Passed Data
-    private _snackbar: MatSnackBar,
+    private dialogRef: MatDialogRef<DialogElementsExampleDialog>,
+    @Inject(MAT_DIALOG_DATA)
+    public data: { user: User; dataSource: MatTableDataSource<User> },
+    private snackBar: MatSnackBar,
   ) {
-    // 1. Assign the global variables from the injected data
-    this.globalID = this.data.user.id;
-    this.globalDataSource = this.data.dataSource;
+    const user = data.user;
 
-    // 2. Precompile the form values using the injected user data
-    this.name = new UntypedFormControl(this.data.user.name);
-    this.surname = new UntypedFormControl(this.data.user.surname);
-    this.email = new UntypedFormControl(this.data.user.email);
-    this.applicationRole = new UntypedFormControl(this.data.user.applicationRole);
-    this.password = new UntypedFormControl('');
+    this.globalID = user.id;
+    this.globalDataSource = data.dataSource;
+
+    this.name.setValue(user.name);
+    this.surname.setValue(user.surname);
+    this.email.setValue(user.email);
+    this.applicationRole.setValue(user.applicationRole);
   }
 
   cancel(): void {
-    this.dialogRef.close(); // Only close this specific dialog
-    this._snackbar.open('Operation cancelled', 'Close', { duration: 2000 });
+    this.dialogRef.close();
+
+    this.snackBar.open('Operation cancelled', 'Close', { duration: 2000 });
   }
 
-  onNoClick(event: any): void {
-    if (confirm('Are you sure to update this record?')) {
-      this.newUser.name = this.name.value;
-      this.newUser.surname = this.surname.value;
-      this.newUser.email = this.email.value;
-      this.newUser.applicationRole = this.applicationRole.value;
-      this.newUser.password = this.password.value;
+  update(): void {
+    const confirmUpdate = confirm('Are you sure you want to update this record?');
+    if (!confirmUpdate) return;
 
-      this.userService.update(this.newUser, this.globalID).subscribe(() => {
-        this.userService.findAll().subscribe((data) => {
+    const updatedUser: User = {
+      id: this.globalID,
+      name: this.name.value ?? '',
+      surname: this.surname.value ?? '',
+      email: this.email.value ?? '',
+      applicationRole: this.applicationRole.value ?? '',
+      password: this.password.value ?? '',
+      userStatus: '',
+      created: this.data.user.created,
+      lastModified: this.data.user.lastModified,
+    };
+
+    this.userService
+      .update(updatedUser, this.globalID)
+      .pipe(switchMap(() => this.userService.findAll()))
+      .subscribe({
+        next: (data) => {
           this.globalDataSource.data = data;
-        });
 
-        this.dialogRef.close(); // Only close this specific dialog
+          this.dialogRef.close();
 
-        this._snackbar.open('Record with ID ' + this.globalID + ' updated successfully', '', {
-          duration: 2000,
-        });
+          this.snackBar.open(`Record with ID ${this.globalID} updated successfully`, 'Close', {
+            duration: 2000,
+          });
+        },
+        error: (err) => {
+          console.error(err);
+
+          this.snackBar.open('Update failed', 'Close', { duration: 3000 });
+        },
       });
-    } else {
-      this.dialogRef.close();
-      this._snackbar.open('Operation cancelled', 'Close', { duration: 2000 });
-    }
   }
 }
 
 @Component({
   selector: 'editing-email',
   templateUrl: 'editing-email.html',
-  styles: [
-    `
-      /* Container Layout */
-      .dialog-container {
-        width: 100%;
-        max-width: 400px; /* Ensures the dialog doesn't stretch too wide on desktop */
-        padding: 32px 24px;
-        box-sizing: border-box;
-        text-align: center;
-        font-family: 'Roboto', 'Helvetica Neue', sans-serif;
-        background-color: #ffffff;
-      }
-
-      /* -----------------------------
-   HEADER & ICON
------------------------------- */
-      .dialog-header {
-        margin-bottom: 24px;
-      }
-
-      .icon-wrapper {
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        width: 64px;
-        height: 64px;
-        background-color: #eef2ff; /* Soft primary tint */
-        border-radius: 50%;
-        margin-bottom: 16px;
-      }
-
-      .icon-wrapper mat-icon {
-        transform: scale(1.3);
-      }
-
-      .dialog-title {
-        margin: 0;
-        font-size: 22px;
-        font-weight: 600;
-        color: #1e293b;
-        letter-spacing: -0.5px;
-      }
-
-      /* -----------------------------
-   BODY & TEXT
------------------------------- */
-      .dialog-body {
-        margin-bottom: 32px;
-      }
-
-      .dialog-message {
-        margin: 0 0 16px 0;
-        font-size: 15px;
-        color: #64748b;
-        line-height: 1.5;
-      }
-
-      /* Highlighting the target email */
-      .email-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
-        background-color: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        font-weight: 500;
-        color: #334155;
-        font-size: 15px;
-        word-break: break-all; /* Prevents long emails from breaking the layout */
-      }
-
-      .badge-icon {
-        font-size: 18px;
-        height: 18px;
-        width: 18px;
-        color: #94a3b8;
-      }
-
-      /* -----------------------------
-   BUTTON ACTIONS
------------------------------- */
-      .dialog-actions {
-        display: flex;
-        justify-content: center;
-        gap: 16px;
-      }
-
-      .action-btn {
-        height: 48px;
-        border-radius: 8px;
-        padding: 0 24px;
-        font-weight: 600;
-        font-size: 15px;
-        letter-spacing: 0.5px;
-        flex: 1; /* Makes buttons equal width */
-      }
-
-      .cancel-btn {
-        color: #64748b;
-        border-color: #cbd5e1;
-      }
-
-      .send-btn mat-icon {
-        margin-right: 6px;
-        font-size: 20px;
-        width: 20px;
-        height: 20px;
-      }
-
-      /* -----------------------------
-   RESPONSIVE (MOBILE)
------------------------------- */
-      @media (max-width: 400px) {
-        .dialog-actions {
-          flex-direction: column-reverse; /* Puts primary action on top for mobile */
-          gap: 12px;
-        }
-        .action-btn {
-          width: 100%;
-        }
-      }
-    `,
-  ],
+  styleUrls: ['editing-email.scss'],
   standalone: true,
   imports: [
     MatFormFieldModule,
@@ -369,36 +273,37 @@ export class DialogElementsExampleDialog {
   providers: [UserService],
 })
 export class EditingEmailDialog {
-  public globalEmail!: string;
+  public globalEmail = '';
 
-  constructor(
-    private userService: UserService,
-    public dialog: MatDialog,
-    private _snackbar: MatSnackBar,
-  ) {}
+  private readonly userService = inject(UserService);
+  private readonly dialogRef = inject(MatDialogRef<EditingEmailDialog>);
+  private readonly snackBar = inject(MatSnackBar);
 
-  public send(): void {
-    this.dialog.closeAll();
-    this._snackbar.open('Trying to send email to ' + this.globalEmail, 'Close', {
-      duration: 1000,
-    });
+  send(): void {
+    this.snackBar.open(`Sending email to ${this.globalEmail}...`, 'Close', { duration: 1000 });
+
     this.userService.sendEmail(this.globalEmail).subscribe({
-      next: (data) => {
-        this._snackbar.open('Email sent successfully to ' + this.globalEmail, 'Close', {
+      next: () => {
+        this.snackBar.open(`Email sent successfully to ${this.globalEmail}`, 'Close', {
           duration: 2000,
         });
+        this.dialogRef.close(true);
       },
       error: (err) => {
         console.error('Error sending email:', err);
-        this._snackbar.open('Error sending email to ' + this.globalEmail, 'Close', {
+
+        this.snackBar.open(`Error sending email to ${this.globalEmail}`, 'Close', {
           duration: 3000,
         });
       },
     });
   }
 
-  cancel() {
-    this.dialog.closeAll();
-    this._snackbar.open('Operation cancelled', 'Close', { duration: 2000 });
+  cancel(): void {
+    this.dialogRef.close(false);
+
+    this.snackBar.open('Operation cancelled', 'Close', {
+      duration: 2000,
+    });
   }
 }

@@ -18,7 +18,7 @@
       matTooltip="Logout"
       color="warn"
       class="logout-btn"
-      style="border-radius: 20px;"
+      style="border-radius: 20px"
       routerLink="/logout"
     >
       <mat-icon>power_settings_new</mat-icon>
@@ -103,10 +103,11 @@
           <mat-form-field appearance="outline">
             <mat-label>N°</mat-label>
             <input
-              (focusout)="focusOutFunction()"
+              (focusout)="focusOut()"
               matInput
               type="number"
               min="1"
+              max="9999"
               formControlName="number"
               placeholder="12"
             />
@@ -120,7 +121,7 @@
           <mat-form-field appearance="outline">
             <mat-label>Good Name</mat-label>
             <mat-icon matPrefix>badge</mat-icon>
-            <input matInput formControlName="goodNaming" placeholder="Enter name" />
+            <input matInput formControlName="goodNaming" placeholder="Enter name">
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -145,7 +146,9 @@
             type="text"
             formControlName="istatCode"
             (input)="
-              mainForm.controls['istatCode'].setValue($any($event.target).value.toUpperCase())
+              mainForm.controls['istatCode'].setValue(
+                $any($event.target).value.toUpperCase().replace(/\D/g, '')
+              )
             "
             minlength="6"
             maxlength="6"
@@ -176,7 +179,13 @@
       </div>
 
       <div class="action-footer">
-        <button [disabled]="mainForm.invalid" mat-flat-button color="primary" class="btn-block save-btn" type="submit">
+        <button
+          [disabled]="mainForm.invalid"
+          mat-flat-button
+          color="primary"
+          class="btn-block save-btn"
+          type="submit"
+        >
           <mat-icon>save</mat-icon> Save Record
         </button>
       </div>

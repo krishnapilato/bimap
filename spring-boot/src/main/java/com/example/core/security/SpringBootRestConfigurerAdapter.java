@@ -32,7 +32,7 @@ public class SpringBootRestConfigurerAdapter {
 	private JwtRequestFilter jwtRequestFilter;
 
 	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+	public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder) {
 		authenticationManagerBuilder.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
 	}
 
@@ -42,13 +42,12 @@ public class SpringBootRestConfigurerAdapter {
 	}
 
 	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
-			throws Exception {
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) {
 		return authenticationConfiguration.getAuthenticationManager();
 	}
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) {
 		httpSecurity
 				.csrf(AbstractHttpConfigurer::disable)
 				.cors(Customizer.withDefaults())

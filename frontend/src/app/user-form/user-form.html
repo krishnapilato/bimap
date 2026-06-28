@@ -3,9 +3,9 @@
     <mat-icon class="brand-logo" color="warn">person_add</mat-icon>
     <span class="brand-title">User<span class="text-danger">Registration</span></span>
   </div>
-  
+
   <span class="spacer"></span>
-  
+
   <div class="header-actions">
     <button mat-icon-button matTooltip="Admin Dashboard" routerLink="/listuser">
       <mat-icon>admin_panel_settings</mat-icon>
@@ -22,7 +22,6 @@
 </header>
 
 <main class="focus-workspace">
-  
   <div class="form-card mat-elevation-z2 animate__animated animate__fadeInUp">
     <div class="form-header">
       <div class="icon-wrapper">
@@ -33,12 +32,21 @@
     </div>
 
     <form (ngSubmit)="onSubmit()" #userForm="ngForm" autocomplete="off" class="modern-form">
-      
       <div class="form-row mt-3">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>First Name</mat-label>
           <mat-icon matPrefix class="field-icon">badge</mat-icon>
-          <input matInput [(ngModel)]="user.name" name="name" #name="ngModel" required minlength="1" maxlength="18" pattern="[a-zA-Z]*" placeholder="e.g. Jane" />
+          <input
+            matInput
+            [(ngModel)]="user.name"
+            name="name"
+            #name="ngModel"
+            required
+            minlength="1"
+            maxlength="18"
+            pattern="[a-zA-Z]*"
+            placeholder="e.g. Jane"
+          />
           @if (name.invalid && (name.dirty || name.touched)) {
             <mat-error>Name must be 1-18 letters</mat-error>
           }
@@ -47,7 +55,17 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Last Name</mat-label>
           <mat-icon matPrefix class="field-icon">person</mat-icon>
-          <input matInput [(ngModel)]="user.surname" name="surname" #surname="ngModel" required minlength="1" maxlength="18" pattern="[a-zA-Z]*" placeholder="e.g. Doe" />
+          <input
+            matInput
+            [(ngModel)]="user.surname"
+            name="surname"
+            #surname="ngModel"
+            required
+            minlength="1"
+            maxlength="18"
+            pattern="[a-zA-Z]*"
+            placeholder="e.g. Doe"
+          />
           @if (surname.invalid && (surname.dirty || surname.touched)) {
             <mat-error>Surname must be 1-18 letters</mat-error>
           }
@@ -58,7 +76,18 @@
         <mat-form-field appearance="outline" class="w-100" [class.has-error]="emailStatus">
           <mat-label>Email Address</mat-label>
           <mat-icon matPrefix class="field-icon">email</mat-icon>
-          <input matInput [(ngModel)]="user.email" name="email" #email="ngModel" required email minlength="3" maxlength="100" (ngModelChange)="onFocusOutEvent()" placeholder="name@company.com" />
+          <input
+            matInput
+            [(ngModel)]="user.email"
+            name="email"
+            #email="ngModel"
+            required
+            email
+            minlength="3"
+            maxlength="100"
+            (ngModelChange)="onFocusOutEvent()"
+            placeholder="name@company.com"
+          />
           @if (email.invalid && (email.dirty || email.touched)) {
             <mat-error>Please enter a valid email format</mat-error>
           }
@@ -66,7 +95,7 @@
         @if (emailStatus) {
           <div class="custom-error animate__animated animate__headShake">
             <mat-icon>error_outline</mat-icon>
-            <span>This email already exists in the system!</span>
+            <span>This email already exists in the system</span>
           </div>
         }
       </div>
@@ -74,20 +103,44 @@
       <mat-form-field appearance="outline" class="w-100 mt-3">
         <mat-label>Password</mat-label>
         <mat-icon matPrefix class="field-icon">lock</mat-icon>
-        <input matInput [type]="hidePassword ? 'password' : 'text'" [(ngModel)]="user.password" name="password" #password="ngModel" required minlength="8" maxlength="32" placeholder="Create a strong password" />
-        
+        <input
+          matInput
+          [type]="hidePassword ? 'password' : 'text'"
+          [(ngModel)]="user.password"
+          name="password"
+          #password="ngModel"
+          required
+          minlength="8"
+          maxlength="32"
+          placeholder="Create a strong password"
+        />
+
         @if (user.password && user.password.length > 2) {
-          <button matSuffix mat-icon-button type="button" (click)="togglePasswordVisibility()" [attr.aria-label]="'Toggle password visibility'">
-            <mat-icon class="field-icon">{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          <button
+            matSuffix
+            mat-icon-button
+            type="button"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="'Toggle password visibility'"
+          >
+            <mat-icon class="field-icon">{{
+              hidePassword ? 'visibility_off' : 'visibility'
+            }}</mat-icon>
           </button>
         }
-        
+
         @if (password.invalid && (password.dirty || password.touched)) {
           <mat-error>Password must be between 8 and 32 characters</mat-error>
         }
       </mat-form-field>
 
-      <button type="submit" [disabled]="userForm.invalid" mat-flat-button color="primary" class="submit-btn">
+      <button
+        type="submit"
+        [disabled]="userForm.invalid"
+        mat-flat-button
+        color="primary"
+        class="submit-btn"
+      >
         Register User
       </button>
     </form>
