@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, DestroyRef, inject, Inject, OnInit, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import {
@@ -12,109 +13,123 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { LoginResponse } from '../auth/loginresponse';
 import { User } from '../user';
-import { LoginResponse } from './../auth/loginresponse';
 import { UserService } from './user-service.service';
-import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-user-list',
+  standalone: true,
   imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatSnackBarModule,
-    FormsModule,
     MatTooltipModule,
     MatIconModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
     MatDialogModule,
-    CommonModule,
-    RouterModule,
   ],
-  standalone: true,
-  templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css'],
+  templateUrl: './user-list.html',
+  styleUrls: ['./user-list.scss'],
   providers: [UserService],
 })
 export class UserListComponent implements OnInit, AfterViewInit {
-  displayedColumns: string[] = [
+  private readonly authService = inject(AuthService);
+  private readonly userService = inject(UserService);
+  private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
+
+  readonly displayedColumns = [
     'name',
     'surname',
     'email',
     'userStatus',
     'applicationRole',
     'actions',
-  ];
-  dataSource = new MatTableDataSource<User>();
-  public whatuser!: LoginResponse;
+  ] as const;
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  readonly dataSource = new MatTableDataSource<User>();
 
-  constructor(
-    private authenticationService: AuthService,
-    private userService: UserService,
-    private _snackbar: MatSnackBar,
-    public dialog: MatDialog,
-  ) {}
+  public whatUser!: LoginResponse;
+
+  readonly paginator = viewChild(MatPaginator);
+  readonly sort = viewChild(MatSort);
+
+  ngOnInit(): void {
+    this.whatUser = this.authService.loginResponseValue;
+
+    this.userService
+      .findAll()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((users: User[]) => {
+        this.dataSource.data = users;
+      });
+  }
 
   ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+    this.dataSource.paginator = this.paginator()!;
+    this.dataSource.sort = this.sort()!;
   }
 
   applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-    if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
+    const value = (event.target as HTMLInputElement).value;
+
+    this.dataSource.filter = value.trim().toLowerCase();
+    this.dataSource.paginator?.firstPage();
   }
 
-  // UPDATED: Passing the entire row and the data source via the 'data' property
-  public openDialog(row: any): void {
+  openDialog(user: User): void {
     this.dialog.open(DialogElementsExampleDialog, {
       data: {
-        user: row,
+        user,
         dataSource: this.dataSource,
       },
     });
   }
 
-  public openEmailDialog(email: string): void {
-    let dialogRef = this.dialog.open(EditingEmailDialog);
+  openEmailDialog(email: string): void {
+    const dialogRef = this.dialog.open(EditingEmailDialog);
+
     dialogRef.componentInstance.globalEmail = email;
   }
 
-  ngOnInit(): void {
-    this.whatuser = this.authenticationService.loginResponseValue;
-    this.userService.findAll().subscribe((data) => (this.dataSource.data = data));
-  }
-
-  public send(email: string): void {
+  send(email: string): void {
     this.openEmailDialog(email);
   }
 
-  public deleteRow(row: any): void {
-    if (confirm('Are you sure to delete this record?')) {
-      this.userService.delete(row.id).subscribe(() => {
-        this.dataSource.data = this.dataSource.data.filter((u) => u !== row);
-      });
-      this._snackbar.open('Record deleted successfully', '', {
+  deleteRow(user: User): void {
+    if (!confirm('Are you sure you want to delete this record?')) {
+      this.snackBar.open('Operation cancelled', 'Close', {
         duration: 2000,
       });
-    } else {
-      this._snackbar.open('Operation cancelled', 'Close', {
-        duration: 2000,
-      });
+      return;
     }
+
+    this.userService
+      .delete(user.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.dataSource.data = this.dataSource.data.filter((u) => u.id !== user.id);
+
+        this.snackBar.open('Record deleted successfully', '', {
+          duration: 2000,
+        });
+      });
   }
 }
 

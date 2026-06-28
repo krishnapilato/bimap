@@ -1,0 +1,33 @@
+<div class="map-container" #mapWrapper>
+  <div class="map-panel" [style.width.%]="leftWidth()">
+    <div id="leafletMap" class="map-canvas"></div>
+
+    @if (isDragging()) {
+      <div class="drag-overlay"></div>
+    }
+
+    <div class="map-info">
+      <div class="info-pill">
+        <span class="label">Map View</span>
+        <span class="coords">{{ currentCoords() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="resizer" (mousedown)="onMouseDown($event)" (dblclick)="resetSplit()"></div>
+
+  <div class="map-panel" [style.width.%]="100 - leftWidth()">
+    <div id="streetView" class="map-canvas"></div>
+
+    @if (isDragging()) {
+      <div class="drag-overlay"></div>
+    }
+
+    <div class="map-info right">
+      <div class="info-pill">
+        <span class="label">Street View</span>
+        <span class="coords">{{ currentCoords() }}</span>
+      </div>
+    </div>
+  </div>
+</div>

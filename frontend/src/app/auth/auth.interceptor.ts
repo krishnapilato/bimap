@@ -1,22 +1,21 @@
-import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
-@Injectable()
-export class SecurityInterceptor implements HttpInterceptor {
-  constructor(private authenticationService: AuthService) {}
+export const securityInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+  const loginResponse = authService.loginResponseValue;
 
-  public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const loginResponse = this.authenticationService.loginResponseValue;
+  const isLoggedIn = !!loginResponse?.jwtToken;
+  const isApiUrl = req.url.startsWith(environment.baseApiUrl);
 
-    const isLoggedIn = loginResponse && loginResponse.jwtToken;
-    const isApiUrl = request.url.startsWith(environment.baseApiUrl);
-
-    if (isLoggedIn && isApiUrl)
-      request = request.clone({ setHeaders: { Authorization: `Bearer ${loginResponse.jwtToken}` } });
-
-    return next.handle(request);
+  if (isLoggedIn && isApiUrl) {
+    const authReq = req.clone({
+      setHeaders: { Authorization: `Bearer ${loginResponse.jwtToken}` },
+    });
+    return next(authReq);
   }
-}
+
+  return next(req);
+};

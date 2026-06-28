@@ -31,7 +31,7 @@
         <mat-icon matPrefix style="margin-right: 8px; color: #757575">lock</mat-icon>
         <input
           matInput
-          [type]="hidePassword ? 'password' : 'text'"
+          [type]="hidePassword() ? 'password' : 'text'"
           name="password"
           [(ngModel)]="loginRequest.password"
           required
@@ -41,13 +41,12 @@
         <button
           mat-icon-button
           matSuffix
-          (click)="hidePassword = !hidePassword"
+          (click)="togglePassword()"
           type="button"
           [attr.aria-label]="'Hide password'"
-          [attr.aria-pressed]="hidePassword"
         >
           <mat-icon style="color: #757575">{{
-            hidePassword ? 'visibility_off' : 'visibility'
+            hidePassword() ? 'visibility_off' : 'visibility'
           }}</mat-icon>
         </button>
 

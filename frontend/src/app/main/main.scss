@@ -1,19 +1,30 @@
-/* GLOBAL RESETS & VARIABLES */
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
 :host {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f4f7f9; /* Soft, cool gray background */
+  background-color: #f4f7f9;
   font-family: 'Roboto', sans-serif;
 }
 
-.text-primary { color: #3f51b5; }
-.w-100 { width: 100%; }
-.mt-3 { margin-top: 16px; }
+/* utilities */
+.w-100 {
+  width: 100%;
+}
+.mt-3 {
+  margin-top: 16px;
+}
 
-/* -----------------------------
-   HEADER / TOOLBAR 
------------------------------- */
+.text-primary {
+  color: #3f51b5;
+}
+
+/* HEADER */
 .app-header {
   display: flex;
   align-items: center;
@@ -43,7 +54,9 @@
   color: #333;
 }
 
-.spacer { flex: 1 1 auto; }
+.spacer {
+  flex: 1 1 auto;
+}
 
 .header-actions {
   display: flex;
@@ -58,21 +71,15 @@
   margin: 0 8px;
 }
 
-.action-icon { color: #5f6368; }
-.logout-btn { border-radius: 20px; }
-
-/* -----------------------------
-   WORKSPACE & LAYOUT
------------------------------- */
+/* MAIN WORKSPACE (FIXED FLEX BEHAVIOR) */
 .workspace {
   display: flex;
   flex: 1;
-  overflow: hidden; /* Contains the scroll areas */
+  min-height: 0; /* 🔥 CRITICAL FIX */
+  overflow: hidden;
 }
 
-/* -----------------------------
-   SIDEBAR (LEFT PANEL)
------------------------------- */
+/* SIDEBAR */
 .sidebar {
   width: 420px;
   min-width: 420px;
@@ -83,16 +90,27 @@
   border-right: 1px solid #e0e0e0;
 }
 
+/* PANEL */
 .panel-header {
   padding: 24px 24px 16px;
   background: #f8fafc;
   border-bottom: 1px solid #edf2f7;
 }
 
-.panel-header h2 { margin: 0; font-size: 22px; font-weight: 600; color: #1e293b; }
-.panel-header p { margin: 6px 0 0; font-size: 14px; color: #64748b; }
+.panel-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1e293b;
+}
 
-/* Form Groupings */
+.panel-header p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* FORM */
 .modern-form {
   padding: 24px;
   display: flex;
@@ -103,22 +121,21 @@
 .form-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .form-card h3 {
-  font-size: 13px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: #64748b;
-  margin: 0 0 8px 0;
-  font-weight: 600;
+  margin: 0;
 }
 
-/* Grid Systems for Inputs */
-.grid-2-col {
+/* GRID */
+.grid-2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
 
@@ -128,14 +145,20 @@
   gap: 16px;
 }
 
-mat-form-field { width: 100%; }
-.mat-mdc-form-field-bottom-align { display: none; } /* Removes excess bottom spacing from Angular Material */
+/* MATERIAL */
+mat-form-field {
+  width: 100%;
+}
 
-/* Special Instruction Card */
+.mat-mdc-form-field-bottom-align {
+  display: none;
+}
+
+/* HIGHLIGHT */
 .highlight-card {
   background: #eef2ff;
   padding: 16px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px dashed #a5b4fc;
 }
 
@@ -144,12 +167,11 @@ mat-form-field { width: 100%; }
   align-items: center;
   gap: 8px;
   color: #4338ca;
-  font-size: 14px;
   font-weight: 500;
 }
 
+/* ACTION */
 .action-footer {
-  margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid #e2e8f0;
 }
@@ -157,37 +179,40 @@ mat-form-field { width: 100%; }
 .btn-block {
   width: 100%;
   height: 48px;
-  font-size: 16px;
-  border-radius: 8px;
-  letter-spacing: 0.5px;
+  border-radius: 10px;
 }
 
-/* -----------------------------
-   MAIN CONTENT (MAP & TABLE)
------------------------------- */
+/* CONTENT AREA (FIXED FLEX CHAIN) */
 .content-panel {
   flex: 1;
-  padding: 24px;
+  min-height: 0; /* 🔥 CRITICAL FIX */
   display: flex;
   flex-direction: column;
   gap: 24px;
+  padding: 24px;
   overflow-y: auto;
 }
 
+/* MAP CARD (FIXED FOR STREETVIEW) */
 .map-card {
-  flex: 1; /* Takes available space */
+  flex: 1;
   min-height: 350px;
-  background: #fff;
+  display: flex; /* 🔥 IMPORTANT */
+  background: #ffffff;
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid #e2e8f0;
 }
 
-.map-container {
+/* ENSURE STREETVIEW ALWAYS FILLS */
+app-streetview {
+  flex: 1;
   width: 100%;
   height: 100%;
+  display: block;
 }
 
+/* TABLE */
 .table-card {
   background: #fff;
   border-radius: 12px;
@@ -195,29 +220,31 @@ mat-form-field { width: 100%; }
   border: 1px solid #e2e8f0;
 }
 
-/* Table Enhancements */
 .table-responsive {
   width: 100%;
-  overflow-x: auto; /* Horizontal scroll on small screens */
+  overflow-x: auto;
 }
 
-table { width: 100%; }
+table {
+  width: 100%;
+}
 
+/* BADGE */
 .badge {
   background: #e2e8f0;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 12px;
-  font-weight: 600;
   color: #475569;
 }
 
+/* ROW HOVER */
 .clickable-row:hover {
   background-color: #f8fafc;
   cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
+/* EMPTY STATE */
 .empty-state {
   text-align: center;
   padding: 48px 24px !important;
@@ -228,17 +255,14 @@ table { width: 100%; }
   font-size: 48px;
   height: 48px;
   width: 48px;
-  margin-bottom: 12px;
   opacity: 0.5;
 }
 
-/* -----------------------------
-   RESPONSIVE DESIGN (MOBILE)
------------------------------- */
+/* RESPONSIVE */
 @media (max-width: 960px) {
   .workspace {
     flex-direction: column;
-    overflow-y: auto; /* Let the whole page scroll vertically */
+    overflow-y: auto;
   }
 
   .sidebar {
@@ -246,22 +270,20 @@ table { width: 100%; }
     min-width: 100%;
     border-right: none;
     border-bottom: 1px solid #e0e0e0;
-    overflow: visible; /* Prevents double scrollbars */
   }
 
   .content-panel {
     padding: 16px;
-    gap: 16px;
     overflow: visible;
   }
-  
+
   .map-card {
     min-height: 300px;
-    flex: none; /* Disables flex-grow on mobile so it stays a fixed height */
+    flex: none;
   }
 
   .hide-on-mobile {
-    display: none; /* Hide text inside buttons on small screens */
+    display: none;
   }
 
   .app-header {

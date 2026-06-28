@@ -1,12 +1,13 @@
 package com.example.core.security;
 
 import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -15,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -25,32 +27,26 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
 
     @Override
-    protected void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        var authHeader = request.getHeader("Authorization");
+        final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        var jwtToken = authHeader.substring(BEARER_PREFIX.length());
-        var username = extractUsername(jwtToken);
+        final String jwtToken = authHeader.substring(7);
+        final String username = extractUsername(jwtToken);
 
-        if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            var userDetails = userDetailsService.loadUserByUsername(username);
 
-        var userDetails = userDetailsService.loadUserByUsername(username);
-
-        if (jwtUtils.validateToken(jwtToken, userDetails)) {
-
-            var auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-            auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            if (jwtUtils.validateToken(jwtToken, userDetails)) {
+                var authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
         }
 
         filterChain.doFilter(request, response);
@@ -59,10 +55,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private String extractUsername(String token) {
         try {
             return jwtUtils.getUsernameFromToken(token);
-        } catch (IllegalArgumentException ex) {
-            logger.error("Invalid JWT token", ex);
-        } catch (ExpiredJwtException ex) {
-            logger.error("Expired JWT token", ex);
+        } catch (ExpiredJwtException e) {
+            log.warn("JWT token expired: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("Unable to parse JWT token: {}", e.getMessage());
         }
         return null;
     }

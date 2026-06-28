@@ -1,47 +1,53 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { LoginRequest } from './loginrequest';
 import { LoginResponse } from './loginresponse';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private loginUrl: string;
-  private loginResponseSubject: BehaviorSubject<LoginResponse>;
-  public loginResponse: Observable<LoginResponse>;
+  private router = inject(Router);
+  private http = inject(HttpClient);
+  private snackbar = inject(MatSnackBar);
 
-  constructor(private router: Router, private http: HttpClient, private _snackbar: MatSnackBar) {
-    this.loginUrl = environment.baseApiUrl + '/auth/login';
-    this.loginResponseSubject = new BehaviorSubject<LoginResponse>(JSON.parse(localStorage.getItem('LoginResponse') || '{}'));
-    this.loginResponse = this.loginResponseSubject.asObservable();
+  private loginUrl = `${environment.baseApiUrl}/auth/login`;
+
+  private getInitialState(): LoginResponse {
+    const stored = localStorage.getItem('LoginResponse');
+    return stored ? JSON.parse(stored) : ({} as LoginResponse);
   }
+
+  private loginResponseSubject = new BehaviorSubject<LoginResponse>(this.getInitialState());
+
+  public loginResponse$ = this.loginResponseSubject.asObservable();
 
   public get loginResponseValue(): LoginResponse {
     return this.loginResponseSubject.value;
   }
 
-  public get isLogged(): boolean { 
-    return this.loginResponseValue.jwtToken != null; 
+  public get isLogged(): boolean {
+    return !!this.loginResponseValue?.jwtToken;
   }
 
   public login(loginRequest: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(this.loginUrl, loginRequest).pipe(
-      map((loginResponse: LoginResponse) => {
-        localStorage.setItem('LoginResponse', JSON.stringify(loginResponse));
-        this.loginResponseSubject.next(loginResponse);
-        if (loginResponse) this._snackbar.open('Login successful', 'Close', { duration: 2000 });
-        return loginResponse;
+      tap((response: LoginResponse) => {
+        if (response?.jwtToken) {
+          localStorage.setItem('LoginResponse', JSON.stringify(response));
+          this.loginResponseSubject.next(response);
+          this.snackbar.open('Login successful', 'Close', { duration: 2000 });
+        }
       }),
     );
   }
 
   public logout(): void {
     localStorage.removeItem('LoginResponse');
-    this.loginResponseSubject.next(new LoginResponse());
+    this.loginResponseSubject.next({} as LoginResponse);
     this.router.navigate(['/login']);
-    this._snackbar.open('Logout successful', 'Close', { duration: 2000 });
+    this.snackbar.open('Logout successful', 'Close', { duration: 2000 });
   }
 }

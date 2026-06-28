@@ -1,54 +1,39 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { debounceTime, map } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { FormModel } from './formdata';
 import { Tables } from './tables';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private URL: string;
+  private http = inject(HttpClient);
 
-  constructor(private httpService: HttpClient) {
-    this.URL = environment.baseApiUrl + '/';
-  }
+  private readonly baseUrl = `${environment.baseApiUrl}/`;
 
   public searchRegions(keyword: string): Observable<string[]> {
-    var provincesList = this.httpService.get(this.URL + 'regions/' + keyword).pipe(
-      debounceTime(10),
-      map((data: any) => {
-        return data.length != 0 ? (data as any) : ['No data found'];
-      }),
-    );
-    return provincesList;
+    return this.http
+      .get<string[]>(`${this.baseUrl}regions/${keyword}`)
+      .pipe(map((data) => (data?.length ? data : ['No data found'])));
   }
 
   public searchProvinces(keyword: string): Observable<string[]> {
-    var provincesList = this.httpService.get(this.URL + 'provinces/' + keyword).pipe(
-      debounceTime(1),
-      map((data: any) => {
-        return data.length != 0 ? (data as any) : ['No data found'];
-      }),
-    );
-    return provincesList;
+    return this.http
+      .get<string[]>(`${this.baseUrl}provinces/${keyword}`)
+      .pipe(map((data) => (data?.length ? data : ['No data found'])));
   }
 
   public searchMunicipalities(keyword: string): Observable<string[]> {
-    var municipalitiesList = this.httpService.get(this.URL + 'municipalities/' + keyword).pipe(
-      debounceTime(1),
-      map((data: any) => {
-        return data.length != 0 ? (data as any) : ['No data found'];
-      }),
-    );
-    return municipalitiesList;
+    return this.http
+      .get<string[]>(`${this.baseUrl}municipalities/${keyword}`)
+      .pipe(map((data) => (data?.length ? data : ['No data found'])));
   }
 
   public findAll(): Observable<Tables[]> {
-    return this.httpService.get<Tables[]>(this.URL + 'tables');
+    return this.http.get<Tables[]>(`${this.baseUrl}tables`);
   }
 
   public save(formdata: FormModel): Observable<FormModel> {
-    return this.httpService.post<FormModel>(this.URL + 'form', formdata);
+    return this.http.post<FormModel>(`${this.baseUrl}form`, formdata);
   }
 }

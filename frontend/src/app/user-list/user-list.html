@@ -3,13 +3,13 @@
     <mat-icon class="brand-logo" color="warn">admin_panel_settings</mat-icon>
     <span class="brand-title">Admin<span class="text-danger">Workspace</span></span>
   </div>
-  
+
   <span class="spacer"></span>
-  
+
   <div class="header-actions">
     <div class="user-badge hide-on-mobile">
       <mat-icon>account_circle</mat-icon>
-      <span>{{ whatuser.user.name }}</span>
+      <span>{{ whatUser.user.fullName }}</span>
     </div>
     <div class="divider hide-on-mobile"></div>
     <button mat-icon-button matTooltip="Dashboard Home" routerLink="/">
@@ -23,18 +23,22 @@
 </header>
 
 <main class="workspace-container animate__animated animate__fadeInUp">
-  
-  <div class="page-header" style="text-align: center; margin-top: 4rem; margin-bottom: 2rem;">
+  <div class="page-header" style="text-align: center; margin-top: 4rem; margin-bottom: 2rem">
     <h1>User Management</h1>
     <p>Manage application access, roles, and user details.</p>
   </div>
 
   <div class="data-card mat-elevation-z1">
-    
     <div class="table-toolbar">
       <mat-form-field appearance="outline" class="search-field">
         <mat-icon matPrefix color="primary">search</mat-icon>
-        <input matInput autocomplete="off" (keyup)="applyFilter($event)" #input placeholder="Search users by name, email, or role...">
+        <input
+          matInput
+          autocomplete="off"
+          (keyup)="applyFilter($event)"
+          #input
+          placeholder="Search users by name, email, or role..."
+        />
       </mat-form-field>
 
       <button mat-flat-button color="primary" class="add-user-btn" routerLink="/adduser">
@@ -45,19 +49,22 @@
 
     <div class="table-responsive">
       <table mat-table matSort [dataSource]="dataSource" class="user-table">
-        
         <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> First Name </th>
-          <td mat-cell *matCellDef="let row"> <strong>{{ row.name }}</strong> </td>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>First Name</th>
+          <td mat-cell *matCellDef="let row">
+            <strong>{{ row.name }}</strong>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="surname">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Last Name </th>
-          <td mat-cell *matCellDef="let row"> <strong>{{ row.surname }}</strong> </td>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Name</th>
+          <td mat-cell *matCellDef="let row">
+            <strong>{{ row.surname }}</strong>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Email Address </th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Email Address</th>
           <td mat-cell *matCellDef="let row">
             <a class="email-link" matTooltip="Send email" (click)="send(row.email)">
               <mat-icon class="email-icon">mail_outline</mat-icon>
@@ -67,7 +74,7 @@
         </ng-container>
 
         <ng-container matColumnDef="userStatus">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Status </th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
           <td mat-cell *matCellDef="let row">
             <span class="status-badge" [ngClass]="row.userStatus.toLowerCase()">
               {{ row.userStatus | titlecase }}
@@ -76,16 +83,21 @@
         </ng-container>
 
         <ng-container matColumnDef="applicationRole">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Role </th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
           <td mat-cell *matCellDef="let row">
             <span class="role-text">{{ row.applicationRole | titlecase }}</span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="action-header"> Actions </th>
+          <th mat-header-cell *matHeaderCellDef class="action-header">Actions</th>
           <td mat-cell *matCellDef="let row" class="action-cell">
-            <button mat-icon-button color="primary" matTooltip="Edit User" (click)="openDialog(row)">
+            <button
+              mat-icon-button
+              color="primary"
+              matTooltip="Edit User"
+              (click)="openDialog(row)"
+            >
               <mat-icon>edit</mat-icon>
             </button>
             <button mat-icon-button color="warn" matTooltip="Delete User" (click)="deleteRow(row)">
@@ -102,7 +114,10 @@
             <mat-icon class="empty-icon">person_search</mat-icon>
             @if (input.value.length > 0) {
               <h3>No users found</h3>
-              <p>No records match the filter "<strong>{{ input.value }}</strong>".</p>
+              <p>
+                No records match the filter "<strong>{{ input.value }}</strong
+                >".
+              </p>
             } @else {
               <h3>No data available</h3>
               <p>There are currently no users in the system.</p>
@@ -112,6 +127,10 @@
       </table>
     </div>
 
-    <mat-paginator showFirstLastButtons [pageSizeOptions]="[5, 10]" class="custom-paginator"></mat-paginator>
+    <mat-paginator
+      showFirstLastButtons
+      [pageSizeOptions]="[5, 10]"
+      class="custom-paginator"
+    ></mat-paginator>
   </div>
 </main>

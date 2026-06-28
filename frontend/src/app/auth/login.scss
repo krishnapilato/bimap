@@ -1,21 +1,18 @@
-/* Main Background Container */
 .bg-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Clean, subtle corporate gradient instead of heavy dark gray */
   background: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
   padding: 20px;
   box-sizing: border-box;
   font-family: 'Roboto', 'Helvetica Neue', sans-serif;
 }
 
-/* The Login Card */
 .login-card {
   background: #ffffff;
   padding: 2.5rem 2.5rem;
-  border-radius: 12px; /* Reduced from 24px for a sharper, enterprise feel */
+  border-radius: 12px;
   box-shadow: 0 8px 24px rgba(149, 157, 165, 0.2);
   width: 100%;
   max-width: 420px;
@@ -27,7 +24,6 @@
   gap: 1rem;
 }
 
-/* Header & Typography */
 .form-header {
   text-align: center;
   margin-bottom: 1.5rem;
@@ -63,17 +59,14 @@
   font-size: 0.95rem;
 }
 
-/* Form Fields */
 .form-field {
   width: 100%;
 }
 
-/* Removes bottom margin on password field to make room for 'Forgot password' */
 .password-field {
-  margin-bottom: -0.5rem; 
+  margin-bottom: -0.5rem;
 }
 
-/* Form Actions */
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -93,10 +86,9 @@
   text-decoration: underline;
 }
 
-/* Submit Button */
 .submit-btn {
   height: 48px;
-  border-radius: 8px; /* Standard rounded rectangle */
+  border-radius: 8px;
   font-size: 1rem;
   font-weight: 500;
   width: 100%;
