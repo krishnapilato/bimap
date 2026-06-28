@@ -5,13 +5,14 @@ import {
   CanActivateFn,
   Router,
   RouterStateSnapshot,
+  UrlTree
 } from '@angular/router';
 import { AuthService } from './auth.service';
 
 export const authGuard: CanActivateFn = (
   _route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot,
-) => {
+): boolean | UrlTree => {
   const router = inject(Router);
   const authService = inject(AuthService);
   const snackbar = inject(MatSnackBar);

@@ -36,13 +36,13 @@ export class LoginComponent {
   hidePassword = signal(true);
   isSubmitting = signal(false);
 
-  loginRequest = new LoginRequest();
+  public loginRequest: LoginRequest = new LoginRequest();
 
-  togglePassword(): void {
+  public togglePassword(): void {
     this.hidePassword.update((hide) => !hide);
   }
 
-  onSubmit(): void {
+  public onSubmit(): void {
     if (this.isSubmitting()) return;
 
     this.isSubmitting.set(true);
