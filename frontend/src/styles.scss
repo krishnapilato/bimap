@@ -72,3 +72,9 @@ body {
 .mat-mdc-snack-bar-container .mat-mdc-button:hover {
   background-color: rgba(59, 130, 246, 0.15);
 }
+
+@media print {
+  body {
+    display: none !important;
+  }
+}

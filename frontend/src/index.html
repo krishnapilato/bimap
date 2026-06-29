@@ -6,14 +6,19 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-
     <script
       async
       defer
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAvQNjK8mukjCu4a5hNE7Sjg1I7g3syYAo&loading=async"
     ></script>
   </head>
-  <body class="user-select-none" oncontextmenu="return false;">
+  <body
+    class="user-select-none"
+    oncontextmenu="return false;"
+    ondragstart="return false;"
+    ondrop="return false;"
+    style="-webkit-touch-callout: none; -webkit-user-select: none; user-select: none"
+  >
     <app-root></app-root>
   </body>
 </html>
