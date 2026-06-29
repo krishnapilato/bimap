@@ -8,7 +8,7 @@
 
   <div class="header-actions">
     @if (user.user.applicationRole === 'ADMINISTRATOR') {
-      <button mat-stroked-button matTooltip="Admin" class="admin-btn" routerLink="/listuser">
+      <button mat-flat-button matTooltip="Admin" class="admin-btn" routerLink="/listuser">
         <mat-icon>admin_panel_settings</mat-icon>
       </button>
     }
@@ -28,7 +28,7 @@
 </header>
 
 <div class="workspace">
-  <aside class="sidebar form-panel mat-elevation-z1">
+  <aside class="sidebar form-panel mat-elevation-z1" style="border-radius: 20px;">
     <div class="panel-header">
       <h2>Asset Registration</h2>
       <p>Enter or search for asset details below.</p>

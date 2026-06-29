@@ -96,6 +96,7 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
       attribution: '© Google',
       maxZoom: 21,
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      noWrap: true,
     });
 
     const streetViewCoverage = L.tileLayer(
@@ -104,6 +105,7 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
         maxZoom: 21,
         subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
         opacity: 0.5,
+        noWrap: true,
       },
     );
 
@@ -111,6 +113,13 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
       zoomControl: false,
       attributionControl: false,
       doubleClickZoom: false,
+      minZoom: 3,
+      maxZoom: 21,
+      maxBounds: [
+        [-90, -180],
+        [90, 180],
+      ],
+      maxBoundsViscosity: 1.0,
     }).setView([this.initialLat, this.initialLng], 16);
 
     this.handleMapDoubleClick();
@@ -236,10 +245,6 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
 
   public panTo(lat: number, lng: number): void {
     this.updatePosition(lat, lng);
-
-    this.leafletMap?.flyTo([lat, lng], 18, {
-      animate: true,
-      duration: 0.8,
-    });
+    this.leafletMap?.flyTo([lat, lng], 18, { animate: true, duration: 1.8 });
   }
 }

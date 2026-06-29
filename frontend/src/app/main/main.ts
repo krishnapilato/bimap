@@ -25,12 +25,12 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 
-
 import { AuthService } from '../auth/auth.service';
 import { LoginResponse } from '../auth/loginresponse';
 import { StreetviewComponent } from '../streetview/streetview';
 import { ApiService } from './api.service';
 import { Tables } from './tables';
+import { debounceTime, distinctUntilChanged, Observable, of, switchMap } from 'rxjs';
 
 declare var google: any;
 
@@ -115,10 +115,23 @@ export class MainComponent implements OnInit, AfterViewInit {
     this.dataSource.sort = this.sort();
   }
 
-  private setupAutocomplete(controlName: string, apiCall: (term: string) => any): void {
-    this.mainForm.get(controlName)?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((term: string) => {
-        if (term?.trim().length > 0) apiCall(term).subscribe((data: string[]) => (this.provinces = data));
-        else this.provinces = [];
+  private setupAutocomplete(controlName: string, apiCall: (term: string) => Observable<string[]>): void {
+    this.mainForm
+      .get(controlName)
+      ?.valueChanges.pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+        switchMap((term: string) => {
+          if (term?.trim().length > 0) {
+            return apiCall(term);
+          } else {
+            return of<string[]>([]);
+          }
+        }),
+      )
+      .subscribe((data: string[]) => {
+        this.provinces = data;
       });
   }
 
@@ -131,20 +144,34 @@ export class MainComponent implements OnInit, AfterViewInit {
     this.latitude = coords.lat;
     this.longitude = coords.lng;
 
-    this.mainForm.patchValue({ ilatitude: coords.lat.toFixed(6), ilongitude: coords.lng.toFixed(6) });
+    this.mainForm.patchValue({
+      ilatitude: coords.lat.toFixed(6),
+      ilongitude: coords.lng.toFixed(6),
+    });
   }
 
   public saveData(): void {
-    if (this.mainForm.valid && this.latitude && this.longitude && confirm('Are you sure you want to save data?')) {
-      const formData = {...this.mainForm.getRawValue(), latitude: this.latitude, longitude: this.longitude};
+    if (
+      this.mainForm.valid &&
+      this.latitude &&
+      this.longitude &&
+      confirm('Are you sure you want to save data?')
+    ) {
+      const formData = {
+        ...this.mainForm.getRawValue(),
+        latitude: this.latitude,
+        longitude: this.longitude,
+      };
 
       this.apiService.save(formData).subscribe({
         next: () => this.snackbar.open('Data saved successfully', 'Close', { duration: 3000 }),
-        error: () => this.snackbar.open('Failed to save data', 'Close', { duration: 3000 })
+        error: () => this.snackbar.open('Failed to save data', 'Close', { duration: 3000 }),
       });
     } else {
       this.mainForm.markAllAsTouched();
-      this.snackbar.open('Please fill out all required fields and pick coordinates.', 'Close', { duration: 3000 });
+      this.snackbar.open('Please fill out all required fields and pick coordinates.', 'Close', {
+        duration: 3000,
+      });
     }
   }
 
@@ -153,9 +180,17 @@ export class MainComponent implements OnInit, AfterViewInit {
 
     const normalizedAddress = this.normalizeAddress(row.indirizzo);
 
-    this.mainForm.patchValue({searchMunicipalities: row.comune, address: normalizedAddress, number: row.civico === 0 ? '' : row.civico.toString()});
+    this.mainForm.patchValue({
+      searchMunicipalities: row.comune,
+      address: normalizedAddress,
+      number: row.civico === 0 ? '' : row.civico.toString(),
+    });
 
-    this.panMapToAddress(row.comune, normalizedAddress, row.civico === 0 ? '' : row.civico.toString());
+    this.panMapToAddress(
+      row.comune,
+      normalizedAddress,
+      row.civico === 0 ? '' : row.civico.toString(),
+    );
   }
 
   public focusOut(): void {
