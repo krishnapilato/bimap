@@ -19,6 +19,7 @@
     "@angular/material": "^22.0.2",
     "@angular/platform-browser": "^22.0.4",
     "@angular/router": "^22.0.4",
+    "animate.css": "^4.1.1",
     "bootstrap": "^5.3.8",
     "leaflet": "^1.9.4",
     "rxjs": "~7.8.2"
