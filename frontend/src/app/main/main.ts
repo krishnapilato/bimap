@@ -70,6 +70,9 @@ export class MainComponent implements OnInit, AfterViewInit {
 
   public user!: LoginResponse;
   public isShown = signal(false);
+  public regionsOptions$!: Observable<string[]>;
+  public provincesOptions$!: Observable<string[]>;
+  public municipalitiesOptions$!: Observable<string[]>;
   public provinces: string[] = [];
 
   public latitude: number | null = null;
@@ -103,9 +106,13 @@ export class MainComponent implements OnInit, AfterViewInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((data) => (this.dataSource.data = data));
 
-    this.setupAutocomplete('searchRegions', (term) => this.apiService.searchRegions(term));
-    this.setupAutocomplete('searchTerm', (term) => this.apiService.searchProvinces(term));
-    this.setupAutocomplete('searchMunicipalities', (term) =>
+    this.regionsOptions$ = this.setupAutocomplete('searchRegions', (term) =>
+      this.apiService.searchRegions(term),
+    );
+    this.provincesOptions$ = this.setupAutocomplete('searchTerm', (term) =>
+      this.apiService.searchProvinces(term),
+    );
+    this.municipalitiesOptions$ = this.setupAutocomplete('searchMunicipalities', (term) =>
       this.apiService.searchMunicipalities(term),
     );
   }
@@ -115,24 +122,21 @@ export class MainComponent implements OnInit, AfterViewInit {
     this.dataSource.sort = this.sort();
   }
 
-  private setupAutocomplete(controlName: string, apiCall: (term: string) => Observable<string[]>): void {
-    this.mainForm
-      .get(controlName)
-      ?.valueChanges.pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntilDestroyed(this.destroyRef),
-        switchMap((term: string) => {
-          if (term?.trim().length > 0) {
-            return apiCall(term);
-          } else {
-            return of<string[]>([]);
-          }
-        }),
-      )
-      .subscribe((data: string[]) => {
-        this.provinces = data;
-      });
+  private setupAutocomplete(
+    controlName: string,
+    apiCall: (term: string) => Observable<string[]>,
+  ): Observable<string[]> {
+    return this.mainForm.get(controlName)!.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((term: string) => {
+        if (term?.trim().length > 0) {
+          return apiCall(term);
+        } else {
+          return of<string[]>([]);
+        }
+      }),
+    );
   }
 
   public applyFilter(event: Event): void {

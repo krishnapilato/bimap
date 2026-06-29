@@ -1,41 +1,87 @@
 <div
   style="
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 40px 32px;
     box-sizing: border-box;
-    font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+    font-family:
+      'Inter',
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      sans-serif;
+    background: #ffffff;
   "
 >
-  <div style="margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #eee">
-    <div style="display: flex; align-items: center; gap: 1rem">
+  <div
+    style="
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    "
+  >
+    <div style="display: flex; align-items: center; gap: 20px">
       <div
         style="
+          background: #f8fafc;
+          padding: 8px;
+          border-radius: 50%;
           display: flex;
-          justify-content: center;
           align-items: center;
-          width: 40px;
-          height: 40px;
-          background-color: #e3f2fd;
-          border-radius: 8px;
+          justify-content: center;
         "
       >
-        <mat-icon style="color: #1976d2">manage_accounts</mat-icon>
+        <div
+          style="
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 48px;
+            height: 48px;
+            background-color: #eff6ff;
+            border-radius: 50%;
+          "
+        >
+          <mat-icon style="color: #3b82f6; font-size: 24px; width: 24px; height: 24px"
+            >manage_accounts</mat-icon
+          >
+        </div>
       </div>
+
       <div>
-        <h2 style="margin: 0 0 0.25rem 0; font-size: 1.5rem; font-weight: 500; color: #333">
+        <h2
+          style="
+            margin: 0 0 6px 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+          "
+        >
           Edit User Profile
         </h2>
-        <p style="margin: 0; font-size: 0.875rem; color: #666">
+        <p
+          style="
+            margin: 0;
+            font-size: 14px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          "
+        >
           Updating records for ID:
           <span
             style="
-              font-family: monospace;
-              background: #f5f5f5;
-              padding: 2px 6px;
-              border-radius: 4px;
-              color: #555;
+              font-family: ui-monospace, monospace;
+              background: #f8fafc;
+              padding: 4px 8px;
+              border-radius: 6px;
+              color: #475569;
+              font-size: 13px;
+              font-weight: 600;
+              border: 1px solid rgba(226, 232, 240, 0.8);
             "
           >
             {{ globalID }}
@@ -45,11 +91,13 @@
     </div>
   </div>
 
-  <form autocomplete="off" style="display: flex; flex-direction: column; gap: 1.25rem">
-    <div style="display: flex; gap: 1.5rem; width: 100%">
-      <mat-form-field appearance="outline" style="flex: 1">
+  <form autocomplete="off" style="display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; gap: 20px; width: 100%; flex-wrap: wrap">
+      <mat-form-field appearance="outline" style="flex: 1; min-width: 220px">
         <mat-label>First Name</mat-label>
-        <mat-icon matPrefix style="margin-right: 8px; color: #757575">person</mat-icon>
+        <mat-icon matPrefix style="margin-right: 12px; color: #94a3b8; transform: scale(0.9)"
+          >person</mat-icon
+        >
         <input
           matInput
           required
@@ -66,7 +114,7 @@
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline" style="flex: 1">
+      <mat-form-field appearance="outline" style="flex: 1; min-width: 220px">
         <mat-label>Last Name</mat-label>
         <input
           matInput
@@ -89,7 +137,9 @@
 
     <mat-form-field appearance="outline" style="width: 100%">
       <mat-label>Email Address</mat-label>
-      <mat-icon matPrefix style="margin-right: 8px; color: #757575">email</mat-icon>
+      <mat-icon matPrefix style="margin-right: 12px; color: #94a3b8; transform: scale(0.9)"
+        >email</mat-icon
+      >
       <input
         matInput
         required
@@ -112,7 +162,9 @@
 
     <mat-form-field appearance="outline" style="width: 100%">
       <mat-label>Application Role</mat-label>
-      <mat-icon matPrefix style="margin-right: 8px; color: #757575">shield</mat-icon>
+      <mat-icon matPrefix style="margin-right: 12px; color: #94a3b8; transform: scale(0.9)"
+        >shield</mat-icon
+      >
       <mat-select required [formControl]="applicationRole">
         @for (approle of approles; track approle.value) {
           <mat-option [value]="approle.value">
@@ -127,7 +179,9 @@
 
     <mat-form-field appearance="outline" style="width: 100%">
       <mat-label>Update Password</mat-label>
-      <mat-icon matPrefix style="margin-right: 8px; color: #757575">lock</mat-icon>
+      <mat-icon matPrefix style="margin-right: 12px; color: #94a3b8; transform: scale(0.9)"
+        >lock</mat-icon
+      >
       <input
         matInput
         required
@@ -150,17 +204,25 @@
       style="
         display: flex;
         justify-content: flex-end;
-        gap: 1rem;
-        margin-top: 1rem;
-        padding-top: 1rem;
-        border-top: 1px solid #eee;
+        gap: 16px;
+        margin-top: 8px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(226, 232, 240, 0.8);
       "
     >
       <button
         type="button"
         mat-stroked-button
         (click)="cancel()"
-        style="border-radius: 8px; height: 44px; padding: 0 1.5rem; font-weight: 500; color: #555"
+        style="
+          border-radius: 10px;
+          height: 48px;
+          padding: 0 24px;
+          font-weight: 600;
+          color: #64748b;
+          font-family: inherit;
+          font-size: 15px;
+        "
       >
         Cancel
       </button>
@@ -168,11 +230,21 @@
       <button
         type="button"
         mat-flat-button
-        color="primary"
         (click)="update()"
-        style="border-radius: 8px; height: 44px; padding: 0 1.5rem; font-weight: 500"
+        style="
+          border-radius: 10px;
+          height: 48px;
+          padding: 0 24px;
+          font-weight: 600;
+          background-color: #3b82f6;
+          color: #ffffff;
+          box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.35);
+          font-family: inherit;
+          font-size: 15px;
+          border: none;
+        "
       >
-        <mat-icon style="margin-right: 6px; font-size: 20px; width: 20px; height: 20px"
+        <mat-icon style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px"
           >save</mat-icon
         >
         Save Changes

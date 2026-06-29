@@ -1,14 +1,19 @@
-/* GLOBAL RESETS */
+/* -----------------------------
+   GLOBAL & TYPOGRAPHY
+------------------------------ */
 :host {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f4f7f9;
-  font-family: 'Roboto', sans-serif;
+  /* A cooler, extremely subtle blue-gray background */
+  background-color: #f8fafc; 
+  /* Modern system font stack */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #0f172a;
 }
 
-.text-primary { color: #3f51b5; }
 .spacer { flex: 1 1 auto; }
+.text-danger { color: #ef4444; }
 
 /* -----------------------------
    APP HEADER
@@ -16,11 +21,15 @@
 .app-header {
   display: flex;
   align-items: center;
-  padding: 0 24px;
-  height: 64px;
-  background: #ffffff;
-  border-bottom: 1px solid #e2e8f0;
-  z-index: 10;
+  padding: 0 32px;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .brand-container {
@@ -29,58 +38,100 @@
   gap: 12px;
 }
 
-.brand-logo { font-size: 28px; height: 28px; width: 28px; }
-.brand-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: #1e293b; }
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff1f2;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+}
+
+.brand-title { 
+  font-size: 20px; 
+  font-weight: 700; 
+  letter-spacing: -0.02em; 
+}
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .user-badge {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #475569;
-  font-weight: 500;
-  font-size: 14px;
+  gap: 10px;
+  background: #f1f5f9;
+  padding: 4px 16px 4px 4px;
+  border-radius: 999px;
+  transition: background 0.2s;
+  cursor: pointer;
+
+  &:hover { background: #e2e8f0; }
 }
-.user-badge mat-icon { color: #10b981; }
+
+.avatar-circle {
+  width: 32px;
+  height: 32px;
+  background: #3b82f6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  mat-icon { color: white; font-size: 20px; width: 20px; height: 20px; }
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
 
 .divider {
   width: 1px;
-  height: 24px;
-  background-color: #cbd5e1;
-  margin: 0 8px;
+  height: 32px;
+  background-color: #e2e8f0;
 }
 
-.logout-btn { border-radius: 20px; }
+.action-btn { color: #64748b; }
+.logout-btn { color: #ef4444; }
 
 /* -----------------------------
-   WORKSPACE & LAYOUT
+   WORKSPACE & HEADER
 ------------------------------ */
 .workspace-container {
-  max-width: 1400px;
+  max-width: 1200px; /* Tighter max-width for better readability */
   margin: 0 auto;
-  padding: 32px 24px;
+  padding: 48px 24px;
   width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
+}
+
+.page-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .page-header h1 {
   margin: 0;
-  font-size: 28px;
-  font-weight: 600;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
   color: #0f172a;
 }
 
 .page-header p {
   margin: 8px 0 0;
-  font-size: 15px;
+  font-size: 16px;
   color: #64748b;
 }
 
@@ -89,11 +140,11 @@
 ------------------------------ */
 .data-card {
   background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border-radius: 16px; /* Modern rounded corners */
+  /* Premium diffuse shadow instead of harsh borders */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
+  border: 1px solid rgba(226, 232, 240, 0.5);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
 .table-toolbar {
@@ -101,125 +152,188 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
   gap: 16px;
 }
 
+/* Material Input Overrides to make it sleek */
 .search-field {
   width: 100%;
-  max-width: 400px;
+  max-width: 360px;
 }
 
-/* Remove bottom padding from Angular Material input inside the toolbar */
-.table-toolbar ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
-.table-toolbar ::ng-deep .mat-mdc-text-field-wrapper { background-color: #ffffff; }
+::ng-deep .dense-theme {
+  .mdc-text-field--outlined {
+    --mdc-outlined-text-field-container-shape: 10px; /* Rounded input */
+    --mdc-outlined-text-field-focus-outline-color: #3b82f6;
+  }
+  .mat-mdc-form-field-subscript-wrapper { display: none; }
+  .mat-mdc-form-field-flex { padding: 0 16px; }
+  .search-icon { color: #94a3b8; }
+}
 
 .add-user-btn {
-  height: 48px;
-  border-radius: 8px;
+  height: 44px;
+  border-radius: 10px; /* Match input radius */
   padding: 0 24px;
-  font-size: 15px;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  letter-spacing: 0;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2) !important; /* Soft colored shadow */
+  background: #3b82f6 !important;
 }
 
 /* -----------------------------
    TABLE STYLING
 ------------------------------ */
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.user-table { width: 100%; }
+.table-responsive { width: 100%; overflow-x: auto; }
+.user-table { width: 100%; background: transparent; }
 
 .user-table th.mat-header-cell {
-  color: #475569;
+  background: #f8fafc;
+  color: #64748b;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 16px;
+  letter-spacing: 0.05em;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .user-table td.mat-cell {
-  padding: 16px;
-  color: #334155;
-  border-bottom-color: #f1f5f9;
+  padding: 16px 24px;
+  color: #475569;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+}
+
+.primary-text {
+  font-weight: 600;
+  color: #1e293b;
 }
 
 .hover-row:hover {
   background-color: #f8fafc;
-  transition: background-color 0.2s ease;
 }
 
 /* Specific Cell Elements */
 .email-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #2563eb;
+  color: #64748b;
   text-decoration: none;
   cursor: pointer;
-  font-weight: 500;
-  transition: color 0.2s;
+  transition: all 0.2s;
+  
+  &:hover { color: #3b82f6; }
 }
-.email-link:hover { color: #1d4ed8; text-decoration: underline; }
-.email-icon { font-size: 18px; height: 18px; width: 18px; opacity: 0.7; }
 
-.role-text { color: #64748b; font-weight: 500; }
-
-.action-header { text-align: right; }
-.action-cell { text-align: right; white-space: nowrap; }
+.role-text { 
+  color: #64748b; 
+  font-weight: 500; 
+  background: #f1f5f9;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
 
 /* -----------------------------
    STATUS BADGES
 ------------------------------ */
 .status-badge {
-  padding: 6px 12px;
-  border-radius: 20px;
+  padding: 4px 12px;
+  border-radius: 999px;
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  display: inline-block;
-  background-color: #f1f5f9;
-  color: #64748b;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* Add logic colors matching what your backend outputs. Example: */
-.status-badge.active { background-color: #dcfce7; color: #166534; }
-.status-badge.inactive { background-color: #fee2e2; color: #991b1b; }
-.status-badge.pending { background-color: #fef9c3; color: #854d0e; }
+/* Add a pseudo element dot for extra modern flair */
+.status-badge::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-badge.active { 
+  background-color: #ecfdf5; 
+  color: #059669; 
+  &::before { background-color: #10b981; }
+}
+.status-badge.inactive { 
+  background-color: #fef2f2; 
+  color: #dc2626; 
+  &::before { background-color: #ef4444; }
+}
+.status-badge.pending { 
+  background-color: #fffbeb; 
+  color: #d97706; 
+  &::before { background-color: #f59e0b; }
+}
+
+/* -----------------------------
+   ROW ACTIONS
+------------------------------ */
+.action-header { text-align: right; }
+.action-cell { text-align: right; }
+
+.row-action-btn {
+  transform: scale(0.9);
+  color: #94a3b8;
+  transition: all 0.2s ease;
+  
+  &:hover.edit-btn { color: #3b82f6; background: #eff6ff; }
+  &:hover.delete-btn { color: #ef4444; background: #fef2f2; }
+}
 
 /* -----------------------------
    EMPTY STATE
 ------------------------------ */
 .empty-state {
-  text-align: center;
-  padding: 64px 24px !important;
+  padding: 80px 24px !important;
+  border-bottom: none !important;
 }
-.empty-icon {
-  font-size: 64px;
-  height: 64px;
+
+.empty-state-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-icon-wrapper {
   width: 64px;
-  color: #cbd5e1;
+  height: 64px;
+  background: #f1f5f9;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 16px;
+  
+  mat-icon { font-size: 32px; width: 32px; height: 32px; color: #94a3b8; }
 }
-.empty-state h3 { margin: 0; font-size: 18px; color: #1e293b; }
-.empty-state p { margin: 8px 0 0; color: #64748b; }
+
+.empty-state h3 { margin: 0; font-size: 18px; font-weight: 600; color: #1e293b; }
+.empty-state p { margin: 8px 0 0; color: #64748b; font-size: 14px; }
 
 /* -----------------------------
-   RESPONSIVE (MOBILE)
+   PAGINATOR OVERRIDES
+------------------------------ */
+::ng-deep .custom-paginator {
+  border-top: 1px solid #f1f5f9;
+  background: transparent;
+}
+
+/* -----------------------------
+   RESPONSIVE
 ------------------------------ */
 @media (max-width: 768px) {
-  .workspace-container { padding: 16px; }
-  
-  .table-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
+  .app-header { padding: 0 16px; }
+  .workspace-container { padding: 24px 16px; gap: 24px; }
+  .table-toolbar { flex-direction: column; align-items: stretch; }
   .search-field { max-width: 100%; }
   .hide-on-mobile { display: none; }
 }

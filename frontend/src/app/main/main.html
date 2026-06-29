@@ -1,6 +1,8 @@
-<header class="app-header mat-elevation-z2">
+<header class="app-header animate__animated animate__fadeInDown">
   <div class="brand-container">
-    <mat-icon class="brand-logo" color="warn">explore</mat-icon>
+    <div class="logo-wrapper">
+      <mat-icon color="warn">explore</mat-icon>
+    </div>
     <span class="brand-title">Bi<span class="text-danger">Map</span></span>
   </div>
 
@@ -8,38 +10,48 @@
 
   <div class="header-actions">
     @if (user.user.applicationRole === 'ADMINISTRATOR') {
-      <button mat-flat-button matTooltip="Admin" class="admin-btn" routerLink="/listuser">
+      <button mat-icon-button class="action-btn" matTooltip="Admin" routerLink="/listuser">
         <mat-icon>admin_panel_settings</mat-icon>
       </button>
     }
-    <div class="divider"></div>
+
+    <div class="divider hide-on-mobile"></div>
+
     <button
-      mat-flat-button
-      matTooltip="Logout"
+      mat-icon-button
+      style="color: red;"
       color="warn"
-      class="logout-btn"
-      style="border-radius: 20px"
+      class="action-btn logout-btn"
+      matTooltip="Logout"
       routerLink="/logout"
     >
-      <mat-icon>power_settings_new</mat-icon>
-      <span class="hide-on-mobile">Logout</span>
+      <mat-icon>logout</mat-icon>
     </button>
   </div>
 </header>
 
-<div class="workspace">
-  <aside class="sidebar form-panel mat-elevation-z1" style="border-radius: 20px;">
+<div class="workspace animate__animated animate__fadeIn">
+  <aside class="sidebar form-panel" style="overflow-y: hidden">
     <div class="panel-header">
-      <h2>Asset Registration</h2>
-      <p>Enter or search for asset details below.</p>
+      <div class="header-title-row">
+        <div class="icon-halo-wrapper">
+          <div class="icon-circle">
+            <mat-icon>app_registration</mat-icon>
+          </div>
+        </div>
+        <div>
+          <h2>Asset Registration</h2>
+          <p>Enter or search for asset details below.</p>
+        </div>
+      </div>
     </div>
 
     <form [formGroup]="mainForm" (ngSubmit)="saveData()" autocomplete="off" class="modern-form">
       <div class="form-card">
         <h3>1. Location Search</h3>
-        <mat-form-field appearance="outline" class="w-100">
+        <mat-form-field appearance="outline" class="modern-input">
           <mat-label>Region</mat-label>
-          <mat-icon matPrefix>landscape</mat-icon>
+          <mat-icon matPrefix class="field-icon">landscape</mat-icon>
           <input
             matInput
             type="text"
@@ -48,59 +60,57 @@
             placeholder="Search for a region"
           />
           <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
-            @for (region of provinces; track region) {
+            @for (region of regionsOptions$ | async; track region) {
               <mat-option [value]="region">{{ region }}</mat-option>
             }
           </mat-autocomplete>
         </mat-form-field>
 
-        <div class="grid-2-col">
-          <mat-form-field appearance="outline">
-            <mat-icon matPrefix>location_city</mat-icon>
-            <mat-label>Province</mat-label>
-            <input
-              matInput
-              type="text"
-              formControlName="searchTerm"
-              [matAutocomplete]="autoProvince"
-              placeholder="Province"
-            />
-            <mat-autocomplete autoActiveFirstOption #autoProvince="matAutocomplete">
-              @for (province of provinces; track province) {
-                <mat-option [value]="province">{{ province }}</mat-option>
-              }
-            </mat-autocomplete>
-          </mat-form-field>
+        <mat-form-field appearance="outline" class="modern-input">
+          <mat-icon matPrefix class="field-icon">location_city</mat-icon>
+          <mat-label>Province</mat-label>
+          <input
+            matInput
+            type="text"
+            formControlName="searchTerm"
+            [matAutocomplete]="autoProvince"
+            placeholder="Province"
+          />
+          <mat-autocomplete autoActiveFirstOption #autoProvince="matAutocomplete">
+            @for (province of provincesOptions$ | async; track province) {
+              <mat-option [value]="province">{{ province }}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Municipality</mat-label>
-            <mat-icon matPrefix>place</mat-icon>
-            <input
-              matInput
-              type="text"
-              formControlName="searchMunicipalities"
-              [matAutocomplete]="autoMunicipality"
-              placeholder="Municipality"
-            />
-            <mat-autocomplete autoActiveFirstOption #autoMunicipality="matAutocomplete">
-              @for (municipality of provinces; track municipality) {
-                <mat-option [value]="municipality">{{ municipality }}</mat-option>
-              }
-            </mat-autocomplete>
-          </mat-form-field>
-        </div>
+        <mat-form-field appearance="outline" class="modern-input">
+          <mat-label>Municipality</mat-label>
+          <mat-icon matPrefix class="field-icon">place</mat-icon>
+          <input
+            matInput
+            type="text"
+            formControlName="searchMunicipalities"
+            [matAutocomplete]="autoMunicipality"
+            placeholder="Municipality"
+          />
+          <mat-autocomplete autoActiveFirstOption #autoMunicipality="matAutocomplete">
+            @for (municipality of municipalitiesOptions$ | async; track municipality) {
+              <mat-option [value]="municipality">{{ municipality }}</mat-option>
+            }
+          </mat-autocomplete>
+        </mat-form-field>
       </div>
 
       <div class="form-card">
         <h3>2. Specific Address</h3>
         <div class="grid-address">
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="modern-input">
             <mat-label>Address</mat-label>
-            <mat-icon matPrefix>home</mat-icon>
+            <mat-icon matPrefix class="field-icon">home</mat-icon>
             <input matInput formControlName="address" placeholder="Enter your address" />
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="modern-input">
             <mat-label>N°</mat-label>
             <input
               (focusout)="focusOut()"
@@ -117,30 +127,29 @@
 
       <div class="form-card">
         <h3>3. Asset Identification</h3>
-        <div class="grid-2-col">
-          <mat-form-field appearance="outline">
-            <mat-label>Good Name</mat-label>
-            <mat-icon matPrefix>badge</mat-icon>
-            <input matInput formControlName="goodNaming" placeholder="Enter name" />
-          </mat-form-field>
 
-          <mat-form-field appearance="outline">
-            <mat-label>Good ID</mat-label>
-            <mat-icon matPrefix>tag</mat-icon>
-            <input
-              matInput
-              type="number"
-              formControlName="gooodId"
-              min="3614"
-              max="7438"
-              placeholder="3614-7438"
-            />
-          </mat-form-field>
-        </div>
+        <mat-form-field appearance="outline" class="modern-input">
+          <mat-label>Good Name</mat-label>
+          <mat-icon matPrefix class="field-icon">badge</mat-icon>
+          <input matInput formControlName="goodNaming" placeholder="Enter name" />
+        </mat-form-field>
 
-        <mat-form-field appearance="outline" class="w-100">
+        <mat-form-field appearance="outline" class="modern-input">
+          <mat-label>Identifier</mat-label>
+          <mat-icon matPrefix class="field-icon">tag</mat-icon>
+          <input
+            matInput
+            type="number"
+            formControlName="gooodId"
+            min="3614"
+            max="7438"
+            placeholder="3614-7438"
+          />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="modern-input">
           <mat-label>Istat Code</mat-label>
-          <mat-icon matPrefix>qr_code</mat-icon>
+          <mat-icon matPrefix class="field-icon">qr_code</mat-icon>
           <input
             matInput
             type="text"
@@ -159,20 +168,20 @@
 
       <div class="form-card highlight-card">
         <div class="instruction-row">
-          <mat-icon color="primary">touch_app</mat-icon>
+          <mat-icon>touch_app</mat-icon>
           <span>Double-click the map to auto-fill coordinates.</span>
         </div>
 
-        <div class="grid-1-col mt-3">
-          <mat-form-field appearance="outline">
+        <div class="stacked-fields mt-3">
+          <mat-form-field appearance="outline" class="modern-input">
             <mat-label>Latitude</mat-label>
-            <mat-icon matPrefix>gps_fixed</mat-icon>
+            <mat-icon matPrefix class="field-icon">gps_fixed</mat-icon>
             <input matInput type="number" formControlName="ilatitude" />
           </mat-form-field>
 
-          <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="modern-input">
             <mat-label>Longitude</mat-label>
-            <mat-icon matPrefix>gps_fixed</mat-icon>
+            <mat-icon matPrefix class="field-icon">gps_fixed</mat-icon>
             <input matInput type="number" formControlName="ilongitude" />
           </mat-form-field>
         </div>
@@ -193,14 +202,14 @@
   </aside>
 
   <main class="content-panel">
-    <div class="map-card mat-elevation-z1">
+    <div class="map-card">
       <app-streetview
         style="width: 100%; height: 100%; display: block"
         (mapDoubleClick)="onCoordinatesPicked($event)"
       ></app-streetview>
     </div>
 
-    <div class="table-card mat-elevation-z1">
+    <div class="table-card">
       <div class="table-responsive" oncontextmenu="return false;">
         <table
           mat-table
@@ -209,27 +218,32 @@
           matSortActive="created"
           matSortDisableClear
           matSortDirection="desc"
+          class="user-table"
         >
           <ng-container matColumnDef="id">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
             <td mat-cell *matCellDef="let row">
-              <strong>{{ row.id }}</strong>
+              <span class="primary-text">{{ row.id }}</span>
             </td>
           </ng-container>
+
           <ng-container matColumnDef="comune">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Municipality</th>
             <td mat-cell *matCellDef="let row">{{ row.comune ? row.comune : '-' }}</td>
           </ng-container>
+
           <ng-container matColumnDef="prov">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Prov.</th>
             <td mat-cell *matCellDef="let row">
               <span class="badge">{{ row.prov ? row.prov : '-' }}</span>
             </td>
           </ng-container>
+
           <ng-container matColumnDef="indirizzo">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>Address</th>
             <td mat-cell *matCellDef="let row">{{ row.indirizzo ? row.indirizzo : '-' }}</td>
           </ng-container>
+
           <ng-container matColumnDef="civico">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>N°</th>
             <td mat-cell *matCellDef="let row">{{ row.civico > 0 ? row.civico : '-' }}</td>
@@ -238,19 +252,29 @@
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr
             mat-row
-            class="clickable-row"
+            class="clickable-row hover-row"
             *matRowDef="let row; columns: displayedColumns"
             (dblclick)="getRecord(row)"
           ></tr>
+
           <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell empty-state" colspan="5">
-              <mat-icon class="empty-icon">search_off</mat-icon>
-              <p>No data matching the filter</p>
+              <div class="empty-state-content">
+                <div class="empty-icon-wrapper">
+                  <mat-icon>search_off</mat-icon>
+                </div>
+                <h3>No data available</h3>
+                <p>No records match the current filter.</p>
+              </div>
             </td>
           </tr>
         </table>
       </div>
-      <mat-paginator showFirstLastButtons [pageSizeOptions]="[5, 10]"></mat-paginator>
+      <mat-paginator
+        showFirstLastButtons
+        [pageSizeOptions]="[5]"
+        class="custom-paginator"
+      ></mat-paginator>
     </div>
   </main>
 </div>

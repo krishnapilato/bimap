@@ -1,31 +1,34 @@
-<header class="app-header mat-elevation-z1 animate__animated animate__fadeInDown">
+<header class="app-header animate__animated animate__fadeInDown">
   <div class="brand-container">
-    <mat-icon class="brand-logo" color="warn">person_add</mat-icon>
+    <div class="logo-wrapper">
+      <mat-icon color="warn">person_add</mat-icon>
+    </div>
     <span class="brand-title">User<span class="text-danger">Registration</span></span>
   </div>
 
   <span class="spacer"></span>
 
   <div class="header-actions">
-    <button mat-icon-button matTooltip="Admin Dashboard" routerLink="/listuser">
+    <button mat-icon-button class="action-btn" matTooltip="Admin Dashboard" routerLink="/listuser">
       <mat-icon>admin_panel_settings</mat-icon>
     </button>
-    <button mat-icon-button matTooltip="Home Dashboard" routerLink="/">
-      <mat-icon>home</mat-icon>
+    <button mat-icon-button class="action-btn" matTooltip="Home Dashboard" routerLink="/">
+      <mat-icon>space_dashboard</mat-icon>
     </button>
-    <div class="divider"></div>
-    <button mat-flat-button color="warn" class="logout-btn" routerLink="/logout">
-      <mat-icon>power_settings_new</mat-icon>
-      <span class="hide-on-mobile">Logout</span>
+    <div class="divider hide-on-mobile"></div>
+    <button mat-icon-button color="warn" class="action-btn logout-btn" matTooltip="Logout" routerLink="/logout">
+      <mat-icon>logout</mat-icon>
     </button>
   </div>
 </header>
 
 <main class="focus-workspace">
-  <div class="form-card mat-elevation-z2 animate__animated animate__fadeInUp">
+  <div class="form-card animate__animated animate__fadeInUp">
     <div class="form-header">
-      <div class="icon-wrapper">
-        <mat-icon color="primary">person_add</mat-icon>
+      <div class="icon-halo-wrapper">
+        <div class="icon-circle">
+          <mat-icon>person_add</mat-icon>
+        </div>
       </div>
       <h1>Register New User</h1>
       <p>Please fill in the details below to create an account.</p>
@@ -33,7 +36,7 @@
 
     <form (ngSubmit)="onSubmit()" #userForm="ngForm" autocomplete="off" class="modern-form">
       <div class="form-row mt-3">
-        <mat-form-field appearance="outline" class="w-100">
+        <mat-form-field appearance="outline" class="w-100 modern-input">
           <mat-label>First Name</mat-label>
           <mat-icon matPrefix class="field-icon">badge</mat-icon>
           <input
@@ -52,7 +55,7 @@
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="w-100">
+        <mat-form-field appearance="outline" class="w-100 modern-input">
           <mat-label>Last Name</mat-label>
           <mat-icon matPrefix class="field-icon">person</mat-icon>
           <input
@@ -72,8 +75,8 @@
         </mat-form-field>
       </div>
 
-      <div class="email-group mt-3">
-        <mat-form-field appearance="outline" class="w-100" [class.has-error]="emailStatus">
+      <div class="email-group mt-2">
+        <mat-form-field appearance="outline" class="w-100 modern-input" [class.has-error]="emailStatus">
           <mat-label>Email Address</mat-label>
           <mat-icon matPrefix class="field-icon">email</mat-icon>
           <input
@@ -92,6 +95,7 @@
             <mat-error>Please enter a valid email format</mat-error>
           }
         </mat-form-field>
+        
         @if (emailStatus) {
           <div class="custom-error animate__animated animate__headShake">
             <mat-icon>error_outline</mat-icon>
@@ -100,7 +104,7 @@
         }
       </div>
 
-      <mat-form-field appearance="outline" class="w-100 mt-3">
+      <mat-form-field appearance="outline" class="w-100 mt-2 modern-input">
         <mat-label>Password</mat-label>
         <mat-icon matPrefix class="field-icon">lock</mat-icon>
         <input
@@ -134,15 +138,18 @@
         }
       </mat-form-field>
 
-      <button
-        type="submit"
-        [disabled]="userForm.invalid"
-        mat-flat-button
-        color="primary"
-        class="submit-btn"
-      >
-        Register User
-      </button>
+      <div class="form-actions mt-4">
+        <button
+          type="submit"
+          [disabled]="userForm.invalid"
+          mat-flat-button
+          color="primary"
+          class="submit-btn"
+        >
+          <mat-icon>person_add</mat-icon>
+          Register User
+        </button>
+      </div>
     </form>
   </div>
 </main>

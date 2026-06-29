@@ -95,19 +95,26 @@ public class SpringBootController {
 
     // CREATE USER
     @PostMapping("/users")
-    public User create(@RequestBody User newUser) {
+    public User create(@RequestBody CreateUserRequest request) {
 
-        logger.info("Creating user: {}", newUser.getEmail());
+        logger.info("Creating user: {}", request.email());
 
         var now = new Date();
+        var newUser = new User();
 
+        newUser.setName(request.name());
+        newUser.setSurname(request.surname());
+        newUser.setEmail(request.email());
+        newUser.setPassword(passwordEncoder.encode(request.password()));
         newUser.setApplicationRole(ApplicationRole.USER);
         newUser.setUserStatus(UserStatus.CONFIRMED);
         newUser.setCreated(now.toInstant());
         newUser.setLastModified(now.toInstant());
-        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
 
         return userRepository.save(newUser);
+    }
+
+    public record CreateUserRequest(String name, String surname, String email, String password) {
     }
 
     @PatchMapping("/users/{id}")

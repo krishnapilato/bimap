@@ -20,11 +20,22 @@ export class UserService {
   }
 
   save(user: User): Observable<User> {
-    return this.http.post<User>(this.usersUrl, user);
+    return this.http.post<User>(this.usersUrl, {
+      name: user.name,
+      surname: user.surname,
+      email: user.email,
+      password: user.password,
+    });
   }
 
   update(user: User, id: number): Observable<User> {
-    return this.http.put<User>(`${this.usersUrl}/${id}`, user);
+    return this.http.put<User>(`${this.usersUrl}/${id}`, {
+      name: user.name,
+      surname: user.surname,
+      email: user.email,
+      password: user.password,
+      applicationRole: user.applicationRole,
+    });
   }
 
   delete(id: number): Observable<void> {

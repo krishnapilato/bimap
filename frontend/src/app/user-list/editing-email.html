@@ -1,22 +1,26 @@
 <div class="dialog-container">
-  <!-- Header & Icon -->
   <div class="dialog-header">
-    <div class="icon-wrapper animate__animated animate__zoomIn">
-      <mat-icon color="primary">mail_outline</mat-icon>
+    <div class="icon-halo-wrapper animate__animated animate__zoomIn">
+      <div class="icon-circle">
+        <mat-icon>mark_email_unread</mat-icon>
+      </div>
     </div>
-    <h2 class="dialog-title">Send Email Confirmation</h2>
+    <h2 class="dialog-title">Send Confirmation</h2>
   </div>
 
-  <!-- Content Body -->
   <div class="dialog-body">
-    <p class="dialog-message">Are you sure you want to send an email to</p>
-    <div class="email-badge">
-      <mat-icon class="badge-icon">alternate_email</mat-icon>
-      <span>{{ globalEmail }}</span>
+    <p class="dialog-message">
+      Are you sure you want to send the confirmation email to this address?
+    </p>
+
+    <div class="email-badge-container">
+      <div class="email-badge">
+        <mat-icon class="badge-icon">alternate_email</mat-icon>
+        <span class="email-text">{{ globalEmail }}</span>
+      </div>
     </div>
   </div>
 
-  <!-- Actions -->
   <div class="dialog-actions">
     <button mat-stroked-button class="action-btn cancel-btn" (click)="cancel()">Cancel</button>
     <button mat-flat-button color="primary" class="action-btn send-btn" (click)="send()">

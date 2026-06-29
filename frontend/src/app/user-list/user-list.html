@@ -1,6 +1,8 @@
-<header class="app-header mat-elevation-z1 animate__animated animate__fadeInDown">
+<header class="app-header animate__animated animate__fadeInDown">
   <div class="brand-container">
-    <mat-icon class="brand-logo" color="warn">admin_panel_settings</mat-icon>
+    <div class="logo-wrapper">
+      <mat-icon color="warn">admin_panel_settings</mat-icon>
+    </div>
     <span class="brand-title">Admin<span class="text-danger">Workspace</span></span>
   </div>
 
@@ -8,42 +10,53 @@
 
   <div class="header-actions">
     <div class="user-badge hide-on-mobile">
-      <mat-icon>account_circle</mat-icon>
-      <span>{{ whatUser.user.fullName }}</span>
+      <div class="avatar-circle">
+        <mat-icon>person</mat-icon>
+      </div>
+      <span class="user-name">{{ whatUser.user.fullName }}</span>
     </div>
+
     <div class="divider hide-on-mobile"></div>
-    <button mat-icon-button matTooltip="Dashboard Home" routerLink="/">
-      <mat-icon>home</mat-icon>
+
+    <button mat-icon-button class="action-btn" matTooltip="Dashboard Home" routerLink="/">
+      <mat-icon>space_dashboard</mat-icon>
     </button>
-    <button mat-flat-button color="warn" class="logout-btn" routerLink="/logout">
-      <mat-icon>power_settings_new</mat-icon>
-      <span class="hide-on-mobile">Logout</span>
+    <button
+      mat-icon-button
+      color="warn"
+      class="action-btn logout-btn"
+      matTooltip="Logout"
+      routerLink="/logout"
+    >
+      <mat-icon>logout</mat-icon>
     </button>
   </div>
 </header>
 
 <main class="workspace-container animate__animated animate__fadeInUp">
-  <div class="page-header" style="text-align: center; margin-top: 4rem; margin-bottom: 2rem">
-    <h1>User Management</h1>
-    <p>Manage application access, roles, and user details.</p>
+  <div class="page-header">
+    <div class="header-content">
+      <h1>User Management</h1>
+      <p>Manage application access, roles, and user details across the organization.</p>
+    </div>
   </div>
 
-  <div class="data-card mat-elevation-z1">
+  <div class="data-card">
     <div class="table-toolbar">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-icon matPrefix color="primary">search</mat-icon>
+      <mat-form-field appearance="outline" class="search-field dense-theme">
+        <mat-icon matPrefix class="search-icon">search</mat-icon>
         <input
           matInput
           autocomplete="off"
           (keyup)="applyFilter($event)"
           #input
-          placeholder="Search users by name, email, or role..."
+          placeholder="Search users by any field..."
         />
       </mat-form-field>
 
       <button mat-flat-button color="primary" class="add-user-btn" routerLink="/adduser">
-        <mat-icon>person_add</mat-icon>
-        <span>Add User</span>
+        <mat-icon>add</mat-icon>
+        <span>Add New User</span>
       </button>
     </div>
 
@@ -52,14 +65,14 @@
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>First Name</th>
           <td mat-cell *matCellDef="let row">
-            <strong>{{ row.name }}</strong>
+            <span class="primary-text">{{ row.name }}</span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="surname">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Name</th>
           <td mat-cell *matCellDef="let row">
-            <strong>{{ row.surname }}</strong>
+            <span class="primary-text">{{ row.surname }}</span>
           </td>
         </ng-container>
 
@@ -67,7 +80,6 @@
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Email Address</th>
           <td mat-cell *matCellDef="let row">
             <a class="email-link" matTooltip="Send email" (click)="openEmailDialog(row.email)">
-              <mat-icon class="email-icon">mail_outline</mat-icon>
               {{ row.email }}
             </a>
           </td>
@@ -94,14 +106,19 @@
           <td mat-cell *matCellDef="let row" class="action-cell">
             <button
               mat-icon-button
-              color="primary"
+              class="row-action-btn edit-btn"
               matTooltip="Edit User"
               (click)="openDialog(row)"
             >
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button color="warn" matTooltip="Delete User" (click)="deleteRow(row)">
-              <mat-icon>delete_outline</mat-icon>
+            <button
+              mat-icon-button
+              class="row-action-btn delete-btn"
+              matTooltip="Delete User"
+              (click)="deleteRow(row)"
+            >
+              <mat-icon>delete</mat-icon>
             </button>
           </td>
         </ng-container>
@@ -111,17 +128,21 @@
 
         <tr class="mat-row" *matNoDataRow>
           <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
-            <mat-icon class="empty-icon">person_search</mat-icon>
-            @if (input.value.length > 0) {
-              <h3>No users found</h3>
-              <p>
-                No records match the filter "<strong>{{ input.value }}</strong
-                >".
-              </p>
-            } @else {
-              <h3>No data available</h3>
-              <p>There are currently no users in the system.</p>
-            }
+            <div class="empty-state-content">
+              <div class="empty-icon-wrapper">
+                <mat-icon>search_off</mat-icon>
+              </div>
+              @if (input.value.length > 0) {
+                <h3>No users found</h3>
+                <p>
+                  We couldn't find anyone matching "<strong>{{ input.value }}</strong
+                  >".
+                </p>
+              } @else {
+                <h3>No data available</h3>
+                <p>There are currently no users in the system.</p>
+              }
+            </div>
           </td>
         </tr>
       </table>

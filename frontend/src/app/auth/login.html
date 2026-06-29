@@ -1,23 +1,27 @@
-<div class="bg-container">
+<div class="bg-container animate__animated animate__fadeIn">
   <div class="login-card">
     <div class="form-header">
-      <h2>Welcome Back</h2>
+      <div class="icon-halo-wrapper">
+        <div class="icon-circle">
+          <mat-icon>vpn_key</mat-icon>
+        </div>
+      </div>
+      <h2>Welcome to Bi<span style="color: rgb(189, 27, 27);">Map</span></h2>
       <p>Sign in to continue to your dashboard</p>
     </div>
 
-    <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="login-form">
-      <mat-form-field appearance="outline" class="form-field">
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="modern-form">
+      <mat-form-field appearance="outline" class="modern-input w-100">
         <mat-label>Username or Email</mat-label>
-        <mat-icon matPrefix style="margin-right: 8px; color: #757575">person</mat-icon>
+        <mat-icon matPrefix class="field-icon">person</mat-icon>
         <input
           matInput
-          type="text"
+          type="email"
           name="username"
           [(ngModel)]="loginRequest.username"
           required
           placeholder="e.g. admin@bimap.com"
         />
-
         @if (
           loginForm.controls['username']?.hasError('required') &&
           loginForm.controls['username']?.touched
@@ -26,9 +30,9 @@
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="form-field password-field">
+      <mat-form-field appearance="outline" class="modern-input w-100">
         <mat-label>Password</mat-label>
-        <mat-icon matPrefix style="margin-right: 8px; color: #757575">lock</mat-icon>
+        <mat-icon matPrefix class="field-icon">lock</mat-icon>
         <input
           matInput
           [type]="hidePassword() ? 'password' : 'text'"
@@ -43,9 +47,10 @@
           matSuffix
           (click)="togglePassword()"
           type="button"
+          class="visibility-btn"
           [attr.aria-label]="'Hide password'"
         >
-          <mat-icon style="color: #757575">{{
+          <mat-icon class="field-icon">{{
             hidePassword() ? 'visibility_off' : 'visibility'
           }}</mat-icon>
         </button>
@@ -58,15 +63,17 @@
         }
       </mat-form-field>
 
-      <button
-        mat-flat-button
-        color="primary"
-        class="submit-btn"
-        type="submit"
-        [disabled]="loginForm.invalid"
-      >
-        Sign In
-      </button>
+      <div class="form-actions mt-2">
+        <button
+          mat-flat-button
+          color="primary"
+          class="submit-btn"
+          type="submit"
+          [disabled]="loginForm.invalid"
+        >
+          Sign In
+        </button>
+      </div>
     </form>
   </div>
 </div>

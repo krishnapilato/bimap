@@ -1,49 +1,83 @@
+/* -----------------------------
+   GLOBAL DIALOG STYLES
+------------------------------ */
 .dialog-container {
   width: 100%;
-  max-width: 400px;
-  padding: 32px 24px;
+  max-width: 440px; /* Slightly wider for better text flow */
+  padding: 40px 32px;
   box-sizing: border-box;
   text-align: center;
-  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
   background-color: #ffffff;
+  /* Note: The outer border-radius is usually handled by your global mat-dialog-container styles. 
+     If it isn't, add: border-radius: 20px; here. */
 }
 
+/* -----------------------------
+   HEADER & ICON HALO
+------------------------------ */
 .dialog-header {
   margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.icon-wrapper {
-  display: inline-flex;
+.icon-halo-wrapper {
+  margin-bottom: 24px;
+  /* Creates a soft "halo" ring around the main icon circle */
+  background: #f8fafc;
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.icon-circle {
+  display: flex;
   justify-content: center;
   align-items: center;
-  width: 64px;
-  height: 64px;
-  background-color: #eef2ff;
+  width: 56px;
+  height: 56px;
+  background-color: #eff6ff; /* Soft blue */
   border-radius: 50%;
-  margin-bottom: 16px;
-}
 
-.icon-wrapper mat-icon {
-  transform: scale(1.3);
+  mat-icon {
+    color: #3b82f6; /* Bold primary blue */
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
 }
 
 .dialog-title {
   margin: 0;
   font-size: 22px;
-  font-weight: 600;
-  color: #1e293b;
-  letter-spacing: -0.5px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.02em;
 }
 
+/* -----------------------------
+   BODY & MESSAGE
+------------------------------ */
 .dialog-body {
-  margin-bottom: 32px;
+  margin-bottom: 36px;
 }
 
 .dialog-message {
-  margin: 0 0 16px 0;
+  margin: 0 0 20px 0;
   font-size: 15px;
   color: #64748b;
-  line-height: 1.5;
+  line-height: 1.6;
+}
+
+.email-badge-container {
+  display: flex;
+  justify-content: center;
 }
 
 .email-badge {
@@ -52,11 +86,15 @@
   gap: 8px;
   padding: 10px 16px;
   background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-weight: 500;
-  color: #334155;
-  font-size: 15px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02) inset; /* Subtle inner depth */
+}
+
+.email-text {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 14px;
   word-break: break-all;
 }
 
@@ -67,39 +105,78 @@
   color: #94a3b8;
 }
 
+/* -----------------------------
+   BUTTON ACTIONS
+------------------------------ */
 .dialog-actions {
   display: flex;
   justify-content: center;
   gap: 16px;
 }
 
+/* Base override for both buttons */
 .action-btn {
   height: 48px;
-  border-radius: 8px;
-  padding: 0 24px;
-  font-weight: 600;
+  border-radius: 10px !important; /* Match the inputs and badges */
+  font-weight: 600 !important;
   font-size: 15px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0 !important;
   flex: 1;
 }
 
+/* Cancel Button */
 .cancel-btn {
-  color: #64748b;
-  border-color: #cbd5e1;
+  color: #64748b !important;
+  --mdc-protected-button-container-color: transparent;
+  --mdc-protected-button-outline-color: #e2e8f0;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+  }
 }
 
-.send-btn mat-icon {
-  margin-right: 6px;
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
+/* Primary Send Button */
+.send-btn {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+  /* The signature SaaS colored drop-shadow */
+  box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.35) !important;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px -2px rgba(59, 130, 246, 0.45) !important;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  mat-icon {
+    margin-right: 6px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
 }
 
-@media (max-width: 400px) {
+/* -----------------------------
+   RESPONSIVE (MOBILE)
+------------------------------ */
+@media (max-width: 480px) {
+  .dialog-container {
+    padding: 32px 20px;
+  }
+
   .dialog-actions {
-    flex-direction: column-reverse;
+    flex-direction: column-reverse; /* Cancel on bottom for mobile */
     gap: 12px;
   }
+
   .action-btn {
     width: 100%;
   }
