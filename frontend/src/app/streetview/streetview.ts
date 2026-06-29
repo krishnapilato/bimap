@@ -12,13 +12,14 @@ import {
   viewChild,
 } from '@angular/core';
 import * as L from 'leaflet';
+import { MatTooltip } from "@angular/material/tooltip";
 
 declare var google: any;
 
 @Component({
   selector: 'app-streetview',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatTooltip],
   templateUrl: 'streetview.html',
   styleUrls: ['streetview.scss'],
 })
@@ -132,7 +133,7 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
       zoomControl: false,
       attributionControl: false,
       doubleClickZoom: false,
-      minZoom: 3,
+      minZoom: 8,
       maxZoom: 21,
       maxBounds: [
         [-90, -180],

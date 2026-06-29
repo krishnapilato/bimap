@@ -13,7 +13,7 @@
     </div>
   </div>
 
-  <div class="resizer" (mousedown)="onMouseDown($event)" (dblclick)="resetSplit()"></div>
+  <div class="resizer" matTooltip="Double click to reset" matTooltipPosition="above" (mousedown)="onMouseDown($event)" (dblclick)="resetSplit()"></div>
 
   <div class="map-panel" [style.width.%]="100 - leftWidth()">
     <div id="streetView" class="map-canvas"></div>
