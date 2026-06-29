@@ -1,24 +1,20 @@
-# Web App Exercise
+# BiMap
 
 This is a project born only with the aim of practicing with the technologies of Spring Boot and Angular.
 
 Access to this application is managed by the administrator who, thanks to the UI already implemented to manage users, can create new users, remove or modify the data of existing users. Only the administrators can see the Admin Dashboard button in the main page. 
 
 In the main screen (and the only one at the moment) of the application it is possible to enter data such as geographic information. At the end of the insertion of all the data the user can save the data.
-The data is written both to a table and to a CSV file, always accessible from the path C:\Simple Map Exercise\csv_file.csv.
-
-The user can change the type of map displayed between Default, Satellite and Open Street Map according to his personal tastes.
-
-Furthermore, thanks to the button with the Street View icon it is possible, only if the zoom is greater than 15, to view the streetview images of the point clicked twice. At the bottom of the page is the original Street View which is in development.
+The data is written both to a table and to a CSV file, always accessible from the path C:\BiMap\csv_file.csv.
 
 ## Requirements
 
 For building and running the application I strongly recommend you to use: 
 
-- [JDK 17.0.3.1](https://www.oracle.com/java/technologies/downloads/#java17)
-- [Maven 3.8.5](https://maven.apache.org/download.cgi)
-- [MySQL Server 8.0.29](https://dev.mysql.com/downloads/mysql/)
-- [NodeJS 18.3.0](https://nodejs.org/en/)
+- [JDK 26.0.1](https://www.oracle.com/java/technologies/downloads/#java17)
+- [Maven 3.9.14](https://maven.apache.org/download.cgi)
+- [MySQL Server 9.7.0](https://dev.mysql.com/downloads/mysql/)
+- [NodeJS 26.4.0](https://nodejs.org/en/)
 
 ## Run Locally
 
@@ -54,10 +50,10 @@ Install dependencies with [NodeJS](https://nodejs.org/en/)
   npm install
 ```
 
-Install Angular 13.0.3
+Install Angular 22.0.4
 
 ```bash
-  npm install -g @angular/cli@13.0.3
+  npm install -g @angular/cli@22.0.4
 ```
 
 Start the client: the web app will open in the browser 
@@ -71,7 +67,7 @@ Start the client: the web app will open in the browser
 #### Get regions
 
 ```http
-  GET /searchRegion={keyword}
+  GET /regions={keyword}
 ```
 
 | Parameter | Type     | Description                |
@@ -81,7 +77,7 @@ Start the client: the web app will open in the browser
 #### Get provinces
 
 ```http
-  GET /searchProvince={keyword}
+  GET /provinces={keyword}
 ```
 
 | Parameter | Type     | Description                       |
@@ -91,7 +87,7 @@ Start the client: the web app will open in the browser
 #### Get municipalities
 
 ```http
-  GET /searchMunicipality={keyword}
+  GET /municipalities={keyword}
 ```
 
 | Parameter | Type     | Description                       |
@@ -161,7 +157,5 @@ Start the client: the web app will open in the browser
 
 ## Technologies used:
 
-- [Leaflet 1.8.0](https://leafletjs.com)
+- [Leaflet 1.9.4](https://leafletjs.com)
 - [Google Maps Data](https://developers.google.com/maps)
-- [Open Street Map Data](https://www.openstreetmap.org/#map=8/45.905/8.990)
-- [OpenLayers Street View](https://github.com/GastonZalba/ol-street-view)
