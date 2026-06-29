@@ -1,13 +1,8 @@
 <div class="bg-container animate__animated animate__fadeIn">
   <div class="login-card">
     <div class="form-header">
-      <div class="icon-halo-wrapper">
-        <div class="icon-circle">
-          <mat-icon>vpn_key</mat-icon>
-        </div>
-      </div>
-      <h2>Welcome to Bi<span style="color: rgb(189, 27, 27);">Map</span></h2>
-      <p>Sign in to continue to your dashboard</p>
+      <h2>Bi<span style="color: rgb(189, 27, 27);">Map</span></h2>
+      <p>Sign in to continue to your dashboard.</p>
     </div>
 
     <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="modern-form">
@@ -30,7 +25,7 @@
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="modern-input w-100">
+      <mat-form-field appearance="outline" class="modern-input w-100 mt-2">
         <mat-label>Password</mat-label>
         <mat-icon matPrefix class="field-icon">lock</mat-icon>
         <input
@@ -42,7 +37,8 @@
           placeholder="Enter your password"
         />
 
-        <button
+        @if (loginRequest.password && loginRequest.password.length > 1) {
+                  <button
           mat-icon-button
           matSuffix
           (click)="togglePassword()"
@@ -54,7 +50,7 @@
             hidePassword() ? 'visibility_off' : 'visibility'
           }}</mat-icon>
         </button>
-
+        }
         @if (
           loginForm.controls['password']?.hasError('required') &&
           loginForm.controls['password']?.touched

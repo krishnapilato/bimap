@@ -94,8 +94,8 @@ export class MainComponent implements OnInit, AfterViewInit {
     goodNaming: ['', Validators.required],
     gooodId: ['', Validators.required],
     istatCode: ['', Validators.required],
-    ilatitude: [{ value: '', disabled: true }, Validators.required],
-    ilongitude: [{ value: '', disabled: true }, Validators.required],
+    ilatitude: [{ value: '', disabled: true }],
+    ilongitude: [{ value: '', disabled: true }],
   });
 
   ngOnInit(): void {

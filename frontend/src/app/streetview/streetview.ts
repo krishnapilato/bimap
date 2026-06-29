@@ -51,7 +51,10 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
     this.initStreetView();
     this.setupResizeObserver();
 
-    setTimeout(() => {this.syncMaps(); this.updatePosition(this.initialLat, this.initialLng);}, 100);
+    setTimeout(() => {
+      this.syncMaps(); 
+      this.updatePosition(this.initialLat, this.initialLng);
+    }, 100);
   }
 
   ngOnDestroy(): void {
@@ -60,7 +63,6 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
     document.removeEventListener('mousemove', this.boundMouseMove);
     document.removeEventListener('mouseup', this.boundMouseUp);
   }
-
 
   onMouseDown(event: MouseEvent): void {
     event.preventDefault();
@@ -98,13 +100,20 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   }
 
   private setupResizeObserver(): void {
-    const wrapper = this.mapWrapper()?.nativeElement;
-    if (!wrapper) return;
+    // FIX: Observe the actual Leaflet container instead of the outer wrapper
+    const leafletContainer = document.getElementById('leafletMap');
+    if (!leafletContainer) return;
 
     this.resizeObserver = new ResizeObserver(() => {
-      if (this.leafletMap) this.leafletMap.invalidateSize();
+      if (this.leafletMap) {
+        // requestAnimationFrame ensures the DOM width has fully updated before Leaflet recalculates
+        requestAnimationFrame(() => {
+          this.leafletMap?.invalidateSize();
+        });
+      }
     });
-    this.resizeObserver.observe(wrapper);
+    
+    this.resizeObserver.observe(leafletContainer);
   }
 
   private updateCurrentCoords(lat: number, lng: number): void {
