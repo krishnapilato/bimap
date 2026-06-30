@@ -29,7 +29,7 @@ export class UserService {
   }
 
   update(user: User, id: number): Observable<User> {
-    return this.http.put<User>(`${this.usersUrl}/${id}`, {
+    return this.http.patch<User>(`${this.usersUrl}/${id}`, {
       name: user.name,
       surname: user.surname,
       email: user.email,

@@ -6,14 +6,24 @@
   flex-direction: column;
   min-height: 100vh;
   /* A cooler, extremely subtle blue-gray background */
-  background-color: #f8fafc; 
+  background-color: #f8fafc;
   /* Modern system font stack */
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
   color: #0f172a;
 }
 
-.spacer { flex: 1 1 auto; }
-.text-danger { color: #ef4444; }
+.spacer {
+  flex: 1 1 auto;
+}
+.text-danger {
+  color: #ef4444;
+}
 
 /* -----------------------------
    APP HEADER
@@ -48,10 +58,10 @@
   height: 40px;
 }
 
-.brand-title { 
-  font-size: 20px; 
-  font-weight: 700; 
-  letter-spacing: -0.02em; 
+.brand-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .header-actions {
@@ -70,7 +80,9 @@
   transition: background 0.2s;
   cursor: pointer;
 
-  &:hover { background: #e2e8f0; }
+  &:hover {
+    background: #e2e8f0;
+  }
 }
 
 .avatar-circle {
@@ -81,8 +93,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  mat-icon { color: white; font-size: 20px; width: 20px; height: 20px; }
+
+  mat-icon {
+    color: white;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
 }
 
 .user-name {
@@ -97,8 +114,12 @@
   background-color: #e2e8f0;
 }
 
-.action-btn { color: #64748b; }
-.logout-btn { color: #ef4444; }
+.action-btn {
+  color: #64748b;
+}
+.logout-btn {
+  color: #ef4444;
+}
 
 /* -----------------------------
    WORKSPACE & HEADER
@@ -142,7 +163,9 @@
   background: #ffffff;
   border-radius: 16px; /* Modern rounded corners */
   /* Premium diffuse shadow instead of harsh borders */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -2px rgba(0, 0, 0, 0.025);
   border: 1px solid rgba(226, 232, 240, 0.5);
   overflow: hidden;
 }
@@ -168,9 +191,15 @@
     --mdc-outlined-text-field-container-shape: 10px; /* Rounded input */
     --mdc-outlined-text-field-focus-outline-color: #3b82f6;
   }
-  .mat-mdc-form-field-subscript-wrapper { display: none; }
-  .mat-mdc-form-field-flex { padding: 0 16px; }
-  .search-icon { color: #94a3b8; }
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+  .mat-mdc-form-field-flex {
+    padding: 0 16px;
+  }
+  .search-icon {
+    color: #94a3b8;
+  }
 }
 
 .add-user-btn {
@@ -186,8 +215,14 @@
 /* -----------------------------
    TABLE STYLING
 ------------------------------ */
-.table-responsive { width: 100%; overflow-x: auto; }
-.user-table { width: 100%; background: transparent; }
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+.user-table {
+  width: 100%;
+  background: transparent;
+}
 
 .user-table th.mat-header-cell {
   background: #f8fafc;
@@ -198,6 +233,7 @@
   letter-spacing: 0.05em;
   padding: 16px 24px;
   border-bottom: 1px solid #e2e8f0;
+  text-align: center;
 }
 
 .user-table td.mat-cell {
@@ -205,6 +241,7 @@
   color: #475569;
   border-bottom: 1px solid #f1f5f9;
   font-size: 14px;
+  text-align: center;
 }
 
 .primary-text {
@@ -222,13 +259,15 @@
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s;
-  
-  &:hover { color: #3b82f6; }
+
+  &:hover {
+    color: #3b82f6;
+  }
 }
 
-.role-text { 
-  color: #64748b; 
-  font-weight: 500; 
+.role-text {
+  color: #64748b;
+  font-weight: 500;
   background: #f1f5f9;
   padding: 4px 10px;
   border-radius: 6px;
@@ -257,35 +296,51 @@
   border-radius: 50%;
 }
 
-.status-badge.active { 
-  background-color: #ecfdf5; 
-  color: #059669; 
-  &::before { background-color: #10b981; }
+.status-badge.active {
+  background-color: #ecfdf5;
+  color: #059669;
+  &::before {
+    background-color: #10b981;
+  }
 }
-.status-badge.inactive { 
-  background-color: #fef2f2; 
-  color: #dc2626; 
-  &::before { background-color: #ef4444; }
+.status-badge.inactive {
+  background-color: #fef2f2;
+  color: #dc2626;
+  &::before {
+    background-color: #ef4444;
+  }
 }
-.status-badge.pending { 
-  background-color: #fffbeb; 
-  color: #d97706; 
-  &::before { background-color: #f59e0b; }
+.status-badge.pending {
+  background-color: #fffbeb;
+  color: #d97706;
+  &::before {
+    background-color: #f59e0b;
+  }
 }
 
 /* -----------------------------
    ROW ACTIONS
 ------------------------------ */
-.action-header { text-align: right; }
-.action-cell { text-align: right; }
+.action-header {
+  text-align: center;
+}
+.action-cell {
+  text-align: center;
+}
 
 .row-action-btn {
   transform: scale(0.9);
   color: #94a3b8;
   transition: all 0.2s ease;
-  
-  &:hover.edit-btn { color: #3b82f6; background: #eff6ff; }
-  &:hover.delete-btn { color: #ef4444; background: #fef2f2; }
+
+  &:hover.edit-btn {
+    color: #3b82f6;
+    background: #eff6ff;
+  }
+  &:hover.delete-btn {
+    color: #ef4444;
+    background: #fef2f2;
+  }
 }
 
 /* -----------------------------
@@ -312,12 +367,26 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 16px;
-  
-  mat-icon { font-size: 32px; width: 32px; height: 32px; color: #94a3b8; }
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: #94a3b8;
+  }
 }
 
-.empty-state h3 { margin: 0; font-size: 18px; font-weight: 600; color: #1e293b; }
-.empty-state p { margin: 8px 0 0; color: #64748b; font-size: 14px; }
+.empty-state h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+.empty-state p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
 
 /* -----------------------------
    PAGINATOR OVERRIDES
@@ -331,9 +400,54 @@
    RESPONSIVE
 ------------------------------ */
 @media (max-width: 768px) {
-  .app-header { padding: 0 16px; }
-  .workspace-container { padding: 24px 16px; gap: 24px; }
-  .table-toolbar { flex-direction: column; align-items: stretch; }
-  .search-field { max-width: 100%; }
-  .hide-on-mobile { display: none; }
+  .app-header {
+    padding: 0 16px;
+  }
+  .workspace-container {
+    padding: 24px 16px;
+    gap: 24px;
+  }
+  .table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-field {
+    max-width: 100%;
+  }
+  .hide-on-mobile {
+    display: none;
+  }
+}
+
+.status-badge.confirmed {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+.status-badge.confirmed::before {
+  background-color: #10b981;
+}
+
+.status-badge.not_confirmed {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+.status-badge.not_confirmed::before {
+  background-color: #ef4444;
+}
+
+/* Center Header Text */
+.user-table th.mat-header-cell,
+.user-table th.mat-mdc-header-cell {
+  text-align: center !important;
+}
+
+/* Center the Sort Arrows */
+::ng-deep .user-table .mat-sort-header-container {
+  justify-content: center !important;
+}
+
+/* Center the Data Cells */
+.user-table td.mat-cell,
+.user-table td.mat-mdc-cell {
+  text-align: center !important;
 }

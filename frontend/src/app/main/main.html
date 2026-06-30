@@ -9,6 +9,10 @@
   <span class="spacer"></span>
 
   <div class="header-actions">
+    <!-- TIME DISPLAY ADDED HERE -->
+    <div class="time-display hide-on-mobile">
+      {{ currentTime | date:'dd/MM/yyyy - HH:mm:ss' }}
+    </div>
     @if (user.user.applicationRole === 'ADMINISTRATOR') {
       <button mat-icon-button class="action-btn" matTooltip="Admin" routerLink="/listuser">
         <mat-icon>admin_panel_settings</mat-icon>
@@ -204,6 +208,7 @@
   <main class="content-panel">
     <div class="map-card">
       <app-streetview
+        class="animate__animated animate__fadeIn"
         style="width: 100%; height: 100%; display: block"
         (mapDoubleClick)="onCoordinatesPicked($event)"
       ></app-streetview>

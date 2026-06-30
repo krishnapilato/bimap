@@ -22,43 +22,8 @@
     "
   >
     <div style="display: flex; align-items: center; gap: 20px">
-      <div
-        style="
-          background: #f8fafc;
-          padding: 8px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        "
-      >
-        <div
-          style="
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 48px;
-            height: 48px;
-            background-color: #eff6ff;
-            border-radius: 50%;
-          "
-        >
-          <mat-icon style="color: #3b82f6; font-size: 24px; width: 24px; height: 24px"
-            >manage_accounts</mat-icon
-          >
-        </div>
-      </div>
-
       <div>
-        <h2
-          style="
-            margin: 0 0 6px 0;
-            font-size: 22px;
-            font-weight: 700;
-            color: #0f172a;
-            letter-spacing: -0.02em;
-          "
-        >
+        <h2 style="font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: -0.02em">
           Edit User Profile
         </h2>
         <p
@@ -72,18 +37,7 @@
           "
         >
           Updating records for ID:
-          <span
-            style="
-              font-family: ui-monospace, monospace;
-              background: #f8fafc;
-              padding: 4px 8px;
-              border-radius: 6px;
-              color: #475569;
-              font-size: 13px;
-              font-weight: 600;
-              border: 1px solid rgba(226, 232, 240, 0.8);
-            "
-          >
+          <span>
             {{ globalID }}
           </span>
         </p>
@@ -179,27 +133,41 @@
 
     <mat-form-field appearance="outline" style="width: 100%">
       <mat-label>Update Password</mat-label>
-      <mat-icon matPrefix style="margin-right: 12px; color: #94a3b8; transform: scale(0.9)"
-        >lock</mat-icon
-      >
+
+      <mat-icon matPrefix style="margin-right: 12px; color: #94a3b8; transform: scale(0.9)">
+        lock
+      </mat-icon>
+
       <input
         matInput
         required
         minlength="8"
         maxlength="16"
-        type="password"
+        [type]="showPassword ? 'text' : 'password'"
         [formControl]="password"
         placeholder="Enter a new password"
       />
+
       @if (
         password.hasError('required') ||
         password.hasError('minlength') ||
         password.hasError('maxlength')
       ) {
-        <mat-error>Password must be between 8-16 characters</mat-error>
+        <mat-error>Password must be between 8-32 characters</mat-error>
       }
-    </mat-form-field>
 
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="togglePasswordVisibility()"
+        style="margin-right: 8px; color: #94a3b8; transform: scale(0.9)"
+        [attr.aria-label]="'Hide password'"
+        [attr.aria-pressed]="showPassword"
+      >
+        <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
     <div
       style="
         display: flex;

@@ -175,7 +175,13 @@ export class DialogElementsExampleDialog {
   surname = new FormControl<string | null>(null);
   email = new FormControl<string | null>(null, [Validators.email]);
   applicationRole = new FormControl<string | null>(null);
-  password = new FormControl<string | null>(null);
+  password = new FormControl<string | null>('', [
+    Validators.required,
+    Validators.minLength(8),
+    Validators.maxLength(32),
+  ]);
+
+  showPassword = false;
 
   globalID!: number;
   globalDataSource!: MatTableDataSource<User>;
@@ -202,6 +208,10 @@ export class DialogElementsExampleDialog {
     this.surname.setValue(user.surname);
     this.email.setValue(user.email);
     this.applicationRole.setValue(user.applicationRole);
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 
   cancel(): void {

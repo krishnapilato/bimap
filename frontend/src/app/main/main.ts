@@ -66,6 +66,9 @@ export class MainComponent implements OnInit, AfterViewInit {
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
 
+  currentTime: Date = new Date();
+  private timer: any;
+
   private geocoder = new google.maps.Geocoder();
 
   public user!: LoginResponse;
@@ -99,6 +102,9 @@ export class MainComponent implements OnInit, AfterViewInit {
   });
 
   ngOnInit(): void {
+    this.timer = setInterval(() => {
+      this.currentTime = new Date();
+    }, 1000);
     this.user = this.authService.loginResponseValue;
 
     this.apiService
@@ -120,6 +126,13 @@ export class MainComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator();
     this.dataSource.sort = this.sort();
+  }
+
+  ngOnDestroy() {
+    // Clean up the interval when the component is destroyed
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
   }
 
   private setupAutocomplete(

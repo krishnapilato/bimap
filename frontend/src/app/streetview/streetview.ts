@@ -11,8 +11,8 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import * as L from 'leaflet';
 import { MatTooltip } from "@angular/material/tooltip";
+import * as L from 'leaflet';
 
 declare var google: any;
 
@@ -100,13 +100,11 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   }
 
   private setupResizeObserver(): void {
-    // FIX: Observe the actual Leaflet container instead of the outer wrapper
     const leafletContainer = document.getElementById('leafletMap');
     if (!leafletContainer) return;
 
     this.resizeObserver = new ResizeObserver(() => {
       if (this.leafletMap) {
-        // requestAnimationFrame ensures the DOM width has fully updated before Leaflet recalculates
         requestAnimationFrame(() => {
           this.leafletMap?.invalidateSize();
         });
@@ -142,7 +140,7 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
       zoomControl: false,
       attributionControl: false,
       doubleClickZoom: false,
-      minZoom: 8,
+      minZoom: 3,
       maxZoom: 21,
       maxBounds: [
         [-90, -180],
