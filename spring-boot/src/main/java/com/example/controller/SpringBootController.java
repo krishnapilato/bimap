@@ -39,12 +39,6 @@ public class SpringBootController {
     private final PasswordEncoder passwordEncoder;
     private final Utility utility;
 
-    // HOME
-    @GetMapping("/")
-    public ModelAndView home() {
-        return new ModelAndView("redirect:/home.html");
-    }
-
     // REGIONS
     @GetMapping("/regions/{keyword}")
     public List<String> searchRegion(@PathVariable String keyword) {
@@ -152,8 +146,6 @@ public class SpringBootController {
 
         var user = userRepository.findByEmailAddress(email).orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-        // Define the professional template as a text block
-// Inside your sendEmail method:
         String content = """
                 <!DOCTYPE html>
                 <html>
