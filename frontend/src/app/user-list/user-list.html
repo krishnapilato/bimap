@@ -42,17 +42,47 @@
   </div>
 
   <div class="data-card">
+    <div class="content-card-header">
+      <div class="content-card-copy">
+        <div class="eyebrow">Administration</div>
+        <h2>Workspace users</h2>
+        <p>Review access, search records fast, and manage user status from one place.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-pill primary">
+          <span class="stat-value">{{ totalUsersCount }}</span>
+          <span class="stat-label">Total users</span>
+        </div>
+        <div class="stat-pill success">
+          <span class="stat-value">{{ activeUsersCount }}</span>
+          <span class="stat-label">Active</span>
+        </div>
+        <div class="stat-pill neutral">
+          <span class="stat-value">{{ adminUsersCount }}</span>
+          <span class="stat-label">Admins</span>
+        </div>
+      </div>
+    </div>
+
     <div class="table-toolbar">
-      <mat-form-field appearance="outline" class="search-field dense-theme">
-        <mat-icon matPrefix class="search-icon">search</mat-icon>
-        <input
-          matInput
-          autocomplete="off"
-          (keyup)="applyFilter($event)"
-          #input
-          placeholder="Search users by any field..."
-        />
-      </mat-form-field>
+      <div class="toolbar-search-block">
+        <div class="toolbar-copy">
+          <h3>Directory</h3>
+          <p>{{ filteredUsersCount }} visible of {{ totalUsersCount }} users.</p>
+        </div>
+
+        <mat-form-field appearance="outline" class="search-field dense-theme">
+          <mat-icon matPrefix class="search-icon">search</mat-icon>
+          <input
+            matInput
+            autocomplete="off"
+            (keyup)="applyFilter($event)"
+            #input
+            placeholder="Search users by name, email, role, or status"
+          />
+        </mat-form-field>
+      </div>
 
       <button mat-flat-button color="primary" class="add-user-btn" routerLink="/adduser">
         <mat-icon>add</mat-icon>
@@ -65,7 +95,13 @@
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>First Name</th>
           <td mat-cell *matCellDef="let row">
-            <span class="primary-text">{{ row.name }}</span>
+            <div class="identity-cell">
+              <div class="mini-avatar">{{ getInitials(row) }}</div>
+              <div class="identity-copy">
+                <span class="primary-text">{{ row.name }}</span>
+                <small>{{ row.applicationRole | titlecase }}</small>
+              </div>
+            </div>
           </td>
         </ng-container>
 
@@ -79,9 +115,15 @@
         <ng-container matColumnDef="email">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Email Address</th>
           <td mat-cell *matCellDef="let row">
-            <a class="email-link" matTooltip="Send email" (click)="openEmailDialog(row.email)">
-              {{ row.email }}
-            </a>
+            <button
+              type="button"
+              class="email-link"
+              matTooltip="Send email"
+              (click)="confirmSendEmail(row.email)"
+            >
+              <mat-icon>mail</mat-icon>
+              <span>{{ row.email }}</span>
+            </button>
           </td>
         </ng-container>
 
@@ -104,22 +146,24 @@
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef class="action-header">Actions</th>
           <td mat-cell *matCellDef="let row" class="action-cell">
-            <button
-              mat-icon-button
-              class="row-action-btn edit-btn"
-              matTooltip="Edit User"
-              (click)="openDialog(row)"
-            >
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button
-              mat-icon-button
-              class="row-action-btn delete-btn"
-              matTooltip="Delete User"
-              (click)="deleteRow(row)"
-            >
-              <mat-icon>delete</mat-icon>
-            </button>
+            <div class="action-group">
+              <button
+                mat-icon-button
+                class="row-action-btn edit-btn"
+                matTooltip="Edit User"
+                (click)="openEditDialog(row)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                class="row-action-btn delete-btn"
+                matTooltip="Delete User"
+                (click)="confirmDeleteUser(row)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
           </td>
         </ng-container>
 

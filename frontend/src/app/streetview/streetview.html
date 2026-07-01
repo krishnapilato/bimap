@@ -2,6 +2,16 @@
   <div class="map-panel" [style.width.%]="leftWidth()">
     <div id="leafletMap" class="map-canvas"></div>
 
+    <button
+      type="button"
+      class="recenter-btn"
+      matTooltip="Recenter on marker"
+      matTooltipPosition="above"
+      (click)="recenterView()"
+    >
+      <mat-icon>my_location</mat-icon>
+    </button>
+
     @if (isDragging()) {
       <div class="drag-overlay"></div>
     }

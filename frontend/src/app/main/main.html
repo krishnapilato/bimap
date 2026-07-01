@@ -11,7 +11,7 @@
   <div class="header-actions">
     <!-- TIME DISPLAY ADDED HERE -->
     <div class="time-display hide-on-mobile">
-      {{ currentTime | date:'dd/MM/yyyy - HH:mm:ss' }}
+      {{ currentTime() | date: 'dd/MM/yyyy - HH:mm:ss' }}
     </div>
     @if (user.user.applicationRole === 'ADMINISTRATOR') {
       <button mat-icon-button class="action-btn" matTooltip="Admin" routerLink="/listuser">
@@ -23,9 +23,8 @@
 
     <button
       mat-icon-button
-      style="color: red;"
       color="warn"
-      class="action-btn logout-btn"
+      class="logout-btn"
       matTooltip="Logout"
       routerLink="/logout"
     >
@@ -35,14 +34,9 @@
 </header>
 
 <div class="workspace animate__animated animate__fadeIn">
-  <aside class="sidebar form-panel" style="overflow-y: hidden">
+  <aside class="sidebar form-panel">
     <div class="panel-header">
       <div class="header-title-row">
-        <div class="icon-halo-wrapper">
-          <div class="icon-circle">
-            <mat-icon>app_registration</mat-icon>
-          </div>
-        </div>
         <div>
           <h2>Asset Registration</h2>
           <p>Enter or search for asset details below.</p>
@@ -144,7 +138,7 @@
           <input
             matInput
             type="number"
-            formControlName="gooodId"
+            formControlName="goodID"
             min="3614"
             max="7438"
             placeholder="3614-7438"
@@ -207,14 +201,37 @@
 
   <main class="content-panel">
     <div class="map-card">
+      <div class="content-card-header map-card-header">
+        <div>
+          <h3>Street View Workspace</h3>
+          <p>Inspect the location, adjust the viewpoint, and double-click to capture coordinates.</p>
+        </div>
+        <div class="header-chip">
+          <mat-icon>map</mat-icon>
+          <span>Live Map</span>
+        </div>
+      </div>
+
+      <div class="map-card-body">
       <app-streetview
         class="animate__animated animate__fadeIn"
-        style="width: 100%; height: 100%; display: block"
         (mapDoubleClick)="onCoordinatesPicked($event)"
       ></app-streetview>
+      </div>
     </div>
 
     <div class="table-card">
+      <div class="content-card-header table-card-header">
+        <div>
+          <h3>Saved Records</h3>
+          <p>Review recent results and double-click a row to load it back into the form.</p>
+        </div>
+        <div class="header-chip muted">
+          <mat-icon>table_rows</mat-icon>
+          <span>History</span>
+        </div>
+      </div>
+
       <div class="table-responsive" oncontextmenu="return false;">
         <table
           mat-table

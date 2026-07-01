@@ -11,7 +11,8 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { MatTooltip } from "@angular/material/tooltip";
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 import * as L from 'leaflet';
 
 declare var google: any;
@@ -19,7 +20,7 @@ declare var google: any;
 @Component({
   selector: 'app-streetview',
   standalone: true,
-  imports: [CommonModule, MatTooltip],
+  imports: [CommonModule, MatTooltip, MatIconModule],
   templateUrl: 'streetview.html',
   styleUrls: ['streetview.scss'],
 })
@@ -32,10 +33,12 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   private streetViewPanorama?: any;
   private currentMarker?: L.Marker;
   private resizeObserver?: ResizeObserver;
+  private streetViewResizeObserver?: ResizeObserver;
 
   private readonly initialLat = 45.46965468279425;
   private readonly initialLng = 9.182206569945924;
   private currentHeading = 165;
+  private focusPulseTimeout?: number;
 
   leftWidth = signal(50);
   isDragging = signal(false);
@@ -52,13 +55,18 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
     this.setupResizeObserver();
 
     setTimeout(() => {
-      this.syncMaps(); 
+      this.syncMaps();
       this.updatePosition(this.initialLat, this.initialLng);
+      this.recenterLeaflet();
     }, 100);
   }
 
   ngOnDestroy(): void {
+    if (this.focusPulseTimeout) {
+      window.clearTimeout(this.focusPulseTimeout);
+    }
     this.resizeObserver?.disconnect();
+    this.streetViewResizeObserver?.disconnect();
     this.leafletMap?.remove();
     document.removeEventListener('mousemove', this.boundMouseMove);
     document.removeEventListener('mouseup', this.boundMouseUp);
@@ -97,21 +105,30 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
 
   resetSplit(): void {
     this.leftWidth.set(50);
+    this.queueMapResize();
+    this.recenterLeaflet();
   }
 
   private setupResizeObserver(): void {
     const leafletContainer = document.getElementById('leafletMap');
-    if (!leafletContainer) return;
+    const streetViewContainer = document.getElementById('streetView');
+    if (!leafletContainer && !streetViewContainer) return;
 
     this.resizeObserver = new ResizeObserver(() => {
-      if (this.leafletMap) {
-        requestAnimationFrame(() => {
-          this.leafletMap?.invalidateSize();
-        });
-      }
+      this.queueMapResize();
     });
-    
-    this.resizeObserver.observe(leafletContainer);
+
+    if (leafletContainer) this.resizeObserver.observe(leafletContainer);
+
+    this.streetViewResizeObserver = new ResizeObserver(() => {
+      if (!this.streetViewPanorama) return;
+
+      requestAnimationFrame(() => {
+        google.maps.event.trigger(this.streetViewPanorama, 'resize');
+      });
+    });
+
+    if (streetViewContainer) this.streetViewResizeObserver.observe(streetViewContainer);
   }
 
   private updateCurrentCoords(lat: number, lng: number): void {
@@ -156,6 +173,9 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
       icon: this.createFovIcon(this.currentHeading),
       zIndexOffset: 1000,
     }).addTo(this.leafletMap);
+
+    this.currentMarker.on('click', () => this.recenterLeaflet());
+    this.currentMarker.on('add', () => this.updateMarkerRotation(this.currentHeading));
   }
 
   private initStreetView(): void {
@@ -197,9 +217,7 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
       const lat = pos.lat();
       const lng = pos.lng();
 
-      this.currentMarker?.setLatLng([lat, lng]);
-      this.leafletMap?.panTo([lat, lng], { animate: true, duration: 0.5 });
-      this.updateCurrentCoords(lat, lng);
+      this.moveMarker(lat, lng, true);
     });
 
     google.maps.event.addListener(this.streetViewPanorama, 'pov_changed', () => {
@@ -210,9 +228,34 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   }
 
   private updatePosition(lat: number, lng: number): void {
-    this.currentMarker?.setLatLng([lat, lng]);
+    this.moveMarker(lat, lng, false);
     this.streetViewPanorama?.setPosition({ lat, lng });
-    this.updateCurrentCoords(lat, lng);
+  }
+
+  private queueMapResize(): void {
+    if (!this.leafletMap) return;
+
+    requestAnimationFrame(() => {
+      this.leafletMap?.invalidateSize();
+      requestAnimationFrame(() => this.leafletMap?.invalidateSize());
+    });
+  }
+
+  private recenterLeaflet(): void {
+    const markerLatLng = this.currentMarker?.getLatLng();
+    if (!markerLatLng) return;
+
+    this.queueMapResize();
+
+    const nextZoom = Math.max(this.leafletMap?.getZoom() ?? 16);
+    this.leafletMap?.flyTo([markerLatLng.lat, markerLatLng.lng], nextZoom, {
+      animate: true,
+      duration: 0.5,
+    });
+  }
+
+  public recenterView(): void {
+    this.recenterLeaflet();
   }
 
   private handleMapDoubleClick(): void {
@@ -223,29 +266,16 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   }
 
   private createFovIcon(heading: number): L.DivIcon {
-    const uniqueId = `glow-${Math.random().toString(36).substring(2, 9)}`;
     const svgHtml = `
-      <svg class="fov-svg-element" width="62" height="62" viewBox="0 0 62 62" 
-           style="transform: rotate(${heading}deg); transform-origin: center; transition: transform 0.15s ease-out;">
-        <defs>
-          <filter id="${uniqueId}" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-        <path 
-          d="M31 31 L12 12 A30 30 0 0 1 50 12 Z" 
-          fill="rgba(66, 133, 244, 0.45)" 
-          stroke="#4285f4" 
-          stroke-width="2.5"
-          filter="url(#${uniqueId})"
-        />
-        <circle cx="31" cy="31" r="6" fill="#1a73e8" stroke="#ffffff" stroke-width="2.5"/>
-        <circle cx="31" cy="31" r="2.5" fill="#ffffff"/>
-      </svg>
+      <div class="fov-marker-shell" style="--marker-heading:${heading}deg;">
+        <div class="fov-pulse-ring"></div>
+        <div class="fov-presence-ring"></div>
+        <div class="fov-heading-cone"></div>
+        <div class="fov-heading-line"></div>
+        <div class="fov-pin-core">
+          <div class="fov-pin-dot"></div>
+        </div>
+      </div>
     `;
 
     return L.divIcon({
@@ -260,13 +290,56 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
     if (!this.currentMarker) return;
 
     const markerElement = this.currentMarker.getElement();
-    const svg = markerElement?.querySelector('.fov-svg-element') as SVGElement | null;
+    const markerShell = markerElement?.querySelector('.fov-marker-shell') as HTMLElement | null;
 
-    if (svg) {
-      svg.style.transform = `rotate(${heading}deg)`;
+    if (markerShell) {
+      markerShell.style.setProperty('--marker-heading', `${heading}deg`);
     } else {
       this.currentMarker.setIcon(this.createFovIcon(heading));
     }
+  }
+
+  private moveMarker(lat: number, lng: number, keepInView: boolean): void {
+    this.currentMarker?.setLatLng([lat, lng]);
+    this.updateCurrentCoords(lat, lng);
+    this.pulseMarker();
+
+    if (keepInView) {
+      this.keepMarkerInView(lat, lng);
+    }
+  }
+
+  private keepMarkerInView(lat: number, lng: number): void {
+    const map = this.leafletMap;
+    if (!map) return;
+
+    const nextPoint = L.latLng(lat, lng);
+    const paddedBounds = map.getBounds().pad(-0.25);
+
+    if (!paddedBounds.isValid() || !paddedBounds.contains(nextPoint)) {
+      map.panTo(nextPoint, { animate: true, duration: 0.45 });
+    }
+  }
+
+  private pulseMarker(): void {
+    const markerElement = this.currentMarker?.getElement();
+    const markerShell = markerElement?.querySelector('.fov-marker-shell') as HTMLElement | null;
+
+    if (!markerShell) {
+      return;
+    }
+
+    markerShell.classList.remove('is-active');
+    void markerShell.offsetWidth;
+    markerShell.classList.add('is-active');
+
+    if (this.focusPulseTimeout) {
+      window.clearTimeout(this.focusPulseTimeout);
+    }
+
+    this.focusPulseTimeout = window.setTimeout(() => {
+      markerShell.classList.remove('is-active');
+    }, 720);
   }
 
   public panTo(lat: number, lng: number): void {

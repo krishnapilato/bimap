@@ -1,4 +1,5 @@
 export class FormModel {
+  id?: number;
   region!: string;
   province!: string;
   municipality!: string;

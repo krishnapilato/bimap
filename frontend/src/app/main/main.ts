@@ -12,6 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -24,13 +25,18 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { debounceTime, distinctUntilChanged, interval, Observable, of, switchMap } from 'rxjs';
 
 import { AuthService } from '../auth/auth.service';
 import { LoginResponse } from '../auth/loginresponse';
 import { StreetviewComponent } from '../streetview/streetview';
 import { ApiService } from './api.service';
 import { Tables } from './tables';
-import { debounceTime, distinctUntilChanged, Observable, of, switchMap } from 'rxjs';
+import {
+  ConfirmationDialogComponent,
+  ConfirmationDialogData,
+} from '../shared/confirmation-dialog/confirmation-dialog';
+import { FormModel } from './formdata';
 
 declare var google: any;
 
@@ -52,6 +58,7 @@ declare var google: any;
     MatTableModule,
     MatSidenavModule,
     MatSlideToggleModule,
+    MatDialogModule,
     RouterModule,
     MatToolbarModule,
     StreetviewComponent,
@@ -63,11 +70,11 @@ export class MainComponent implements OnInit, AfterViewInit {
   private apiService = inject(ApiService);
   private snackbar = inject(MatSnackBar);
   private authService = inject(AuthService);
+  private dialog = inject(MatDialog);
   private fb = inject(FormBuilder);
   private destroyRef = inject(DestroyRef);
 
-  currentTime: Date = new Date();
-  private timer: any;
+  currentTime = signal(new Date());
 
   private geocoder = new google.maps.Geocoder();
 
@@ -95,16 +102,17 @@ export class MainComponent implements OnInit, AfterViewInit {
     address: ['', Validators.required],
     number: ['', Validators.required],
     goodNaming: ['', Validators.required],
-    gooodId: ['', Validators.required],
+    goodID: ['', Validators.required],
     istatCode: ['', Validators.required],
     ilatitude: [{ value: '', disabled: true }],
     ilongitude: [{ value: '', disabled: true }],
   });
 
   ngOnInit(): void {
-    this.timer = setInterval(() => {
-      this.currentTime = new Date();
-    }, 1000);
+    interval(1000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.currentTime.set(new Date()));
+
     this.user = this.authService.loginResponseValue;
 
     this.apiService
@@ -126,13 +134,6 @@ export class MainComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator();
     this.dataSource.sort = this.sort();
-  }
-
-  ngOnDestroy() {
-    // Clean up the interval when the component is destroyed
-    if (this.timer) {
-      clearInterval(this.timer);
-    }
   }
 
   private setupAutocomplete(
@@ -168,22 +169,42 @@ export class MainComponent implements OnInit, AfterViewInit {
   }
 
   public saveData(): void {
-    if (
-      this.mainForm.valid &&
-      this.latitude &&
-      this.longitude &&
-      confirm('Are you sure you want to save data?')
-    ) {
-      const formData = {
-        ...this.mainForm.getRawValue(),
-        latitude: this.latitude,
-        longitude: this.longitude,
+    if (this.mainForm.valid && this.latitude !== null && this.longitude !== null) {
+      const confirmData: ConfirmationDialogData = {
+        title: 'Save Record',
+        message: 'Are you sure you want to save this asset record?',
+        icon: 'save',
+        tone: 'primary',
+        confirmText: 'Save Record',
+        cancelText: 'Cancel',
       };
 
-      this.apiService.save(formData).subscribe({
-        next: () => this.snackbar.open('Data saved successfully', 'Close', { duration: 3000 }),
-        error: () => this.snackbar.open('Failed to save data', 'Close', { duration: 3000 }),
-      });
+      this.dialog
+        .open(ConfirmationDialogComponent, { data: confirmData })
+        .afterClosed()
+        .subscribe((confirmed) => {
+          if (!confirmed) {
+            return;
+          }
+
+          const formData: FormModel = {
+            region: this.mainForm.get('searchRegions')?.value,
+            province: this.mainForm.get('searchTerm')?.value,
+            municipality: this.mainForm.get('searchMunicipalities')?.value,
+            address: this.mainForm.get('address')?.value,
+            number: this.mainForm.get('number')?.value,
+            goodNaming: this.mainForm.get('goodNaming')?.value,
+            goodID: this.mainForm.get('goodID')?.value,
+            istatCode: this.mainForm.get('istatCode')?.value,
+            latitude: this.mainForm.get('ilatitude')?.value,
+            longitude: this.mainForm.get('ilongitude')?.value,
+          };
+
+          this.apiService.save(formData).subscribe({
+            next: () => this.snackbar.open('Data saved successfully', 'Close', { duration: 3000 }),
+            error: () => this.snackbar.open('Failed to save data', 'Close', { duration: 3000 }),
+          });
+        });
     } else {
       this.mainForm.markAllAsTouched();
       this.snackbar.open('Please fill out all required fields and pick coordinates.', 'Close', {

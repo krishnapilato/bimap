@@ -1,26 +1,12 @@
-/* -----------------------------
-   GLOBAL DIALOG STYLES
------------------------------- */
 .dialog-container {
   width: 100%;
-  max-width: 440px; /* Slightly wider for better text flow */
+  max-width: 440px;
   padding: 40px 32px;
   box-sizing: border-box;
   text-align: center;
-  font-family:
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    sans-serif;
   background-color: #ffffff;
-  /* Note: The outer border-radius is usually handled by your global mat-dialog-container styles. 
-     If it isn't, add: border-radius: 20px; here. */
 }
 
-/* -----------------------------
-   HEADER & ICON HALO
------------------------------- */
 .dialog-header {
   margin-bottom: 24px;
   display: flex;
@@ -30,10 +16,33 @@
 
 .icon-halo-wrapper {
   margin-bottom: 24px;
-  /* Creates a soft "halo" ring around the main icon circle */
-  background: #f8fafc;
   padding: 8px;
   border-radius: 50%;
+  background: #f8fafc;
+}
+
+.icon-halo-wrapper.tone-primary .icon-circle {
+  background-color: #eff6ff;
+
+  mat-icon {
+    color: #3b82f6;
+  }
+}
+
+.icon-halo-wrapper.tone-accent .icon-circle {
+  background-color: #eef2ff;
+
+  mat-icon {
+    color: #6366f1;
+  }
+}
+
+.icon-halo-wrapper.tone-warn .icon-circle {
+  background-color: #fef2f2;
+
+  mat-icon {
+    color: #dc2626;
+  }
 }
 
 .icon-circle {
@@ -42,11 +51,9 @@
   align-items: center;
   width: 56px;
   height: 56px;
-  background-color: #eff6ff; /* Soft blue */
   border-radius: 50%;
 
   mat-icon {
-    color: #3b82f6; /* Bold primary blue */
     font-size: 28px;
     width: 28px;
     height: 28px;
@@ -61,9 +68,6 @@
   letter-spacing: -0.02em;
 }
 
-/* -----------------------------
-   BODY & MESSAGE
------------------------------- */
 .dialog-body {
   margin-bottom: 36px;
 }
@@ -75,56 +79,47 @@
   line-height: 1.6;
 }
 
-.email-badge-container {
-  display: flex;
-  justify-content: center;
-}
-
-.email-badge {
+.detail-card {
   display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
   padding: 10px 16px;
   background-color: #f8fafc;
   border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02) inset; /* Subtle inner depth */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02) inset;
 }
 
-.email-text {
+.detail-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.detail-value {
   font-weight: 600;
   color: #1e293b;
   font-size: 14px;
   word-break: break-all;
 }
 
-.badge-icon {
-  font-size: 18px;
-  height: 18px;
-  width: 18px;
-  color: #94a3b8;
-}
-
-/* -----------------------------
-   BUTTON ACTIONS
------------------------------- */
 .dialog-actions {
   display: flex;
   justify-content: center;
   gap: 16px;
 }
 
-/* Base override for both buttons */
 .action-btn {
   height: 48px;
-  border-radius: 10px !important; /* Match the inputs and badges */
+  border-radius: 10px !important;
   font-weight: 600 !important;
   font-size: 15px;
   letter-spacing: 0 !important;
   flex: 1;
 }
 
-/* Cancel Button */
 .cancel-btn {
   color: #64748b !important;
   --mdc-protected-button-container-color: transparent;
@@ -137,19 +132,15 @@
   }
 }
 
-/* Primary Send Button */
-.send-btn {
-  background-color: #3b82f6 !important;
-  color: #ffffff !important;
-  /* The signature SaaS colored drop-shadow */
-  box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.35) !important;
+.confirm-btn {
+  box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.28) !important;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 14px -2px rgba(59, 130, 246, 0.45) !important;
+    box-shadow: 0 6px 14px -2px rgba(59, 130, 246, 0.35) !important;
   }
 
   &:active {
@@ -164,16 +155,13 @@
   }
 }
 
-/* -----------------------------
-   RESPONSIVE (MOBILE)
------------------------------- */
 @media (max-width: 480px) {
   .dialog-container {
     padding: 32px 20px;
   }
 
   .dialog-actions {
-    flex-direction: column-reverse; /* Cancel on bottom for mobile */
+    flex-direction: column-reverse;
     gap: 12px;
   }
 

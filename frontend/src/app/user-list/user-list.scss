@@ -156,6 +156,90 @@
   color: #64748b;
 }
 
+.content-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+  border-bottom: 1px solid #f1f5f9;
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.06), transparent 26%),
+    linear-gradient(180deg, rgba(248, 250, 252, 0.98) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+.content-card-copy h2 {
+  margin: 6px 0 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+}
+
+.content-card-copy p {
+  margin: 8px 0 0;
+  max-width: 42rem;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #64748b;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  gap: 12px;
+  min-width: min(100%, 380px);
+}
+
+.stat-pill {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  background: rgba(255, 255, 255, 0.84);
+
+  &.primary {
+    background: rgba(239, 246, 255, 0.95);
+    border-color: rgba(147, 197, 253, 0.7);
+  }
+
+  &.success {
+    background: rgba(236, 253, 245, 0.96);
+    border-color: rgba(110, 231, 183, 0.7);
+  }
+
+  &.neutral {
+    background: rgba(248, 250, 252, 0.96);
+  }
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  color: #0f172a;
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 /* -----------------------------
    DATA CARD & TOOLBAR
 ------------------------------ */
@@ -180,10 +264,35 @@
   gap: 16px;
 }
 
+.toolbar-search-block {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+  min-width: 0;
+}
+
+.toolbar-copy {
+  min-width: 180px;
+
+  h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #64748b;
+  }
+}
+
 /* Material Input Overrides to make it sleek */
 .search-field {
   width: 100%;
-  max-width: 360px;
+  max-width: 420px;
 }
 
 ::ng-deep .dense-theme {
@@ -242,11 +351,44 @@
   border-bottom: 1px solid #f1f5f9;
   font-size: 14px;
   text-align: center;
+  vertical-align: middle;
 }
 
 .primary-text {
   font-weight: 600;
   color: #1e293b;
+}
+
+.identity-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.mini-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.identity-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  small {
+    font-size: 12px;
+    color: #64748b;
+  }
 }
 
 .hover-row:hover {
@@ -255,23 +397,41 @@
 
 /* Specific Cell Elements */
 .email-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  background: transparent;
   color: #64748b;
-  text-decoration: none;
   cursor: pointer;
   transition: all 0.2s;
 
+  mat-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 16px;
+    color: #94a3b8;
+    transition: color 0.2s ease;
+  }
+
   &:hover {
     color: #3b82f6;
+
+    mat-icon {
+      color: #3b82f6;
+    }
   }
 }
 
 .role-text {
-  color: #64748b;
+  color: #334155;
   font-weight: 500;
-  background: #f1f5f9;
+  background: #f8fafc;
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: 999px;
   font-size: 13px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
 }
 
 /* -----------------------------
@@ -326,6 +486,16 @@
 }
 .action-cell {
   text-align: center;
+}
+
+.action-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1px solid rgba(226, 232, 240, 0.9);
 }
 
 .row-action-btn {
@@ -407,9 +577,24 @@
     padding: 24px 16px;
     gap: 24px;
   }
+  .content-card-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr;
+    min-width: 0;
+  }
   .table-toolbar {
     flex-direction: column;
     align-items: stretch;
+  }
+  .toolbar-search-block {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .toolbar-copy {
+    min-width: 0;
   }
   .search-field {
     max-width: 100%;

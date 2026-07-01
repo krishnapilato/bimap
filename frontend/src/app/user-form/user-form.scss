@@ -1,11 +1,19 @@
-/* -----------------------------
-   GLOBAL & TYPOGRAPHY
------------------------------- */
 :host {
-  display: flex;
-  flex-direction: column;
+  display: block;
   min-height: 100vh;
-  background-color: #f8fafc;
+}
+
+.registration-shell {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 28px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.05), transparent 22%),
+    radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.04), transparent 18%),
+    linear-gradient(135deg, #f8fafc 0%, #eef2f6 100%);
   font-family:
     'Inter',
     -apple-system,
@@ -16,179 +24,219 @@
   color: #0f172a;
 }
 
-.spacer {
-  flex: 1 1 auto;
-}
-.w-100 {
-  width: 100%;
-}
-.mt-2 {
-  margin-top: 8px;
-}
-.mt-3 {
-  margin-top: 16px;
-}
-.mt-4 {
-  margin-top: 24px;
-}
-.text-danger {
-  color: #ef4444;
-}
-
-/* -----------------------------
-   APP HEADER
------------------------------- */
-.app-header {
-  display: flex;
-  align-items: center;
-  padding: 0 32px;
-  height: 72px;
-  background: rgba(255, 255, 255, 0.85);
+.registration-card {
+  border: 1px solid rgba(226, 232, 240, 0.7);
+  box-shadow:
+    0 14px 30px -12px rgba(15, 23, 42, 0.12),
+    0 6px 14px -10px rgba(15, 23, 42, 0.08);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  padding: 28px;
+  width: min(1240px, 100%);
+  min-height: min(860px, calc(100vh - 56px));
+  display: flex;
+  flex-direction: column;
 }
 
-.brand-container {
+.card-brand-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 15px;
+    max-width: 34rem;
+  }
 }
 
 .logo-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #fff1f2;
-  border-radius: 10px;
-  width: 40px;
-  height: 40px;
+
+  mat-icon {
+    color: #ef4444;
+  }
 }
 
-.brand-title {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.header-actions {
+.card-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.action-btn {
-  color: #64748b;
-}
-.logout-btn {
-  color: #ef4444;
-}
-
-.divider {
-  width: 1px;
-  height: 32px;
-  background-color: #e2e8f0;
-  margin: 0 8px;
-}
-
-/* -----------------------------
-   WORKSPACE & CARD
------------------------------- */
-.focus-workspace {
-  flex: 1;
-  display: flex;
   justify-content: center;
-  align-items: center; /* Centered perfectly in the viewport */
-  padding: 48px 24px;
-}
-
-.form-card {
-  width: 100%;
-  max-width: 540px;
-  background-color: #ffffff;
-  border-radius: 16px;
-  /* Premium diffuse shadow */
-  box-shadow:
-    0 10px 25px -5px rgba(0, 0, 0, 0.05),
-    0 8px 10px -6px rgba(0, 0, 0, 0.01);
-  border: 1px solid rgba(226, 232, 240, 0.6);
-  padding: 48px 40px;
-  box-sizing: border-box;
-}
-
-/* -----------------------------
-   FORM HEADER & HALO ICON
------------------------------- */
-.form-header {
-  text-align: center;
-  margin-bottom: 36px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.icon-halo-wrapper {
-  margin-bottom: 24px;
-  background: #f8fafc;
-  padding: 8px;
-  border-radius: 50%;
-}
-
-.icon-circle {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 56px;
-  height: 56px;
-  background-color: #eff6ff;
-  border-radius: 50%;
+  background: #eff6ff;
 
   mat-icon {
     color: #3b82f6;
-    font-size: 28px;
-    width: 28px;
-    height: 28px;
   }
 }
 
-.form-header h1 {
-  margin: 0;
-  font-size: 26px;
+.text-danger {
+  color: #ef4444;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   font-weight: 700;
-  color: #0f172a;
-  letter-spacing: -0.02em;
-}
-
-.form-header p {
-  margin: 8px 0 0;
   color: #64748b;
-  font-size: 15px;
 }
 
-/* -----------------------------
-   FORM FIELDS & INPUTS
------------------------------- */
+.registration-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(340px, 420px);
+  gap: 24px;
+  align-items: stretch;
+  flex: 1;
+}
+
+.illustration-panel {
+  padding: 12px 8px 12px 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  h2 {
+    margin: 10px 0 10px;
+    font-size: 40px;
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+  }
+
+  p {
+    margin: 0;
+    color: #475569;
+    max-width: 40rem;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+}
+
+.illustration-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: 18px 0 10px;
+}
+
+.illustration {
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 24px 30px rgba(15, 23, 42, 0.08));
+}
+
+.feature-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.82);
+  color: #1e293b;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  mat-icon {
+    color: #3b82f6;
+  }
+}
+
+.form-panel {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid #e2e8f0;
+}
+
+.form-panel h3 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.form-panel-subtitle {
+  margin: 6px 0 28px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.w-100 {
+  width: 100%;
+}
+
 .modern-form {
   display: flex;
   flex-direction: column;
+  gap: 20px;
 }
 
-.form-row {
-  display: flex;
+.name-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
 
-/* Override Material UI default shapes */
 ::ng-deep .modern-input {
   .mdc-text-field--outlined {
-    --mdc-outlined-text-field-container-shape: 10px;
+    --mdc-outlined-text-field-container-shape: 12px;
     --mdc-outlined-text-field-focus-outline-color: #3b82f6;
   }
+
   .mat-mdc-form-field-subscript-wrapper {
-    margin-bottom: -16px;
+    display: none;
   }
 }
 
@@ -198,12 +246,16 @@
   transform: scale(0.9);
 }
 
+.visibility-btn {
+  transform: scale(0.9);
+  margin-right: -4px;
+}
+
 .email-group {
   display: flex;
   flex-direction: column;
 }
 
-/* Error States */
 .has-error ::ng-deep .mdc-notched-outline__leading,
 .has-error ::ng-deep .mdc-notched-outline__notch,
 .has-error ::ng-deep .mdc-notched-outline__trailing {
@@ -228,21 +280,19 @@
   }
 }
 
-/* -----------------------------
-   ACTIONS & BUTTONS
------------------------------- */
 .form-actions {
   display: flex;
-  justify-content: stretch;
+  flex-direction: column;
+  padding-top: 4px;
 }
 
 .submit-btn {
-  width: 100%;
   height: 52px;
-  border-radius: 10px !important;
-  font-weight: 600 !important;
+  border-radius: 12px !important;
   font-size: 16px !important;
+  font-weight: 700 !important;
   letter-spacing: 0 !important;
+  width: 100%;
   background-color: #3b82f6 !important;
   color: #ffffff !important;
   box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.35) !important;
@@ -260,38 +310,71 @@
     color: #94a3b8 !important;
     box-shadow: none !important;
   }
+}
 
-  mat-icon {
-    margin-right: 8px;
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+@media (max-width: 1024px) {
+  .registration-shell {
+    padding: 16px;
+  }
+
+  .registration-card {
+    width: 100%;
+    min-height: calc(100vh - 32px);
+  }
+
+  .registration-content {
+    grid-template-columns: 1fr;
+  }
+
+  .illustration-panel h2 {
+    font-size: 32px;
+  }
+
+  .illustration-frame {
+    min-height: 220px;
+  }
+
+  .form-panel {
+    border-left: none;
+    border-top: 1px solid #e2e8f0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    margin-top: 8px;
   }
 }
 
-/* -----------------------------
-   RESPONSIVE (MOBILE)
------------------------------- */
 @media (max-width: 640px) {
-  .app-header {
-    padding: 0 16px;
-  }
-  .hide-on-mobile {
-    display: none;
+  .registration-shell {
+    padding: 12px;
+    min-height: 100svh;
+    align-items: stretch;
   }
 
-  .focus-workspace {
-    padding: 24px 16px;
+  .registration-card {
+    border-radius: 20px;
+    padding: 18px;
+    min-height: calc(100svh - 24px);
+  }
+
+  .card-brand-row {
+    flex-direction: column;
     align-items: flex-start;
   }
 
-  .form-card {
-    padding: 32px 24px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  .illustration-panel h2 {
+    font-size: 28px;
   }
 
-  .form-row {
-    flex-direction: column;
-    gap: 0;
+  .illustration-frame {
+    min-height: 180px;
+  }
+
+  .form-panel {
+    padding-top: 18px;
+  }
+
+  .name-grid {
+    grid-template-columns: 1fr;
   }
 }

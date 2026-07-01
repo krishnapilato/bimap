@@ -1,0 +1,98 @@
+<div class="dialog-shell">
+  <div class="dialog-header">
+    <div>
+      <h2>Edit User</h2>
+      <p>
+        Updating records for ID:
+        <span>{{ userId }}</span>
+      </p>
+    </div>
+  </div>
+
+  <form autocomplete="off" class="dialog-form">
+    <div class="row-fields">
+      <mat-form-field appearance="outline" class="field">
+        <mat-label>First Name</mat-label>
+        <mat-icon matPrefix>person</mat-icon>
+        <input matInput required minlength="1" maxlength="20" type="text" [formControl]="name" />
+        @if (name.hasError('required') || name.hasError('minlength') || name.hasError('maxlength')) {
+          <mat-error>Please enter a valid name</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="field">
+        <mat-label>Last Name</mat-label>
+        <input matInput required minlength="1" maxlength="20" type="text" [formControl]="surname" />
+        @if (
+          surname.hasError('required') ||
+          surname.hasError('minlength') ||
+          surname.hasError('maxlength')
+        ) {
+          <mat-error>Please enter a valid surname</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="field field-full">
+      <mat-label>Email Address</mat-label>
+      <mat-icon matPrefix>email</mat-icon>
+      <input matInput required type="email" email="true" minlength="3" maxlength="30" [formControl]="email" />
+      @if (
+        email.hasError('required') ||
+        email.hasError('email') ||
+        email.hasError('minlength') ||
+        email.hasError('maxlength')
+      ) {
+        <mat-error>Please enter a valid email</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field field-full">
+      <mat-label>Application Role</mat-label>
+      <mat-icon matPrefix>shield</mat-icon>
+      <mat-select required [formControl]="applicationRole">
+        @for (approle of approles; track approle.value) {
+          <mat-option [value]="approle.value">{{ approle.viewValue }}</mat-option>
+        }
+      </mat-select>
+      @if (applicationRole.hasError('required')) {
+        <mat-error>Please select an Application Role</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field field-full">
+      <mat-label>Update Password</mat-label>
+      <mat-icon matPrefix>lock</mat-icon>
+
+      <input
+        matInput
+        required
+        minlength="8"
+        maxlength="16"
+        [type]="showPassword ? 'text' : 'password'"
+        [formControl]="password"
+      />
+
+      @if (
+        password.hasError('required') ||
+        password.hasError('minlength') ||
+        password.hasError('maxlength')
+      ) {
+        <mat-error>Password must be between 8-32 characters</mat-error>
+      }
+
+      <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()">
+        <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <div class="dialog-actions">
+      <button type="button" mat-stroked-button (click)="cancel()" class="cancel-btn">Cancel</button>
+
+      <button type="button" mat-flat-button (click)="update()" class="save-btn">
+        <mat-icon>save</mat-icon>
+        Save Changes
+      </button>
+    </div>
+  </form>
+</div>
