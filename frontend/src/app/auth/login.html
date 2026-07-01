@@ -1,0 +1,133 @@
+<div class="login-shell animate__animated animate__fadeIn">
+  <section class="login-card">
+    <div class="card-brand-row">
+      <div class="brand-lockup">
+        <div class="logo-wrapper">
+          <mat-icon color="warn">explore</mat-icon>
+        </div>
+        <div>
+          <h1>Bi<span class="text-danger">Map</span></h1>
+          <p>Asset registration, map lookup, and field operations in one workspace.</p>
+        </div>
+      </div>
+
+      <div class="card-badge">
+        <mat-icon>lock_open</mat-icon>
+      </div>
+    </div>
+
+    <div class="login-content">
+      <div class="illustration-panel">
+        <div class="eyebrow">Secure workspace access</div>
+        <h2>Sign in to continue.</h2>
+        <p>
+          Continue to the dashboard, manage records, and keep your operational workflow in one
+          place.
+        </p>
+
+        <div class="illustration-frame">
+          <img
+            src="https://undraw.co/features_1.svg"
+            alt="Dashboard illustration"
+            class="illustration"
+            loading="eager"
+          />
+        </div>
+
+        <div class="feature-grid">
+          <div class="feature-item">
+            <mat-icon>verified_user</mat-icon>
+            <div>
+              <span>Role-based access</span>
+              <p>Administrator and user flows remain separated.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <mat-icon>map</mat-icon>
+            <div>
+              <span>Field operations</span>
+              <p>Move from records to maps without changing context.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-panel">
+        <h3>Enter your credentials</h3>
+        <p class="form-panel-subtitle">Protected workspace for authorized users only.</p>
+
+        <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="modern-form" autocomplete="off">
+          <mat-form-field appearance="outline" class="modern-input w-100">
+            <mat-label>Username or Email</mat-label>
+            <mat-icon matPrefix class="field-icon">person</mat-icon>
+            <input
+              matInput
+              type="email"
+              name="username"
+              [(ngModel)]="loginRequest.username"
+              required
+              placeholder="e.g. admin@bimap.com"
+            />
+            @if (loginForm.controls['username']?.hasError('required') && loginForm.controls['username']?.touched) {
+              <mat-error>Username is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="modern-input w-100">
+            <mat-label>Password</mat-label>
+            <mat-icon matPrefix class="field-icon">lock</mat-icon>
+            <input
+              matInput
+              [type]="hidePassword() ? 'password' : 'text'"
+              name="password"
+              [(ngModel)]="loginRequest.password"
+              required
+              placeholder="Enter your password"
+            />
+
+            @if (loginRequest.password && loginRequest.password.length > 1) {
+              <button
+                mat-icon-button
+                matSuffix
+                (click)="togglePassword()"
+                type="button"
+                class="visibility-btn"
+                [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+              >
+                <mat-icon class="field-icon">{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+            }
+
+            @if (loginForm.controls['password']?.hasError('required') && loginForm.controls['password']?.touched) {
+              <mat-error>Password is required</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="form-actions">
+            <button
+              mat-flat-button
+              color="primary"
+              class="submit-btn"
+              type="submit"
+              [disabled]="loginForm.invalid || isSubmitting()"
+            >
+              @if (isSubmitting()) {
+                Signing In...
+              } @else {
+                Sign In
+              }
+            </button>
+          </div>
+        </form>
+
+        <div class="card-footer">
+          <div class="footer-note">
+            <mat-icon>security</mat-icon>
+            <span>Protected workspace for authorized users only</span>
+          </div>
+          <p>Need access? Contact your system administrator.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,36 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="icon-halo-wrapper animate__animated animate__zoomIn" [ngClass]="'tone-' + (data.tone ?? 'primary')">
+      <div class="icon-circle">
+        <mat-icon>{{ data.icon ?? 'help_outline' }}</mat-icon>
+      </div>
+    </div>
+
+    <h2 class="dialog-title">{{ data.title }}</h2>
+  </div>
+
+  <div class="dialog-body">
+    <p class="dialog-message">{{ data.message }}</p>
+
+    @if (data.details) {
+      <div class="detail-card">
+        @if (data.detailsLabel) {
+          <span class="detail-label">{{ data.detailsLabel }}</span>
+        }
+
+        <span class="detail-value">{{ data.details }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="dialog-actions">
+    <button mat-stroked-button class="action-btn cancel-btn" (click)="cancel()">
+      {{ data.cancelText ?? 'Cancel' }}
+    </button>
+
+    <button mat-flat-button [color]="data.tone ?? 'primary'" class="action-btn confirm-btn" (click)="confirm()">
+      <mat-icon>{{ data.icon ?? 'check' }}</mat-icon>
+      {{ data.confirmText ?? 'Confirm' }}
+    </button>
+  </div>
+</div>

@@ -1,0 +1,181 @@
+<div class="registration-shell animate__animated animate__fadeIn">
+  <section class="registration-card">
+    <div class="card-brand-row">
+      <div class="brand-lockup">
+        <div class="logo-wrapper">
+          <mat-icon color="warn">person_add</mat-icon>
+        </div>
+        <div>
+          <h1>User<span class="text-danger">Registration</span></h1>
+          <p>Create access for new users and keep registration aligned with the workspace.</p>
+        </div>
+      </div>
+
+      <div class="card-badge">
+        <mat-icon>verified_user</mat-icon>
+      </div>
+    </div>
+
+    <div class="registration-content">
+      <div class="illustration-panel">
+        <div class="eyebrow">Account setup</div>
+        <h2>Register a user in the same workspace style.</h2>
+        <p>
+          Add a person, assign access, and keep the onboarding flow clean and consistent.
+        </p>
+
+        <div class="illustration-frame">
+          <img
+            src="https://undraw.co/features_1.svg"
+            alt="User registration illustration"
+            class="illustration"
+            loading="eager"
+          />
+        </div>
+
+        <div class="feature-grid">
+          <div class="feature-item">
+            <mat-icon>badge</mat-icon>
+            <div>
+              <span>Structured onboarding</span>
+              <p>Capture name, email, and password in one streamlined step.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <mat-icon>security</mat-icon>
+            <div>
+              <span>Clean access control</span>
+              <p>Keep registration and workspace access aligned from the start.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-panel">
+        <h3>Enter user details</h3>
+        <p class="form-panel-subtitle">New accounts are added immediately after validation.</p>
+
+        <form (ngSubmit)="onSubmit()" #userForm="ngForm" autocomplete="off" class="modern-form">
+          <div class="name-grid">
+            <mat-form-field appearance="outline" class="modern-input w-100">
+              <mat-label>First Name</mat-label>
+              <mat-icon matPrefix class="field-icon">badge</mat-icon>
+              <input
+                matInput
+                [(ngModel)]="user.name"
+                name="name"
+                #name="ngModel"
+                required
+                minlength="1"
+                maxlength="18"
+                pattern="[a-zA-Z]*"
+                placeholder="e.g. Jane"
+              />
+              @if (name.invalid && (name.dirty || name.touched)) {
+                <mat-error>Name must be 1-18 letters</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="modern-input w-100">
+              <mat-label>Last Name</mat-label>
+              <mat-icon matPrefix class="field-icon">person</mat-icon>
+              <input
+                matInput
+                [(ngModel)]="user.surname"
+                name="surname"
+                #surname="ngModel"
+                required
+                minlength="1"
+                maxlength="18"
+                pattern="[a-zA-Z]*"
+                placeholder="e.g. Doe"
+              />
+              @if (surname.invalid && (surname.dirty || surname.touched)) {
+                <mat-error>Surname must be 1-18 letters</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="email-group">
+            <mat-form-field
+              appearance="outline"
+              class="w-100 modern-input"
+              [class.has-error]="emailStatus"
+            >
+              <mat-label>Email Address</mat-label>
+              <mat-icon matPrefix class="field-icon">email</mat-icon>
+              <input
+                matInput
+                [(ngModel)]="user.email"
+                name="email"
+                #email="ngModel"
+                required
+                email
+                minlength="3"
+                maxlength="100"
+                (ngModelChange)="onFocusOutEvent()"
+                placeholder="name@company.com"
+              />
+              @if (email.invalid && (email.dirty || email.touched)) {
+                <mat-error>Please enter a valid email format</mat-error>
+              }
+            </mat-form-field>
+
+            @if (emailStatus) {
+              <div class="custom-error animate__animated animate__headShake">
+                <mat-icon>error_outline</mat-icon>
+                <span>This email already exists in the system</span>
+              </div>
+            }
+          </div>
+
+          <mat-form-field appearance="outline" class="w-100 modern-input">
+            <mat-label>Password</mat-label>
+            <mat-icon matPrefix class="field-icon">lock</mat-icon>
+            <input
+              matInput
+              [type]="hidePassword ? 'password' : 'text'"
+              [(ngModel)]="user.password"
+              name="password"
+              #password="ngModel"
+              required
+              minlength="8"
+              maxlength="32"
+              placeholder="Create a strong password"
+            />
+
+            @if (user.password && user.password.length > 2) {
+              <button
+                matSuffix
+                mat-icon-button
+                type="button"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="'Toggle password visibility'"
+              >
+                <mat-icon class="field-icon">{{
+                  hidePassword ? 'visibility_off' : 'visibility'
+                }}</mat-icon>
+              </button>
+            }
+
+            @if (password.invalid && (password.dirty || password.touched)) {
+              <mat-error>Password must be between 8 and 32 characters</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="form-actions">
+            <button
+              type="submit"
+              [disabled]="userForm.invalid"
+              mat-flat-button
+              color="primary"
+              class="submit-btn"
+            >
+              Register User
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>

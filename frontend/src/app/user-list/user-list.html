@@ -1,0 +1,201 @@
+<header class="app-header animate__animated animate__fadeInDown">
+  <div class="brand-container">
+    <div class="logo-wrapper">
+      <mat-icon color="warn">admin_panel_settings</mat-icon>
+    </div>
+    <span class="brand-title">Admin<span class="text-danger">Workspace</span></span>
+  </div>
+
+  <span class="spacer"></span>
+
+  <div class="header-actions">
+    <div class="user-badge hide-on-mobile">
+      <div class="avatar-circle">
+        <mat-icon>person</mat-icon>
+      </div>
+      <span class="user-name">{{ whatUser.user.fullName }}</span>
+    </div>
+
+    <div class="divider hide-on-mobile"></div>
+
+    <button mat-icon-button class="action-btn" matTooltip="Dashboard Home" routerLink="/">
+      <mat-icon>space_dashboard</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      color="warn"
+      class="action-btn logout-btn"
+      matTooltip="Logout"
+      routerLink="/logout"
+    >
+      <mat-icon>logout</mat-icon>
+    </button>
+  </div>
+</header>
+
+<main class="workspace-container animate__animated animate__fadeInUp">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>User Management</h1>
+      <p>Manage application access, roles, and user details across the organization.</p>
+    </div>
+  </div>
+
+  <div class="data-card">
+    <div class="content-card-header">
+      <div class="content-card-copy">
+        <div class="eyebrow">Administration</div>
+        <h2>Workspace users</h2>
+        <p>Review access, search records fast, and manage user status from one place.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-pill primary">
+          <span class="stat-value">{{ totalUsersCount }}</span>
+          <span class="stat-label">Total users</span>
+        </div>
+        <div class="stat-pill success">
+          <span class="stat-value">{{ activeUsersCount }}</span>
+          <span class="stat-label">Active</span>
+        </div>
+        <div class="stat-pill neutral">
+          <span class="stat-value">{{ adminUsersCount }}</span>
+          <span class="stat-label">Admins</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-toolbar">
+      <div class="toolbar-search-block">
+        <div class="toolbar-copy">
+          <h3>Directory</h3>
+          <p>{{ filteredUsersCount }} visible of {{ totalUsersCount }} users.</p>
+        </div>
+
+        <mat-form-field appearance="outline" class="search-field dense-theme">
+          <mat-icon matPrefix class="search-icon">search</mat-icon>
+          <input
+            matInput
+            autocomplete="off"
+            (keyup)="applyFilter($event)"
+            #input
+            placeholder="Search users by name, email, role, or status"
+          />
+        </mat-form-field>
+      </div>
+
+      <button mat-flat-button color="primary" class="add-user-btn" routerLink="/adduser">
+        <mat-icon>add</mat-icon>
+        <span>Add New User</span>
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table mat-table matSort [dataSource]="dataSource" class="user-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>First Name</th>
+          <td mat-cell *matCellDef="let row">
+            <div class="identity-cell">
+              <div class="mini-avatar">{{ getInitials(row) }}</div>
+              <div class="identity-copy">
+                <span class="primary-text">{{ row.name }}</span>
+                <small>{{ row.applicationRole | titlecase }}</small>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="surname">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Name</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="primary-text">{{ row.surname }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Email Address</th>
+          <td mat-cell *matCellDef="let row">
+            <button
+              type="button"
+              class="email-link"
+              matTooltip="Send email"
+              (click)="confirmSendEmail(row.email)"
+            >
+              <mat-icon>mail</mat-icon>
+              <span>{{ row.email }}</span>
+            </button>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="userStatus">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-badge" [ngClass]="row.userStatus.toLowerCase()">
+              {{ row.userStatus | titlecase }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="applicationRole">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="role-text">{{ row.applicationRole | titlecase }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="action-header">Actions</th>
+          <td mat-cell *matCellDef="let row" class="action-cell">
+            <div class="action-group">
+              <button
+                mat-icon-button
+                class="row-action-btn edit-btn"
+                matTooltip="Edit User"
+                (click)="openEditDialog(row)"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                class="row-action-btn delete-btn"
+                matTooltip="Delete User"
+                (click)="confirmDeleteUser(row)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row class="hover-row" *matRowDef="let row; columns: displayedColumns"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+            <div class="empty-state-content">
+              <div class="empty-icon-wrapper">
+                <mat-icon>search_off</mat-icon>
+              </div>
+              @if (input.value.length > 0) {
+                <h3>No users found</h3>
+                <p>
+                  We couldn't find anyone matching "<strong>{{ input.value }}</strong
+                  >".
+                </p>
+              } @else {
+                <h3>No data available</h3>
+                <p>There are currently no users in the system.</p>
+              }
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      showFirstLastButtons
+      [pageSizeOptions]="[5]"
+      class="custom-paginator"
+    ></mat-paginator>
+  </div>
+</main>

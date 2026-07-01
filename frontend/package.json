@@ -1,0 +1,36 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "private": true,
+  "packageManager": "npm@11.18.0",
+  "dependencies": {
+    "@angular/cdk": "^22.0.2",
+    "@angular/common": "^22.0.4",
+    "@angular/compiler": "^22.0.4",
+    "@angular/core": "^22.0.4",
+    "@angular/forms": "^22.0.4",
+    "@angular/material": "^22.0.2",
+    "@angular/platform-browser": "^22.0.4",
+    "@angular/router": "^22.0.4",
+    "animate.css": "^4.1.1",
+    "bootstrap": "^5.3.8",
+    "leaflet": "^1.9.4",
+    "rxjs": "~7.8.2"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.0.4",
+    "@angular/cli": "^22.0.4",
+    "@angular/compiler-cli": "^22.0.4",
+    "@types/leaflet": "^1.9.21",
+    "jsdom": "^29.1.1",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.9"
+  }
+}

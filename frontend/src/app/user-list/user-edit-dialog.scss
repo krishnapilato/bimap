@@ -1,0 +1,119 @@
+.dialog-shell {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 40px 32px;
+  box-sizing: border-box;
+  background: #ffffff;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+}
+
+.dialog-header {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+  }
+
+  span {
+    font-weight: 700;
+    color: #0f172a;
+  }
+}
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.row-fields {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.field {
+  flex: 1;
+  min-width: 220px;
+
+  mat-icon {
+    margin-right: 12px;
+    color: #94a3b8;
+    transform: scale(0.9);
+  }
+}
+
+.field-full {
+  width: 100%;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 8px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.cancel-btn,
+.save-btn {
+  border-radius: 10px;
+  height: 48px;
+  padding: 0 24px;
+  font-weight: 600;
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.cancel-btn {
+  color: #64748b;
+}
+
+.save-btn {
+  background-color: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.35);
+  border: none;
+
+  mat-icon {
+    margin-right: 8px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dialog-shell {
+    padding: 28px 20px;
+  }
+
+  .dialog-actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+  }
+}

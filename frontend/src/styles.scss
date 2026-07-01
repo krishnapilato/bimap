@@ -1,0 +1,80 @@
+@use '@angular/material' as mat;
+@import 'animate.css/animate.min.css';
+
+html {
+  overflow-x: hidden;
+  height: 100%;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
+
+body {
+  color-scheme: light;
+
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  margin: 0;
+  height: 100%;
+}
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: #0f172a;
+  --mdc-snackbar-supporting-text-color: #f8fafc;
+  --mat-snack-bar-button-color: #3b82f6;
+
+  --mdc-snackbar-supporting-text-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  border-radius: inherit;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.25),
+    0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  padding: 4px 8px;
+}
+
+.mat-mdc-snack-bar-container .mdc-snackbar__label {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0;
+}
+
+.mat-mdc-snack-bar-container .mat-mdc-button {
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: none !important;
+  letter-spacing: 0;
+  border-radius: 8px;
+  padding: 0 12px;
+  margin-right: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.mat-mdc-snack-bar-container .mat-mdc-button:hover {
+  background-color: rgba(59, 130, 246, 0.15);
+}
+
+@media print {
+  body {
+    display: none !important;
+  }
+}
