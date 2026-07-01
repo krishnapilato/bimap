@@ -76,6 +76,10 @@ export class UserListComponent implements OnInit, AfterViewInit {
   readonly paginator = viewChild(MatPaginator);
   readonly sort = viewChild(MatSort);
 
+  get currentUserName(): string {
+    return this.whatUser?.user?.fullName?.trim() || 'Admin User';
+  }
+
   get totalUsersCount(): number {
     return this.dataSource.data.length;
   }
@@ -92,6 +96,14 @@ export class UserListComponent implements OnInit, AfterViewInit {
     return this.dataSource.data.filter(
       (user) => user.applicationRole?.toLowerCase() === 'administrator',
     ).length;
+  }
+
+  getStatusClass(status: string | null | undefined): string {
+    return (status || '')
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
   }
 
   ngOnInit(): void {

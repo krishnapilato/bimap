@@ -327,9 +327,11 @@
 .table-responsive {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .user-table {
   width: 100%;
+  min-width: 920px;
   background: transparent;
 }
 
@@ -478,6 +480,25 @@
   }
 }
 
+.status-badge.not_confirmed,
+.status-badge.notconfirmed {
+  background-color: #fef2f2;
+  color: #dc2626;
+
+  &::before {
+    background-color: #ef4444;
+  }
+}
+
+.status-badge.confirmed {
+  background-color: #ecfdf5;
+  color: #059669;
+
+  &::before {
+    background-color: #10b981;
+  }
+}
+
 /* -----------------------------
    ROW ACTIONS
 ------------------------------ */
@@ -572,7 +593,15 @@
 @media (max-width: 768px) {
   .app-header {
     padding: 0 16px;
+    height: auto;
+    min-height: 64px;
+    gap: 8px;
   }
+
+  .brand-title {
+    font-size: 18px;
+  }
+
   .workspace-container {
     padding: 24px 16px;
     gap: 24px;
@@ -599,25 +628,23 @@
   .search-field {
     max-width: 100%;
   }
+
+  .add-user-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .table-responsive {
+    margin: 0 -4px;
+  }
+
+  .user-table {
+    min-width: 760px;
+  }
+
   .hide-on-mobile {
     display: none;
   }
-}
-
-.status-badge.confirmed {
-  background-color: #ecfdf5;
-  color: #059669;
-}
-.status-badge.confirmed::before {
-  background-color: #10b981;
-}
-
-.status-badge.not_confirmed {
-  background-color: #fef2f2;
-  color: #dc2626;
-}
-.status-badge.not_confirmed::before {
-  background-color: #ef4444;
 }
 
 /* Center Header Text */
