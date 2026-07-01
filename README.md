@@ -22,7 +22,7 @@ A full-stack geographic data management application built with Angular and Sprin
 
 ### Backend
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-6DB33F?style=flat-square&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
-[![Java](https://img.shields.io/badge/Java-25-ED8B00?style=flat-square&logo=openjdk&logoColor=white)](https://www.oracle.com/java)
+[![Java](https://img.shields.io/badge/Java-26-ED8B00?style=flat-square&logo=openjdk&logoColor=white)](https://www.oracle.com/java)
 [![Spring Security](https://img.shields.io/badge/Spring%20Security-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)](https://spring.io/projects/spring-security)
 [![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-6DB33F?style=flat-square&logo=spring&logoColor=white)](https://spring.io/projects/spring-data-jpa)
 [![MySQL](https://img.shields.io/badge/MySQL-9.7.0-4479A1?style=flat-square&logo=mysql&logoColor=white)](https://dev.mysql.com)
@@ -35,7 +35,7 @@ A full-stack geographic data management application built with Angular and Sprin
 
 | Tool | Version |
 |------|---------|
-| [JDK](https://www.oracle.com/java/technologies/downloads/) | 25 |
+| [JDK](https://www.oracle.com/java/technologies/downloads/) | 26 |
 | [Maven](https://maven.apache.org/download.cgi) | 3.9.14 |
 | [MySQL Server](https://dev.mysql.com/downloads/mysql/) | 9.7.0 |
 | [Node.js](https://nodejs.org/en/) | 26.4.0 |
