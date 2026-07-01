@@ -1,0 +1,26 @@
+body {
+  font-family: "Roboto", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.map-container {
+  background: linear-gradient(135deg, #ffffff, #f8f9fa); /* Subtle gradient for the card */
+  border: 1px solid #e0e0e0; /* Light border for separation */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
+  border-radius: 12px; /* Rounded corners */
+  padding: 24px; /* Consistent padding */
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth animation */
+}
+
+.map-container:hover {
+  transform: translateY(-8px); /* Slight hover lift */
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2), 0 6px 12px rgba(0, 0, 0, 0.1); /* More pronounced shadow on hover */
+}
+
+.map-container .w-full {
+  background-color: #f0f0f0; /* Subtle background for the map */
+  border: 2px solid #d6d6d6; /* Neutral border for map area */
+  border-radius: 8px; /* Rounded corners for map */
+  overflow: hidden; /* Prevent map content overflow */
+}
