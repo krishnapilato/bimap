@@ -1,26 +1,9 @@
-# BiMap
+# BiMap — Backend
 
-A full-stack geographic data management application built with Angular and Spring Boot. Users can enter and save geographic information (regions, provinces, municipalities) which is persisted to a MySQL database. Access is role-based: administrators can manage users via a dedicated dashboard, while regular users can interact with the map form.
-
-## 🏆 Lighthouse Scores
-
-| Performance | Accessibility | Best Practices | SEO |
-|:-----------:|:-------------:|:--------------:|:---:|
-| ![100](https://img.shields.io/badge/100-Performance-brightgreen?style=flat-square&logo=lighthouse&logoColor=white) | ![100](https://img.shields.io/badge/100-Accessibility-brightgreen?style=flat-square&logo=lighthouse&logoColor=white) | ![100](https://img.shields.io/badge/100-Best%20Practices-brightgreen?style=flat-square&logo=lighthouse&logoColor=white) | ![100](https://img.shields.io/badge/100-SEO-brightgreen?style=flat-square&logo=lighthouse&logoColor=white) |
+The backend service for BiMap, built with Spring Boot. It exposes a RESTful API for geographic data lookups and user management, secured with JWT-based authentication via Spring Security. Data is persisted in MySQL using Spring Data JPA.
 
 ## 🛠️ Tech Stack
 
-### Frontend
-[![Angular](https://img.shields.io/badge/Angular-22.0.4-DD0031?style=flat-square&logo=angular&logoColor=white)](https://angular.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-6.0.3-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.8-7952B3?style=flat-square&logo=bootstrap&logoColor=white)](https://getbootstrap.com)
-[![Angular Material](https://img.shields.io/badge/Angular%20Material-22.0.2-FF4081?style=flat-square&logo=angular&logoColor=white)](https://material.angular.io)
-[![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-199900?style=flat-square&logo=leaflet&logoColor=white)](https://leafletjs.com)
-[![RxJS](https://img.shields.io/badge/RxJS-7.8.2-B7178C?style=flat-square&logo=reactivex&logoColor=white)](https://rxjs.dev)
-[![Vitest](https://img.shields.io/badge/Vitest-4.1.9-6E9F18?style=flat-square&logo=vitest&logoColor=white)](https://vitest.dev)
-[![Node.js](https://img.shields.io/badge/Node.js-26.4.0-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
-
-### Backend
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.0-6DB33F?style=flat-square&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Java](https://img.shields.io/badge/Java-25-ED8B00?style=flat-square&logo=openjdk&logoColor=white)](https://www.oracle.com/java)
 [![Spring Security](https://img.shields.io/badge/Spring%20Security-6DB33F?style=flat-square&logo=springsecurity&logoColor=white)](https://spring.io/projects/spring-security)
@@ -30,6 +13,8 @@ A full-stack geographic data management application built with Angular and Sprin
 [![Lombok](https://img.shields.io/badge/Lombok-red?style=flat-square&logo=java&logoColor=white)](https://projectlombok.org)
 [![JWT](https://img.shields.io/badge/JWT-0.13.0-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)](https://jwt.io)
 [![Springdoc OpenAPI](https://img.shields.io/badge/OpenAPI-3.0.3-6BA539?style=flat-square&logo=openapiinitiative&logoColor=white)](https://springdoc.org)
+[![Thymeleaf](https://img.shields.io/badge/Thymeleaf-4.1.0-005F0F?style=flat-square&logo=thymeleaf&logoColor=white)](https://www.thymeleaf.org)
+[![Log4j2](https://img.shields.io/badge/Log4j2-4.1.0-CC0000?style=flat-square&logo=apache&logoColor=white)](https://logging.apache.org/log4j/2.x)
 
 ## ⚙️ Requirements
 
@@ -38,35 +23,42 @@ A full-stack geographic data management application built with Angular and Sprin
 | [JDK](https://www.oracle.com/java/technologies/downloads/) | 25 |
 | [Maven](https://maven.apache.org/download.cgi) | 3.9.14 |
 | [MySQL Server](https://dev.mysql.com/downloads/mysql/) | 9.7.0 |
-| [Node.js](https://nodejs.org/en/) | 26.4.0 |
 
-## 🚀 Run Locally
+## 🚀 Getting Started
 
-Clone the project:
+### 1. Configure the database
 
-```bash
-git clone https://github.com/krishnapilato/bimap.git
-cd bimap
+Create a MySQL database and update the connection settings in `src/main/resources/application.properties` (or `application.yml`):
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/bimap
+spring.datasource.username=your_username
+spring.datasource.******
 ```
 
-### Start the Backend
+### 2. Build and run
 
 ```bash
-cd backend
+# From the backend/ directory
 mvn spring-boot:run
 ```
 
-The API will be available at `http://localhost:8080`.
-
-### Start the Frontend
+Or build a JAR and run it:
 
 ```bash
-cd frontend
-npm install
-ng serve -o
+mvn clean package
+java -jar target/demo-1.0.0.jar
 ```
 
-The app will open automatically at `http://localhost:4200`.
+The server starts at `http://localhost:8080`.
+
+### 3. API Documentation
+
+Interactive Swagger UI is available at:
+
+```
+http://localhost:8080/swagger-ui.html
+```
 
 ## 📡 API Reference
 
@@ -156,6 +148,13 @@ DELETE /users/{id}
 | :-------- | :----- | :-------------------------------- |
 | `id`      | `Long` | **Required**. Delete the user with the given id |
 
-## 📄 License
+## 🗂️ Project Structure
 
-This project is open-source and available under the [MIT License](LICENSE).
+```
+backend/
+├── src/
+│   └── main/
+│       ├── java/          # Application source code
+│       └── resources/     # Configuration files
+└── pom.xml                # Maven build descriptor
+```
