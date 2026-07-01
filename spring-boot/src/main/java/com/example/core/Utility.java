@@ -25,7 +25,7 @@ public class Utility {
 
     private final JavaMailSender mailSender;
     private final Object csvWriteLock = new Object();
-    private volatile boolean csvReady;
+    private Path csvPath;
 
     @Value("${bimap.storage.dir:}")
     private String storageDir;
@@ -40,23 +40,19 @@ public class Utility {
     private String emailSubject;
 
     public void createFiles() throws IOException {
-        var storagePath = resolveStoragePath();
-        Files.createDirectories(storagePath);
+        synchronized (csvWriteLock) {
+            var storagePath = resolveStoragePath();
+            Files.createDirectories(storagePath);
 
-        var csvPath = storagePath.resolve(csvFileName);
-        if (!Files.exists(csvPath)) {
-            Files.writeString(csvPath, CSV_HEADER + System.lineSeparator(), StandardCharsets.UTF_8, StandardOpenOption.CREATE);
-            log.info("Created CSV file at {}", csvPath.toAbsolutePath());
+            csvPath = storagePath.resolve(csvFileName);
+            if (!Files.exists(csvPath)) {
+                Files.writeString(csvPath, CSV_HEADER + System.lineSeparator(), StandardCharsets.UTF_8, StandardOpenOption.CREATE);
+                log.info("Created CSV file at {}", csvPath.toAbsolutePath());
+            }
         }
-
-        csvReady = true;
     }
 
     public void writeCSVFile(FormModel formData) throws IOException {
-        if (!csvReady) {
-            createFiles();
-        }
-
         var row = new StringJoiner(",")
                 .add(csvValue(formData.getRegion()))
                 .add(csvValue(formData.getProvince()))
@@ -70,8 +66,10 @@ public class Utility {
                 .add(csvValue(formData.getLongitude()))
                 .toString();
 
-        var csvPath = resolveStoragePath().resolve(csvFileName);
         synchronized (csvWriteLock) {
+            if (csvPath == null || !Files.exists(csvPath)) {
+                createFiles();
+            }
             Files.writeString(csvPath, row + System.lineSeparator(), StandardCharsets.UTF_8, StandardOpenOption.APPEND);
         }
     }
