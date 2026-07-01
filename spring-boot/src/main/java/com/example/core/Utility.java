@@ -24,8 +24,10 @@ public class Utility {
     private static final String CSV_HEADER = "region,province,municipality,address,goodNaming,number,goodID,istatCode,latitude,longitude";
 
     private final JavaMailSender mailSender;
+    private final Object csvWriteLock = new Object();
+    private volatile boolean csvReady;
 
-    @Value("${bimap.storage.dir:C:/BiMap}")
+    @Value("${bimap.storage.dir:}")
     private String storageDir;
 
     @Value("${bimap.csv.filename:csv_file.csv}")
@@ -34,8 +36,11 @@ public class Utility {
     @Value("${spring.mail.username:no-reply@bimap.local}")
     private String senderAddress;
 
+    @Value("${bimap.email.subject:BiMap Account Information}")
+    private String emailSubject;
+
     public void createFiles() throws IOException {
-        var storagePath = Path.of(storageDir);
+        var storagePath = resolveStoragePath();
         Files.createDirectories(storagePath);
 
         var csvPath = storagePath.resolve(csvFileName);
@@ -43,10 +48,14 @@ public class Utility {
             Files.writeString(csvPath, CSV_HEADER + System.lineSeparator(), StandardCharsets.UTF_8, StandardOpenOption.CREATE);
             log.info("Created CSV file at {}", csvPath.toAbsolutePath());
         }
+
+        csvReady = true;
     }
 
     public void writeCSVFile(FormModel formData) throws IOException {
-        createFiles();
+        if (!csvReady) {
+            createFiles();
+        }
 
         var row = new StringJoiner(",")
                 .add(csvValue(formData.getRegion()))
@@ -61,18 +70,27 @@ public class Utility {
                 .add(csvValue(formData.getLongitude()))
                 .toString();
 
-        var csvPath = Path.of(storageDir).resolve(csvFileName);
-        Files.writeString(csvPath, row + System.lineSeparator(), StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+        var csvPath = resolveStoragePath().resolve(csvFileName);
+        synchronized (csvWriteLock) {
+            Files.writeString(csvPath, row + System.lineSeparator(), StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+        }
     }
 
     public void sendEmail(String email, String content) throws MessagingException, IOException {
         var message = mailSender.createMimeMessage();
         var helper = new MimeMessageHelper(message, StandardCharsets.UTF_8.name());
         helper.setTo(email);
-        helper.setSubject("BiMap Account Information");
+        helper.setSubject(emailSubject);
         helper.setText(content, true);
         helper.setFrom(senderAddress);
         mailSender.send(message);
+    }
+
+    private Path resolveStoragePath() {
+        if (storageDir != null && !storageDir.isBlank()) {
+            return Path.of(storageDir);
+        }
+        return Path.of(System.getProperty("user.home"), "BiMap");
     }
 
     private String csvValue(Object value) {
