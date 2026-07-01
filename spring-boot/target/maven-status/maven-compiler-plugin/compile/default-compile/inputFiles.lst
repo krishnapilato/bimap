@@ -9,6 +9,7 @@
 /home/runner/work/bimap/bimap/spring-boot/src/main/java/com/example/controller/LoginController.java
 /home/runner/work/bimap/bimap/spring-boot/src/main/java/com/example/controller/SpringBootController.java
 /home/runner/work/bimap/bimap/spring-boot/src/main/java/com/example/core/AppInit.java
+/home/runner/work/bimap/bimap/spring-boot/src/main/java/com/example/core/Utility.java
 /home/runner/work/bimap/bimap/spring-boot/src/main/java/com/example/core/config/OpenApiConfig.java
 /home/runner/work/bimap/bimap/spring-boot/src/main/java/com/example/core/security/JwtAuthenticationEntryPoint.java
 /home/runner/work/bimap/bimap/spring-boot/src/main/java/com/example/core/security/JwtRequestFilter.java
