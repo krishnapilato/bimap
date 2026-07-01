@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+	<Properties>
+		<Property name="LOG_PATH">C:/BiMap/logs</Property>
+		<Property name="LOG_FILE">application.log</Property>
+	</Properties>
+
+	<Appenders>
+
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%highlight{%d{HH:mm:ss.SSS} %-5level} [%t] %style{%c{1}}{cyan} - %msg%n"/>
+		</Console>
+
+		<RollingFile
+				name="RollingFile"
+				fileName="${LOG_PATH}/${LOG_FILE}"
+				filePattern="${LOG_PATH}/application-%d{yyyy-MM-dd}-%i.log.gz">
+
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] %c{1} - %msg%n"/>
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1"/>
+				<SizeBasedTriggeringPolicy size="25 MB"/>
+			</Policies>
+
+			<DefaultRolloverStrategy max="30"/>
+
+		</RollingFile>
+
+	</Appenders>
+
+	<Loggers>
+
+		<Logger name="com.example" level="debug" additivity="false">
+			<AppenderRef ref="Console"/>
+			<AppenderRef ref="RollingFile"/>
+		</Logger>
+
+		<Root level="info">
+			<AppenderRef ref="Console"/>
+			<AppenderRef ref="RollingFile"/>
+		</Root>
+
+	</Loggers>
+
+</Configuration>
