@@ -32,8 +32,10 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   private leafletMap?: L.Map;
   private streetViewPanorama?: any;
   private currentMarker?: L.Marker;
+  private cachedMarkerShell?: HTMLElement;
   private resizeObserver?: ResizeObserver;
   private streetViewResizeObserver?: ResizeObserver;
+  private mouseMoveRafPending = false;
 
   private readonly initialLat = 45.46965468279425;
   private readonly initialLng = 9.182206569945924;
@@ -83,16 +85,24 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   }
 
   private onMouseMove(event: MouseEvent): void {
-    if (!this.isDragging()) return;
+    if (!this.isDragging() || this.mouseMoveRafPending) return;
 
-    const wrapper = this.mapWrapper()?.nativeElement;
-    if (!wrapper) return;
+    const clientX = event.clientX;
+    this.mouseMoveRafPending = true;
 
-    const rect = wrapper.getBoundingClientRect();
-    let percentage = ((event.clientX - rect.left) / rect.width) * 100;
-    percentage = Math.max(8, Math.min(92, percentage));
+    requestAnimationFrame(() => {
+      this.mouseMoveRafPending = false;
+      if (!this.isDragging()) return;
 
-    this.zone.run(() => this.leftWidth.set(percentage));
+      const wrapper = this.mapWrapper()?.nativeElement;
+      if (!wrapper) return;
+
+      const rect = wrapper.getBoundingClientRect();
+      let percentage = ((clientX - rect.left) / rect.width) * 100;
+      percentage = Math.max(8, Math.min(92, percentage));
+
+      this.zone.run(() => this.leftWidth.set(percentage));
+    });
   }
 
   private onMouseUp(): void {
@@ -235,10 +245,7 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   private queueMapResize(): void {
     if (!this.leafletMap) return;
 
-    requestAnimationFrame(() => {
-      this.leafletMap?.invalidateSize();
-      requestAnimationFrame(() => this.leafletMap?.invalidateSize());
-    });
+    requestAnimationFrame(() => this.leafletMap?.invalidateSize());
   }
 
   private recenterLeaflet(): void {
@@ -247,7 +254,7 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
 
     this.queueMapResize();
 
-    const nextZoom = Math.max(this.leafletMap?.getZoom() ?? 16);
+    const nextZoom = this.leafletMap?.getZoom() ?? 16;
     this.leafletMap?.flyTo([markerLatLng.lat, markerLatLng.lng], nextZoom, {
       animate: true,
       duration: 0.5,
@@ -268,13 +275,11 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   private createFovIcon(heading: number): L.DivIcon {
     const svgHtml = `
       <div class="fov-marker-shell" style="--marker-heading:${heading}deg;">
+        <div class="fov-glass-disc"></div>
+        <div class="fov-cone"></div>
+        <div class="fov-tick"></div>
+        <div class="fov-pin"></div>
         <div class="fov-pulse-ring"></div>
-        <div class="fov-presence-ring"></div>
-        <div class="fov-heading-cone"></div>
-        <div class="fov-heading-line"></div>
-        <div class="fov-pin-core">
-          <div class="fov-pin-dot"></div>
-        </div>
       </div>
     `;
 
@@ -286,20 +291,29 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  private getMarkerShell(): HTMLElement | null {
+    if (!this.cachedMarkerShell) {
+      const shell = this.currentMarker?.getElement()?.querySelector('.fov-marker-shell') as HTMLElement | null;
+      if (shell) this.cachedMarkerShell = shell;
+    }
+    return this.cachedMarkerShell ?? null;
+  }
+
   private updateMarkerRotation(heading: number): void {
     if (!this.currentMarker) return;
 
-    const markerElement = this.currentMarker.getElement();
-    const markerShell = markerElement?.querySelector('.fov-marker-shell') as HTMLElement | null;
+    const markerShell = this.getMarkerShell();
 
     if (markerShell) {
       markerShell.style.setProperty('--marker-heading', `${heading}deg`);
     } else {
+      this.cachedMarkerShell = undefined;
       this.currentMarker.setIcon(this.createFovIcon(heading));
     }
   }
 
   private moveMarker(lat: number, lng: number, keepInView: boolean): void {
+    this.cachedMarkerShell = undefined;
     this.currentMarker?.setLatLng([lat, lng]);
     this.updateCurrentCoords(lat, lng);
     this.pulseMarker();
@@ -322,8 +336,7 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   }
 
   private pulseMarker(): void {
-    const markerElement = this.currentMarker?.getElement();
-    const markerShell = markerElement?.querySelector('.fov-marker-shell') as HTMLElement | null;
+    const markerShell = this.getMarkerShell();
 
     if (!markerShell) {
       return;

@@ -163,145 +163,116 @@
     border: none;
   }
 
+  // ── Shell ──────────────────────────────────────────────────────────────────
   .fov-marker-shell {
     --marker-heading: 0deg;
-    --marker-accent: #f97316;
-    --marker-accent-soft: rgba(249, 115, 22, 0.24);
-    --marker-accent-glow: rgba(249, 115, 22, 0.46);
+    --marker-accent: #3b82f6;
+    --marker-accent-mid: rgba(59, 130, 246, 0.58);
+    --marker-accent-soft: rgba(59, 130, 246, 0.18);
     position: relative;
     width: 62px;
     height: 62px;
-    transform: translateZ(0);
-    filter: drop-shadow(0 10px 20px rgba(15, 23, 42, 0.22));
+    will-change: transform;
+    filter: drop-shadow(0 6px 18px rgba(15, 23, 42, 0.3));
     transition: filter 0.2s ease, transform 0.2s ease;
 
     &.is-active {
-      animation: marker-bounce 0.72s ease;
+      animation: marker-bounce 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     &.is-active .fov-pulse-ring {
-      animation: marker-pulse 0.72s ease-out;
+      animation: marker-pulse 0.6s ease-out;
     }
   }
 
-  .fov-pulse-ring {
+  // ── Frosted-glass base disc (mirrors .recenter-btn aesthetic) ─────────────
+  .fov-glass-disc {
     position: absolute;
-    inset: 13px;
-    border-radius: 999px;
-    border: 2px solid var(--marker-accent);
-    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.24);
-    opacity: 0;
-    transform: scale(0.62);
-    pointer-events: none;
+    inset: 9px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1.5px solid rgba(255, 255, 255, 0.65);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
   }
 
-  .fov-presence-ring {
+  // ── Directional FOV cone ──────────────────────────────────────────────────
+  .fov-cone {
     position: absolute;
-    inset: 15px;
-    border-radius: 999px;
-    background: radial-gradient(circle, var(--marker-accent-soft) 0%, rgba(59, 130, 246, 0.08) 65%, transparent 72%);
-    border: 1px solid rgba(249, 115, 22, 0.3);
-    backdrop-filter: blur(2px);
-  }
-
-  .fov-heading-cone {
-    position: absolute;
-    left: 6px;
-    top: 6px;
-    width: 50px;
-    height: 50px;
+    inset: 3px;
     border-radius: 50%;
     background: conic-gradient(
-      from calc(var(--marker-heading) - 26deg),
-      rgba(59, 130, 246, 0) 0deg,
-      rgba(249, 115, 22, 0.66) 22deg,
-      rgba(251, 191, 36, 0.26) 52deg,
-      rgba(59, 130, 246, 0) 78deg,
-      rgba(59, 130, 246, 0) 360deg
+      from calc(var(--marker-heading) - 23deg),
+      transparent 0deg,
+      var(--marker-accent-mid) 21deg,
+      rgba(147, 197, 253, 0.2) 44deg,
+      transparent 66deg,
+      transparent 360deg
     );
-    mask: radial-gradient(circle at center, transparent 0 9px, #000 11px);
-    -webkit-mask: radial-gradient(circle at center, transparent 0 9px, #000 11px);
-    opacity: 0.95;
+    mask: radial-gradient(circle at center, transparent 0 12px, black 13.5px);
+    -webkit-mask: radial-gradient(circle at center, transparent 0 12px, black 13.5px);
   }
 
-  .fov-heading-line {
+  // ── Heading tick – thin line from centre pointing in heading direction ────
+  .fov-tick {
     position: absolute;
-    left: 30px;
-    top: 12px;
+    left: 50%;
+    top: 7px;
     width: 2px;
-    height: 18px;
+    height: 10px;
     border-radius: 999px;
-    background: linear-gradient(180deg, #ffffff 0%, var(--marker-accent) 100%);
-    transform-origin: center 19px;
+    background: var(--marker-accent);
+    // pivot = top of element + 24px = 7 + 24 = 31px = marker centre
+    transform-origin: center 24px;
     transform: translateX(-50%) rotate(var(--marker-heading));
-    box-shadow: 0 0 12px var(--marker-accent-glow);
+    opacity: 0.8;
     transition: transform 0.15s ease-out;
   }
 
-  .fov-pin-core {
+  // ── Centre pin ────────────────────────────────────────────────────────────
+  .fov-pin {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     transform: translate(-50%, -50%);
-    background: linear-gradient(180deg, var(--marker-accent) 0%, #ea580c 100%);
-    border: 3px solid rgba(255, 255, 255, 0.96);
+    background: var(--marker-accent);
+    border: 3px solid #ffffff;
     box-shadow:
-      0 0 0 4px rgba(249, 115, 22, 0.18),
-      0 10px 18px rgba(15, 23, 42, 0.26);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+      0 0 0 2px rgba(59, 130, 246, 0.32),
+      0 3px 10px rgba(15, 23, 42, 0.28);
   }
 
-  .fov-pin-dot {
-    width: 5px;
-    height: 5px;
+  // ── Ripple on position change ─────────────────────────────────────────────
+  .fov-pulse-ring {
+    position: absolute;
+    inset: 17px;
     border-radius: 50%;
-    background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.12);
+    border: 1.5px solid var(--marker-accent);
+    opacity: 0;
+    transform: scale(0.7);
+    pointer-events: none;
   }
 
   .leaflet-marker-icon:hover .fov-marker-shell {
-    transform: scale(1.03);
-    filter: drop-shadow(0 14px 24px rgba(15, 23, 42, 0.28));
+    transform: scale(1.05);
+    filter: drop-shadow(0 10px 24px rgba(15, 23, 42, 0.36));
   }
 }
 
 @keyframes marker-bounce {
-  0% {
-    transform: scale(0.92);
-    filter: drop-shadow(0 8px 16px rgba(15, 23, 42, 0.18));
-  }
-
-  40% {
-    transform: scale(1.08);
-    filter: drop-shadow(0 16px 28px rgba(15, 23, 42, 0.26));
-  }
-
-  100% {
-    transform: scale(1);
-    filter: drop-shadow(0 10px 20px rgba(15, 23, 42, 0.22));
-  }
+  0%   { transform: scale(0.88);  filter: drop-shadow(0 3px 10px rgba(15, 23, 42, 0.18)); }
+  45%  { transform: scale(1.12);  filter: drop-shadow(0 10px 22px rgba(15, 23, 42, 0.3)); }
+  100% { transform: scale(1);     filter: drop-shadow(0 6px 18px rgba(15, 23, 42, 0.3)); }
 }
 
 @keyframes marker-pulse {
-  0% {
-    opacity: 0.9;
-    transform: scale(0.62);
-  }
-
-  70% {
-    opacity: 0.25;
-    transform: scale(1.38);
-  }
-
-  100% {
-    opacity: 0;
-    transform: scale(1.62);
-  }
+  0%   { opacity: 0.85; transform: scale(0.7); }
+  65%  { opacity: 0.18; transform: scale(1.45); }
+  100% { opacity: 0;    transform: scale(1.75); }
 }
 
 @media (max-width: 768px) {

@@ -152,11 +152,7 @@
             matInput
             type="text"
             formControlName="istatCode"
-            (input)="
-              mainForm.controls['istatCode'].setValue(
-                $any($event.target).value.toUpperCase().replace(/\D/g, '')
-              )
-            "
+            (input)="formatIstatCode($event)"
             minlength="6"
             maxlength="6"
             placeholder="e.g. 058091"
@@ -167,22 +163,24 @@
       <div class="form-card highlight-card">
         <div class="instruction-row">
           <mat-icon>touch_app</mat-icon>
-          <span>Double-click the map to auto-fill coordinates.</span>
+          <span>Double-click the map to capture coordinates.</span>
         </div>
 
-        <div class="stacked-fields mt-3">
-          <mat-form-field appearance="outline" class="modern-input">
-            <mat-label>Latitude</mat-label>
-            <mat-icon matPrefix class="field-icon">gps_fixed</mat-icon>
-            <input matInput type="number" formControlName="ilatitude" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="modern-input">
-            <mat-label>Longitude</mat-label>
-            <mat-icon matPrefix class="field-icon">gps_fixed</mat-icon>
-            <input matInput type="number" formControlName="ilongitude" />
-          </mat-form-field>
-        </div>
+        @if (hasCoordinates()) {
+          <div class="coords-captured-badge">
+            <mat-icon>check_circle</mat-icon>
+            <div class="coords-values">
+              <span>{{ mainForm.get('ilatitude')?.value }}</span>
+              <span class="coords-sep">·</span>
+              <span>{{ mainForm.get('ilongitude')?.value }}</span>
+            </div>
+          </div>
+        } @else {
+          <div class="coords-pending">
+            <mat-icon>my_location</mat-icon>
+            <span>No coordinates captured yet</span>
+          </div>
+        }
       </div>
 
       <div class="action-footer">
@@ -232,7 +230,7 @@
         </div>
       </div>
 
-      <div class="table-responsive" oncontextmenu="return false;">
+      <div class="table-responsive">
         <table
           mat-table
           [dataSource]="dataSource"

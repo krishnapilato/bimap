@@ -89,7 +89,7 @@ export class UserListComponent implements OnInit, AfterViewInit {
   }
 
   get activeUsersCount(): number {
-    return this.dataSource.data.filter((user) => user.userStatus?.toLowerCase() === 'active').length;
+    return this.dataSource.data.filter((user) => user.userStatus?.toLowerCase() === 'confirmed').length;
   }
 
   get adminUsersCount(): number {
@@ -104,6 +104,10 @@ export class UserListComponent implements OnInit, AfterViewInit {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_+|_+$/g, '');
+  }
+
+  formatStatus(status: string | null | undefined): string {
+    return (status || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
   ngOnInit(): void {

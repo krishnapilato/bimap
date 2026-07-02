@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
+  computed,
   DestroyRef,
   OnInit,
   inject,
@@ -76,17 +77,19 @@ export class MainComponent implements OnInit, AfterViewInit {
 
   currentTime = signal(new Date());
 
-  private geocoder = new google.maps.Geocoder();
+  private _geocoder?: any;
+  private get geocoder() {
+    return (this._geocoder ??= new google.maps.Geocoder());
+  }
 
   public user!: LoginResponse;
-  public isShown = signal(false);
   public regionsOptions$!: Observable<string[]>;
   public provincesOptions$!: Observable<string[]>;
   public municipalitiesOptions$!: Observable<string[]>;
-  public provinces: string[] = [];
 
-  public latitude: number | null = null;
-  public longitude: number | null = null;
+  readonly latitude = signal<number | null>(null);
+  readonly longitude = signal<number | null>(null);
+  readonly hasCoordinates = computed(() => this.latitude() !== null && this.longitude() !== null);
 
   public displayedColumns: string[] = ['id', 'prov', 'comune', 'indirizzo', 'civico'];
   public dataSource = new MatTableDataSource<Tables>();
@@ -153,14 +156,9 @@ export class MainComponent implements OnInit, AfterViewInit {
     );
   }
 
-  public applyFilter(event: Event): void {
-    this.dataSource.filter = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
-  }
-
   public onCoordinatesPicked(coords: { lat: number; lng: number }): void {
-    this.latitude = coords.lat;
-    this.longitude = coords.lng;
+    this.latitude.set(coords.lat);
+    this.longitude.set(coords.lng);
 
     this.mainForm.patchValue({
       ilatitude: coords.lat.toFixed(6),
@@ -169,7 +167,7 @@ export class MainComponent implements OnInit, AfterViewInit {
   }
 
   public saveData(): void {
-    if (this.mainForm.valid && this.latitude !== null && this.longitude !== null) {
+    if (this.mainForm.valid && this.hasCoordinates()) {
       const confirmData: ConfirmationDialogData = {
         title: 'Save Record',
         message: 'Are you sure you want to save this asset record?',
@@ -183,9 +181,7 @@ export class MainComponent implements OnInit, AfterViewInit {
         .open(ConfirmationDialogComponent, { data: confirmData })
         .afterClosed()
         .subscribe((confirmed) => {
-          if (!confirmed) {
-            return;
-          }
+          if (!confirmed) return;
 
           const formData: FormModel = {
             region: this.mainForm.get('searchRegions')?.value,
@@ -201,7 +197,12 @@ export class MainComponent implements OnInit, AfterViewInit {
           };
 
           this.apiService.save(formData).subscribe({
-            next: () => this.snackbar.open('Data saved successfully', 'Close', { duration: 3000 }),
+            next: () => {
+              this.snackbar.open('Data saved successfully', 'Close', { duration: 3000 });
+              this.mainForm.reset();
+              this.latitude.set(null);
+              this.longitude.set(null);
+            },
             error: () => this.snackbar.open('Failed to save data', 'Close', { duration: 3000 }),
           });
         });
@@ -229,6 +230,11 @@ export class MainComponent implements OnInit, AfterViewInit {
       normalizedAddress,
       row.civico === 0 ? '' : row.civico.toString(),
     );
+  }
+
+  public formatIstatCode(event: Event): void {
+    const val = (event.target as HTMLInputElement).value.toUpperCase().replace(/\D/g, '');
+    this.mainForm.controls['istatCode'].setValue(val, { emitEvent: false });
   }
 
   public focusOut(): void {
