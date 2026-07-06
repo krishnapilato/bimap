@@ -27,6 +27,17 @@ export class ConfirmationDialogComponent {
 
   private readonly dialogRef = inject(MatDialogRef<ConfirmationDialogComponent>);
 
+  readonly titleId = 'confirmation-dialog-title';
+  readonly messageId = 'confirmation-dialog-message';
+
+  get resolvedTitle(): string {
+    return this.data?.title?.trim() || 'Please confirm';
+  }
+
+  get resolvedMessage(): string {
+    return this.data?.message?.trim() || 'Are you sure you want to continue?';
+  }
+
   confirm(): void {
     this.dialogRef.close(true);
   }

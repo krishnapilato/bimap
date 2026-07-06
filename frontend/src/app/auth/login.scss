@@ -1,16 +1,25 @@
+:host {
+  --page-bg: radial-gradient(circle at 6% 0%, #e8efff 0%, transparent 32%),
+    radial-gradient(circle at 94% 0%, #ffecef 0%, transparent 30%),
+    linear-gradient(180deg, #f6f9ff 0%, #eff4ff 50%, #f8fbff 100%);
+
+  min-height: 100vh;
+  display: block;
+  background: var(--page-bg);
+}
+
 .login-shell {
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow-y: auto;
   padding: 28px;
   box-sizing: border-box;
-  background:
-    radial-gradient(circle at top left, rgba(59, 130, 246, 0.05), transparent 22%),
-    radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.04), transparent 18%),
-    linear-gradient(135deg, #f8fafc 0%, #eef2f6 100%);
+  background: var(--page-bg);
   font-family:
-    'Inter',
+    'Manrope',
+    'IBM Plex Sans',
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
@@ -32,9 +41,11 @@
 .login-card {
   padding: 28px;
   width: min(1240px, 100%);
-  min-height: min(860px, calc(100vh - 56px));
+  min-height: min(820px, calc(100vh - 56px));
+  max-height: calc(100vh - 56px);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .card-brand-row {
@@ -106,6 +117,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  overflow: hidden;
 }
 
 .illustration-panel h2 {
@@ -178,6 +190,7 @@
   flex-direction: column;
   justify-content: center;
   border-left: 1px solid #e2e8f0;
+  overflow-y: auto;
 }
 
 .card-badge {
@@ -224,7 +237,8 @@
   }
 
   .mat-mdc-form-field-subscript-wrapper {
-    display: none;
+    min-height: 20px;
+    margin-top: 2px;
   }
 }
 
@@ -237,6 +251,11 @@
 .visibility-btn {
   transform: scale(0.9);
   margin-right: -4px;
+
+  &:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+  }
 }
 
 .form-actions {
@@ -297,6 +316,11 @@
     color: #94a3b8 !important;
     box-shadow: none !important;
   }
+
+  &:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.45);
+    outline-offset: 2px;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -307,10 +331,20 @@
   .login-card {
     width: 100%;
     min-height: calc(100vh - 32px);
+    max-height: none;
+    overflow: visible;
   }
 
   .login-content {
     grid-template-columns: 1fr;
+  }
+
+  .form-panel {
+    order: 1;
+  }
+
+  .illustration-panel {
+    order: 2;
   }
 
   .illustration-panel h2 {
@@ -324,10 +358,11 @@
   .form-panel {
     border-left: none;
     border-top: 1px solid #e2e8f0;
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 4px;
+    padding-right: 4px;
     padding-bottom: 0;
     margin-top: 8px;
+    overflow: visible;
   }
 }
 
@@ -347,6 +382,11 @@
   .card-brand-row {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
+  }
+
+  .brand-lockup p {
+    font-size: 14px;
   }
 
   .illustration-panel h2 {
@@ -359,5 +399,21 @@
 
   .form-panel {
     padding-top: 18px;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

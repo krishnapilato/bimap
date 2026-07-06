@@ -4,6 +4,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  HostListener,
   inject,
   NgZone,
   OnDestroy,
@@ -36,6 +37,7 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   private resizeObserver?: ResizeObserver;
   private streetViewResizeObserver?: ResizeObserver;
   private mouseMoveRafPending = false;
+  private wasMobileViewport = false;
 
   private readonly initialLat = 45.46965468279425;
   private readonly initialLng = 9.182206569945924;
@@ -44,6 +46,7 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
 
   leftWidth = signal(50);
   isDragging = signal(false);
+  isMobileViewport = signal(false);
   currentCoords = signal('45.4697, 9.1822');
 
   @Output() mapDoubleClick = new EventEmitter<{ lat: number; lng: number }>();
@@ -52,6 +55,8 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   private boundMouseUp = this.onMouseUp.bind(this);
 
   ngAfterViewInit(): void {
+    this.updateViewportMode();
+
     this.initLeaflet();
     this.initStreetView();
     this.setupResizeObserver();
@@ -61,6 +66,11 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
       this.updatePosition(this.initialLat, this.initialLng);
       this.recenterLeaflet();
     }, 100);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.updateViewportMode();
   }
 
   ngOnDestroy(): void {
@@ -88,6 +98,7 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
     if (!this.isDragging() || this.mouseMoveRafPending) return;
 
     const clientX = event.clientX;
+    const clientY = event.clientY;
     this.mouseMoveRafPending = true;
 
     requestAnimationFrame(() => {
@@ -98,8 +109,12 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
       if (!wrapper) return;
 
       const rect = wrapper.getBoundingClientRect();
-      let percentage = ((clientX - rect.left) / rect.width) * 100;
-      percentage = Math.max(8, Math.min(92, percentage));
+      const isMobile = this.isMobileViewport();
+      let percentage = isMobile
+        ? ((clientY - rect.top) / rect.height) * 100
+        : ((clientX - rect.left) / rect.width) * 100;
+
+      percentage = Math.max(20, Math.min(80, percentage));
 
       this.zone.run(() => this.leftWidth.set(percentage));
     });
@@ -117,6 +132,18 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
     this.leftWidth.set(50);
     this.queueMapResize();
     this.recenterLeaflet();
+  }
+
+  private updateViewportMode(): void {
+    const mobile = window.innerWidth <= 768;
+
+    if (mobile !== this.wasMobileViewport) {
+      this.leftWidth.set(50);
+      this.queueMapResize();
+    }
+
+    this.wasMobileViewport = mobile;
+    this.isMobileViewport.set(mobile);
   }
 
   private setupResizeObserver(): void {

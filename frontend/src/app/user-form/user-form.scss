@@ -1,6 +1,11 @@
 :host {
+  --page-bg: radial-gradient(circle at 6% 0%, #e8efff 0%, transparent 32%),
+    radial-gradient(circle at 94% 0%, #ffecef 0%, transparent 30%),
+    linear-gradient(180deg, #f6f9ff 0%, #eff4ff 50%, #f8fbff 100%);
+
   display: block;
   min-height: 100vh;
+  background: var(--page-bg);
 }
 
 .registration-shell {
@@ -8,14 +13,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow-y: auto;
   padding: 28px;
   box-sizing: border-box;
-  background:
-    radial-gradient(circle at top left, rgba(59, 130, 246, 0.05), transparent 22%),
-    radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.04), transparent 18%),
-    linear-gradient(135deg, #f8fafc 0%, #eef2f6 100%);
+  background: var(--page-bg);
   font-family:
-    'Inter',
+    'Manrope',
+    'IBM Plex Sans',
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
@@ -34,9 +38,11 @@
   backdrop-filter: blur(12px);
   padding: 28px;
   width: min(1240px, 100%);
-  min-height: min(860px, calc(100vh - 56px));
+  min-height: min(820px, calc(100vh - 56px));
+  max-height: calc(100vh - 56px);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .card-brand-row {
@@ -101,6 +107,29 @@
   color: #ef4444;
 }
 
+.top-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 12px;
+}
+
+.back-btn {
+  height: 40px;
+  border-radius: 10px !important;
+  border-color: rgba(59, 130, 246, 0.25) !important;
+  color: #2563eb !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+  padding: 0 14px !important;
+
+  mat-icon {
+    margin-right: 6px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
 .eyebrow {
   display: inline-flex;
   align-items: center;
@@ -126,6 +155,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  overflow: hidden;
 
   h2 {
     margin: 10px 0 10px;
@@ -198,6 +228,7 @@
   flex-direction: column;
   justify-content: center;
   border-left: 1px solid #e2e8f0;
+  overflow-y: auto;
 }
 
 .form-panel h3 {
@@ -236,7 +267,8 @@
   }
 
   .mat-mdc-form-field-subscript-wrapper {
-    display: none;
+    min-height: 20px;
+    margin-top: 2px;
   }
 }
 
@@ -249,6 +281,11 @@
 .visibility-btn {
   transform: scale(0.9);
   margin-right: -4px;
+
+  &:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+  }
 }
 
 .email-group {
@@ -282,8 +319,21 @@
 
 .form-actions {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
   padding-top: 4px;
+}
+
+.secondary-btn {
+  height: 52px;
+  border-radius: 12px !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  min-width: 132px;
+  border-color: rgba(59, 130, 246, 0.28) !important;
+  color: #2563eb !important;
+  background: rgba(239, 246, 255, 0.65) !important;
 }
 
 .submit-btn {
@@ -310,6 +360,11 @@
     color: #94a3b8 !important;
     box-shadow: none !important;
   }
+
+  &:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.45);
+    outline-offset: 2px;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -320,10 +375,20 @@
   .registration-card {
     width: 100%;
     min-height: calc(100vh - 32px);
+    max-height: none;
+    overflow: visible;
   }
 
   .registration-content {
     grid-template-columns: 1fr;
+  }
+
+  .form-panel {
+    order: 1;
+  }
+
+  .illustration-panel {
+    order: 2;
   }
 
   .illustration-panel h2 {
@@ -337,10 +402,11 @@
   .form-panel {
     border-left: none;
     border-top: 1px solid #e2e8f0;
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 4px;
+    padding-right: 4px;
     padding-bottom: 0;
     margin-top: 8px;
+    overflow: visible;
   }
 }
 
@@ -360,6 +426,7 @@
   .card-brand-row {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
   }
 
   .illustration-panel h2 {
@@ -376,5 +443,26 @@
 
   .name-grid {
     grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .secondary-btn,
+  .submit-btn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

@@ -68,8 +68,9 @@
                 required
                 minlength="1"
                 maxlength="18"
-                pattern="[a-zA-Z]*"
+                pattern="[a-zA-Z\s'-]*"
                 placeholder="e.g. Jane"
+                autocomplete="given-name"
               />
               @if (name.invalid && (name.dirty || name.touched)) {
                 <mat-error>Name must be 1-18 letters</mat-error>
@@ -87,8 +88,9 @@
                 required
                 minlength="1"
                 maxlength="18"
-                pattern="[a-zA-Z]*"
+                pattern="[a-zA-Z\s'-]*"
                 placeholder="e.g. Doe"
+                autocomplete="family-name"
               />
               @if (surname.invalid && (surname.dirty || surname.touched)) {
                 <mat-error>Surname must be 1-18 letters</mat-error>
@@ -113,8 +115,11 @@
                 email
                 minlength="3"
                 maxlength="100"
-                (ngModelChange)="onFocusOutEvent()"
+                (blur)="onFocusOutEvent()"
                 placeholder="name@company.com"
+                autocomplete="email"
+                autocapitalize="none"
+                spellcheck="false"
               />
               @if (email.invalid && (email.dirty || email.touched)) {
                 <mat-error>Please enter a valid email format</mat-error>
@@ -142,15 +147,17 @@
               minlength="8"
               maxlength="32"
               placeholder="Create a strong password"
+              autocomplete="new-password"
             />
 
-            @if (user.password && user.password.length > 2) {
+            @if (user.password && user.password.length > 0) {
               <button
                 matSuffix
                 mat-icon-button
                 type="button"
                 (click)="togglePasswordVisibility()"
                 [attr.aria-label]="'Toggle password visibility'"
+                class="visibility-btn"
               >
                 <mat-icon class="field-icon">{{
                   hidePassword ? 'visibility_off' : 'visibility'
@@ -165,8 +172,17 @@
 
           <div class="form-actions">
             <button
+              type="button"
+              mat-stroked-button
+              color="primary"
+              class="secondary-btn"
+              routerLink="/listuser"
+            >
+              Cancel
+            </button>
+            <button
               type="submit"
-              [disabled]="userForm.invalid"
+              [disabled]="userForm.invalid || emailStatus"
               mat-flat-button
               color="primary"
               class="submit-btn"

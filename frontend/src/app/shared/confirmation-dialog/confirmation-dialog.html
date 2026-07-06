@@ -1,16 +1,26 @@
-<div class="dialog-container">
+<div
+  class="dialog-container"
+  role="alertdialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="titleId"
+  [attr.aria-describedby]="messageId"
+>
   <div class="dialog-header">
-    <div class="icon-halo-wrapper animate__animated animate__zoomIn" [ngClass]="'tone-' + (data.tone ?? 'primary')">
+    <div
+      class="icon-halo-wrapper animate__animated animate__zoomIn"
+      [ngClass]="'tone-' + (data.tone ?? 'primary')"
+      aria-hidden="true"
+    >
       <div class="icon-circle">
         <mat-icon>{{ data.icon ?? 'help_outline' }}</mat-icon>
       </div>
     </div>
 
-    <h2 class="dialog-title">{{ data.title }}</h2>
+    <h2 class="dialog-title" [id]="titleId">{{ resolvedTitle }}</h2>
   </div>
 
   <div class="dialog-body">
-    <p class="dialog-message">{{ data.message }}</p>
+    <p class="dialog-message" [id]="messageId">{{ resolvedMessage }}</p>
 
     @if (data.details) {
       <div class="detail-card">
@@ -24,11 +34,23 @@
   </div>
 
   <div class="dialog-actions">
-    <button mat-stroked-button class="action-btn cancel-btn" (click)="cancel()">
+    <button
+      type="button"
+      mat-stroked-button
+      class="action-btn cancel-btn"
+      cdkFocusInitial
+      (click)="cancel()"
+    >
       {{ data.cancelText ?? 'Cancel' }}
     </button>
 
-    <button mat-flat-button [color]="data.tone ?? 'primary'" class="action-btn confirm-btn" (click)="confirm()">
+    <button
+      type="button"
+      mat-flat-button
+      [color]="data.tone ?? 'primary'"
+      class="action-btn confirm-btn"
+      (click)="confirm()"
+    >
       <mat-icon>{{ data.icon ?? 'check' }}</mat-icon>
       {{ data.confirmText ?? 'Confirm' }}
     </button>

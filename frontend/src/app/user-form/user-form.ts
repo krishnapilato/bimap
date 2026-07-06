@@ -30,7 +30,7 @@ import { UserService } from '../user-list/user-service.service';
 })
 export class UserFormComponent {
   user: User;
-  emailStatus!: boolean;
+  emailStatus = false;
 
   hidePassword = true;
 
@@ -47,10 +47,15 @@ export class UserFormComponent {
   }
 
   onFocusOutEvent(): void {
+    const email = this.user.email?.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      this.emailStatus = false;
+      return;
+    }
+
     this.userService
-      .checkIfEmailExists(this.user.email)
+      .checkIfEmailExists(email)
       .subscribe((data) => (this.emailStatus = data));
-    console.log('' + this.emailStatus);
   }
 
   public onSubmit(): void {

@@ -2,14 +2,20 @@
    GLOBAL & TYPOGRAPHY
 ------------------------------ */
 :host {
+  --page-bg: radial-gradient(circle at 6% 0%, #e8efff 0%, transparent 32%),
+    radial-gradient(circle at 94% 0%, #ffecef 0%, transparent 30%),
+    linear-gradient(180deg, #f6f9ff 0%, #eff4ff 50%, #f8fbff 100%);
+  --card-bg: #ffffff;
+  --border-soft: rgba(148, 163, 184, 0.24);
+  --shadow-soft: 0 12px 30px -24px rgba(15, 23, 42, 0.45);
+
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  /* A cooler, extremely subtle blue-gray background */
-  background-color: #f8fafc;
-  /* Modern system font stack */
+  background: var(--page-bg);
   font-family:
-    'Inter',
+    'Manrope',
+    'IBM Plex Sans',
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
@@ -33,10 +39,11 @@
   align-items: center;
   padding: 0 32px;
   height: 72px;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 10px 24px -22px rgba(15, 23, 42, 0.7);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -77,8 +84,8 @@
   background: #f1f5f9;
   padding: 4px 16px 4px 4px;
   border-radius: 999px;
-  transition: background 0.2s;
-  cursor: pointer;
+  transition: background 0.2s ease;
+  cursor: default;
 
   &:hover {
     background: #e2e8f0;
@@ -106,6 +113,10 @@
   font-size: 14px;
   font-weight: 600;
   color: #334155;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .divider {
@@ -116,9 +127,23 @@
 
 .action-btn {
   color: #64748b;
+
+  &:hover {
+    color: #334155;
+    background: rgba(100, 116, 139, 0.12);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.45);
+    outline-offset: 2px;
+  }
 }
 .logout-btn {
   color: #ef4444;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.1);
+  }
 }
 
 /* -----------------------------
@@ -127,7 +152,7 @@
 .workspace-container {
   max-width: 1200px; /* Tighter max-width for better readability */
   margin: 0 auto;
-  padding: 48px 24px;
+  padding: 28px 24px;
   width: 100%;
   box-sizing: border-box;
   display: flex;
@@ -244,13 +269,10 @@
    DATA CARD & TOOLBAR
 ------------------------------ */
 .data-card {
-  background: #ffffff;
-  border-radius: 16px; /* Modern rounded corners */
-  /* Premium diffuse shadow instead of harsh borders */
-  box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 2px 4px -2px rgba(0, 0, 0, 0.025);
-  border: 1px solid rgba(226, 232, 240, 0.5);
+  background: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-soft);
   overflow: hidden;
 }
 
@@ -328,14 +350,24 @@
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+  }
 }
 .user-table {
   width: 100%;
-  min-width: 920px;
+  min-width: 900px;
   background: transparent;
 }
 
-.user-table th.mat-header-cell {
+.user-table th.mat-header-cell,
+.user-table th.mat-mdc-header-cell {
   background: #f8fafc;
   color: #64748b;
   font-weight: 600;
@@ -347,7 +379,8 @@
   text-align: center;
 }
 
-.user-table td.mat-cell {
+.user-table td.mat-cell,
+.user-table td.mat-mdc-cell {
   padding: 16px 24px;
   color: #475569;
   border-bottom: 1px solid #f1f5f9;
@@ -408,6 +441,14 @@
   color: #64748b;
   cursor: pointer;
   transition: all 0.2s;
+  max-width: 100%;
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 240px;
+  }
 
   mat-icon {
     width: 16px;
@@ -524,6 +565,11 @@
   color: #94a3b8;
   transition: all 0.2s ease;
 
+  &:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.4);
+    outline-offset: 2px;
+  }
+
   &:hover.edit-btn {
     color: #3b82f6;
     background: #eff6ff;
@@ -596,6 +642,12 @@
     height: auto;
     min-height: 64px;
     gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .header-actions {
+    margin-left: auto;
+    gap: 10px;
   }
 
   .brand-title {
@@ -603,8 +655,21 @@
   }
 
   .workspace-container {
-    padding: 24px 16px;
+    padding: 18px 12px;
     gap: 24px;
+  }
+
+  .page-header {
+    text-align: left;
+    align-items: flex-start;
+  }
+
+  .page-header h1 {
+    font-size: 28px;
+  }
+
+  .page-header p {
+    font-size: 14px;
   }
   .content-card-header {
     flex-direction: column;
@@ -644,6 +709,17 @@
 
   .hide-on-mobile {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

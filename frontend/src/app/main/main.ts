@@ -197,13 +197,13 @@ export class MainComponent implements OnInit, AfterViewInit {
           };
 
           this.apiService.save(formData).subscribe({
-            next: () => {
+            next: (_result) => {
               this.snackbar.open('Data saved successfully', 'Close', { duration: 3000 });
               this.mainForm.reset();
               this.latitude.set(null);
               this.longitude.set(null);
             },
-            error: () => this.snackbar.open('Failed to save data', 'Close', { duration: 3000 }),
+            error: (_error) => this.snackbar.open('Failed to save data', 'Close', { duration: 3000 }),
           });
         });
     } else {

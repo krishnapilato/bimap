@@ -62,11 +62,14 @@
             <mat-icon matPrefix class="field-icon">person</mat-icon>
             <input
               matInput
-              type="email"
+              type="text"
               name="username"
               [(ngModel)]="loginRequest.username"
               required
               placeholder="e.g. admin@bimap.com"
+              autocomplete="username"
+              autocapitalize="none"
+              spellcheck="false"
             />
             @if (loginForm.controls['username']?.hasError('required') && loginForm.controls['username']?.touched) {
               <mat-error>Username is required</mat-error>
@@ -83,9 +86,10 @@
               [(ngModel)]="loginRequest.password"
               required
               placeholder="Enter your password"
+              autocomplete="current-password"
             />
 
-            @if (loginRequest.password && loginRequest.password.length > 1) {
+            @if (loginRequest.password && loginRequest.password.length > 0) {
               <button
                 mat-icon-button
                 matSuffix
@@ -109,6 +113,7 @@
               color="primary"
               class="submit-btn"
               type="submit"
+              aria-label="Sign in"
               [disabled]="loginForm.invalid || isSubmitting()"
             >
               @if (isSubmitting()) {

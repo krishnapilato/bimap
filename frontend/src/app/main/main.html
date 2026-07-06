@@ -9,12 +9,17 @@
   <span class="spacer"></span>
 
   <div class="header-actions">
-    <!-- TIME DISPLAY ADDED HERE -->
     <div class="time-display hide-on-mobile">
       {{ currentTime() | date: 'dd/MM/yyyy - HH:mm:ss' }}
     </div>
     @if (user.user.applicationRole === 'ADMINISTRATOR') {
-      <button mat-icon-button class="action-btn" matTooltip="Admin" routerLink="/listuser">
+      <button
+        mat-icon-button
+        class="action-btn"
+        matTooltip="Admin"
+        aria-label="Open admin panel"
+        routerLink="/listuser"
+      >
         <mat-icon>admin_panel_settings</mat-icon>
       </button>
     }
@@ -26,6 +31,7 @@
       color="warn"
       class="logout-btn"
       matTooltip="Logout"
+      aria-label="Logout"
       routerLink="/logout"
     >
       <mat-icon>logout</mat-icon>
@@ -185,7 +191,7 @@
 
       <div class="action-footer">
         <button
-          [disabled]="mainForm.invalid"
+          [disabled]="mainForm.invalid || !hasCoordinates()"
           mat-flat-button
           color="primary"
           class="btn-block save-btn"
@@ -211,10 +217,10 @@
       </div>
 
       <div class="map-card-body">
-      <app-streetview
-        class="animate__animated animate__fadeIn"
-        (mapDoubleClick)="onCoordinatesPicked($event)"
-      ></app-streetview>
+        <app-streetview
+          class="animate__animated animate__fadeIn"
+          (mapDoubleClick)="onCoordinatesPicked($event)"
+        ></app-streetview>
       </div>
     </div>
 
@@ -284,7 +290,7 @@
                   <mat-icon>search_off</mat-icon>
                 </div>
                 <h3>No data available</h3>
-                <p>No records match the current filter.</p>
+                <p>No records found.</p>
               </div>
             </td>
           </tr>

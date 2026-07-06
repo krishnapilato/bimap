@@ -1,5 +1,9 @@
-<div class="map-container" #mapWrapper>
-  <div class="map-panel" [style.width.%]="leftWidth()">
+<div class="map-container" #mapWrapper [style.--split]="leftWidth() + '%'">
+  <div
+    class="map-panel"
+    [style.width.%]="isMobileViewport() ? null : leftWidth()"
+    [style.height.%]="isMobileViewport() ? leftWidth() : null"
+  >
     <div id="leafletMap" class="map-canvas"></div>
 
     <button
@@ -7,6 +11,7 @@
       class="recenter-btn"
       matTooltip="Recenter on marker"
       matTooltipPosition="above"
+      aria-label="Recenter map on marker"
       (click)="recenterView()"
     >
       <mat-icon>my_location</mat-icon>
@@ -23,16 +28,27 @@
     </div>
   </div>
 
-  <div class="resizer" matTooltip="Double click to reset" matTooltipPosition="above" (mousedown)="onMouseDown($event)" (dblclick)="resetSplit()"></div>
+  <div
+    class="resizer"
+    role="separator"
+    [attr.aria-orientation]="isMobileViewport() ? 'horizontal' : 'vertical'"
+    aria-label="Resize map and street view panels"
+    matTooltip="Drag to resize panels, double-click to reset"
+    matTooltipPosition="above"
+    (mousedown)="onMouseDown($event)"
+    (dblclick)="resetSplit()"
+  ></div>
 
-  <div class="map-panel" [style.width.%]="100 - leftWidth()">
+  <div
+    class="map-panel"
+    [style.width.%]="isMobileViewport() ? null : 100 - leftWidth()"
+    [style.height.%]="isMobileViewport() ? 100 - leftWidth() : null"
+  >
     <div id="streetView" class="map-canvas"></div>
 
     @if (isDragging()) {
       <div class="drag-overlay"></div>
     }
 
-    <div class="map-info right">
-    </div>
   </div>
 </div>
