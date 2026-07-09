@@ -2,6 +2,19 @@
 
 A full-stack geographic data management application built with Angular and Spring Boot. Users can enter and save geographic information (regions, provinces, municipalities) which is persisted to a MySQL database. Access is role-based: administrators can manage users via a dedicated dashboard, while regular users can interact with the map form.
 
+## 🖼️ Screenshots
+
+<table>
+	<tr>
+		<td><img width="100%" alt="Screenshot 1" src="https://github.com/user-attachments/assets/cec8b3b4-4a5f-4efe-83b7-bc794b165113" /></td>
+		<td><img width="100%" alt="Screenshot 2" src="https://github.com/user-attachments/assets/dff3409d-a6ef-46e0-b38b-f996a3beffb5" /></td>
+	</tr>
+	<tr>
+		<td><img width="100%" alt="Screenshot 3" src="https://github.com/user-attachments/assets/0e28c7c8-a789-4fc6-9538-04486eeb382b" /></td>
+		<td><img width="100%" alt="Screenshot 4" src="https://github.com/user-attachments/assets/d6065408-fce8-4a15-bd2a-6c96d982426c" /></td>
+	</tr>
+</table>
+
 ## 🏆 Lighthouse Scores
 
 | Performance | Accessibility | Best Practices | SEO |
@@ -155,7 +168,3 @@ DELETE /users/{id}
 | Parameter | Type   | Description                       |
 | :-------- | :----- | :-------------------------------- |
 | `id`      | `Long` | **Required**. Delete the user with the given id |
-
-## 📄 License
-
-This project is open-source and available under the [MIT License](LICENSE).
