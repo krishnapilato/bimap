@@ -1,0 +1,360 @@
+// =============================================================================
+//  BiMap — Angular Material bridge
+// -----------------------------------------------------------------------------
+//  Material is themed through its own token layer (`--mat-sys-*`, `--mdc-*`)
+//  rather than by overriding rendered selectors with `!important`. That keeps
+//  the components' internal states — hover, disabled, error, ripple — working
+//  as designed while making every one of them inherit BiMap's tokens, in both
+//  colour schemes, from a single place.
+// =============================================================================
+
+@use 'mixins' as *;
+
+:root {
+  // ── System palette ─────────────────────────────────────────────────────────
+  --mat-sys-primary: var(--bm-accent);
+  --mat-sys-on-primary: var(--bm-on-accent);
+  --mat-sys-primary-container: var(--bm-accent-soft);
+  --mat-sys-on-primary-container: var(--bm-accent-text);
+
+  --mat-sys-error: var(--bm-danger);
+  --mat-sys-on-error: var(--bm-text-inverse);
+  --mat-sys-error-container: var(--bm-danger-soft);
+  --mat-sys-on-error-container: var(--bm-danger);
+
+  --mat-sys-background: var(--bm-canvas);
+  --mat-sys-on-background: var(--bm-text);
+  --mat-sys-surface: var(--bm-surface);
+  --mat-sys-on-surface: var(--bm-text);
+  --mat-sys-on-surface-variant: var(--bm-text-2);
+  --mat-sys-surface-variant: var(--bm-surface-2);
+  --mat-sys-surface-container-lowest: var(--bm-surface);
+  --mat-sys-surface-container-low: var(--bm-surface);
+  --mat-sys-surface-container: var(--bm-surface);
+  --mat-sys-surface-container-high: var(--bm-surface-2);
+  --mat-sys-surface-container-highest: var(--bm-surface-3);
+
+  --mat-sys-outline: var(--bm-line-strong);
+  --mat-sys-outline-variant: var(--bm-line);
+
+  --mat-sys-corner-extra-small: var(--bm-radius-xs);
+  --mat-sys-corner-small: var(--bm-radius-sm);
+  --mat-sys-corner-medium: var(--bm-radius-md);
+  --mat-sys-corner-large: var(--bm-radius-lg);
+
+  --mat-sys-body-medium: var(--bm-text-body);
+  --mat-sys-body-small: var(--bm-text-small);
+  --mat-sys-label-large: var(--bm-text-h3);
+
+  // ── Text fields ────────────────────────────────────────────────────────────
+  --mdc-outlined-text-field-container-shape: var(--bm-radius-md);
+  --mdc-outlined-text-field-outline-color: var(--bm-line-strong);
+  --mdc-outlined-text-field-hover-outline-color: var(--bm-text-3);
+  --mdc-outlined-text-field-focus-outline-color: var(--bm-accent);
+  --mdc-outlined-text-field-disabled-outline-color: var(--bm-line);
+  --mdc-outlined-text-field-error-outline-color: var(--bm-danger);
+  --mdc-outlined-text-field-error-focus-outline-color: var(--bm-danger);
+  --mdc-outlined-text-field-error-hover-outline-color: var(--bm-danger);
+  --mdc-outlined-text-field-outline-width: 1px;
+  --mdc-outlined-text-field-focus-outline-width: 2px;
+  --mdc-outlined-text-field-label-text-color: var(--bm-text-2);
+  --mdc-outlined-text-field-hover-label-text-color: var(--bm-text-2);
+  --mdc-outlined-text-field-focus-label-text-color: var(--bm-accent);
+  --mdc-outlined-text-field-error-label-text-color: var(--bm-danger);
+  --mdc-outlined-text-field-error-focus-label-text-color: var(--bm-danger);
+  --mdc-outlined-text-field-input-text-color: var(--bm-text);
+  --mdc-outlined-text-field-disabled-input-text-color: var(--bm-text-3);
+  --mdc-outlined-text-field-input-text-placeholder-color: var(--bm-text-3);
+  --mdc-outlined-text-field-caret-color: var(--bm-accent);
+  --mdc-outlined-text-field-error-caret-color: var(--bm-danger);
+  --mdc-outlined-text-field-label-text-size: 14px;
+  --mdc-outlined-text-field-label-text-weight: 450;
+  --mdc-outlined-text-field-label-text-tracking: 0;
+  --mat-form-field-container-text-size: 14px;
+  --mat-form-field-container-text-tracking: 0;
+  --mat-form-field-subscript-text-size: 12px;
+  --mat-form-field-subscript-text-tracking: 0;
+  --mat-form-field-error-text-color: var(--bm-danger);
+  --mat-form-field-leading-icon-color: var(--bm-text-3);
+  --mat-form-field-trailing-icon-color: var(--bm-text-3);
+
+  // ── Buttons ────────────────────────────────────────────────────────────────
+  --mdc-filled-button-container-shape: var(--bm-radius-md);
+  --mdc-filled-button-container-color: var(--bm-accent);
+  --mdc-filled-button-label-text-color: var(--bm-on-accent);
+  --mdc-filled-button-container-height: 40px;
+  --mdc-filled-button-label-text-size: 14px;
+  --mdc-filled-button-label-text-weight: 550;
+  --mdc-filled-button-label-text-tracking: 0;
+  --mdc-filled-button-disabled-container-color: var(--bm-surface-3);
+  --mdc-filled-button-disabled-label-text-color: var(--bm-text-3);
+
+  --mdc-outlined-button-container-shape: var(--bm-radius-md);
+  --mdc-outlined-button-outline-color: var(--bm-line-strong);
+  --mdc-outlined-button-label-text-color: var(--bm-text);
+  --mdc-outlined-button-container-height: 40px;
+  --mdc-outlined-button-label-text-size: 14px;
+  --mdc-outlined-button-label-text-weight: 550;
+  --mdc-outlined-button-label-text-tracking: 0;
+  --mdc-outlined-button-disabled-outline-color: var(--bm-line);
+  --mdc-outlined-button-disabled-label-text-color: var(--bm-text-3);
+
+  --mdc-text-button-container-shape: var(--bm-radius-md);
+  --mdc-text-button-label-text-color: var(--bm-accent);
+  --mdc-text-button-label-text-weight: 550;
+  --mdc-text-button-label-text-tracking: 0;
+
+  --mdc-icon-button-icon-color: var(--bm-text-2);
+  --mdc-icon-button-state-layer-size: 38px;
+  --mdc-icon-button-icon-size: 20px;
+
+  // ── Table ──────────────────────────────────────────────────────────────────
+  --mat-table-background-color: transparent;
+  --mat-table-header-container-height: 40px;
+  --mat-table-row-item-container-height: 48px;
+  --mat-table-header-headline-color: var(--bm-text-3);
+  --mat-table-header-headline-size: 12px;
+  --mat-table-header-headline-weight: 600;
+  --mat-table-header-headline-tracking: var(--bm-tracking-label);
+  --mat-table-row-item-label-text-color: var(--bm-text-2);
+  --mat-table-row-item-label-text-size: 13px;
+  --mat-table-row-item-outline-color: var(--bm-line-soft);
+  --mat-sort-arrow-color: var(--bm-text-3);
+
+  // ── Paginator ──────────────────────────────────────────────────────────────
+  --mat-paginator-container-background-color: transparent;
+  --mat-paginator-container-text-color: var(--bm-text-2);
+  --mat-paginator-container-size: 52px;
+  --mat-paginator-container-text-size: 13px;
+  --mat-paginator-enabled-icon-color: var(--bm-text-2);
+  --mat-paginator-disabled-icon-color: var(--bm-text-3);
+
+  // ── Dialog ─────────────────────────────────────────────────────────────────
+  --mdc-dialog-container-color: var(--bm-surface);
+  --mdc-dialog-container-shape: var(--bm-radius-xl);
+  --mdc-dialog-subhead-color: var(--bm-text);
+  --mdc-dialog-supporting-text-color: var(--bm-text-2);
+
+  // ── Menus, options, autocomplete ───────────────────────────────────────────
+  --mat-autocomplete-background-color: var(--bm-surface);
+  --mat-autocomplete-container-shape: var(--bm-radius-md);
+  --mat-select-panel-background-color: var(--bm-surface);
+  --mat-select-container-elevation-shadow: var(--bm-shadow-md);
+  --mat-select-enabled-trigger-text-color: var(--bm-text);
+  --mat-select-placeholder-text-color: var(--bm-text-3);
+  --mat-select-enabled-arrow-color: var(--bm-text-3);
+  --mat-select-focused-arrow-color: var(--bm-accent);
+  --mat-option-label-text-color: var(--bm-text);
+  --mat-option-label-text-size: 14px;
+  --mat-option-selected-state-label-text-color: var(--bm-accent-text);
+  --mat-option-selected-state-layer-color: var(--bm-accent-soft);
+  --mat-option-hover-state-layer-color: var(--bm-surface-2);
+  --mat-option-focus-state-layer-color: var(--bm-surface-2);
+
+  // ── Tooltip ────────────────────────────────────────────────────────────────
+  --mdc-plain-tooltip-container-color: var(--bm-text);
+  --mdc-plain-tooltip-supporting-text-color: var(--bm-canvas);
+  --mdc-plain-tooltip-container-shape: var(--bm-radius-sm);
+  --mdc-plain-tooltip-supporting-text-size: 12px;
+
+  // ── Snackbar ───────────────────────────────────────────────────────────────
+  --mdc-snackbar-container-color: var(--bm-text);
+  --mdc-snackbar-supporting-text-color: var(--bm-canvas);
+  --mdc-snackbar-container-shape: var(--bm-radius-md);
+  --mat-snack-bar-button-color: var(--bm-accent);
+}
+
+// =============================================================================
+//  Structural adjustments Material's tokens don't reach
+// =============================================================================
+
+// ── Form fields ──────────────────────────────────────────────────────────────
+
+.mat-mdc-form-field {
+  width: 100%;
+  display: block;
+
+  // Reserve the subscript row only where a message can actually appear, so
+  // fields in a dense form don't carry 20px of dead space each.
+  &.bm-field--quiet .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}
+
+.mat-mdc-form-field-icon-prefix {
+  padding-inline: 12px 4px;
+  color: var(--bm-text-3);
+
+  > mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.mat-mdc-form-field-icon-suffix {
+  padding-inline-end: 4px;
+}
+
+// Coordinates, ISTAT codes and identifiers read as data, not prose.
+.bm-field--numeric input.mat-mdc-input-element {
+  @include numeric;
+  font-size: 13.5px;
+}
+
+// Chrome/Safari number spinners are a mis-click hazard in a data-entry form.
+input.mat-mdc-input-element[type='number'] {
+  appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+}
+
+// ── Buttons ──────────────────────────────────────────────────────────────────
+
+.mat-mdc-button-base {
+  letter-spacing: 0;
+
+  @include focusable(2px);
+}
+
+// Material's default focus indicator is a subtle state layer; ours must be
+// unmistakable for keyboard users.
+.mat-mdc-button-base:focus-visible {
+  @include focus-ring;
+}
+
+.mat-mdc-unelevated-button:not(:disabled):hover {
+  --mdc-filled-button-container-color: var(--bm-accent-hover);
+}
+
+.mat-mdc-unelevated-button:not(:disabled):active {
+  --mdc-filled-button-container-color: var(--bm-accent-active);
+}
+
+.mat-mdc-outlined-button:not(:disabled):hover {
+  background: var(--bm-surface-2);
+}
+
+// A destructive variant, so "delete" never renders in the same hue as "save".
+.bm-btn-danger.mat-mdc-unelevated-button {
+  --mdc-filled-button-container-color: var(--bm-danger);
+  // `--bm-danger` is a deep red in light mode and a light red in dark mode, so
+  // the label has to flip with it to stay legible on the fill.
+  --mdc-filled-button-label-text-color: var(--bm-text-inverse);
+
+  &:not(:disabled):hover {
+    --mdc-filled-button-container-color: var(--bm-danger-hover);
+  }
+}
+
+.mat-mdc-icon-button {
+  border-radius: var(--bm-radius-md);
+  transition:
+    background-color var(--bm-duration-fast) var(--bm-ease),
+    color var(--bm-duration-fast) var(--bm-ease);
+
+  &:hover {
+    background: var(--bm-surface-2);
+    color: var(--bm-text);
+  }
+
+  .mat-mdc-button-persistent-ripple {
+    border-radius: inherit;
+  }
+}
+
+// ── Table ────────────────────────────────────────────────────────────────────
+
+.mat-mdc-table {
+  background: transparent;
+}
+
+.mat-mdc-header-row {
+  background: var(--bm-surface-2);
+}
+
+.mat-mdc-header-cell {
+  text-transform: uppercase;
+  border-bottom-color: var(--bm-line);
+  white-space: nowrap;
+}
+
+.mat-mdc-cell {
+  border-bottom-color: var(--bm-line-soft);
+}
+
+.mat-mdc-row {
+  transition: background-color var(--bm-duration-fast) var(--bm-ease);
+
+  &:hover {
+    background: var(--bm-surface-2);
+  }
+
+  &:last-of-type .mat-mdc-cell {
+    border-bottom: none;
+  }
+}
+
+.mat-sort-header-arrow {
+  color: var(--bm-text-3);
+}
+
+// ── Dialog & overlay ─────────────────────────────────────────────────────────
+
+.mat-mdc-dialog-surface {
+  border: 1px solid var(--bm-line);
+  box-shadow: var(--bm-shadow-lg) !important;
+}
+
+.cdk-overlay-dark-backdrop {
+  background: var(--bm-overlay);
+  @include glass(2px);
+}
+
+// ── Overlay panels ───────────────────────────────────────────────────────────
+
+.mat-mdc-autocomplete-panel,
+.mat-mdc-select-panel {
+  border: 1px solid var(--bm-line);
+  box-shadow: var(--bm-shadow-md) !important;
+  padding: 4px !important;
+  @include thin-scrollbar;
+}
+
+.mat-mdc-option {
+  border-radius: var(--bm-radius-sm);
+  min-height: 40px;
+}
+
+// ── Snackbar ─────────────────────────────────────────────────────────────────
+
+.mat-mdc-snack-bar-container {
+  .mdc-snackbar__surface {
+    box-shadow: var(--bm-shadow-lg);
+  }
+
+  .mdc-snackbar__label {
+    font: var(--bm-text-small);
+  }
+
+  .mat-mdc-button {
+    font-weight: 600;
+  }
+}
+
+// ── Paginator ────────────────────────────────────────────────────────────────
+
+.mat-mdc-paginator {
+  border-top: 1px solid var(--bm-line);
+  background: transparent;
+
+  .mat-mdc-paginator-range-label {
+    @include numeric;
+    font-size: 12px;
+    margin: 0 20px 0 12px;
+  }
+}

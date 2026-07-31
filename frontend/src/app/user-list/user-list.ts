@@ -1,27 +1,19 @@
-import { CommonModule } from '@angular/common';
-import {
-  AfterViewInit,
-  Component,
-  DestroyRef,
-  inject,
-  OnInit,
-  viewChild,
-} from '@angular/core';
+import { TitleCasePipe } from '@angular/common';
+import { AfterViewInit, Component, DestroyRef, OnInit, inject, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
-import { AuthService } from '../auth/auth.service';
-import { LoginResponse } from '../auth/loginresponse';
+
+import { AppShellComponent } from '../shared/app-shell/app-shell';
 import { User } from '../user';
 import {
   ConfirmationDialogComponent,
@@ -34,27 +26,23 @@ import { UserService } from './user-service.service';
   selector: 'app-user-list',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
+    TitleCasePipe,
     RouterModule,
-
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatSnackBarModule,
     MatTooltipModule,
     MatIconModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
     MatDialogModule,
+    AppShellComponent,
   ],
   templateUrl: './user-list.html',
-  styleUrls: ['./user-list.scss'],
-  providers: [UserService],
+  styleUrl: './user-list.scss',
 })
 export class UserListComponent implements OnInit, AfterViewInit {
-  private readonly authService = inject(AuthService);
   private readonly userService = inject(UserService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
@@ -71,25 +59,16 @@ export class UserListComponent implements OnInit, AfterViewInit {
 
   readonly dataSource = new MatTableDataSource<User>();
 
-  whatUser!: LoginResponse;
-
   readonly paginator = viewChild(MatPaginator);
   readonly sort = viewChild(MatSort);
-
-  get currentUserName(): string {
-    return this.whatUser?.user?.fullName?.trim() || 'Admin User';
-  }
 
   get totalUsersCount(): number {
     return this.dataSource.data.length;
   }
 
-  get filteredUsersCount(): number {
-    return this.dataSource.filteredData.length;
-  }
-
   get activeUsersCount(): number {
-    return this.dataSource.data.filter((user) => user.userStatus?.toLowerCase() === 'confirmed').length;
+    return this.dataSource.data.filter((user) => user.userStatus?.toLowerCase() === 'confirmed')
+      .length;
   }
 
   get adminUsersCount(): number {
@@ -98,27 +77,11 @@ export class UserListComponent implements OnInit, AfterViewInit {
     ).length;
   }
 
-  getStatusClass(status: string | null | undefined): string {
-    return (status || '')
-      .trim()
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '_')
-      .replace(/^_+|_+$/g, '');
-  }
-
-  formatStatus(status: string | null | undefined): string {
-    return (status || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-  }
-
   ngOnInit(): void {
-    this.whatUser = this.authService.loginResponseValue;
-
     this.userService
       .findAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((users) => {
-        this.dataSource.data = users;
-      });
+      .subscribe((users) => (this.dataSource.data = users));
   }
 
   ngAfterViewInit(): void {
@@ -130,100 +93,96 @@ export class UserListComponent implements OnInit, AfterViewInit {
   }
 
   applyFilter(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-
-    this.dataSource.filter = value.trim().toLowerCase();
+    this.dataSource.filter = (event.target as HTMLInputElement).value.trim().toLowerCase();
     this.dataSource.paginator?.firstPage();
   }
 
-  getInitials(user: User): string {
-    const first = user.name?.trim().charAt(0) ?? '';
-    const last = user.surname?.trim().charAt(0) ?? '';
+  /** Maps a backend status onto one of the shared chip variants. */
+  statusChipClass(status: string | null | undefined): string {
+    switch ((status || '').trim().toLowerCase()) {
+      case 'confirmed':
+      case 'active':
+        return 'bm-chip--success';
+      case 'pending':
+        return 'bm-chip--warning';
+      case 'not_confirmed':
+      case 'notconfirmed':
+      case 'inactive':
+        return 'bm-chip--danger';
+      default:
+        return 'bm-chip--plain';
+    }
+  }
 
-    return `${first}${last}`.toUpperCase() || 'U';
+  formatStatus(status: string | null | undefined): string {
+    return (status || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
   openEditDialog(user: User): void {
     this.dialog.open(UserEditDialogComponent, {
-      data: {
-        user,
-        dataSource: this.dataSource,
-      },
+      data: { user, dataSource: this.dataSource },
     });
   }
 
   confirmSendEmail(email: string): void {
     const data: ConfirmationDialogData = {
-      title: 'Send Confirmation Email',
-      message: 'Are you sure you want to send the confirmation email to this address?',
+      title: 'Send confirmation email',
+      message: 'Send the account confirmation email to this address?',
       detailsLabel: 'Email address',
       details: email,
       icon: 'mark_email_unread',
       tone: 'primary',
-      confirmText: 'Send Email',
+      confirmText: 'Send email',
       cancelText: 'Cancel',
     };
 
-    this.dialog.open(ConfirmationDialogComponent, { data }).afterClosed().subscribe((confirmed) => {
-      if (!confirmed) {
-        this.snackBar.open('Operation cancelled', 'Close', { duration: 2000 });
-        return;
-      }
+    this.dialog
+      .open(ConfirmationDialogComponent, { data })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (!confirmed) return;
 
-      this.snackBar.open(`Sending email to ${email}...`, 'Close', { duration: 1000 });
-
-      this.userService.sendEmail(email).subscribe({
-        next: () => {
-          this.snackBar.open(`Email sent successfully to ${email}`, 'Close', {
-            duration: 2000,
-          });
-        },
-        error: (err) => {
-          console.error('Error sending email:', err);
-
-          this.snackBar.open(`Error sending email to ${email}`, 'Close', {
-            duration: 3000,
-          });
-        },
+        this.userService.sendEmail(email).subscribe({
+          next: () => this.snackBar.open(`Email sent to ${email}`, 'Close', { duration: 2500 }),
+          error: (err) => {
+            console.error('Error sending email:', err);
+            this.snackBar.open(`Could not send email to ${email}`, 'Close', { duration: 3000 });
+          },
+        });
       });
-    });
   }
 
   confirmDeleteUser(user: User): void {
     const data: ConfirmationDialogData = {
-      title: 'Delete User',
-      message: 'Are you sure you want to delete this record?',
+      title: 'Delete user',
+      message: 'This permanently removes the account and its access.',
+      detailsLabel: 'Account',
+      details: `${user.name} ${user.surname} · ${user.email}`,
       icon: 'delete',
       tone: 'warn',
-      confirmText: 'Delete User',
+      confirmText: 'Delete user',
       cancelText: 'Cancel',
     };
 
-    this.dialog.open(ConfirmationDialogComponent, { data }).afterClosed().subscribe((confirmed) => {
-      if (!confirmed) {
-        this.snackBar.open('Operation cancelled', 'Close', { duration: 2000 });
-        return;
-      }
+    this.dialog
+      .open(ConfirmationDialogComponent, { data })
+      .afterClosed()
+      .subscribe((confirmed) => {
+        if (!confirmed) return;
 
-      this.userService
-        .delete(user.id)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: () => {
-            this.dataSource.data = this.dataSource.data.filter((u) => u.id !== user.id);
-
-            this.snackBar.open('Record deleted successfully', 'Close', {
-              duration: 2000,
-            });
-          },
-          error: (err) => {
-            console.error(err);
-
-            this.snackBar.open('Delete failed', 'Close', {
-              duration: 3000,
-            });
-          },
-        });
-    });
+        this.userService
+          .delete(user.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.dataSource.data = this.dataSource.data.filter((u) => u.id !== user.id);
+              this.snackBar.open('User deleted', 'Close', { duration: 2500 });
+            },
+            error: (err) => {
+              console.error(err);
+              this.snackBar.open('Delete failed', 'Close', { duration: 3000 });
+            },
+          });
+      });
   }
 }

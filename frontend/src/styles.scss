@@ -1,80 +1,50 @@
+// =============================================================================
+//  BiMap — global stylesheet
+// -----------------------------------------------------------------------------
+//  Load order matters:
+//    1. tokens    — the vocabulary every other layer reads from
+//    2. mat.theme — generates Material's full `--mat-sys-*` set
+//    3. material  — re-points those tokens at ours
+//    4. base      — document reset, typography, a11y primitives
+//
+//  The previously bundled `indigo-pink` prebuilt theme, Bootstrap and
+//  animate.css have been removed: the first competed with `mat.theme()` for the
+//  same variables, and the other two shipped ~290 KB of CSS to supply three
+//  utility classes and two fades that are now handled locally.
+// =============================================================================
+
 @use '@angular/material' as mat;
-@import 'animate.css/animate.min.css';
+@use 'styles/tokens';
+@use 'styles/material';
+@use 'styles/base';
+@use 'styles/components';
 
 html {
-  overflow-x: hidden;
-  height: 100%;
   @include mat.theme(
     (
       color: (
         primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        tertiary: mat.$azure-palette,
       ),
-      typography: Roboto,
-      density: 0,
+      typography: (
+        plain-family: (
+          Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          sans-serif,
+        ),
+        brand-family: (
+          Inter,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          Roboto,
+          sans-serif,
+        ),
+      ),
+      density: -1,
     )
   );
-}
-
-body {
-  color-scheme: light;
-
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
-
-  margin: 0;
-  height: 100%;
-}
-.mat-mdc-snack-bar-container {
-  --mdc-snackbar-container-color: #0f172a;
-  --mdc-snackbar-supporting-text-color: #f8fafc;
-  --mat-snack-bar-button-color: #3b82f6;
-
-  --mdc-snackbar-supporting-text-font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-}
-
-.mat-mdc-snack-bar-container .mdc-snackbar__surface {
-  border-radius: inherit;
-  box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.25),
-    0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  padding: 4px 8px;
-}
-
-.mat-mdc-snack-bar-container .mdc-snackbar__label {
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.6;
-  letter-spacing: 0;
-}
-
-.mat-mdc-snack-bar-container .mat-mdc-button {
-  font-family:
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  text-transform: none !important;
-  letter-spacing: 0;
-  border-radius: 8px;
-  padding: 0 12px;
-  margin-right: 8px;
-  transition: background-color 0.2s ease;
-}
-
-.mat-mdc-snack-bar-container .mat-mdc-button:hover {
-  background-color: rgba(59, 130, 246, 0.15);
-}
-
-@media print {
-  body {
-    display: none !important;
-  }
 }

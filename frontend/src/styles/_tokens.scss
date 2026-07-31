@@ -1,0 +1,177 @@
+// =============================================================================
+//  BiMap — Design Tokens
+// -----------------------------------------------------------------------------
+//  BiMap is a field instrument for cadastral / heritage-asset registration.
+//  The interface is a chassis around a map: neutral, quiet, and dense enough to
+//  work in all day. One accent carries every interactive affordance; semantic
+//  hues are reserved for state. Nothing else is coloured.
+//
+//  Every value below is exposed as a CSS custom property so components never
+//  hardcode a hex and dark mode is a single attribute swap on <html>.
+// =============================================================================
+
+:root {
+  color-scheme: light;
+
+  // ── Surfaces ───────────────────────────────────────────────────────────────
+  --bm-canvas: #f5f7fa; // page background
+  --bm-surface: #ffffff; // cards, panels, dialogs
+  --bm-surface-2: #f2f4f8; // table headers, inset wells
+  --bm-surface-3: #e8ecf2; // hover on inset surfaces
+  --bm-overlay: rgba(12, 17, 27, 0.42); // dialog scrim
+
+  // ── Lines ──────────────────────────────────────────────────────────────────
+  --bm-line: #e4e8ee; // default hairline
+  --bm-line-soft: #eef1f5; // row separators
+  --bm-line-strong: #cfd6e0; // input borders, dividers that must read
+
+  // ── Text ───────────────────────────────────────────────────────────────────
+  --bm-text: #0c111b; // primary
+  --bm-text-2: #566074; // secondary / descriptions
+  --bm-text-3: #8590a3; // tertiary / placeholders, field icons
+  --bm-text-inverse: #ffffff;
+
+  // ── Accent — the single interactive hue ────────────────────────────────────
+  --bm-accent: #0a5fe0;
+  --bm-accent-hover: #0a52c2;
+  --bm-accent-active: #08459f;
+  --bm-accent-soft: #eaf1fe; // tinted backgrounds
+  --bm-accent-border: #c3d8fb;
+  --bm-accent-text: #0a4fbb; // accent text on soft background (AA on --bm-accent-soft)
+  --bm-on-accent: #ffffff;
+
+  // ── Semantic state ─────────────────────────────────────────────────────────
+  --bm-success: #047857;
+  --bm-success-soft: #e8f6f0;
+  --bm-success-border: #b7e2d1;
+
+  --bm-warning: #b45309;
+  --bm-warning-soft: #fdf3e6;
+  --bm-warning-border: #f2d9b4;
+
+  --bm-danger: #c62b30;
+  --bm-danger-hover: #a92126;
+  --bm-danger-soft: #fdeced;
+  --bm-danger-border: #f5c6c8;
+
+  // ── Elevation — restrained; borders do most of the work ────────────────────
+  --bm-shadow-xs: 0 1px 2px rgba(12, 17, 27, 0.05);
+  --bm-shadow-sm: 0 1px 2px rgba(12, 17, 27, 0.05), 0 2px 6px -2px rgba(12, 17, 27, 0.07);
+  --bm-shadow-md: 0 2px 4px rgba(12, 17, 27, 0.04), 0 8px 20px -8px rgba(12, 17, 27, 0.14);
+  --bm-shadow-lg: 0 4px 8px rgba(12, 17, 27, 0.05), 0 20px 44px -16px rgba(12, 17, 27, 0.22);
+
+  // ── Radii ──────────────────────────────────────────────────────────────────
+  --bm-radius-xs: 4px;
+  --bm-radius-sm: 6px;
+  --bm-radius-md: 8px;
+  --bm-radius-lg: 12px;
+  --bm-radius-xl: 16px;
+  --bm-radius-pill: 999px;
+
+  // ── Space — 4px base ───────────────────────────────────────────────────────
+  --bm-space-1: 4px;
+  --bm-space-2: 8px;
+  --bm-space-3: 12px;
+  --bm-space-4: 16px;
+  --bm-space-5: 20px;
+  --bm-space-6: 24px;
+  --bm-space-7: 32px;
+  --bm-space-8: 40px;
+  --bm-space-9: 48px;
+  --bm-space-10: 64px;
+
+  // ── Type ───────────────────────────────────────────────────────────────────
+  --bm-font-sans:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --bm-font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, monospace;
+
+  --bm-text-display: 600 clamp(22px, 1.1rem + 1vw, 28px) / 1.18 var(--bm-font-sans);
+  --bm-text-h1: 600 20px / 1.25 var(--bm-font-sans);
+  --bm-text-h2: 600 16px / 1.35 var(--bm-font-sans);
+  --bm-text-h3: 600 14px / 1.4 var(--bm-font-sans);
+  --bm-text-body: 400 14px / 1.55 var(--bm-font-sans);
+  --bm-text-small: 400 13px / 1.5 var(--bm-font-sans);
+  --bm-text-micro: 500 12px / 1.45 var(--bm-font-sans);
+
+  --bm-tracking-tight: -0.015em;
+  --bm-tracking-label: 0.06em;
+
+  // ── Motion — short, functional, never decorative ───────────────────────────
+  --bm-ease: cubic-bezier(0.2, 0, 0.1, 1);
+  --bm-duration-fast: 120ms;
+  --bm-duration: 180ms;
+  --bm-duration-slow: 260ms;
+
+  // ── Layout ─────────────────────────────────────────────────────────────────
+  --bm-header-height: 56px;
+  --bm-rail-width: clamp(340px, 26vw, 400px);
+  --bm-content-max: 1360px;
+  --bm-prose-max: 62ch;
+
+  // ── Focus ring ─────────────────────────────────────────────────────────────
+  --bm-focus-ring: 0 0 0 2px var(--bm-surface), 0 0 0 4px var(--bm-accent);
+
+  // ── Map chrome — the map is the only saturated thing on screen ─────────────
+  --bm-map-void: #e9edf2; // shown while tiles load
+  --bm-map-chrome: rgba(255, 255, 255, 0.94);
+  --bm-map-chrome-border: rgba(12, 17, 27, 0.08);
+  --bm-map-chrome-text: #26303f;
+}
+
+// =============================================================================
+//  Dark — for long sessions beside dark map tiles and Street View.
+//  Surfaces lift with lightness rather than shadow; the accent brightens so it
+//  still clears AA against the darker canvas.
+// =============================================================================
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bm-canvas: #0a0e15;
+  --bm-surface: #111721;
+  --bm-surface-2: #19212d;
+  --bm-surface-3: #222c3b;
+  --bm-overlay: rgba(3, 6, 11, 0.66);
+
+  --bm-line: #232c3a;
+  --bm-line-soft: #1b232f;
+  --bm-line-strong: #334053;
+
+  --bm-text: #e9edf4;
+  --bm-text-2: #9aa5b8;
+  --bm-text-3: #6d7889;
+  --bm-text-inverse: #0c111b;
+
+  --bm-accent: #4f95ff;
+  --bm-accent-hover: #6ba6ff;
+  --bm-accent-active: #85b6ff;
+  --bm-accent-soft: #14243c;
+  --bm-accent-border: #26456e;
+  --bm-accent-text: #8ab8ff;
+  --bm-on-accent: #06152b;
+
+  --bm-success: #34d399;
+  --bm-success-soft: #0f2a22;
+  --bm-success-border: #1d4c3c;
+
+  --bm-warning: #fbbf24;
+  --bm-warning-soft: #2b2110;
+  --bm-warning-border: #4d3a15;
+
+  --bm-danger: #f87171;
+  --bm-danger-hover: #fb8b8b;
+  --bm-danger-soft: #2c1518;
+  --bm-danger-border: #542427;
+
+  --bm-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --bm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 6px -2px rgba(0, 0, 0, 0.5);
+  --bm-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.4), 0 8px 20px -8px rgba(0, 0, 0, 0.6);
+  --bm-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.45), 0 20px 44px -16px rgba(0, 0, 0, 0.7);
+
+  --bm-focus-ring: 0 0 0 2px var(--bm-canvas), 0 0 0 4px var(--bm-accent);
+
+  --bm-map-void: #0d1219;
+  --bm-map-chrome: rgba(17, 23, 33, 0.92);
+  --bm-map-chrome-border: rgba(255, 255, 255, 0.12);
+  --bm-map-chrome-text: #dce3ec;
+}

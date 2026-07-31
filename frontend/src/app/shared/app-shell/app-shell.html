@@ -1,0 +1,75 @@
+<a class="bm-skip-link" href="#bm-main">Skip to main content</a>
+
+<header class="shell-header">
+  <a class="brand" routerLink="/" aria-label="BiMap home">
+    <span class="brand-mark" aria-hidden="true">
+      <mat-icon>explore</mat-icon>
+    </span>
+    <span class="brand-text">
+      <span class="brand-name">BiMap</span>
+      @if (section()) {
+        <span class="brand-divider" aria-hidden="true">/</span>
+        <span class="brand-section">{{ section() }}</span>
+      }
+    </span>
+  </a>
+
+  <div class="header-slot">
+    <ng-content select="[shellActions]" />
+  </div>
+
+  <div class="header-actions">
+    @if (user()) {
+      <div class="identity" [attr.title]="displayName()">
+        <span class="identity-avatar" aria-hidden="true">{{ initials() }}</span>
+        <span class="identity-copy">
+          <span class="identity-name">{{ displayName() }}</span>
+          @if (roleLabel()) {
+            <span class="identity-role">{{ roleLabel() }}</span>
+          }
+        </span>
+      </div>
+    }
+
+    <span class="header-rule" aria-hidden="true"></span>
+
+    <button
+      mat-icon-button
+      type="button"
+      class="icon-action"
+      [matTooltip]="isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
+      [attr.aria-label]="isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
+      [attr.aria-pressed]="isDark()"
+      (click)="toggleTheme()"
+    >
+      <mat-icon>{{ isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
+
+    @if (isAdmin()) {
+      <a
+        mat-icon-button
+        class="icon-action"
+        routerLink="/listuser"
+        routerLinkActive="is-current"
+        matTooltip="User administration"
+        aria-label="User administration"
+      >
+        <mat-icon>manage_accounts</mat-icon>
+      </a>
+    }
+
+    <a
+      mat-icon-button
+      class="icon-action icon-action--danger"
+      routerLink="/logout"
+      matTooltip="Sign out"
+      aria-label="Sign out"
+    >
+      <mat-icon>logout</mat-icon>
+    </a>
+  </div>
+</header>
+
+<main id="bm-main" class="shell-main" [class.shell-main--wide]="wide()" tabindex="-1">
+  <ng-content />
+</main>

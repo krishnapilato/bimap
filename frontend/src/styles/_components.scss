@@ -1,0 +1,289 @@
+// =============================================================================
+//  BiMap — Shared component patterns
+// -----------------------------------------------------------------------------
+//  The primitives that appear on more than one page live here so the map view
+//  and the admin views are literally the same components rather than two
+//  lookalike copies. Pages keep only their own layout.
+// =============================================================================
+
+@use 'mixins' as *;
+
+// ── Page heading ─────────────────────────────────────────────────────────────
+
+.bm-page-head {
+  margin-bottom: var(--bm-space-6);
+
+  h1 {
+    font: var(--bm-text-display);
+    letter-spacing: var(--bm-tracking-tight);
+  }
+
+  p {
+    margin-top: var(--bm-space-2);
+    max-width: var(--bm-prose-max);
+    color: var(--bm-text-2);
+    font: var(--bm-text-small);
+  }
+}
+
+// ── Panel ────────────────────────────────────────────────────────────────────
+
+.bm-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  @include surface;
+  overflow: hidden;
+}
+
+.bm-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bm-space-4);
+  padding: var(--bm-space-4) var(--bm-space-5);
+  border-bottom: 1px solid var(--bm-line);
+  background: var(--bm-surface);
+
+  @include below(sm) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--bm-space-3);
+    padding: var(--bm-space-4);
+  }
+}
+
+.bm-panel-copy {
+  min-width: 0;
+
+  h2 {
+    font: var(--bm-text-h2);
+    letter-spacing: var(--bm-tracking-tight);
+  }
+
+  p {
+    margin-top: 2px;
+    color: var(--bm-text-2);
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+}
+
+// ── Chip ─────────────────────────────────────────────────────────────────────
+
+.bm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: var(--bm-radius-pill);
+  border: 1px solid var(--bm-line);
+  background: var(--bm-surface-2);
+  color: var(--bm-text-2);
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.5;
+  white-space: nowrap;
+  flex: none;
+
+  // Status is never carried by colour alone — every variant keeps its dot and
+  // its text label.
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentcolor;
+    flex: none;
+  }
+
+  &--plain::before {
+    display: none;
+  }
+
+  &--accent {
+    background: var(--bm-accent-soft);
+    border-color: var(--bm-accent-border);
+    color: var(--bm-accent-text);
+  }
+
+  &--success {
+    background: var(--bm-success-soft);
+    border-color: var(--bm-success-border);
+    color: var(--bm-success);
+  }
+
+  &--warning {
+    background: var(--bm-warning-soft);
+    border-color: var(--bm-warning-border);
+    color: var(--bm-warning);
+  }
+
+  &--danger {
+    background: var(--bm-danger-soft);
+    border-color: var(--bm-danger-border);
+    color: var(--bm-danger);
+  }
+}
+
+// ── Table ────────────────────────────────────────────────────────────────────
+
+.bm-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  @include thin-scrollbar;
+}
+
+.bm-table {
+  width: 100%;
+
+  .mat-mdc-header-cell,
+  .mat-mdc-cell {
+    padding-inline: var(--bm-space-5);
+
+    &:first-of-type {
+      padding-inline-start: var(--bm-space-5);
+    }
+  }
+
+  .cell-strong {
+    color: var(--bm-text);
+    font-weight: 550;
+  }
+
+  .row-action {
+    color: var(--bm-text-3);
+
+    &:hover {
+      color: var(--bm-accent);
+      background: var(--bm-accent-soft);
+    }
+  }
+
+  // Row actions stay quiet until the row is engaged, keeping long lists calm —
+  // but never hide from keyboard or touch users.
+  @media (hover: hover) and (pointer: fine) {
+    .row-action {
+      opacity: 0;
+      transition: opacity var(--bm-duration-fast) var(--bm-ease);
+    }
+
+    .mat-mdc-row:hover .row-action,
+    .row-action:focus-visible {
+      opacity: 1;
+    }
+  }
+}
+
+// Below the tablet breakpoint a six-column table cannot be read without
+// horizontal scrolling, so each row becomes a labelled block instead.
+@include below(md) {
+  .bm-table {
+    display: block;
+
+    thead,
+    .mat-mdc-header-row {
+      display: none;
+    }
+
+    tbody {
+      display: block;
+    }
+
+    .mat-mdc-row {
+      display: block;
+      height: auto;
+      padding: var(--bm-space-3) var(--bm-space-4);
+      border-bottom: 1px solid var(--bm-line);
+    }
+
+    .mat-mdc-cell {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--bm-space-4);
+      min-height: 0;
+      padding: 5px 0;
+      border: none;
+      text-align: right;
+
+      &::before {
+        content: attr(data-label);
+        @include label;
+        text-align: left;
+        flex: none;
+      }
+
+      // Cells with no label (row actions) span the full width instead.
+      &[data-label='']::before {
+        display: none;
+      }
+
+      &[data-label=''] {
+        justify-content: flex-end;
+        padding-top: var(--bm-space-2);
+      }
+    }
+
+    .row-action {
+      opacity: 1;
+    }
+
+    // The `*matNoDataRow` row carries `mat-row`, not `mat-mdc-row`, so it needs
+    // to be switched to block layout explicitly alongside the data rows.
+    .mat-row:not(.mat-mdc-row) {
+      display: block;
+    }
+
+    .bm-empty-cell {
+      display: block;
+      width: 100%;
+    }
+  }
+}
+
+// ── Empty state ──────────────────────────────────────────────────────────────
+
+.bm-empty-cell {
+  padding: 0 !important;
+  border-bottom: none !important;
+}
+
+.bm-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--bm-space-2);
+  // Kept compact so an empty table doesn't claim vertical space that a
+  // neighbouring panel (the map) can put to better use.
+  padding: var(--bm-space-8) var(--bm-space-5);
+  text-align: center;
+
+  > mat-icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    margin-bottom: var(--bm-space-2);
+    border-radius: var(--bm-radius-lg);
+    background: var(--bm-surface-2);
+    color: var(--bm-text-3);
+    font-size: 22px;
+  }
+
+  .bm-empty-title {
+    font: var(--bm-text-h3);
+    color: var(--bm-text);
+  }
+
+  .bm-empty-body {
+    color: var(--bm-text-2);
+    font: var(--bm-text-small);
+    max-width: 36ch;
+  }
+
+  @include below(md) {
+    padding: var(--bm-space-8) var(--bm-space-4);
+  }
+}

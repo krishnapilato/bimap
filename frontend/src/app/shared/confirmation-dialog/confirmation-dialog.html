@@ -1,57 +1,37 @@
 <div
-  class="dialog-container"
+  class="dialog"
   role="alertdialog"
   aria-modal="true"
   [attr.aria-labelledby]="titleId"
   [attr.aria-describedby]="messageId"
 >
-  <div class="dialog-header">
-    <div
-      class="icon-halo-wrapper animate__animated animate__zoomIn"
-      [ngClass]="'tone-' + (data.tone ?? 'primary')"
-      aria-hidden="true"
-    >
-      <div class="icon-circle">
-        <mat-icon>{{ data.icon ?? 'help_outline' }}</mat-icon>
-      </div>
+  <div class="dialog-icon" [class]="'tone-' + (data.tone ?? 'primary')" aria-hidden="true">
+    <mat-icon>{{ data.icon ?? 'help' }}</mat-icon>
+  </div>
+
+  <h2 class="dialog-title" [id]="titleId">{{ resolvedTitle }}</h2>
+  <p class="dialog-message" [id]="messageId">{{ resolvedMessage }}</p>
+
+  @if (data.details) {
+    <div class="dialog-details">
+      @if (data.detailsLabel) {
+        <span class="dialog-details-label">{{ data.detailsLabel }}</span>
+      }
+      <span class="dialog-details-value">{{ data.details }}</span>
     </div>
-
-    <h2 class="dialog-title" [id]="titleId">{{ resolvedTitle }}</h2>
-  </div>
-
-  <div class="dialog-body">
-    <p class="dialog-message" [id]="messageId">{{ resolvedMessage }}</p>
-
-    @if (data.details) {
-      <div class="detail-card">
-        @if (data.detailsLabel) {
-          <span class="detail-label">{{ data.detailsLabel }}</span>
-        }
-
-        <span class="detail-value">{{ data.details }}</span>
-      </div>
-    }
-  </div>
+  }
 
   <div class="dialog-actions">
-    <button
-      type="button"
-      mat-stroked-button
-      class="action-btn cancel-btn"
-      cdkFocusInitial
-      (click)="cancel()"
-    >
+    <button type="button" mat-stroked-button cdkFocusInitial (click)="cancel()">
       {{ data.cancelText ?? 'Cancel' }}
     </button>
 
     <button
       type="button"
       mat-flat-button
-      [color]="data.tone ?? 'primary'"
-      class="action-btn confirm-btn"
+      [class.bm-btn-danger]="data.tone === 'warn'"
       (click)="confirm()"
     >
-      <mat-icon>{{ data.icon ?? 'check' }}</mat-icon>
       {{ data.confirmText ?? 'Confirm' }}
     </button>
   </div>

@@ -1,121 +1,79 @@
-<header class="app-header animate__animated animate__fadeInDown">
-  <div class="brand-container">
-    <div class="logo-wrapper">
-      <mat-icon color="warn">admin_panel_settings</mat-icon>
-    </div>
-    <span class="brand-title">Admin<span class="text-danger">Workspace</span></span>
+<bm-app-shell section="Administration">
+  <div class="bm-page-head">
+    <h1>Users</h1>
+    <p>Manage workspace access, roles, and account status.</p>
   </div>
 
-  <span class="spacer"></span>
+  <dl class="stats">
+    <div class="stat">
+      <dt>Total users</dt>
+      <dd class="bm-numeric">{{ totalUsersCount }}</dd>
+    </div>
+    <div class="stat">
+      <dt>Confirmed</dt>
+      <dd class="bm-numeric">{{ activeUsersCount }}</dd>
+    </div>
+    <div class="stat">
+      <dt>Administrators</dt>
+      <dd class="bm-numeric">{{ adminUsersCount }}</dd>
+    </div>
+  </dl>
 
-  <div class="header-actions">
-    <div class="user-badge hide-on-mobile">
-      <div class="avatar-circle">
-        <mat-icon>person</mat-icon>
+  <section class="bm-panel" aria-labelledby="users-title">
+    <div class="bm-panel-head">
+      <div class="bm-panel-copy">
+        <h2 id="users-title">All accounts</h2>
+        <p>Search by name, email, role, or status.</p>
       </div>
-      <span class="user-name">{{ currentUserName }}</span>
-    </div>
 
-    <div class="divider hide-on-mobile"></div>
-
-    <button
-      mat-icon-button
-      class="action-btn"
-      matTooltip="Dashboard Home"
-      aria-label="Go to dashboard"
-      routerLink="/"
-    >
-      <mat-icon>space_dashboard</mat-icon>
-    </button>
-    <button
-      mat-icon-button
-      color="warn"
-      class="action-btn logout-btn"
-      matTooltip="Logout"
-      aria-label="Logout"
-      routerLink="/logout"
-    >
-      <mat-icon>logout</mat-icon>
-    </button>
-  </div>
-</header>
-
-<main class="workspace-container animate__animated animate__fadeInUp">
-  <div class="page-header">
-    <div class="header-content">
-      <h1>User Management</h1>
-      <p>Manage application access, roles, and user details across the organization.</p>
-    </div>
-  </div>
-
-  <div class="data-card">
-    <div class="content-card-header">
-      <div class="content-card-copy">
-        <div class="eyebrow">Administration</div>
-        <h2>Workspace users</h2>
-        <p>Review access, search records fast, and manage user status from one place.</p>
-      </div>
-    </div>
-
-    <div class="table-toolbar">
-      <div class="toolbar-search-block">
-
-        <mat-form-field appearance="outline" class="search-field dense-theme">
-          <mat-icon matPrefix class="search-icon">search</mat-icon>
+      <div class="toolbar">
+        <mat-form-field appearance="outline" class="toolbar-search bm-field--quiet">
+          <mat-icon matIconPrefix>search</mat-icon>
           <input
             matInput
+            type="search"
             autocomplete="off"
-            (keyup)="applyFilter($event)"
             #input
             aria-label="Search users"
-            placeholder="Search users by name, email, role, or status"
+            placeholder="Search users"
+            (keyup)="applyFilter($event)"
           />
         </mat-form-field>
-      </div>
 
-      <button
-        mat-flat-button
-        color="primary"
-        class="add-user-btn"
-        aria-label="Add new user"
-        routerLink="/adduser"
-      >
-        <mat-icon>add</mat-icon>
-        <span>Add New User</span>
-      </button>
+        <a mat-flat-button routerLink="/adduser" class="toolbar-add">
+          <mat-icon aria-hidden="true">add</mat-icon>
+          Add user
+        </a>
+      </div>
     </div>
 
-    <div class="table-responsive">
-      <table mat-table matSort [dataSource]="dataSource" class="user-table" aria-label="User list table">
+    <div class="bm-table-wrap">
+      <table mat-table matSort [dataSource]="dataSource" class="bm-table" aria-label="Workspace users">
         <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>First Name</th>
-          <td mat-cell *matCellDef="let row">
-            <div class="identity-cell">
-              <div class="identity-copy">
-                <span class="primary-text">{{ row.name }}</span>
-              </div>
-            </div>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>First name</th>
+          <td mat-cell *matCellDef="let row" data-label="First name">
+            <span class="cell-strong">{{ row.name }}</span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="surname">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Name</th>
-          <td mat-cell *matCellDef="let row">
-            <span class="primary-text">{{ row.surname }}</span>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Last name</th>
+          <td mat-cell *matCellDef="let row" data-label="Last name">
+            <span class="cell-strong">{{ row.surname }}</span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Email Address</th>
-          <td mat-cell *matCellDef="let row">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+          <td mat-cell *matCellDef="let row" data-label="Email">
             <button
               type="button"
-              class="email-link"
-              matTooltip="Send email"
+              class="email-btn"
+              matTooltip="Send confirmation email"
               [attr.aria-label]="'Send confirmation email to ' + row.email"
               (click)="confirmSendEmail(row.email)"
             >
-              <mat-icon>mail</mat-icon>
+              <mat-icon aria-hidden="true">mail</mat-icon>
               <span>{{ row.email }}</span>
             </button>
           </td>
@@ -123,38 +81,42 @@
 
         <ng-container matColumnDef="userStatus">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
-          <td mat-cell *matCellDef="let row">
-            <span class="status-badge" [ngClass]="getStatusClass(row.userStatus)">
-              {{ formatStatus(row.userStatus) }}
+          <td mat-cell *matCellDef="let row" data-label="Status">
+            <span class="bm-chip" [class]="statusChipClass(row.userStatus)">
+              {{ formatStatus(row.userStatus) || 'Unknown' }}
             </span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="applicationRole">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
-          <td mat-cell *matCellDef="let row">
-            <span class="role-text">{{ row.applicationRole | titlecase }}</span>
+          <td mat-cell *matCellDef="let row" data-label="Role">
+            <span class="bm-chip bm-chip--plain">{{ row.applicationRole | titlecase }}</span>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef class="action-header">Actions</th>
-          <td mat-cell *matCellDef="let row" class="action-cell">
-            <div class="action-group">
+          <th mat-header-cell *matHeaderCellDef class="col-actions">
+            <span class="bm-visually-hidden">Actions</span>
+          </th>
+          <td mat-cell *matCellDef="let row" class="col-actions" data-label="">
+            <div class="row-actions">
               <button
                 mat-icon-button
-                class="row-action-btn edit-btn"
-                matTooltip="Edit User"
-                [attr.aria-label]="'Edit user ' + row.name + ' ' + row.surname"
+                type="button"
+                class="row-action"
+                matTooltip="Edit user"
+                [attr.aria-label]="'Edit ' + row.name + ' ' + row.surname"
                 (click)="openEditDialog(row)"
               >
                 <mat-icon>edit</mat-icon>
               </button>
               <button
                 mat-icon-button
-                class="row-action-btn delete-btn"
-                matTooltip="Delete User"
-                [attr.aria-label]="'Delete user ' + row.name + ' ' + row.surname"
+                type="button"
+                class="row-action row-action--danger"
+                matTooltip="Delete user"
+                [attr.aria-label]="'Delete ' + row.name + ' ' + row.surname"
                 (click)="confirmDeleteUser(row)"
               >
                 <mat-icon>delete</mat-icon>
@@ -164,23 +126,18 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row class="hover-row" *matRowDef="let row; columns: displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
 
         <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
-            <div class="empty-state-content">
-              <div class="empty-icon-wrapper">
-                <mat-icon>search_off</mat-icon>
-              </div>
+          <td class="bm-empty-cell" [attr.colspan]="displayedColumns.length">
+            <div class="bm-empty">
+              <mat-icon aria-hidden="true">person_search</mat-icon>
               @if (input.value.length > 0) {
-                <h3>No users found</h3>
-                <p>
-                  We couldn't find anyone matching "<strong>{{ input.value }}</strong
-                  >".
-                </p>
+                <p class="bm-empty-title">No matching users</p>
+                <p class="bm-empty-body">Nothing matched “{{ input.value }}”. Try another search.</p>
               } @else {
-                <h3>No data available</h3>
-                <p>There are currently no users in the system.</p>
+                <p class="bm-empty-title">No users yet</p>
+                <p class="bm-empty-body">Add the first account to get started.</p>
               }
             </div>
           </td>
@@ -188,12 +145,6 @@
       </table>
     </div>
 
-    <mat-paginator
-      showFirstLastButtons
-      [pageSize]="5"
-      [pageSizeOptions]="[5]"
-      [hidePageSize]="true"
-      class="custom-paginator"
-    ></mat-paginator>
-  </div>
-</main>
+    <mat-paginator showFirstLastButtons [pageSize]="10" [pageSizeOptions]="[10, 25, 50]" />
+  </section>
+</bm-app-shell>

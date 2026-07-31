@@ -1,0 +1,236 @@
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+  background: var(--bm-canvas);
+}
+
+// ── Masthead ─────────────────────────────────────────────────────────────────
+
+.shell-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-4);
+  height: var(--bm-header-height);
+  padding-inline: var(--bm-space-5);
+  background: var(--bm-surface);
+  border-bottom: 1px solid var(--bm-line);
+
+  @include below(sm) {
+    gap: var(--bm-space-2);
+    padding-inline: var(--bm-space-3);
+  }
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bm-space-3);
+  padding: var(--bm-space-1);
+  margin-inline-start: calc(var(--bm-space-1) * -1);
+  border-radius: var(--bm-radius-md);
+  color: var(--bm-text);
+  text-decoration: none;
+  flex: none;
+
+  &:hover {
+    text-decoration: none;
+
+    .brand-mark {
+      border-color: var(--bm-accent-border);
+    }
+  }
+
+  @include focusable;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--bm-radius-md);
+  background: var(--bm-accent-soft);
+  border: 1px solid transparent;
+  color: var(--bm-accent);
+  transition: border-color var(--bm-duration) var(--bm-ease);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.brand-text {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--bm-space-2);
+  min-width: 0;
+}
+
+.brand-name {
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: var(--bm-tracking-tight);
+}
+
+// Both hide together — a lone separator with nothing after it reads as a bug.
+.brand-divider,
+.brand-section {
+  @include below(xs) {
+    display: none;
+  }
+}
+
+.brand-divider {
+  color: var(--bm-line-strong);
+}
+
+.brand-section {
+  font-size: 13px;
+  color: var(--bm-text-2);
+  @include truncate;
+}
+
+// Page-specific controls project here and take the free space.
+.header-slot {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-2);
+  flex: 1;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-1);
+  flex: none;
+}
+
+.header-rule {
+  width: 1px;
+  height: 20px;
+  margin-inline: var(--bm-space-2);
+  background: var(--bm-line);
+
+  @include below(sm) {
+    display: none;
+  }
+}
+
+// ── Identity ─────────────────────────────────────────────────────────────────
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-2);
+  padding: 3px var(--bm-space-3) 3px 3px;
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-surface-2);
+  min-width: 0;
+  max-width: 220px;
+
+  @include below(md) {
+    display: none;
+  }
+}
+
+.identity-avatar {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--bm-accent);
+  color: var(--bm-on-accent);
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.identity-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.identity-name {
+  font-size: 12.5px;
+  font-weight: 550;
+  color: var(--bm-text);
+  @include truncate;
+}
+
+.identity-role {
+  font-size: 10.5px;
+  color: var(--bm-text-3);
+  @include truncate;
+}
+
+// ── Header buttons ───────────────────────────────────────────────────────────
+
+.icon-action {
+  color: var(--bm-text-2);
+
+  &.is-current {
+    background: var(--bm-accent-soft);
+    color: var(--bm-accent);
+  }
+
+  &--danger:hover {
+    background: var(--bm-danger-soft);
+    color: var(--bm-danger);
+  }
+}
+
+// ── Content frame ────────────────────────────────────────────────────────────
+
+// A flex column so pages can opt a panel into filling the remaining height
+// instead of leaving a dead band under short content.
+.shell-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: var(--bm-content-max);
+  margin-inline: auto;
+  padding: var(--bm-space-7) var(--bm-space-6) var(--bm-space-9);
+
+  &:focus {
+    outline: none;
+  }
+
+  // The map workspace needs the full viewport and manages its own padding.
+  &--wide {
+    max-width: none;
+    padding: 0;
+  }
+
+  @include below(md) {
+    padding: var(--bm-space-5) var(--bm-space-4) var(--bm-space-8);
+
+    &--wide {
+      padding: 0;
+    }
+  }
+
+  @include below(xs) {
+    padding: var(--bm-space-4) var(--bm-space-3) var(--bm-space-7);
+
+    &--wide {
+      padding: 0;
+    }
+  }
+}

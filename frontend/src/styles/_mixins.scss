@@ -1,0 +1,131 @@
+// =============================================================================
+//  BiMap — Layout & pattern mixins
+//  Breakpoints are named for the layout change they trigger, not for devices.
+// =============================================================================
+
+@use 'sass:map';
+
+$bp: (
+  xs: 480px,
+  // phone portrait
+  sm: 640px,
+  // large phone
+  md: 900px,
+  // tablet — tables reflow to stacked rows here
+  lg: 1100px,
+  // small laptop — workspace rail stacks here
+  xl: 1400px,
+) !default;
+
+/// Applies styles at or below a named breakpoint.
+@mixin below($name) {
+  @if not map.has-key($bp, $name) {
+    @error 'Unknown breakpoint `#{$name}`. Expected one of: #{map.keys($bp)}.';
+  }
+  @media (max-width: map.get($bp, $name)) {
+    @content;
+  }
+}
+
+/// Applies styles above a named breakpoint.
+@mixin above($name) {
+  @if not map.has-key($bp, $name) {
+    @error 'Unknown breakpoint `#{$name}`. Expected one of: #{map.keys($bp)}.';
+  }
+  @media (min-width: map.get($bp, $name) + 1px) {
+    @content;
+  }
+}
+
+// ── Patterns ─────────────────────────────────────────────────────────────────
+
+/// A panel: the single container primitive. Borders carry the structure so the
+/// page stays flat and quiet; elevation is opt-in.
+@mixin surface($radius: var(--bm-radius-lg), $shadow: var(--bm-shadow-sm)) {
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-line);
+  border-radius: $radius;
+  box-shadow: $shadow;
+}
+
+/// Keyboard-only focus ring. Always paired with `:focus-visible` so pointer
+/// users never see it.
+@mixin focus-ring($offset: 0) {
+  outline: none;
+  box-shadow: var(--bm-focus-ring);
+  @if $offset != 0 {
+    outline-offset: $offset;
+  }
+}
+
+@mixin focusable($offset: 0) {
+  &:focus-visible {
+    @include focus-ring($offset);
+  }
+}
+
+/// Uppercase micro-label used for section eyebrows and table headers.
+@mixin label {
+  font: var(--bm-text-micro);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: var(--bm-tracking-label);
+  color: var(--bm-text-3);
+}
+
+/// Coordinates, ISTAT codes and record IDs — aligned digits, always.
+@mixin numeric {
+  font-family: var(--bm-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/// Translucent chrome floating over the map. Prefixed for Safari, which still
+/// requires `-webkit-backdrop-filter`.
+@mixin glass($blur: 8px) {
+  -webkit-backdrop-filter: blur($blur);
+  backdrop-filter: blur($blur);
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/// Slim scrollbars that match the surface they sit on.
+@mixin thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bm-line-strong) transparent;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--bm-line-strong);
+    border: 3px solid transparent;
+    background-clip: content-box;
+    border-radius: var(--bm-radius-pill);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--bm-text-3);
+    background-clip: content-box;
+  }
+}
+
+/// Faint graticule — a nod to a map grid, at an opacity that reads as texture
+/// rather than pattern. Used only on the unauthenticated shell.
+@mixin graticule($size: 32px) {
+  background-image:
+    linear-gradient(var(--bm-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bm-line) 1px, transparent 1px);
+  background-size: $size $size;
+  background-position: center center;
+}

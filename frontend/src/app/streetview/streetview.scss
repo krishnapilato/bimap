@@ -1,42 +1,61 @@
+@use 'styles/mixins' as *;
+
+// The host is a flex item that stretches to whatever height its container
+// gives it. It must not declare `height: 100%`: the parent's height comes from
+// `flex: 1`, which is an indefinite height, so a percentage would fall back to
+// auto and collapse the whole map to nothing.
 :host {
-  display: block;
+  display: flex;
   width: 100%;
-  height: 100%;
-  min-height: 320px;
-  background: #0b1220;
+  min-width: 0;
+  min-height: 0;
+  background: var(--bm-map-void);
   overflow: hidden;
 }
 
-.map-container {
+.map-split {
+  position: relative;
   display: flex;
   flex-direction: row;
-  width: 100%;
-  height: 100%;
+  flex: 1;
+  min-width: 0;
   min-height: 0;
-  position: relative;
   overflow: hidden;
-  background: #111;
+  background: var(--bm-map-void);
 
-  // Responsive: Stack vertically on mobile
-  @media (max-width: 768px) {
+  @include below(md) {
     flex-direction: column;
-    min-height: 520px;
   }
 }
 
-.map-panel {
-  height: 100%;
-  min-height: 0;
+.map-pane {
   position: relative;
+  flex-grow: 0;
+  flex-shrink: 1; // absorbs the splitter's 10px so the panes still total 100%
+  min-width: 0;
+  min-height: 0;
   overflow: hidden;
-  transition:
-    width 0.08s linear,
-    flex-basis 0.08s linear;
+}
 
-  @media (max-width: 768px) {
-    width: 100% !important;
-    height: auto;
-    flex: 0 0 auto;
+// Single-view modes STACK the panes rather than collapsing one to zero.
+//
+// A Street View panorama whose container is squeezed to zero width discards
+// its imagery and comes back permanently black — `setVisible()` does not
+// recover it. So in Map-only and Street-only the two panes are taken out of
+// flow at full size and simply layered: the active one covers the other
+// completely. Both keep real dimensions at all times, so neither API is ever
+// resized to nothing.
+.map-split.is-single {
+  .map-pane {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .map-pane.is-front {
+    z-index: 2;
+    pointer-events: auto;
   }
 }
 
@@ -44,189 +63,127 @@
   width: 100%;
   height: 100%;
   min-height: 0;
-  background: #1a1a1a;
+  background: var(--bm-map-void);
 }
 
-.recenter-btn {
+// In dark mode the raster road tiles are inverted so the map sits at the same
+// luminance as the rest of the app. Only the tile pane is filtered, so markers,
+// Street View and our own chrome keep their true colours.
+:host-context(:root[data-theme='dark']) ::ng-deep .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.92) saturate(0.75);
+}
+
+// ── Pane chrome ──────────────────────────────────────────────────────────────
+
+.pane-badge {
   position: absolute;
-  left: 14px;
-  bottom: 14px;
-  z-index: 1200;
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+  top: var(--bm-space-3);
+  left: var(--bm-space-3);
+  z-index: 500;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  color: #334155;
-  cursor: pointer;
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    background 0.18s ease;
-
-  mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-  }
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
-    background: rgba(255, 255, 255, 1);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-
-  &:focus-visible {
-    outline: 2px solid rgba(59, 130, 246, 0.55);
-    outline-offset: 2px;
-  }
-
-  @media (max-width: 768px) {
-    width: 44px;
-    height: 44px;
-    left: 12px;
-    bottom: 12px;
-  }
-}
-
-.resizer {
-  position: relative;
-  flex: 0 0 12px;
-  width: 12px;
-  background: linear-gradient(90deg, #f5f5f5, #f0f0f0, #f5f5f5);
-  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.2);
-  border-left: 1px solid #111;
-  border-right: 1px solid #333;
-  cursor: col-resize;
-  z-index: 1000;
-  transition: background 0.2s ease, width 0.2s ease;
-
-  @media (max-width: 768px) {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: calc(var(--split, 50%) - 6px);
-    width: 100%;
-    height: 12px;
-    flex: none;
-    cursor: row-resize;
-    border-left: none;
-    border-right: none;
-    border-top: 1px solid #111;
-    border-bottom: 1px solid #333;
-    background: linear-gradient(180deg, #f5f5f5, #f0f0f0, #f5f5f5);
-  }
-
-  &:hover, &:active {
-    background: linear-gradient(90deg, #e0e0e0, #d0d0d0, #e0e0e0);
-  }
-
-  &::after {
-    content: '⋮';
-    color: #666;
-    font-size: 22px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    opacity: 0.6;
-
-    @media (max-width: 768px) {
-      content: '⋯';
-      font-size: 20px;
-      line-height: 1;
-    }
-  }
-}
-
-.drag-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 9999;
-  cursor: col-resize;
-  background: rgba(66, 133, 244, 0.08);
-  pointer-events: auto;
-
-  @media (max-width: 768px) {
-    cursor: row-resize;
-  }
-}
-
-.map-info {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  z-index: 500;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-map-chrome);
+  border: 1px solid var(--bm-map-chrome-border);
+  @include glass;
+  color: var(--bm-map-chrome-text);
+  font-size: 11.5px;
+  font-weight: 600;
   pointer-events: none;
 
-  @media (max-width: 768px) {
-    top: 10px;
-    left: 10px;
-  }
-
-  &.right {
-    left: auto;
-    right: 16px;
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
   }
 }
 
-.info-pill {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  color: #000000;
-  font-size: 13px;
-  padding: 6px 14px;
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+// The coordinate readout and the recentre control now live in the canvas bar
+// above, so every map control sits in one place instead of floating over the
+// imagery.
 
-  @media (max-width: 768px) {
-    font-size: 12px;
-    padding: 6px 10px;
+// ── Splitter ─────────────────────────────────────────────────────────────────
+
+// Sits in normal flow between the panes, so it follows the split in both
+// orientations without any absolute positioning.
+.splitter {
+  position: relative;
+  flex: 0 0 10px;
+  z-index: 700;
+  background: var(--bm-surface);
+  border-inline: 1px solid var(--bm-line);
+  cursor: col-resize;
+  touch-action: none; // dragging must not scroll the page
+  display: grid;
+  place-items: center;
+  transition: background-color var(--bm-duration-fast) var(--bm-ease);
+
+  &:hover,
+  &.is-active {
+    background: var(--bm-accent-soft);
+  }
+
+  @include focusable;
+
+  @include below(md) {
+    cursor: row-resize;
+    border-inline: none;
+    border-block: 1px solid var(--bm-line);
   }
 }
 
-.label { color: #888; font-weight: 500; }
-.coords { font-family: ui-monospace, monospace; color: #aaa; }
+.splitter-grip {
+  width: 2px;
+  height: 26px;
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-line-strong);
+
+  .splitter:hover &,
+  .splitter.is-active & {
+    background: var(--bm-accent);
+  }
+
+  @include below(md) {
+    width: 26px;
+    height: 2px;
+  }
+}
+
+// Swallows pointer events over the map iframes mid-drag, so the panes keep
+// tracking the pointer instead of the map grabbing it.
+.drag-shield {
+  position: absolute;
+  inset: 0;
+  z-index: 650;
+  cursor: inherit;
+  background: rgba(10, 95, 224, 0.06);
+}
+
+// ── Marker ───────────────────────────────────────────────────────────────────
 
 :host ::ng-deep {
-  .leaflet-container { background: #1a1a1a; }
-  .leaflet-control-attribution {
-    background: rgba(0, 0, 0, 0.7) !important;
-    color: #777 !important;
-    font-size: 10px;
-  }
-
   .fov-marker-container {
     background: transparent;
     border: none;
   }
 
-  // ── Shell ──────────────────────────────────────────────────────────────────
+  // The marker floats over map imagery, not over an app surface, and is not
+  // affected by the dark-mode tile inversion — so it keeps one fixed, high
+  // contrast treatment in both themes rather than following the text tokens.
   .fov-marker-shell {
     --marker-heading: 0deg;
-    --marker-accent: #3b82f6;
-    --marker-accent-mid: rgba(59, 130, 246, 0.58);
-    --marker-accent-soft: rgba(59, 130, 246, 0.18);
+    --marker-accent: #0a5fe0;
+    --marker-accent-mid: rgba(10, 95, 224, 0.55);
     position: relative;
     width: 62px;
     height: 62px;
     will-change: transform;
-    filter: drop-shadow(0 6px 18px rgba(15, 23, 42, 0.3));
-    transition: filter 0.2s ease, transform 0.2s ease;
+    filter: drop-shadow(0 6px 16px rgba(12, 17, 27, 0.3));
+    transition:
+      filter var(--bm-duration) var(--bm-ease),
+      transform var(--bm-duration) var(--bm-ease);
 
     &.is-active {
       animation: marker-bounce 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -237,19 +194,16 @@
     }
   }
 
-  // ── Frosted-glass base disc (mirrors .recenter-btn aesthetic) ─────────────
   .fov-glass-disc {
     position: absolute;
     inset: 9px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1.5px solid rgba(255, 255, 255, 0.65);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 2px 8px rgba(12, 17, 27, 0.12);
   }
 
-  // ── Directional FOV cone ──────────────────────────────────────────────────
+  // The cone shows which way the Street View camera is pointing.
   .fov-cone {
     position: absolute;
     inset: 3px;
@@ -258,31 +212,28 @@
       from calc(var(--marker-heading) - 23deg),
       transparent 0deg,
       var(--marker-accent-mid) 21deg,
-      rgba(147, 197, 253, 0.2) 44deg,
+      rgba(120, 170, 250, 0.2) 44deg,
       transparent 66deg,
       transparent 360deg
     );
-    mask: radial-gradient(circle at center, transparent 0 12px, black 13.5px);
     -webkit-mask: radial-gradient(circle at center, transparent 0 12px, black 13.5px);
+    mask: radial-gradient(circle at center, transparent 0 12px, black 13.5px);
   }
 
-  // ── Heading tick – thin line from centre pointing in heading direction ────
   .fov-tick {
     position: absolute;
     left: 50%;
     top: 7px;
     width: 2px;
     height: 10px;
-    border-radius: 999px;
+    border-radius: var(--bm-radius-pill);
     background: var(--marker-accent);
-    // pivot = top of element + 24px = 7 + 24 = 31px = marker centre
-    transform-origin: center 24px;
+    transform-origin: center 24px; // 7px offset + 24px = the 31px marker centre
     transform: translateX(-50%) rotate(var(--marker-heading));
-    opacity: 0.8;
+    opacity: 0.85;
     transition: transform 0.15s ease-out;
   }
 
-  // ── Centre pin ────────────────────────────────────────────────────────────
   .fov-pin {
     position: absolute;
     left: 50%;
@@ -294,11 +245,10 @@
     background: var(--marker-accent);
     border: 3px solid #ffffff;
     box-shadow:
-      0 0 0 2px rgba(59, 130, 246, 0.32),
-      0 3px 10px rgba(15, 23, 42, 0.28);
+      0 0 0 2px rgba(10, 95, 224, 0.3),
+      0 3px 10px rgba(12, 17, 27, 0.28);
   }
 
-  // ── Ripple on position change ─────────────────────────────────────────────
   .fov-pulse-ring {
     position: absolute;
     inset: 17px;
@@ -311,35 +261,33 @@
 
   .leaflet-marker-icon:hover .fov-marker-shell {
     transform: scale(1.05);
-    filter: drop-shadow(0 10px 24px rgba(15, 23, 42, 0.36));
   }
 }
 
 @keyframes marker-bounce {
-  0%   { transform: scale(0.88);  filter: drop-shadow(0 3px 10px rgba(15, 23, 42, 0.18)); }
-  45%  { transform: scale(1.12);  filter: drop-shadow(0 10px 22px rgba(15, 23, 42, 0.3)); }
-  100% { transform: scale(1);     filter: drop-shadow(0 6px 18px rgba(15, 23, 42, 0.3)); }
+  0% {
+    transform: scale(0.88);
+  }
+  45% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes marker-pulse {
-  0%   { opacity: 0.85; transform: scale(0.7); }
-  65%  { opacity: 0.18; transform: scale(1.45); }
-  100% { opacity: 0;    transform: scale(1.75); }
-}
-
-@media (max-width: 768px) {
-  :host {
-    min-height: 520px;
+  0% {
+    opacity: 0.85;
+    transform: scale(0.7);
+  }
+  65% {
+    opacity: 0.18;
+    transform: scale(1.45);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.75);
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}

@@ -1,78 +1,89 @@
-import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterModule } from '@angular/router';
+
+import { AppShellComponent } from '../shared/app-shell/app-shell';
 import { User } from '../user';
 import { UserService } from '../user-list/user-service.service';
 
 @Component({
   selector: 'app-user-form',
+  standalone: true,
   imports: [
+    FormsModule,
+    RouterModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatSnackBarModule,
-    FormsModule,
     MatTooltipModule,
     MatIconModule,
-    CommonModule,
-    RouterModule,
+    AppShellComponent,
   ],
-  providers: [UserService],
   templateUrl: './user-form.html',
-  styleUrls: ['./user-form.scss'],
+  styleUrl: './user-form.scss',
 })
 export class UserFormComponent {
-  user: User;
-  emailStatus = false;
+  private readonly router = inject(Router);
+  private readonly userService = inject(UserService);
+  private readonly snackbar = inject(MatSnackBar);
 
-  hidePassword = true;
+  user = new User();
+
+  readonly emailTaken = signal(false);
+  readonly hidePassword = signal(true);
+  readonly isSubmitting = signal(false);
 
   togglePasswordVisibility(): void {
-    this.hidePassword = !this.hidePassword;
+    this.hidePassword.update((hidden) => !hidden);
   }
 
-  constructor(
-    private router: Router,
-    private userService: UserService,
-    private _snackbar: MatSnackBar,
-  ) {
-    this.user = new User();
-  }
-
+  /** Checks availability on blur so the clash surfaces before submission. */
   onFocusOutEvent(): void {
     const email = this.user.email?.trim();
+
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      this.emailStatus = false;
+      this.emailTaken.set(false);
       return;
     }
 
-    this.userService
-      .checkIfEmailExists(email)
-      .subscribe((data) => (this.emailStatus = data));
+    this.userService.checkIfEmailExists(email).subscribe({
+      next: (exists) => this.emailTaken.set(exists),
+      error: () => this.emailTaken.set(false),
+    });
   }
 
-  public onSubmit(): void {
+  onSubmit(): void {
+    if (this.isSubmitting()) return;
+
+    this.isSubmitting.set(true);
+
+    // Re-check immediately before writing: the address may have been claimed
+    // between the blur check and submission.
     this.userService.checkIfEmailExists(this.user.email).subscribe({
       next: (exists) => {
         if (exists) {
-          this._snackbar.open('Email already exists.', 'Close', {
-            duration: 3000,
-          });
+          this.emailTaken.set(true);
+          this.isSubmitting.set(false);
+          this.snackbar.open('That email is already registered', 'Close', { duration: 3000 });
           return;
         }
 
         this.userService.save(this.user).subscribe({
-          next: () => this.router.navigate(['/listuser']),
+          next: () => {
+            this.isSubmitting.set(false);
+            this.snackbar.open('User created', 'Close', { duration: 2500 });
+            this.router.navigate(['/listuser']);
+          },
           error: (err) => {
             console.error(err);
-            this._snackbar.open("Can't save new user: retry!", 'Close', {
+            this.isSubmitting.set(false);
+            this.snackbar.open('Could not create the user. Please try again.', 'Close', {
               duration: 3000,
             });
           },
@@ -80,6 +91,8 @@ export class UserFormComponent {
       },
       error: (err) => {
         console.error(err);
+        this.isSubmitting.set(false);
+        this.snackbar.open('Could not verify the email address', 'Close', { duration: 3000 });
       },
     });
   }

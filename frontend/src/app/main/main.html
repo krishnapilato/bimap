@@ -1,306 +1,362 @@
-<header class="app-header animate__animated animate__fadeInDown">
-  <div class="brand-container">
-    <div class="logo-wrapper">
-      <mat-icon color="warn">explore</mat-icon>
-    </div>
-    <span class="brand-title">Bi<span class="text-danger">Map</span></span>
+<bm-app-shell section="Asset registration" wide>
+  <div shellActions class="shell-clock" role="status" aria-live="off">
+    <mat-icon aria-hidden="true">schedule</mat-icon>
+    <time [attr.datetime]="currentTime().toISOString()">
+      {{ currentTime() | date: 'dd MMM · HH:mm:ss' }}
+    </time>
   </div>
 
-  <span class="spacer"></span>
-
-  <div class="header-actions">
-    <div class="time-display hide-on-mobile">
-      {{ currentTime() | date: 'dd/MM/yyyy - HH:mm:ss' }}
-    </div>
-    @if (user.user.applicationRole === 'ADMINISTRATOR') {
-      <button
-        mat-icon-button
-        class="action-btn"
-        matTooltip="Admin"
-        aria-label="Open admin panel"
-        routerLink="/listuser"
-      >
-        <mat-icon>admin_panel_settings</mat-icon>
-      </button>
-    }
-
-    <div class="divider hide-on-mobile"></div>
-
-    <button
-      mat-icon-button
-      color="warn"
-      class="logout-btn"
-      matTooltip="Logout"
-      aria-label="Logout"
-      routerLink="/logout"
-    >
-      <mat-icon>logout</mat-icon>
-    </button>
-  </div>
-</header>
-
-<div class="workspace animate__animated animate__fadeIn">
-  <aside class="sidebar form-panel">
-    <div class="panel-header">
-      <div class="header-title-row">
-        <div>
-          <h2>Asset Registration</h2>
-          <p>Enter or search for asset details below.</p>
-        </div>
-      </div>
-    </div>
-
-    <form [formGroup]="mainForm" (ngSubmit)="saveData()" autocomplete="off" class="modern-form">
-      <div class="form-card">
-        <h3>1. Location Search</h3>
-        <mat-form-field appearance="outline" class="modern-input">
+  <!-- `formGroup` sits on the wrapper so the locate bar and the inspector can
+       share one form without nesting <form> elements. -->
+  <div class="ws" [formGroup]="mainForm">
+    <!-- ── Locate bar ───────────────────────────────────────────────────── -->
+    <section class="locate" aria-label="Locate the asset">
+      <div class="locate-fields">
+        <mat-form-field appearance="outline" class="bm-field--quiet">
           <mat-label>Region</mat-label>
-          <mat-icon matPrefix class="field-icon">landscape</mat-icon>
           <input
             matInput
             type="text"
             formControlName="searchRegions"
-            [matAutocomplete]="auto"
-            placeholder="Search for a region"
+            [matAutocomplete]="regionAuto"
           />
-          <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+          <mat-autocomplete autoActiveFirstOption #regionAuto="matAutocomplete">
             @for (region of regionsOptions$ | async; track region) {
               <mat-option [value]="region">{{ region }}</mat-option>
             }
           </mat-autocomplete>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="modern-input">
-          <mat-icon matPrefix class="field-icon">location_city</mat-icon>
+        <mat-form-field appearance="outline" class="bm-field--quiet">
           <mat-label>Province</mat-label>
           <input
             matInput
             type="text"
             formControlName="searchTerm"
-            [matAutocomplete]="autoProvince"
-            placeholder="Province"
+            [matAutocomplete]="provinceAuto"
           />
-          <mat-autocomplete autoActiveFirstOption #autoProvince="matAutocomplete">
+          <mat-autocomplete autoActiveFirstOption #provinceAuto="matAutocomplete">
             @for (province of provincesOptions$ | async; track province) {
               <mat-option [value]="province">{{ province }}</mat-option>
             }
           </mat-autocomplete>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="modern-input">
+        <mat-form-field appearance="outline" class="bm-field--quiet">
           <mat-label>Municipality</mat-label>
-          <mat-icon matPrefix class="field-icon">place</mat-icon>
           <input
             matInput
             type="text"
             formControlName="searchMunicipalities"
-            [matAutocomplete]="autoMunicipality"
-            placeholder="Municipality"
+            [matAutocomplete]="municipalityAuto"
           />
-          <mat-autocomplete autoActiveFirstOption #autoMunicipality="matAutocomplete">
+          <mat-autocomplete autoActiveFirstOption #municipalityAuto="matAutocomplete">
             @for (municipality of municipalitiesOptions$ | async; track municipality) {
               <mat-option [value]="municipality">{{ municipality }}</mat-option>
             }
           </mat-autocomplete>
         </mat-form-field>
-      </div>
 
-      <div class="form-card">
-        <h3>2. Specific Address</h3>
-        <div class="grid-address">
-          <mat-form-field appearance="outline" class="modern-input">
-            <mat-label>Address</mat-label>
-            <mat-icon matPrefix class="field-icon">home</mat-icon>
-            <input matInput formControlName="address" placeholder="Enter your address" />
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="modern-input">
-            <mat-label>N°</mat-label>
-            <input
-              (focusout)="focusOut()"
-              matInput
-              type="number"
-              min="1"
-              max="9999"
-              formControlName="number"
-              placeholder="12"
-            />
-          </mat-form-field>
-        </div>
-      </div>
-
-      <div class="form-card">
-        <h3>3. Asset Identification</h3>
-
-        <mat-form-field appearance="outline" class="modern-input">
-          <mat-label>Good Name</mat-label>
-          <mat-icon matPrefix class="field-icon">badge</mat-icon>
-          <input matInput formControlName="goodNaming" placeholder="Enter name" />
+        <mat-form-field appearance="outline" class="bm-field--quiet">
+          <mat-label>Street</mat-label>
+          <input matInput formControlName="address" placeholder="Via Roma" />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="modern-input">
-          <mat-label>Identifier</mat-label>
-          <mat-icon matPrefix class="field-icon">tag</mat-icon>
+        <mat-form-field appearance="outline" class="bm-field--quiet bm-field--numeric locate-no">
+          <mat-label>No.</mat-label>
           <input
             matInput
             type="number"
-            formControlName="goodID"
-            min="3614"
-            max="7438"
-            placeholder="3614-7438"
-          />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="modern-input">
-          <mat-label>Istat Code</mat-label>
-          <mat-icon matPrefix class="field-icon">qr_code</mat-icon>
-          <input
-            matInput
-            type="text"
-            formControlName="istatCode"
-            (input)="formatIstatCode($event)"
-            minlength="6"
-            maxlength="6"
-            placeholder="e.g. 058091"
+            min="1"
+            max="9999"
+            inputmode="numeric"
+            formControlName="number"
+            (focusout)="focusOut()"
           />
         </mat-form-field>
       </div>
 
-      <div class="form-card highlight-card">
-        <div class="instruction-row">
-          <mat-icon>touch_app</mat-icon>
-          <span>Double-click the map to capture coordinates.</span>
+      <button
+        type="button"
+        mat-flat-button
+        class="locate-btn"
+        [disabled]="!canLocate()"
+        (click)="locateOnMap()"
+      >
+        <mat-icon aria-hidden="true">travel_explore</mat-icon>
+        Locate
+      </button>
+    </section>
+
+    <!-- ── Canvas + inspector ───────────────────────────────────────────── -->
+    <section class="canvas" aria-label="Map canvas">
+        <div class="canvas-bar">
+          <div class="segmented" role="group" aria-label="Canvas view mode">
+            @for (option of viewModes; track option.value) {
+              <button
+                type="button"
+                class="segmented-btn"
+                [class.is-active]="viewMode() === option.value"
+                [attr.aria-pressed]="viewMode() === option.value"
+                (click)="setViewMode(option.value)"
+              >
+                <mat-icon aria-hidden="true">{{ option.icon }}</mat-icon>
+                <span>{{ option.label }}</span>
+              </button>
+            }
+          </div>
+
+          <div class="canvas-tools">
+            <span class="coord-chip">
+              <mat-icon aria-hidden="true">location_searching</mat-icon>
+              <span class="bm-numeric" aria-live="polite">{{ liveCoords() }}</span>
+            </span>
+
+            <button
+              type="button"
+              mat-icon-button
+              class="canvas-icon-btn"
+              matTooltip="Recentre on marker"
+              aria-label="Recentre map on marker"
+              (click)="recenterMap()"
+            >
+              <mat-icon>my_location</mat-icon>
+            </button>
+          </div>
         </div>
 
-        @if (hasCoordinates()) {
-          <div class="coords-captured-badge">
-            <mat-icon>check_circle</mat-icon>
-            <div class="coords-values">
-              <span>{{ mainForm.get('ilatitude')?.value }}</span>
-              <span class="coords-sep">·</span>
-              <span>{{ mainForm.get('ilongitude')?.value }}</span>
+        <div class="canvas-surface">
+          <app-streetview [mode]="viewMode()" (mapDoubleClick)="onCoordinatesPicked($event)" />
+        </div>
+      </section>
+
+      <aside class="inspector" aria-labelledby="inspector-title">
+        <div class="inspector-head">
+          <h2 id="inspector-title">Asset details</h2>
+          <p>Capture the point, then identify what stands there.</p>
+        </div>
+
+        <div class="inspector-body bm-scroll">
+          <!-- Recap of what the locate bar resolved, so the record can be
+               checked before it is written. -->
+          <dl class="recap">
+            <div>
+              <dt>Region</dt>
+              <dd>{{ mainForm.get('searchRegions')?.value || '—' }}</dd>
             </div>
-          </div>
-        } @else {
-          <div class="coords-pending">
-            <mat-icon>my_location</mat-icon>
-            <span>No coordinates captured yet</span>
-          </div>
-        }
-      </div>
+            <div>
+              <dt>Province</dt>
+              <dd>{{ mainForm.get('searchTerm')?.value || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Municipality</dt>
+              <dd>{{ mainForm.get('searchMunicipalities')?.value || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Address</dt>
+              <dd>{{ addressSummary() }}</dd>
+            </div>
+          </dl>
 
-      <div class="action-footer">
-        <button
-          [disabled]="mainForm.invalid || !hasCoordinates()"
-          mat-flat-button
-          color="primary"
-          class="btn-block save-btn"
-          type="submit"
-        >
-          <mat-icon>save</mat-icon> Save Record
-        </button>
-      </div>
-    </form>
-  </aside>
+          <div class="coords" [class.coords--set]="hasCoordinates()">
+            <div class="coords-head">
+              <mat-icon aria-hidden="true">
+                {{ hasCoordinates() ? 'check_circle' : 'my_location' }}
+              </mat-icon>
+              <span>{{ hasCoordinates() ? 'Point captured' : 'No point captured' }}</span>
+            </div>
 
-  <main class="content-panel">
-    <div class="map-card">
-      <div class="content-card-header map-card-header">
-        <div>
-          <h3>Street View Workspace</h3>
-          <p>Inspect the location, adjust the viewpoint, and double-click to capture coordinates.</p>
-        </div>
-        <div class="header-chip">
-          <mat-icon>map</mat-icon>
-          <span>Live Map</span>
-        </div>
-      </div>
-
-      <div class="map-card-body">
-        <app-streetview
-          class="animate__animated animate__fadeIn"
-          (mapDoubleClick)="onCoordinatesPicked($event)"
-        ></app-streetview>
-      </div>
-    </div>
-
-    <div class="table-card">
-      <div class="content-card-header table-card-header">
-        <div>
-          <h3>Saved Records</h3>
-          <p>Review recent results and double-click a row to load it back into the form.</p>
-        </div>
-        <div class="header-chip muted">
-          <mat-icon>table_rows</mat-icon>
-          <span>History</span>
-        </div>
-      </div>
-
-      <div class="table-responsive">
-        <table
-          mat-table
-          [dataSource]="dataSource"
-          matSort
-          matSortActive="created"
-          matSortDisableClear
-          matSortDirection="desc"
-          class="user-table"
-        >
-          <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
-            <td mat-cell *matCellDef="let row">
-              <span class="primary-text">{{ row.id }}</span>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="comune">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Municipality</th>
-            <td mat-cell *matCellDef="let row">{{ row.comune ? row.comune : '-' }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="prov">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Prov.</th>
-            <td mat-cell *matCellDef="let row">
-              <span class="badge">{{ row.prov ? row.prov : '-' }}</span>
-            </td>
-          </ng-container>
-
-          <ng-container matColumnDef="indirizzo">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Address</th>
-            <td mat-cell *matCellDef="let row">{{ row.indirizzo ? row.indirizzo : '-' }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="civico">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>N°</th>
-            <td mat-cell *matCellDef="let row">{{ row.civico > 0 ? row.civico : '-' }}</td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr
-            mat-row
-            class="clickable-row hover-row"
-            *matRowDef="let row; columns: displayedColumns"
-            (dblclick)="getRecord(row)"
-          ></tr>
-
-          <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell empty-state" colspan="5">
-              <div class="empty-state-content">
-                <div class="empty-icon-wrapper">
-                  <mat-icon>search_off</mat-icon>
+            @if (hasCoordinates()) {
+              <dl class="coords-values">
+                <div>
+                  <dt>Lat</dt>
+                  <dd class="bm-numeric">{{ mainForm.get('ilatitude')?.value }}</dd>
                 </div>
-                <h3>No data available</h3>
-                <p>No records found.</p>
-              </div>
-            </td>
-          </tr>
-        </table>
+                <div>
+                  <dt>Lng</dt>
+                  <dd class="bm-numeric">{{ mainForm.get('ilongitude')?.value }}</dd>
+                </div>
+              </dl>
+            } @else {
+              <p class="coords-hint">Double-click the map to drop a point.</p>
+            }
+          </div>
+
+          <mat-form-field appearance="outline" class="bm-field--quiet">
+            <mat-label>Asset name</mat-label>
+            <mat-icon matIconPrefix>badge</mat-icon>
+            <input matInput formControlName="goodNaming" placeholder="Palazzo Comunale" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="bm-field--quiet bm-field--numeric">
+            <mat-label>Asset ID</mat-label>
+            <mat-icon matIconPrefix>tag</mat-icon>
+            <input
+              matInput
+              type="number"
+              inputmode="numeric"
+              formControlName="goodID"
+              min="3614"
+              max="7438"
+              placeholder="3614–7438"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="bm-field--quiet bm-field--numeric">
+            <mat-label>ISTAT code</mat-label>
+            <mat-icon matIconPrefix>qr_code</mat-icon>
+            <input
+              matInput
+              type="text"
+              inputmode="numeric"
+              formControlName="istatCode"
+              (input)="formatIstatCode($event)"
+              minlength="6"
+              maxlength="6"
+              placeholder="058091"
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="inspector-foot">
+          <button
+            type="button"
+            mat-stroked-button
+            class="inspector-clear"
+            (click)="clearForm()"
+            [disabled]="isSaving()"
+          >
+            Clear
+          </button>
+
+          <button
+            type="button"
+            mat-flat-button
+            class="inspector-save"
+            (click)="saveData()"
+            [disabled]="mainForm.invalid || !hasCoordinates() || isSaving()"
+          >
+            <mat-icon aria-hidden="true">save</mat-icon>
+            {{ isSaving() ? 'Saving…' : 'Save record' }}
+          </button>
+        </div>
+      </aside>
+
+    <!-- ── Records drawer ───────────────────────────────────────────────── -->
+    <section class="drawer" [class.is-open]="recordsOpen()" aria-label="Saved records">
+      <button
+        type="button"
+        class="drawer-handle"
+        [attr.aria-expanded]="recordsOpen()"
+        aria-controls="records-panel"
+        (click)="toggleRecords()"
+      >
+        <mat-icon aria-hidden="true">{{ recordsOpen() ? 'expand_more' : 'expand_less' }}</mat-icon>
+        <span class="drawer-title">Saved records</span>
+        <span class="drawer-count bm-numeric">{{ recordCount }}</span>
+        <span class="drawer-flex"></span>
+        <span class="drawer-hint">{{ recordsOpen() ? 'Hide' : 'Show' }}</span>
+      </button>
+
+      @if (recordsOpen()) {
+      <div class="drawer-panel" id="records-panel">
+        <div class="drawer-toolbar">
+          <mat-form-field appearance="outline" class="drawer-search bm-field--quiet">
+            <mat-icon matIconPrefix>search</mat-icon>
+            <input
+              matInput
+              type="search"
+              autocomplete="off"
+              placeholder="Filter records"
+              aria-label="Filter saved records"
+              (keyup)="applyFilter($event)"
+            />
+          </mat-form-field>
+
+          <mat-paginator showFirstLastButtons [pageSize]="5" [pageSizeOptions]="[5, 10, 25]" />
+        </div>
+
+        <div class="bm-table-wrap">
+          <table
+            mat-table
+            [dataSource]="dataSource"
+            matSort
+            matSortDisableClear
+            class="bm-table"
+            aria-label="Saved asset records"
+          >
+            <ng-container matColumnDef="id">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+              <td mat-cell *matCellDef="let row" data-label="ID">
+                <span class="bm-numeric cell-strong">{{ row.id }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="prov">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Prov.</th>
+              <td mat-cell *matCellDef="let row" data-label="Province">
+                <span class="bm-chip bm-chip--plain">{{ row.prov || '—' }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="comune">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Municipality</th>
+              <td mat-cell *matCellDef="let row" data-label="Municipality">
+                <span class="cell-strong">{{ row.comune || '—' }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="indirizzo">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Address</th>
+              <td mat-cell *matCellDef="let row" data-label="Address">{{ row.indirizzo || '—' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="civico">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>No.</th>
+              <td mat-cell *matCellDef="let row" data-label="Number">
+                <span class="bm-numeric">{{ row.civico > 0 ? row.civico : '—' }}</span>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>
+                <span class="bm-visually-hidden">Actions</span>
+              </th>
+              <td mat-cell *matCellDef="let row" data-label="">
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="row-action"
+                  matTooltip="Load into form"
+                  [attr.aria-label]="'Load record ' + row.id + ' into the form'"
+                  (click)="loadRecord(row)"
+                >
+                  <mat-icon>arrow_outward</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: displayedColumns"
+              class="record-row"
+              (dblclick)="loadRecord(row)"
+            ></tr>
+
+            <tr class="mat-row" *matNoDataRow>
+              <td class="bm-empty-cell" [attr.colspan]="displayedColumns.length">
+                <div class="bm-empty">
+                  <mat-icon aria-hidden="true">database</mat-icon>
+                  <p class="bm-empty-title">No records yet</p>
+                  <p class="bm-empty-body">Saved assets will appear here.</p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
       </div>
-      <mat-paginator
-        showFirstLastButtons
-        [pageSizeOptions]="[5]"
-        class="custom-paginator"
-      ></mat-paginator>
-    </div>
-  </main>
-</div>
+      }
+    </section>
+  </div>
+</bm-app-shell>

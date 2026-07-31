@@ -1,21 +1,49 @@
 import { Routes } from '@angular/router';
 import { adminAuthGuard } from './auth/admin.auth.guard';
 import { authGuard } from './auth/auth.guard';
-import { LoginComponent } from './auth/login';
-import { LogoutComponent } from './auth/logout';
-import { MainComponent } from './main/main';
-import { UserFormComponent } from './user-form/user-form';
-import { UserListComponent } from './user-list/user-list';
 
+/**
+ * Routes are lazy so the initial download carries only what the first screen
+ * needs — signing in no longer pulls in Leaflet, the Material table, or the
+ * admin views.
+ */
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'logout', component: LogoutComponent, canActivate: [authGuard] },
+  {
+    path: 'login',
+    title: 'Sign in · BiMap',
+    loadComponent: () => import('./auth/login').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'logout',
+    canActivate: [authGuard],
+    loadComponent: () => import('./auth/logout').then((m) => m.LogoutComponent),
+  },
 
-  { path: '', component: MainComponent, canActivate: [authGuard] },
-  { path: 'main', component: MainComponent, canActivate: [authGuard] },
+  {
+    path: '',
+    title: 'Asset registration · BiMap',
+    canActivate: [authGuard],
+    loadComponent: () => import('./main/main').then((m) => m.MainComponent),
+  },
+  {
+    path: 'main',
+    title: 'Asset registration · BiMap',
+    canActivate: [authGuard],
+    loadComponent: () => import('./main/main').then((m) => m.MainComponent),
+  },
 
-  { path: 'adduser', component: UserFormComponent, canActivate: [adminAuthGuard] },
-  { path: 'listuser', component: UserListComponent, canActivate: [adminAuthGuard] },
+  {
+    path: 'adduser',
+    title: 'Add user · BiMap',
+    canActivate: [adminAuthGuard],
+    loadComponent: () => import('./user-form/user-form').then((m) => m.UserFormComponent),
+  },
+  {
+    path: 'listuser',
+    title: 'Users · BiMap',
+    canActivate: [adminAuthGuard],
+    loadComponent: () => import('./user-list/user-list').then((m) => m.UserListComponent),
+  },
 
   { path: '**', redirectTo: '', pathMatch: 'full' },
 ];

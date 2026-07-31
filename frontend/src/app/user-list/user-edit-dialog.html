@@ -1,97 +1,103 @@
-<div class="dialog-shell">
-  <div class="dialog-header">
-    <div>
-      <h2>Edit User</h2>
-      <p>
-        Updating records for ID:
-        <span>{{ userId }}</span>
-      </p>
-    </div>
+<div class="dialog">
+  <div class="dialog-head">
+    <h2>Edit user</h2>
+    <p>
+      Account ID
+      <span class="bm-numeric">{{ userId }}</span>
+    </p>
   </div>
 
   <form autocomplete="off" class="dialog-form">
-    <div class="row-fields">
-      <mat-form-field appearance="outline" class="field">
-        <mat-label>First Name</mat-label>
-        <mat-icon matPrefix>person</mat-icon>
+    <div class="field-row">
+      <mat-form-field appearance="outline">
+        <mat-label>First name</mat-label>
+        <mat-icon matIconPrefix>badge</mat-icon>
         <input matInput required minlength="1" maxlength="20" type="text" [formControl]="name" />
-        @if (name.hasError('required') || name.hasError('minlength') || name.hasError('maxlength')) {
-          <mat-error>Please enter a valid name</mat-error>
+        @if (name.invalid) {
+          <mat-error>Enter a valid first name</mat-error>
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="field">
-        <mat-label>Last Name</mat-label>
+      <mat-form-field appearance="outline">
+        <mat-label>Last name</mat-label>
+        <mat-icon matIconPrefix>person</mat-icon>
         <input matInput required minlength="1" maxlength="20" type="text" [formControl]="surname" />
-        @if (
-          surname.hasError('required') ||
-          surname.hasError('minlength') ||
-          surname.hasError('maxlength')
-        ) {
-          <mat-error>Please enter a valid surname</mat-error>
+        @if (surname.invalid) {
+          <mat-error>Enter a valid last name</mat-error>
         }
       </mat-form-field>
     </div>
 
-    <mat-form-field appearance="outline" class="field field-full">
-      <mat-label>Email Address</mat-label>
-      <mat-icon matPrefix>email</mat-icon>
-      <input matInput required type="email" email="true" minlength="3" maxlength="30" [formControl]="email" />
-      @if (
-        email.hasError('required') ||
-        email.hasError('email') ||
-        email.hasError('minlength') ||
-        email.hasError('maxlength')
-      ) {
-        <mat-error>Please enter a valid email</mat-error>
+    <mat-form-field appearance="outline">
+      <mat-label>Email address</mat-label>
+      <mat-icon matIconPrefix>mail</mat-icon>
+      <input
+        matInput
+        required
+        type="email"
+        minlength="3"
+        maxlength="100"
+        autocapitalize="none"
+        spellcheck="false"
+        [formControl]="email"
+      />
+      @if (email.invalid) {
+        <mat-error>Enter a valid email address</mat-error>
       }
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="field field-full">
-      <mat-label>Application Role</mat-label>
-      <mat-icon matPrefix>shield</mat-icon>
+    <mat-form-field appearance="outline">
+      <mat-label>Application role</mat-label>
+      <mat-icon matIconPrefix>shield</mat-icon>
       <mat-select required [formControl]="applicationRole">
-        @for (approle of approles; track approle.value) {
-          <mat-option [value]="approle.value">{{ approle.viewValue }}</mat-option>
+        @for (role of approles; track role.value) {
+          <mat-option [value]="role.value">{{ role.viewValue }}</mat-option>
         }
       </mat-select>
       @if (applicationRole.hasError('required')) {
-        <mat-error>Please select an Application Role</mat-error>
+        <mat-error>Select an application role</mat-error>
       }
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="field field-full">
-      <mat-label>Update Password</mat-label>
-      <mat-icon matPrefix>lock</mat-icon>
-
+    <mat-form-field appearance="outline">
+      <mat-label>New password</mat-label>
+      <mat-icon matIconPrefix>lock</mat-icon>
       <input
         matInput
         required
         minlength="8"
-        maxlength="16"
-        [type]="showPassword ? 'text' : 'password'"
+        maxlength="32"
+        autocomplete="new-password"
+        [type]="showPassword() ? 'text' : 'password'"
         [formControl]="password"
       />
-
-      @if (
-        password.hasError('required') ||
-        password.hasError('minlength') ||
-        password.hasError('maxlength')
-      ) {
-        <mat-error>Password must be between 8-32 characters</mat-error>
-      }
-
-      <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()">
-        <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+      <button
+        mat-icon-button
+        matIconSuffix
+        type="button"
+        tabindex="-1"
+        (click)="togglePasswordVisibility()"
+        [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+        [attr.aria-pressed]="showPassword()"
+      >
+        <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
       </button>
+      @if (password.invalid) {
+        <mat-error>Use between 8 and 32 characters</mat-error>
+      } @else {
+        <mat-hint>Replaces the current password</mat-hint>
+      }
     </mat-form-field>
 
     <div class="dialog-actions">
-      <button type="button" mat-stroked-button (click)="cancel()" class="cancel-btn">Cancel</button>
-
-      <button type="button" mat-flat-button (click)="update()" class="save-btn">
-        <mat-icon>save</mat-icon>
-        Save Changes
+      <button type="button" mat-stroked-button (click)="cancel()">Cancel</button>
+      <button
+        type="button"
+        mat-flat-button
+        [disabled]="isSaving() || name.invalid || surname.invalid || email.invalid || password.invalid"
+        (click)="update()"
+      >
+        {{ isSaving() ? 'Saving…' : 'Save changes' }}
       </button>
     </div>
   </form>

@@ -1,54 +1,61 @@
-<div class="map-container" #mapWrapper [style.--split]="leftWidth() + '%'">
-  <div
-    class="map-panel"
-    [style.width.%]="isMobileViewport() ? null : leftWidth()"
-    [style.height.%]="isMobileViewport() ? leftWidth() : null"
-  >
+<div class="map-split" #mapWrapper [class.is-single]="mode() !== 'split'">
+  <!--
+    One `flex-basis` binding drives both orientations: it is the width while the
+    split is a row, and the height once it stacks into a column. A pane the
+    current mode hides simply collapses to a basis of zero.
+  -->
+  <div class="map-pane" [style.flex-basis.%]="mapBasis()" [class.is-front]="mode() === 'map'">
     <div id="leafletMap" class="map-canvas"></div>
 
-    <button
-      type="button"
-      class="recenter-btn"
-      matTooltip="Recenter on marker"
-      matTooltipPosition="above"
-      aria-label="Recenter map on marker"
-      (click)="recenterView()"
-    >
-      <mat-icon>my_location</mat-icon>
-    </button>
-
-    @if (isDragging()) {
-      <div class="drag-overlay"></div>
+    @if (mode() === 'split') {
+      <span class="pane-badge">
+        <mat-icon aria-hidden="true">map</mat-icon>
+        Map
+      </span>
     }
 
-    <div class="map-info">
-      <div class="info-pill">
-        <span class="coords">{{ currentCoords() }}</span>
-      </div>
-    </div>
+    @if (isDragging()) {
+      <div class="drag-shield"></div>
+    }
   </div>
 
-  <div
-    class="resizer"
-    role="separator"
-    [attr.aria-orientation]="isMobileViewport() ? 'horizontal' : 'vertical'"
-    aria-label="Resize map and street view panels"
-    matTooltip="Drag to resize panels, double-click to reset"
-    matTooltipPosition="above"
-    (mousedown)="onMouseDown($event)"
-    (dblclick)="resetSplit()"
-  ></div>
+  @if (mode() === 'split') {
+    <div
+      class="splitter"
+      role="separator"
+      tabindex="0"
+      [attr.aria-orientation]="isMobileViewport() ? 'horizontal' : 'vertical'"
+      aria-label="Resize map and Street View panes"
+      aria-valuemin="20"
+      aria-valuemax="80"
+      [attr.aria-valuenow]="leftWidth()"
+      [attr.aria-valuetext]="leftWidth() + '% map'"
+      [class.is-active]="isDragging()"
+      matTooltip="Drag or use arrow keys to resize · double-click to reset"
+      matTooltipPosition="above"
+      (pointerdown)="onPointerDown($event)"
+      (pointermove)="onPointerMove($event)"
+      (pointerup)="onPointerUp($event)"
+      (pointercancel)="onPointerUp($event)"
+      (keydown)="onSeparatorKeydown($event)"
+      (dblclick)="resetSplit()"
+    >
+      <span class="splitter-grip" aria-hidden="true"></span>
+    </div>
+  }
 
-  <div
-    class="map-panel"
-    [style.width.%]="isMobileViewport() ? null : 100 - leftWidth()"
-    [style.height.%]="isMobileViewport() ? 100 - leftWidth() : null"
-  >
+  <div class="map-pane" [style.flex-basis.%]="streetBasis()" [class.is-front]="mode() === 'street'">
     <div id="streetView" class="map-canvas"></div>
 
-    @if (isDragging()) {
-      <div class="drag-overlay"></div>
+    @if (mode() === 'split') {
+      <span class="pane-badge">
+        <mat-icon aria-hidden="true">streetview</mat-icon>
+        Street View
+      </span>
     }
 
+    @if (isDragging()) {
+      <div class="drag-shield"></div>
+    }
   </div>
 </div>
