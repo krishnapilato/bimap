@@ -1,609 +1,502 @@
-@use 'styles/mixins' as *;
+// =============================================================================
+//  Asset workspace
+// -----------------------------------------------------------------------------
+//  The map is the whole screen. Everything else floats on it.
+//
+//  No docks, no bands, no stepper, no section headings, no instructions in the
+//  panel — every field labels itself, and the one instruction that exists sits
+//  on the map where the gesture it describes is actually performed.
+//
+//  Nothing scrolls. The record panel is sized by its content and the register
+//  is paginated, so there is no `overflow-y` anywhere in this file: if
+//  something does not fit, the answer is less of it, not a scrollbar.
+// =============================================================================
 
-// The operator workspace, arranged around the actual task order:
-//   locate (top bar) → verify on the canvas → identify (right inspector)
-// Past records are reference material, so they live in a drawer that stays out
-// of the way until asked for. The canvas gets everything that is left.
+@use '../../styles/mixins' as *;
 
 :host {
   display: block;
-  --workspace-control-height: 48px;
-  --workspace-toolbar-height: 52px;
+  height: 100%;
+  --panel-width: clamp(300px, 24vw, 360px);
+  --float: clamp(12px, 1.4vw, 20px);
+  --control-height: 42px;
 }
-
-// ── Header clock ─────────────────────────────────────────────────────────────
 
 .shell-clock {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px var(--bm-space-3);
-  border-radius: var(--bm-radius-pill);
-  background: var(--bm-surface-2);
-  color: var(--bm-text-2);
-  font-size: 12px;
-
-  time {
-    @include numeric;
-    font-size: 11.5px;
-  }
-
-  mat-icon {
-    font-size: 15px;
-    width: 15px;
-    height: 15px;
-    color: var(--bm-text-3);
-  }
-
-  @include below(sm) {
-    display: none;
-  }
+  @include numeric;
+  font-size: 11.5px;
+  color: var(--bm-text-3);
+  letter-spacing: 0.02em;
 }
 
-// ── Workspace frame ──────────────────────────────────────────────────────────
-//  A definite height is what lets the canvas — and the map inside it — resolve
-//  to a real size rather than collapsing.
+// ── Frame ────────────────────────────────────────────────────────────────────
 
-// The inspector spans both body rows, so opening the records drawer costs map
-// height rather than squeezing the fields into a scroll.
 .ws {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(352px, 25vw, 400px);
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  grid-template-areas:
-    'locate locate'
-    'canvas inspector'
-    'drawer inspector';
-  gap: clamp(var(--bm-space-3), 1vw, 18px);
-  padding: var(--bm-space-4) clamp(var(--bm-space-4), 1.5vw, var(--bm-space-6))
-    var(--bm-space-5);
-  height: calc(100svh - var(--bm-header-height));
+  position: relative;
+  height: 100%;
   min-height: 0;
-
-  @include below(lg) {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto auto;
-    grid-template-areas:
-      'locate'
-      'canvas'
-      'inspector'
-      'drawer';
-    height: auto;
-  }
-
-  @include below(sm) {
-    gap: var(--bm-space-3);
-    padding: var(--bm-space-3);
-  }
-}
-
-.locate {
-  grid-area: locate;
-}
-
-.canvas {
-  grid-area: canvas;
-}
-
-.inspector {
-  grid-area: inspector;
-}
-
-.drawer {
-  grid-area: drawer;
-}
-
-// ── Locate bar ───────────────────────────────────────────────────────────────
-
-.locate {
-  display: flex;
-  align-items: center;
-  gap: var(--bm-space-4);
-  flex: none;
-  min-height: 76px;
-  padding: var(--bm-space-3) 14px;
-  @include surface(var(--bm-radius-lg), none);
-
-  --mat-form-field-container-height: var(--workspace-control-height);
-  --mat-form-field-container-vertical-padding: 12px;
-}
-
-.locate-fields {
-  display: grid;
-  // Three administrative levels, then the street and its number.
-  grid-template-columns:
-    minmax(150px, 0.95fr) minmax(150px, 0.95fr) minmax(170px, 1.05fr)
-    minmax(220px, 1.35fr) 88px;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
-
-  @include below(lg) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  @include below(sm) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-
-    > .mat-mdc-form-field:nth-child(3) {
-      grid-column: 1 / -1;
-    }
-  }
-}
-
-.locate-no {
-  @include below(lg) {
-    grid-column: auto;
-  }
-}
-
-.locate-btn {
-  flex: none;
-  height: var(--workspace-control-height);
-  min-height: var(--workspace-control-height);
-  min-width: 112px;
-  --mdc-filled-button-container-height: var(--workspace-control-height);
-
-  @include below(sm) {
-    width: 100%;
-  }
-}
-
-@include below(sm) {
-  .locate {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
-// ── Canvas ───────────────────────────────────────────────────────────────────
-
-.canvas {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  min-height: 0;
-  @include surface;
   overflow: hidden;
-
-  @include below(lg) {
-    height: clamp(420px, 58svh, 620px);
-  }
 }
 
-.canvas-bar {
+.canvas {
+  position: absolute;
+  inset: 0;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--bm-space-3);
-  flex: none;
-  min-height: var(--workspace-toolbar-height);
-  padding: 6px var(--bm-space-3);
-  border-bottom: 1px solid var(--bm-line);
-}
-
-.canvas-surface {
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-  display: flex;
+  background: var(--bm-map-void);
 
   app-streetview {
     flex: 1;
     min-width: 0;
-  }
-}
-
-// ── Segmented view switch ────────────────────────────────────────────────────
-
-.segmented {
-  display: inline-flex;
-  padding: 2px;
-  border-radius: var(--bm-radius-md);
-  background: var(--bm-surface-2);
-  border: 1px solid var(--bm-line);
-}
-
-.segmented-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 36px;
-  padding: 6px 13px;
-  border: none;
-  border-radius: var(--bm-radius-sm);
-  background: transparent;
-  color: var(--bm-text-2);
-  font-size: 12.5px;
-  font-weight: 550;
-  transition:
-    background-color var(--bm-duration-fast) var(--bm-ease),
-    color var(--bm-duration-fast) var(--bm-ease);
-
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-  }
-
-  &:hover:not(.is-active) {
-    color: var(--bm-text);
-  }
-
-  &.is-active {
-    background: var(--bm-surface);
-    color: var(--bm-text);
-    box-shadow: var(--bm-shadow-xs);
-  }
-
-  @include focusable;
-
-  // Labels drop away on narrow screens; the icons still carry the meaning.
-  @include below(sm) {
-    padding: 6px 10px;
-
-    span {
-      display: none;
-    }
-  }
-}
-
-.canvas-tools {
-  display: flex;
-  align-items: center;
-  gap: var(--bm-space-2);
-}
-
-.coord-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 32px;
-  padding: 5px 11px;
-  border-radius: var(--bm-radius-pill);
-  background: var(--bm-surface-2);
-  border: 1px solid var(--bm-line);
-  color: var(--bm-text-2);
-  font-size: 11.5px;
-
-  mat-icon {
-    font-size: 14px;
-    width: 14px;
-    height: 14px;
-    color: var(--bm-text-3);
-  }
-
-  @include below(xs) {
-    display: none;
-  }
-}
-
-.canvas-icon-btn {
-  color: var(--bm-text-2);
-  width: 40px;
-  height: 40px;
-}
-
-// ── Inspector ────────────────────────────────────────────────────────────────
-
-.inspector {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  @include surface;
-
-  @include below(lg) {
     min-height: 0;
   }
 }
 
-.inspector-head {
-  flex: none;
-  padding: var(--bm-space-5) var(--bm-space-5) var(--bm-space-4);
-  border-bottom: 1px solid var(--bm-line);
+// ── Glass ────────────────────────────────────────────────────────────────────
+//  The one surface treatment for anything floating over imagery. Translucent so
+//  the map is never fully hidden, and blurred so text stays legible over
+//  whatever happens to be underneath it.
 
-  h2 {
-    font: var(--bm-text-h2);
-    letter-spacing: var(--bm-tracking-tight);
-  }
-
-  p {
-    margin-top: 2px;
-    color: var(--bm-text-2);
-    font-size: 12.5px;
-    line-height: 1.5;
-  }
-}
-
-.inspector-body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: var(--bm-space-4) 18px var(--bm-space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--bm-space-3);
-
-  --mat-form-field-container-height: var(--workspace-control-height);
-  --mat-form-field-container-vertical-padding: 12px;
-
-  @include below(lg) {
-    overflow: visible;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: stretch;
-    padding: var(--bm-space-5);
-  }
-
-  @include below(sm) {
-    display: flex;
-    padding: var(--bm-space-4);
-  }
-}
-
-.inspector-foot {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--bm-space-3);
-  flex: none;
-  padding: var(--bm-space-3) var(--bm-space-5) var(--bm-space-4);
-  border-top: 1px solid var(--bm-line);
-
-  @include below(sm) {
-    padding-inline: var(--bm-space-4);
-  }
-}
-
-.inspector-save {
-  width: 100%;
-  height: 44px;
-  min-height: 44px;
-  --mdc-filled-button-container-height: 44px;
-}
-
-.inspector-clear {
-  height: 44px;
-  min-height: 44px;
-  --mdc-outlined-button-container-height: 44px;
-}
-
-// ── Location recap ───────────────────────────────────────────────────────────
-
-.recap {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  margin: 0;
-  padding: 6px 0;
-  border-radius: var(--bm-radius-md);
-  background: var(--bm-surface-2);
-  border: 1px solid var(--bm-line);
-
-  > div {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--bm-space-3);
-    min-height: 28px;
-    padding: 5px var(--bm-space-3);
-  }
-
-  dt {
-    @include label;
-    font-size: 10.5px;
-    flex: none;
-  }
-
-  dd {
-    margin: 0;
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--bm-text);
-    text-align: end;
-    @include truncate;
-  }
-}
-
-// ── Coordinate capture ───────────────────────────────────────────────────────
-
-// Grows into the space the fields leave over, so the rail has no dead gap and
-// the one required input that isn't a text field reads as a real target.
-// Shrinks as well as grows, so opening the records drawer gives the space back
-// to the fields instead of pushing them into a scroll.
-.coords {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 108px;
-  margin: 0;
-  padding: var(--bm-space-4);
-  border-radius: var(--bm-radius-md);
-  border: 1px dashed var(--bm-line-strong);
-  background: var(--bm-surface-2);
-  transition:
-    border-color var(--bm-duration) var(--bm-ease),
-    background-color var(--bm-duration) var(--bm-ease);
-
-  &--set {
-    border-style: solid;
-    border-color: var(--bm-success-border);
-    background: var(--bm-success-soft);
-  }
-}
-
-.coords-head {
+.glass-pill {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: var(--bm-space-2);
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--bm-text-2);
+  border: 1px solid var(--bm-map-chrome-border);
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-map-chrome);
+  box-shadow: var(--bm-shadow-md);
+  @include glass(14px);
+}
 
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+// ── Corner chrome ────────────────────────────────────────────────────────────
+
+.chrome {
+  position: absolute;
+  z-index: 500;
+}
+
+.chrome--top {
+  top: var(--float);
+  right: var(--float);
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-2);
+}
+
+// The count sits in the palette's title bar, so collapsed it reads as
+// "Register · 12" — a chip that happens to contain a table.
+.records-count {
+  @include numeric;
+  font-size: 11px;
+  color: var(--bm-accent-text);
+
+  &::before {
+    content: '·';
+    margin-right: 6px;
     color: var(--bm-text-3);
   }
-
-  .coords--set & {
-    color: var(--bm-success);
-
-    mat-icon {
-      color: var(--bm-success);
-    }
-  }
 }
 
-.coords-hint {
-  margin-top: var(--bm-space-1);
-  color: var(--bm-text-3);
-  font-size: 12px;
-  line-height: 1.45;
-  text-align: center;
-}
+.modes {
+  position: relative;
+  padding: 3px;
 
-.coords-values {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--bm-space-2);
-  margin: var(--bm-space-2) 0 0;
-
-  > div {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    min-width: 0;
-  }
-
-  dt {
-    @include label;
-    font-size: 10px;
-    color: var(--bm-success);
-    opacity: 0.9;
-  }
-
-  dd {
-    margin: 0;
+  button {
+    position: relative;
+    z-index: 1;
+    padding: 7px 15px;
+    border: none;
+    border-radius: var(--bm-radius-pill);
+    background: none;
+    color: var(--bm-text-2);
     font-size: 12.5px;
-    font-weight: 500;
-    color: var(--bm-text);
-    @include truncate;
+    font-weight: 600;
+    transition: color var(--bm-duration) var(--bm-ease);
+
+    &.is-active {
+      color: var(--bm-text);
+    }
+
+    @include focusable(2px);
   }
 }
 
-// ── Records drawer ───────────────────────────────────────────────────────────
-
-.drawer {
-  display: flex;
-  flex-direction: column;
-  flex: none;
-  min-height: 0;
-  @include surface(var(--bm-radius-lg), none);
-  overflow: hidden;
+.switch-thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 0;
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-surface-solid);
+  box-shadow: var(--bm-shadow-xs);
 }
 
-.drawer-handle {
+.chrome--readout {
+  right: var(--float);
+  bottom: var(--float);
+  gap: var(--bm-space-2);
+  padding: 5px 5px 5px 15px;
+}
+
+.readout-live {
+  @include numeric;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--bm-signal-strong);
+  letter-spacing: 0.02em;
+}
+
+.readout-recentre {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--bm-text-2);
+  transition:
+    background var(--bm-duration-fast) var(--bm-ease),
+    color var(--bm-duration-fast) var(--bm-ease);
+
+  &:hover {
+    background: var(--bm-accent-soft);
+    color: var(--bm-accent-text);
+  }
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+  }
+
+  @include focusable(2px);
+}
+
+// The only instruction on the screen. `pointer-events: none` so it can never
+// intercept the very double-click it is asking for.
+.capture-prompt {
+  position: absolute;
+  left: calc(50% + var(--panel-width) / 2);
+  bottom: var(--float);
+  translate: -50% 0;
+  z-index: 500;
   display: flex;
   align-items: center;
+  gap: 11px;
+  padding: 9px 18px 9px 14px;
+  border: 1px solid var(--bm-signal-border);
+  border-radius: var(--bm-radius-pill);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--bm-signal-strong);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--bm-shadow-md);
+  pointer-events: none;
+  @include glass(10px);
+}
+
+.capture-ring {
+  position: relative;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--bm-signal);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 1px solid var(--bm-signal);
+    border-radius: 50%;
+    animation: capture-ping 2s var(--bm-ease-cinematic) infinite;
+  }
+}
+
+@keyframes capture-ping {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.7);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+// ── The record panel ─────────────────────────────────────────────────────────
+//  Floats top-left. Height comes from its content — never from the viewport —
+//  which is what keeps it free of a scrollbar.
+
+// Surface, drag and collapse come from `bm-float-panel`; the workspace only
+// says where each palette starts and how wide it is.
+.panel {
+  top: var(--float);
+  left: var(--float);
+  --float-width: var(--panel-width);
+}
+
+// ── Locality ─────────────────────────────────────────────────────────────────
+
+.panel-locality {
+  padding: var(--bm-space-3);
+  @include ruled(bottom);
+
+  &.is-set {
+    padding: 5px;
+  }
+}
+
+.locality-edit {
+  display: grid;
   gap: var(--bm-space-2);
+}
+
+.locality-confirm {
+  height: var(--control-height);
+}
+
+.locality-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-3);
   width: 100%;
-  min-height: 48px;
-  padding: var(--bm-space-2) var(--bm-space-4);
+  padding: 7px 11px;
   border: none;
-  background: transparent;
-  color: var(--bm-text);
-  text-align: start;
+  border-radius: var(--bm-radius-md);
+  background: none;
+  color: inherit;
+  text-align: left;
+  transition: background var(--bm-duration) var(--bm-ease);
 
   &:hover {
     background: var(--bm-surface-2);
+
+    .locality-change {
+      opacity: 1;
+    }
   }
 
-  @include focusable;
-
-  mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    color: var(--bm-text-3);
-  }
+  @include focusable(-2px);
 }
 
-.drawer-title {
-  font: var(--bm-text-h3);
-}
-
-.drawer-count {
-  padding: 1px 8px;
-  border-radius: var(--bm-radius-pill);
-  background: var(--bm-accent-soft);
-  border: 1px solid var(--bm-accent-border);
-  color: var(--bm-accent-text);
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.drawer-flex {
-  flex: 1;
-}
-
-.drawer-hint {
-  color: var(--bm-text-3);
-  font-size: 12px;
-}
-
-// Mounted only while open — an always-rendered table pushed content past the
-// viewport and cost a full Material table render for something nobody is
-// looking at.
-.drawer-panel {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  height: min(300px, 38svh);
-  overflow: hidden;
-  border-top: 1px solid var(--bm-line);
-
-  @include below(lg) {
-    height: auto;
-  }
-}
-
-.drawer-toolbar {
+// Region › Province › Municipality, separator drawn by the stylesheet so the
+// template stays a plain list.
+.locality-path {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--bm-space-3);
+  gap: 7px;
+  min-width: 0;
+  overflow: hidden;
+
+  b {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    color: var(--bm-text-3);
+
+    + b::before {
+      content: '›';
+      margin-right: 7px;
+      font-weight: 400;
+    }
+  }
+
+  // The comune is the one that matters day to day.
+  b:last-child {
+    color: var(--bm-text);
+  }
+}
+
+.locality-change {
+  margin-left: auto;
+  @include label;
+  font-size: 8.5px;
+  color: var(--bm-accent);
+  opacity: 0;
+  transition: opacity var(--bm-duration) var(--bm-ease);
   flex: none;
-  min-height: 64px;
-  padding: 6px var(--bm-space-4);
-  border-bottom: 1px solid var(--bm-line);
+}
 
-  --mat-form-field-container-height: var(--workspace-control-height);
-  --mat-form-field-container-vertical-padding: 12px;
+// ── Record fields ────────────────────────────────────────────────────────────
 
-  @include below(sm) {
-    flex-direction: column;
-    align-items: stretch;
+.panel-record {
+  display: grid;
+  gap: var(--bm-space-2);
+  padding: var(--bm-space-3);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--bm-space-2);
+}
+
+// Street, number, and the locate action on one line — the address is one
+// thought and belongs on one row.
+.field-row--address {
+  grid-template-columns: minmax(0, 1fr) 68px var(--control-height);
+}
+
+.locate-action {
+  display: grid;
+  place-items: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  border: 1px solid var(--bm-line-strong);
+  border-radius: var(--bm-radius-md);
+  background: var(--bm-surface-solid);
+  color: var(--bm-text-2);
+  transition:
+    border-color var(--bm-duration-fast) var(--bm-ease),
+    background var(--bm-duration-fast) var(--bm-ease),
+    color var(--bm-duration-fast) var(--bm-ease);
+
+  &:hover:not(:disabled) {
+    border-color: var(--bm-accent-border);
+    background: var(--bm-accent-soft);
+    color: var(--bm-accent-text);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  mat-icon {
+    font-size: 19px;
+    width: 19px;
+    height: 19px;
+  }
+
+  @include focusable(2px);
+}
+
+// ── The fix ──────────────────────────────────────────────────────────────────
+//  The one filled surface in the workspace: it is the point of the screen.
+
+.fix {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--bm-space-2);
+  margin: 0;
+  padding: 9px 11px;
+  border: 1px solid var(--bm-line);
+  border-radius: var(--bm-radius-md);
+  background: var(--bm-surface-2);
+  transition:
+    border-color var(--bm-duration) var(--bm-ease),
+    background var(--bm-duration) var(--bm-ease);
+
+  &.is-captured {
+    border-color: var(--bm-signal-border);
+    background: var(--bm-signal-soft);
+  }
+
+  dt {
+    @include label;
+    font-size: 8.5px;
+  }
+
+  dd {
+    margin: 2px 0 0;
+    @include numeric;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--bm-text-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &.is-captured dd {
+    color: var(--bm-signal-strong);
   }
 }
 
-.drawer-search {
-  width: clamp(220px, 24vw, 300px);
-  max-width: 100%;
+.panel-foot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--bm-space-2);
+  padding: var(--bm-space-3);
+  @include ruled(top);
 
-  @include below(sm) {
-    max-width: none;
+  > * {
+    height: var(--control-height);
   }
 }
 
-.drawer-panel .bm-table-wrap {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+// ── Records ──────────────────────────────────────────────────────────────────
+//  Replaces the panel in place rather than pushing anything: looking a record
+//  up must never cost the operator their view of the map.
+
+// Anchored to the right, below the mode switch. Anchoring by `right` rather
+// than `left` is what makes the table appear to grow *out of* the chip: the
+// chip's own right edge stays put and the panel opens leftward from it.
+.records {
+  top: calc(var(--float) * 2 + 40px);
+  right: var(--float);
+  left: auto;
+  z-index: 540;
+  --float-width: min(680px, calc(100% - var(--panel-width) - var(--float) * 3));
+}
+
+.records-filter {
+  padding: var(--bm-space-3);
+  @include ruled(bottom);
+}
+
+.records-search {
+  width: 100%;
+}
+
+.records-foot {
+  @include ruled(top);
 }
 
 .record-row {
   cursor: pointer;
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+
+@include below(lg) {
+  // No room for two palettes side by side, so the register expands across the
+  // full width and simply overlaps the record — which is exactly why either one
+  // can be dragged or parked.
+  .records {
+    --float-width: calc(100% - var(--float) * 2);
+  }
+}
+
+@include below(md) {
+  :host {
+    --panel-width: calc(100% - var(--float) * 2);
+  }
+
+  // The palette drops to the bottom of the screen, where a thumb can reach it,
+  // and the map keeps the top two thirds.
+  .panel {
+    top: auto;
+    bottom: var(--float);
+  }
+
+  .chrome--readout {
+    display: none;
+  }
+
+  .capture-prompt {
+    left: 50%;
+    bottom: auto;
+    top: calc(var(--float) + 52px);
+  }
+}
+
+@include below(sm) {
+  .field-row--address {
+    grid-template-columns: minmax(0, 1fr) 62px var(--control-height);
+  }
+
+  .panel-foot {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

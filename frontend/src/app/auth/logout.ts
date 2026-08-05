@@ -21,12 +21,12 @@ export class LogoutComponent implements OnInit {
     this.dialog
       .open(ConfirmationDialogComponent, {
         data: {
-          title: 'Confirm Logout',
-          message: 'Are you sure you want to log out of the application?',
+          title: 'Sign out',
+          message: 'End this session? Any unsaved record in the workspace will be lost.',
           icon: 'logout',
           tone: 'warn',
-          confirmText: 'Logout',
-          cancelText: 'Stay Signed In',
+          confirmText: 'Sign out',
+          cancelText: 'Stay signed in',
         },
       })
       .afterClosed()

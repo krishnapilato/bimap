@@ -1,210 +1,184 @@
-<bm-app-shell section="Asset registration" wide>
+<bm-app-shell section="Asset workspace" wide flush>
   <div shellActions class="shell-clock" role="status" aria-live="off">
-    <mat-icon aria-hidden="true">schedule</mat-icon>
     <time [attr.datetime]="currentTime().toISOString()">
-      {{ currentTime() | date: 'dd MMM · HH:mm:ss' }}
+      {{ currentTime() | date: 'dd MMM · HH:mm' }}
     </time>
   </div>
 
-  <!-- `formGroup` sits on the wrapper so the locate bar and the inspector can
-       share one form without nesting <form> elements. -->
-  <div class="ws" [formGroup]="mainForm">
-    <!-- ── Locate bar ───────────────────────────────────────────────────── -->
-    <section class="locate" aria-label="Locate the asset">
-      <div class="locate-fields">
-        <mat-form-field appearance="outline" class="bm-field--quiet">
-          <mat-label>Region</mat-label>
-          <input
-            matInput
-            type="text"
-            formControlName="searchRegions"
-            [matAutocomplete]="regionAuto"
-          />
-          <mat-autocomplete autoActiveFirstOption #regionAuto="matAutocomplete">
-            @for (region of regionsOptions$ | async; track region) {
-              <mat-option [value]="region">{{ region }}</mat-option>
-            }
-          </mat-autocomplete>
-        </mat-form-field>
+  <!--
+    ── The workspace ─────────────────────────────────────────────────────────
+    The map is the entire surface, edge to edge. Everything else floats on it:
+    one panel holding the record, and small pieces of glass chrome pinned to
+    the corners. Nothing is docked, nothing scrolls, and no band of UI takes
+    height away from the thing being worked on.
+  -->
+  <div class="ws" [formGroup]="mainForm" #workspace>
+    <div class="canvas">
+      <app-streetview [mode]="viewMode()" (mapDoubleClick)="onCoordinatesPicked($event)" />
+    </div>
 
-        <mat-form-field appearance="outline" class="bm-field--quiet">
-          <mat-label>Province</mat-label>
-          <input
-            matInput
-            type="text"
-            formControlName="searchTerm"
-            [matAutocomplete]="provinceAuto"
-          />
-          <mat-autocomplete autoActiveFirstOption #provinceAuto="matAutocomplete">
-            @for (province of provincesOptions$ | async; track province) {
-              <mat-option [value]="province">{{ province }}</mat-option>
-            }
-          </mat-autocomplete>
-        </mat-form-field>
+    <!-- Top-right chrome: what the canvas is showing. -->
+    <div class="chrome chrome--top">
+      <div class="glass-pill modes" role="group" aria-label="Map display mode" #viewSwitch>
+        <span class="switch-thumb" aria-hidden="true" #switchThumb></span>
 
-        <mat-form-field appearance="outline" class="bm-field--quiet">
-          <mat-label>Municipality</mat-label>
-          <input
-            matInput
-            type="text"
-            formControlName="searchMunicipalities"
-            [matAutocomplete]="municipalityAuto"
-          />
-          <mat-autocomplete autoActiveFirstOption #municipalityAuto="matAutocomplete">
-            @for (municipality of municipalitiesOptions$ | async; track municipality) {
-              <mat-option [value]="municipality">{{ municipality }}</mat-option>
-            }
-          </mat-autocomplete>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="bm-field--quiet">
-          <mat-label>Street</mat-label>
-          <input matInput formControlName="address" placeholder="Via Roma" />
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="bm-field--quiet bm-field--numeric locate-no">
-          <mat-label>No.</mat-label>
-          <input
-            matInput
-            type="number"
-            min="1"
-            max="9999"
-            inputmode="numeric"
-            formControlName="number"
-            (focusout)="focusOut()"
-          />
-        </mat-form-field>
+        @for (option of viewModes; track option.value) {
+          <button
+            type="button"
+            data-view-option
+            [class.is-active]="viewMode() === option.value"
+            [attr.aria-pressed]="viewMode() === option.value"
+            (click)="setViewMode(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        }
       </div>
+    </div>
 
+    <!-- Bottom-right: the live marker position. -->
+    <div class="chrome chrome--readout glass-pill">
+      <span class="readout-live" aria-live="polite">{{ liveCoords() }}</span>
       <button
         type="button"
-        mat-flat-button
-        class="locate-btn"
-        [disabled]="!canLocate()"
-        (click)="locateOnMap()"
+        class="readout-recentre"
+        matTooltip="Recentre on marker"
+        aria-label="Recentre map on marker"
+        (click)="recenterMap()"
       >
-        <mat-icon aria-hidden="true">travel_explore</mat-icon>
-        Locate
+        <mat-icon>my_location</mat-icon>
       </button>
-    </section>
+    </div>
 
-    <!-- ── Canvas + inspector ───────────────────────────────────────────── -->
-    <section class="canvas" aria-label="Map canvas">
-        <div class="canvas-bar">
-          <div class="segmented" role="group" aria-label="Canvas view mode">
-            @for (option of viewModes; track option.value) {
-              <button
-                type="button"
-                class="segmented-btn"
-                [class.is-active]="viewMode() === option.value"
-                [attr.aria-pressed]="viewMode() === option.value"
-                (click)="setViewMode(option.value)"
-              >
-                <mat-icon aria-hidden="true">{{ option.icon }}</mat-icon>
-                <span>{{ option.label }}</span>
-              </button>
-            }
-          </div>
-
-          <div class="canvas-tools">
-            <span class="coord-chip">
-              <mat-icon aria-hidden="true">location_searching</mat-icon>
-              <span class="bm-numeric" aria-live="polite">{{ liveCoords() }}</span>
+    <!--
+      The record. A floating palette: drag it clear of the façade you are
+      looking at, or collapse it to its title bar when the map is the only
+      thing that matters.
+    -->
+    <bm-float-panel class="panel" heading="Record" aria-label="Asset record" data-stage>
+      <div class="panel-locality" [class.is-set]="localitySettled()">
+        @if (localitySettled()) {
+          <button type="button" class="locality-summary" (click)="editLocality()">
+            <span class="locality-path">
+              @for (part of localityPath(); track part) {
+                <b>{{ part }}</b>
+              }
             </span>
+            <span class="locality-change">Change</span>
+          </button>
+        } @else {
+          <div class="locality-edit">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="bm-field--quiet">
+              <mat-label>Region</mat-label>
+              <input matInput type="text" formControlName="searchRegions" [matAutocomplete]="regionAuto" />
+              <mat-autocomplete autoActiveFirstOption #regionAuto="matAutocomplete">
+                @for (region of regionsOptions$ | async; track region) {
+                  <mat-option [value]="region">{{ region }}</mat-option>
+                }
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <div class="field-row">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="bm-field--quiet">
+                <mat-label>Province</mat-label>
+                <input matInput type="text" formControlName="searchTerm" [matAutocomplete]="provinceAuto" />
+                <mat-autocomplete autoActiveFirstOption #provinceAuto="matAutocomplete">
+                  @for (province of provincesOptions$ | async; track province) {
+                    <mat-option [value]="province">{{ province }}</mat-option>
+                  }
+                </mat-autocomplete>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="bm-field--quiet">
+                <mat-label>Municipality</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  formControlName="searchMunicipalities"
+                  [matAutocomplete]="municipalityAuto"
+                />
+                <mat-autocomplete autoActiveFirstOption #municipalityAuto="matAutocomplete">
+                  @for (municipality of municipalitiesOptions$ | async; track municipality) {
+                    <mat-option [value]="municipality">{{ municipality }}</mat-option>
+                  }
+                </mat-autocomplete>
+              </mat-form-field>
+            </div>
 
             <button
               type="button"
-              mat-icon-button
-              class="canvas-icon-btn"
-              matTooltip="Recentre on marker"
-              aria-label="Recentre map on marker"
-              (click)="recenterMap()"
+              class="bm-action locality-confirm"
+              [disabled]="!localityComplete()"
+              (click)="confirmLocality()"
             >
-              <mat-icon>my_location</mat-icon>
+              Set locality
             </button>
           </div>
+        }
+      </div>
+
+      <div class="panel-record">
+        <div class="field-row field-row--address">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="bm-field--quiet">
+            <mat-label>Street</mat-label>
+            <input matInput formControlName="address" placeholder="Via Roma" />
+          </mat-form-field>
+
+          <mat-form-field
+            appearance="outline"
+            subscriptSizing="dynamic"
+            class="bm-field--quiet bm-field--numeric"
+          >
+            <mat-label>No.</mat-label>
+            <input matInput type="number" min="1" max="9999" inputmode="numeric" formControlName="number" />
+          </mat-form-field>
+
+          <button
+            type="button"
+            class="locate-action"
+            [disabled]="!canLocate()"
+            (click)="locateOnMap()"
+            matTooltip="Locate on map"
+            aria-label="Locate on map"
+          >
+            <mat-icon>travel_explore</mat-icon>
+          </button>
         </div>
 
-        <div class="canvas-surface">
-          <app-streetview [mode]="viewMode()" (mapDoubleClick)="onCoordinatesPicked($event)" />
-        </div>
-      </section>
-
-      <aside class="inspector" aria-labelledby="inspector-title">
-        <div class="inspector-head">
-          <h2 id="inspector-title">Asset details</h2>
-          <p>Capture the point, then identify what stands there.</p>
-        </div>
-
-        <div class="inspector-body bm-scroll">
-          <!-- Recap of what the locate bar resolved, so the record can be
-               checked before it is written. -->
-          <dl class="recap">
-            <div>
-              <dt>Region</dt>
-              <dd>{{ mainForm.get('searchRegions')?.value || '—' }}</dd>
-            </div>
-            <div>
-              <dt>Province</dt>
-              <dd>{{ mainForm.get('searchTerm')?.value || '—' }}</dd>
-            </div>
-            <div>
-              <dt>Municipality</dt>
-              <dd>{{ mainForm.get('searchMunicipalities')?.value || '—' }}</dd>
-            </div>
-            <div>
-              <dt>Address</dt>
-              <dd>{{ addressSummary() }}</dd>
-            </div>
-          </dl>
-
-          <div class="coords" [class.coords--set]="hasCoordinates()">
-            <div class="coords-head">
-              <mat-icon aria-hidden="true">
-                {{ hasCoordinates() ? 'check_circle' : 'my_location' }}
-              </mat-icon>
-              <span>{{ hasCoordinates() ? 'Point captured' : 'No point captured' }}</span>
-            </div>
-
-            @if (hasCoordinates()) {
-              <dl class="coords-values">
-                <div>
-                  <dt>Lat</dt>
-                  <dd class="bm-numeric">{{ mainForm.get('ilatitude')?.value }}</dd>
-                </div>
-                <div>
-                  <dt>Lng</dt>
-                  <dd class="bm-numeric">{{ mainForm.get('ilongitude')?.value }}</dd>
-                </div>
-              </dl>
-            } @else {
-              <p class="coords-hint">Double-click the map to drop a point.</p>
-            }
+        <!-- Always two rows, captured or not, so nothing below moves when the
+             point lands. -->
+        <dl class="fix" [class.is-captured]="hasCoordinates()" #positionCard>
+          <div>
+            <dt>Lat</dt>
+            <dd>{{ mainForm.get('ilatitude')?.value || '—' }}</dd>
           </div>
+          <div>
+            <dt>Lon</dt>
+            <dd>{{ mainForm.get('ilongitude')?.value || '—' }}</dd>
+          </div>
+        </dl>
 
-          <mat-form-field appearance="outline" class="bm-field--quiet">
-            <mat-label>Asset name</mat-label>
-            <mat-icon matIconPrefix>badge</mat-icon>
-            <input matInput formControlName="goodNaming" placeholder="Palazzo Comunale" />
-          </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="bm-field--quiet">
+          <mat-label>Asset name</mat-label>
+          <input matInput formControlName="goodNaming" placeholder="Palazzo Comunale" />
+        </mat-form-field>
 
-          <mat-form-field appearance="outline" class="bm-field--quiet bm-field--numeric">
+        <div class="field-row">
+          <mat-form-field
+            appearance="outline"
+            subscriptSizing="dynamic"
+            class="bm-field--quiet bm-field--numeric"
+          >
             <mat-label>Asset ID</mat-label>
-            <mat-icon matIconPrefix>tag</mat-icon>
-            <input
-              matInput
-              type="number"
-              inputmode="numeric"
-              formControlName="goodID"
-              min="3614"
-              max="7438"
-              placeholder="3614–7438"
-            />
+            <input matInput type="number" inputmode="numeric" formControlName="goodID" min="3614" max="7438" />
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="bm-field--quiet bm-field--numeric">
-            <mat-label>ISTAT code</mat-label>
-            <mat-icon matIconPrefix>qr_code</mat-icon>
+          <mat-form-field
+            appearance="outline"
+            subscriptSizing="dynamic"
+            class="bm-field--quiet bm-field--numeric"
+          >
+            <mat-label>ISTAT</mat-label>
             <input
               matInput
               type="text"
@@ -213,56 +187,46 @@
               (input)="formatIstatCode($event)"
               minlength="6"
               maxlength="6"
-              placeholder="058091"
             />
           </mat-form-field>
         </div>
+      </div>
 
-        <div class="inspector-foot">
-          <button
-            type="button"
-            mat-stroked-button
-            class="inspector-clear"
-            (click)="clearForm()"
-            [disabled]="isSaving()"
+      <footer class="panel-foot">
+        <button type="button" class="bm-action-ghost" (click)="clearForm()" [disabled]="isSaving()">
+          Clear
+        </button>
+
+        <button
+          type="button"
+          class="bm-action"
+          (click)="saveData()"
+          [disabled]="mainForm.invalid || !hasCoordinates() || isSaving()"
+          bmMagnetic="6"
+        >
+          <span class="bm-magnetic-label">{{ isSaving() ? 'Saving…' : 'Save record' }}</span>
+        </button>
+      </footer>
+    </bm-float-panel>
+
+    <!-- ── Records ────────────────────────────────────────────────────────── -->
+    <!--
+      The register is not a separate window that opens over the map — it *is*
+      the chip. Collapsed it reads as "Register · 12" in the corner; expanded,
+      the table grows out of that same chip in place. One object, two states,
+      so there is nothing to summon and nothing to dismiss.
+    -->
+    <bm-float-panel class="records" heading="Register" [(collapsed)]="registerCollapsed" #recordsPanel>
+      <span panelMeta class="records-count" [bmCountUp]="recordCount()"></span>
+
+      @if (!registerCollapsed()) {
+        <div class="records-filter">
+          <mat-form-field
+            appearance="outline"
+            subscriptSizing="dynamic"
+            class="records-search bm-field--quiet"
           >
-            Clear
-          </button>
-
-          <button
-            type="button"
-            mat-flat-button
-            class="inspector-save"
-            (click)="saveData()"
-            [disabled]="mainForm.invalid || !hasCoordinates() || isSaving()"
-          >
-            <mat-icon aria-hidden="true">save</mat-icon>
-            {{ isSaving() ? 'Saving…' : 'Save record' }}
-          </button>
-        </div>
-      </aside>
-
-    <!-- ── Records drawer ───────────────────────────────────────────────── -->
-    <section class="drawer" [class.is-open]="recordsOpen()" aria-label="Saved records">
-      <button
-        type="button"
-        class="drawer-handle"
-        [attr.aria-expanded]="recordsOpen()"
-        aria-controls="records-panel"
-        (click)="toggleRecords()"
-      >
-        <mat-icon aria-hidden="true">{{ recordsOpen() ? 'expand_more' : 'expand_less' }}</mat-icon>
-        <span class="drawer-title">Saved records</span>
-        <span class="drawer-count bm-numeric">{{ recordCount }}</span>
-        <span class="drawer-flex"></span>
-        <span class="drawer-hint">{{ recordsOpen() ? 'Hide' : 'Show' }}</span>
-      </button>
-
-      @if (recordsOpen()) {
-      <div class="drawer-panel" id="records-panel">
-        <div class="drawer-toolbar">
-          <mat-form-field appearance="outline" class="drawer-search bm-field--quiet">
-            <mat-icon matIconPrefix>search</mat-icon>
+            <mat-icon matIconPrefix aria-hidden="true">search</mat-icon>
             <input
               matInput
               type="search"
@@ -272,8 +236,6 @@
               (keyup)="applyFilter($event)"
             />
           </mat-form-field>
-
-          <mat-paginator showFirstLastButtons [pageSize]="5" [pageSizeOptions]="[5, 10, 25]" />
         </div>
 
         <div class="bm-table-wrap">
@@ -349,14 +311,16 @@
                 <div class="bm-empty">
                   <mat-icon aria-hidden="true">database</mat-icon>
                   <p class="bm-empty-title">No records yet</p>
-                  <p class="bm-empty-body">Saved assets will appear here.</p>
                 </div>
               </td>
             </tr>
           </table>
         </div>
-      </div>
+
+        <footer class="records-foot">
+          <mat-paginator [pageSize]="8" [pageSizeOptions]="[8]" />
+        </footer>
       }
-    </section>
+    </bm-float-panel>
   </div>
 </bm-app-shell>

@@ -1,102 +1,127 @@
-<div class="auth-page">
-  <button
-    mat-icon-button
-    type="button"
-    class="theme-toggle"
-    [matTooltip]="isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
-    [attr.aria-label]="isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
-    [attr.aria-pressed]="isDark()"
-    (click)="toggleTheme()"
-  >
-    <mat-icon>{{ isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-  </button>
+<main class="access-page">
+  <div class="access-column">
+    <header class="access-header" data-access-stage>
+      <a class="access-brand" routerLink="/" aria-label="BiMap home">
+        <span class="bm-benchmark" aria-hidden="true"></span>
+        <span class="access-brand-copy">
+          <strong>BiMap</strong>
+          <small>Heritage asset registration</small>
+        </span>
+      </a>
 
-  <main class="auth-card">
-    <div class="auth-brand">
-      <span class="brand-mark" aria-hidden="true">
-        <mat-icon>explore</mat-icon>
-      </span>
-      <span class="brand-name">BiMap</span>
-    </div>
+      <a class="overview-link" routerLink="/">
+        <mat-icon aria-hidden="true">arrow_back</mat-icon>
+        <span>Back to overview</span>
+      </a>
+    </header>
 
-    <div class="auth-intro">
-      <h1>Sign in</h1>
-      <p>Geographic asset registration workspace.</p>
-    </div>
+    <div class="access-body">
+      <p class="bm-marker" data-access-stage><span>ACC</span><i></i> Secure account access</p>
 
-    <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="auth-form" autocomplete="on" novalidate>
-      <mat-form-field appearance="outline">
-        <mat-label>Username or email</mat-label>
-        <mat-icon matIconPrefix>person</mat-icon>
-        <input
-          matInput
-          type="text"
-          name="username"
-          [(ngModel)]="loginRequest.username"
-          #username="ngModel"
-          required
-          autocomplete="username"
-          autocapitalize="none"
-          spellcheck="false"
-          [disabled]="isSubmitting()"
-        />
-        @if (username.invalid && username.touched) {
-          <mat-error>Enter your username or email</mat-error>
+      <h1 class="access-title" id="login-title" data-access-stage>
+        Return to your spatial workspace.
+      </h1>
+
+      <p class="access-lede" data-access-stage>
+        Sign in with your organization credentials to continue locating, verifying and registering
+        geographic asset records.
+      </p>
+
+      <form
+        (ngSubmit)="onSubmit()"
+        #loginForm="ngForm"
+        class="access-form"
+        autocomplete="on"
+        aria-labelledby="login-title"
+        aria-describedby="login-help"
+        novalidate
+      >
+        @if (registrationComplete()) {
+          <div class="access-message access-message--success" role="status" data-access-stage>
+            <mat-icon aria-hidden="true">check_circle</mat-icon>
+            <span>Your account is ready. Sign in to continue.</span>
+          </div>
         }
-      </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Password</mat-label>
-        <mat-icon matIconPrefix>lock</mat-icon>
-        <input
-          matInput
-          [type]="hidePassword() ? 'password' : 'text'"
-          name="password"
-          [(ngModel)]="loginRequest.password"
-          #password="ngModel"
-          required
-          autocomplete="current-password"
-          [disabled]="isSubmitting()"
-        />
-        <button
-          mat-icon-button
-          matIconSuffix
-          type="button"
-          tabindex="-1"
-          (click)="togglePassword()"
-          [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
-          [attr.aria-pressed]="!hidePassword()"
-        >
-          <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
-        </button>
-        @if (password.invalid && password.touched) {
-          <mat-error>Enter your password</mat-error>
-        }
-      </mat-form-field>
+        <mat-form-field appearance="outline" data-access-stage>
+          <mat-label>Username or work email</mat-label>
+          <mat-icon matIconPrefix aria-hidden="true">person</mat-icon>
+          <input
+            matInput
+            type="text"
+            name="username"
+            [(ngModel)]="loginRequest.username"
+            #username="ngModel"
+            required
+            autocomplete="username"
+            autocapitalize="none"
+            spellcheck="false"
+            [disabled]="isSubmitting()"
+          />
+          @if (username.invalid && username.touched) {
+            <mat-error>Enter your username or work email.</mat-error>
+          }
+        </mat-form-field>
 
-      <!-- Announced to assistive tech the moment a sign-in attempt fails. -->
-      <div class="auth-alert-slot" role="alert" aria-live="assertive">
+        <mat-form-field appearance="outline" data-access-stage>
+          <mat-label>Password</mat-label>
+          <mat-icon matIconPrefix aria-hidden="true">lock</mat-icon>
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            name="password"
+            [(ngModel)]="loginRequest.password"
+            #password="ngModel"
+            required
+            autocomplete="current-password"
+            [disabled]="isSubmitting()"
+          />
+          <button
+            mat-icon-button
+            matIconSuffix
+            type="button"
+            (click)="togglePassword()"
+            [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+            [attr.aria-pressed]="!hidePassword()"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+          @if (password.invalid && password.touched) {
+            <mat-error>Enter your password.</mat-error>
+          }
+        </mat-form-field>
+
         @if (errorMessage()) {
-          <p class="auth-alert">
+          <div class="access-message access-message--error" role="alert" aria-live="assertive" #errorBanner>
             <mat-icon aria-hidden="true">error</mat-icon>
             <span>{{ errorMessage() }}</span>
-          </p>
+          </div>
         }
-      </div>
 
-      <button
-        mat-flat-button
-        type="submit"
-        class="auth-submit"
-        [disabled]="loginForm.invalid || isSubmitting()"
-      >
-        {{ isSubmitting() ? 'Signing in…' : 'Sign in' }}
-      </button>
-    </form>
+        <button
+          mat-flat-button
+          type="submit"
+          class="access-submit"
+          data-access-stage
+          [disabled]="loginForm.invalid || isSubmitting()"
+        >
+          <span>{{ isSubmitting() ? 'Signing you in…' : 'Open workspace' }}</span>
+          @if (!isSubmitting()) {
+            <!-- Material projects `mat-icon` into a *leading* slot unless it is
+                 marked `iconPositionEnd`; without this the arrow renders before
+                 the label. -->
+            <mat-icon iconPositionEnd aria-hidden="true">arrow_forward</mat-icon>
+          }
+        </button>
+      </form>
 
-    <p class="auth-footnote">
-      <mat-icon aria-hidden="true">shield</mat-icon>
-      <span>Authorized users only. Contact your administrator for access.</span>
-    </p>
-  </main>
-</div>
+      <p class="access-alternative" id="login-help" data-access-stage>
+        New to BiMap? <a routerLink="/register">Create an account</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="access-console">
+    <bm-access-console />
+  </div>
+</main>

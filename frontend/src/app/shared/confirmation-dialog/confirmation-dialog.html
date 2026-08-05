@@ -1,12 +1,17 @@
 <div
   class="dialog"
+  #dialog
   role="alertdialog"
   aria-modal="true"
   [attr.aria-labelledby]="titleId"
   [attr.aria-describedby]="messageId"
 >
-  <div class="dialog-icon" [class]="'tone-' + (data.tone ?? 'primary')" aria-hidden="true">
-    <mat-icon>{{ data.icon ?? 'help' }}</mat-icon>
+  <div class="dialog-visual" [class]="'tone-' + (data.tone ?? 'primary')" aria-hidden="true">
+    <span class="dialog-orbit dialog-orbit--one"></span>
+    <span class="dialog-orbit dialog-orbit--two"></span>
+    <div class="dialog-icon">
+      <mat-icon>{{ data.icon ?? 'help' }}</mat-icon>
+    </div>
   </div>
 
   <h2 class="dialog-title" [id]="titleId">{{ resolvedTitle }}</h2>
@@ -32,7 +37,8 @@
       [class.bm-btn-danger]="data.tone === 'warn'"
       (click)="confirm()"
     >
-      {{ data.confirmText ?? 'Confirm' }}
+      <span>{{ data.confirmText ?? 'Confirm' }}</span>
+      <mat-icon iconPositionEnd aria-hidden="true">arrow_forward</mat-icon>
     </button>
   </div>
 </div>

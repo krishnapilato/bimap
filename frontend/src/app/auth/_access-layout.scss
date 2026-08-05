@@ -1,0 +1,278 @@
+// =============================================================================
+//  Shared access layout — sign in and registration
+// -----------------------------------------------------------------------------
+//  Both screens are the same object: a form column on the left, the live
+//  console on the right. Keeping the layout here means the two pages cannot
+//  drift apart, and each page's stylesheet carries only what differs.
+// =============================================================================
+
+@use '../../styles/mixins' as *;
+
+:host {
+  display: block;
+}
+
+.access-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+  gap: clamp(28px, 4vw, 68px);
+  align-items: stretch;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: clamp(20px, 3vw, 40px) clamp(20px, 4vw, 60px);
+}
+
+// ── Form column ──────────────────────────────────────────────────────────────
+
+.access-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.access-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--bm-space-4);
+  margin-bottom: clamp(28px, 5vh, 56px);
+}
+
+.access-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-3);
+  color: inherit;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.access-brand-copy {
+  display: grid;
+
+  strong {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: var(--bm-tracking-tight);
+  }
+
+  small {
+    color: var(--bm-text-3);
+    font-size: 10.5px;
+  }
+}
+
+.overview-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bm-space-2);
+  padding: 8px 14px;
+  border: 1px solid var(--bm-line);
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-surface);
+  color: var(--bm-text-2);
+  font-size: 12.5px;
+  font-weight: 550;
+  transition:
+    border-color var(--bm-duration) var(--bm-ease),
+    color var(--bm-duration) var(--bm-ease);
+
+  &:hover {
+    border-color: var(--bm-accent-border);
+    color: var(--bm-accent-text);
+    text-decoration: none;
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    transition: transform var(--bm-duration) var(--bm-ease-cinematic);
+  }
+
+  &:hover mat-icon {
+    transform: translateX(-3px);
+  }
+}
+
+// ── Intro ────────────────────────────────────────────────────────────────────
+
+.access-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  max-width: 520px;
+}
+
+.access-title {
+  margin-top: var(--bm-space-4);
+  font: var(--bm-text-display);
+  letter-spacing: var(--bm-tracking-hero);
+  // Clipped so the GSAP entrance can travel the line up from below its baseline.
+  overflow: hidden;
+}
+
+.access-lede {
+  max-width: 46ch;
+  margin-top: var(--bm-space-4);
+  color: var(--bm-text-2);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+// ── Form ─────────────────────────────────────────────────────────────────────
+
+.access-form {
+  display: grid;
+  gap: var(--bm-space-4);
+  margin-top: clamp(24px, 4vh, 40px);
+}
+
+.field-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--bm-space-3);
+}
+
+.access-message {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-3);
+  padding: 11px var(--bm-space-4);
+  border: 1px solid;
+  border-radius: var(--bm-radius-md);
+  font-size: 12.5px;
+  font-weight: 550;
+  line-height: 1.5;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &--success {
+    border-color: var(--bm-success-border);
+    background: var(--bm-success-soft);
+    color: var(--bm-success);
+  }
+
+  &--error {
+    border-color: var(--bm-danger-border);
+    background: var(--bm-danger-soft);
+    color: var(--bm-danger);
+  }
+}
+
+// ── Submit ───────────────────────────────────────────────────────────────────
+
+// Near-black, matching every other primary action in the product. Cobalt is
+// reserved for navigation and state; the one control a screen exists to have
+// pressed is the only thing allowed to be black.
+.access-submit {
+  --mat-filled-button-container-color: var(--bm-text);
+  --mat-filled-button-label-text-color: var(--bm-text-inverse);
+  --mdc-filled-button-container-height: 50px;
+  --mdc-filled-button-container-shape: var(--bm-radius-pill);
+  position: relative;
+  overflow: hidden;
+  justify-content: center;
+  font-size: 14px !important;
+  font-weight: 650 !important;
+  letter-spacing: -0.005em;
+  box-shadow: 0 18px 34px -22px rgba(8, 23, 44, 0.9);
+
+  // Material paints the container from inside its own cascade layer, which no
+  // author specificity can outrank — see `.bm-btn-danger` in `_material.scss`.
+  &:not(:disabled) {
+    background: var(--bm-text) !important;
+    color: var(--bm-text-inverse) !important;
+  }
+
+  // A light sweeps across on hover — the only decorative flourish on either
+  // form, and it is on the one control the page exists to have pressed.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 32%,
+      rgba(255, 255, 255, 0.32) 50%,
+      transparent 68%
+    );
+    transform: translateX(-120%);
+    transition: transform 0.9s var(--bm-ease-cinematic);
+  }
+
+  &:hover:not(:disabled)::before {
+    transform: translateX(120%);
+  }
+
+  mat-icon {
+    transition: transform var(--bm-duration) var(--bm-ease-cinematic);
+  }
+
+  &:hover:not(:disabled) mat-icon {
+    transform: translateX(4px);
+  }
+}
+
+.access-alternative {
+  margin-top: var(--bm-space-5);
+  color: var(--bm-text-2);
+  font-size: 13px;
+
+  a {
+    font-weight: 650;
+  }
+}
+
+// ── Console column ───────────────────────────────────────────────────────────
+
+.access-console {
+  display: flex;
+  min-width: 0;
+
+  bm-access-console {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+
+@include below(lg) {
+  .access-page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  // The console becomes a banner above the form rather than disappearing: it is
+  // what tells a first-time visitor what they are signing in to.
+  .access-console {
+    order: -1;
+    max-height: 250px;
+  }
+
+  .access-body {
+    max-width: none;
+  }
+}
+
+@include below(sm) {
+  .field-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .access-console {
+    display: none;
+  }
+
+  .overview-link span {
+    display: none;
+  }
+}

@@ -31,6 +31,35 @@ body {
   overflow-x: hidden;
 }
 
+// The room the whole product sits in: a cool paper wash lit from the top left,
+// with a single warm bloom bottom-right so the page is never flatly neutral.
+// Fixed and behind everything, so no page has to paint its own background.
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 6% 0%, rgba(17, 87, 227, 0.11), transparent 34%),
+    radial-gradient(circle at 96% 96%, rgba(217, 112, 18, 0.07), transparent 32%),
+    linear-gradient(152deg, #fafcff 0%, var(--bm-canvas) 58%, #eef3f9 100%);
+  pointer-events: none;
+}
+
+// A whole-page graticule at the threshold of visibility. It is the one thing
+// that tells you, before you read a word, that this is an instrument for
+// working on maps.
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  @include graticule(56px, rgba(37, 71, 112, 0.045));
+  -webkit-mask-image: radial-gradient(circle at 50% 32%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(circle at 50% 32%, #000 0%, transparent 78%);
+  pointer-events: none;
+}
+
 // ── Headings & text ──────────────────────────────────────────────────────────
 
 h1,
@@ -109,8 +138,29 @@ button {
 // Icons are decorative unless a label says otherwise, so they must never be
 // announced or selected as stray text.
 mat-icon {
+  -webkit-user-select: none;
   user-select: none;
   flex: none;
+}
+
+// ── Motion primitives ────────────────────────────────────────────────────────
+//  The CSS half of the GSAP directives in `core/motion`. Kept global because
+//  the directives are applied across component boundaries and their markup is
+//  generated, so it cannot be reached by a component's scoped styles.
+
+.bm-split {
+  @include split-clip;
+}
+
+// `bmMagnetic` and `bmTilt` write transforms directly; both need a compositing
+// layer and neither should let the browser's own transitions fight GSAP.
+.bm-magnetic,
+.bm-tilt {
+  transform: translateZ(0);
+}
+
+.bm-tilt {
+  transform-style: preserve-3d;
 }
 
 // ── Accessibility primitives ─────────────────────────────────────────────────

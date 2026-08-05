@@ -1,0 +1,16 @@
+// =============================================================================
+//  App root
+// -----------------------------------------------------------------------------
+//  The frame owns no visual language of its own — the route curtain and the
+//  command palette carry their own styles, and the page background lives in
+//  `styles/_base.scss` so it is painted once for every route.
+// =============================================================================
+
+:host {
+  display: block;
+  min-height: 100vh;
+  min-height: 100dvh;
+  // Establishes the containing block the curtain and palette position against,
+  // and stops a page's own transform from capturing them.
+  isolation: isolate;
+}

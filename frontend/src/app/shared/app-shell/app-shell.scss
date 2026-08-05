@@ -1,236 +1,285 @@
-@use 'styles/mixins' as *;
+// =============================================================================
+//  App shell — the chrome around every authenticated page
+// =============================================================================
+
+@use '../../../styles/mixins' as *;
 
 :host {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  min-height: 100svh;
-  background: var(--bm-canvas);
+  min-height: 100dvh;
+  --shell-gutter: clamp(16px, 3vw, 40px);
 }
 
-// ── Masthead ─────────────────────────────────────────────────────────────────
+// ── Bar ──────────────────────────────────────────────────────────────────────
 
-.shell-header {
+.shell-bar {
   position: sticky;
   top: 0;
-  z-index: 40;
+  z-index: 30;
   display: flex;
   align-items: center;
   gap: var(--bm-space-4);
-  height: var(--bm-header-height);
-  padding-inline: var(--bm-space-5);
-  background: var(--bm-surface);
+  padding: var(--bm-space-3) var(--shell-gutter);
   border-bottom: 1px solid var(--bm-line);
-
-  @include below(sm) {
-    gap: var(--bm-space-2);
-    padding-inline: var(--bm-space-3);
-  }
+  background: rgba(250, 252, 255, 0.82);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
 }
 
-.brand {
-  display: inline-flex;
+.shell-brand {
+  display: flex;
   align-items: center;
   gap: var(--bm-space-3);
-  padding: var(--bm-space-1);
-  margin-inline-start: calc(var(--bm-space-1) * -1);
-  border-radius: var(--bm-radius-md);
-  color: var(--bm-text);
-  text-decoration: none;
+  color: inherit;
   flex: none;
 
   &:hover {
     text-decoration: none;
-
-    .brand-mark {
-      border-color: var(--bm-accent-border);
-    }
   }
-
-  @include focusable;
 }
 
-.brand-mark {
+.shell-brand-copy {
   display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: var(--bm-radius-md);
-  background: var(--bm-accent-soft);
-  border: 1px solid transparent;
-  color: var(--bm-accent);
-  transition: border-color var(--bm-duration) var(--bm-ease);
 
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
+  strong {
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: var(--bm-tracking-tight);
+  }
+
+  small {
+    color: var(--bm-text-3);
+    font-size: 10.5px;
   }
 }
 
-.brand-text {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--bm-space-2);
+.shell-slot {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-3);
   min-width: 0;
+  margin-inline: auto;
 }
 
-.brand-name {
-  font-size: 15px;
-  font-weight: 650;
-  letter-spacing: var(--bm-tracking-tight);
-}
-
-// Both hide together — a lone separator with nothing after it reads as a bug.
-.brand-divider,
-.brand-section {
-  @include below(xs) {
-    display: none;
-  }
-}
-
-.brand-divider {
-  color: var(--bm-line-strong);
-}
-
-.brand-section {
-  font-size: 13px;
-  color: var(--bm-text-2);
-  @include truncate;
-}
-
-// Page-specific controls project here and take the free space.
-.header-slot {
+.shell-rail {
   display: flex;
   align-items: center;
   gap: var(--bm-space-2);
-  flex: 1;
-  min-width: 0;
-  justify-content: flex-end;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--bm-space-1);
   flex: none;
 }
 
-.header-rule {
-  width: 1px;
-  height: 20px;
-  margin-inline: var(--bm-space-2);
-  background: var(--bm-line);
+// ── Command trigger ──────────────────────────────────────────────────────────
 
-  @include below(sm) {
-    display: none;
+.shell-command {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bm-space-2);
+  padding: 7px 9px 7px 11px;
+  border: 1px solid var(--bm-line);
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-surface-solid);
+  color: var(--bm-text-2);
+  font-size: 12.5px;
+  font-weight: 550;
+  transition:
+    border-color var(--bm-duration) var(--bm-ease),
+    color var(--bm-duration) var(--bm-ease),
+    box-shadow var(--bm-duration) var(--bm-ease);
+
+  &:hover {
+    border-color: var(--bm-accent-border);
+    color: var(--bm-accent-text);
+    box-shadow: var(--bm-shadow-xs);
   }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--bm-accent);
+  }
+
+  kbd {
+    padding: 1px 6px;
+    border: 1px solid var(--bm-line);
+    border-radius: 5px;
+    background: var(--bm-surface-2);
+    color: var(--bm-text-3);
+    font: 500 10px/1.6 var(--bm-font-mono);
+  }
+
+  @include focusable(2px);
+}
+
+// ── Icon actions ─────────────────────────────────────────────────────────────
+
+.shell-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: var(--bm-radius-sm);
+  color: var(--bm-text-2);
+  transition:
+    background var(--bm-duration-fast) var(--bm-ease),
+    color var(--bm-duration-fast) var(--bm-ease),
+    border-color var(--bm-duration-fast) var(--bm-ease);
+
+  &:hover {
+    border-color: var(--bm-accent-border);
+    background: var(--bm-accent-soft);
+    color: var(--bm-accent-text);
+    text-decoration: none;
+  }
+
+  &.is-current {
+    border-color: var(--bm-accent-border);
+    background: var(--bm-accent-soft);
+    color: var(--bm-accent-text);
+  }
+
+  &--danger:hover {
+    border-color: var(--bm-danger-border);
+    background: var(--bm-danger-soft);
+    color: var(--bm-danger);
+  }
+
+  mat-icon {
+    font-size: 19px;
+    width: 19px;
+    height: 19px;
+  }
+
+  @include focusable(2px);
 }
 
 // ── Identity ─────────────────────────────────────────────────────────────────
 
-.identity {
+.shell-identity {
   display: flex;
   align-items: center;
-  gap: var(--bm-space-2);
-  padding: 3px var(--bm-space-3) 3px 3px;
+  gap: var(--bm-space-3);
+  padding: 4px 12px 4px 4px;
+  border: 1px solid var(--bm-line);
   border-radius: var(--bm-radius-pill);
-  background: var(--bm-surface-2);
+  background: var(--bm-surface-solid);
   min-width: 0;
-  max-width: 220px;
-
-  @include below(md) {
-    display: none;
-  }
 }
 
 .identity-avatar {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   flex: none;
   border-radius: 50%;
-  background: var(--bm-accent);
+  background: linear-gradient(145deg, var(--bm-accent), #0a3f9e);
   color: var(--bm-on-accent);
-  font-size: 10.5px;
-  font-weight: 650;
+  font-size: 11.5px;
+  font-weight: 700;
   letter-spacing: 0.02em;
+
+  // Presence dot, in the semantic success hue rather than the signal hue —
+  // signal means position, and this is not one.
+  i {
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    width: 9px;
+    height: 9px;
+    border: 2px solid var(--bm-surface-solid);
+    border-radius: 50%;
+    background: var(--bm-success);
+  }
 }
 
 .identity-copy {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   min-width: 0;
-  line-height: 1.25;
 }
 
 .identity-name {
   font-size: 12.5px;
-  font-weight: 550;
-  color: var(--bm-text);
+  font-weight: 600;
+  letter-spacing: -0.01em;
   @include truncate;
 }
 
 .identity-role {
-  font-size: 10.5px;
-  color: var(--bm-text-3);
-  @include truncate;
+  @include label;
+  font-size: 10px;
 }
 
-// ── Header buttons ───────────────────────────────────────────────────────────
+// ── Main ─────────────────────────────────────────────────────────────────────
 
-.icon-action {
-  color: var(--bm-text-2);
-
-  &.is-current {
-    background: var(--bm-accent-soft);
-    color: var(--bm-accent);
-  }
-
-  &--danger:hover {
-    background: var(--bm-danger-soft);
-    color: var(--bm-danger);
-  }
-}
-
-// ── Content frame ────────────────────────────────────────────────────────────
-
-// A flex column so pages can opt a panel into filling the remaining height
-// instead of leaving a dead band under short content.
 .shell-main {
-  display: flex;
-  flex-direction: column;
   flex: 1;
-  min-height: 0;
   width: 100%;
   max-width: var(--bm-content-max);
   margin-inline: auto;
-  padding: var(--bm-space-7) var(--bm-space-6) var(--bm-space-9);
+  padding: clamp(24px, 4vw, 44px) var(--shell-gutter) var(--bm-space-9);
 
   &:focus {
     outline: none;
   }
 
-  // The map workspace needs the full viewport and manages its own padding.
+  // The workspace manages its own full-bleed grid and must not be boxed in.
   &--wide {
     max-width: none;
+    padding: var(--bm-space-4) var(--shell-gutter) var(--bm-space-5);
+  }
+
+  // Hands the page the whole viewport below the bar. `min-height: 0` is what
+  // lets a flex child actually shrink to its container instead of being sized
+  // by its content — without it the map would push the page taller and the
+  // document would scroll after all.
+  &--flush {
+    max-width: none;
     padding: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+// The bar is sticky on scrolling pages and simply fixed in place on flush ones.
+:host:has(.shell-main--flush) {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+
+@include below(lg) {
+  .identity-copy {
+    display: none;
   }
 
-  @include below(md) {
-    padding: var(--bm-space-5) var(--bm-space-4) var(--bm-space-8);
+  .shell-identity {
+    padding: 4px;
+  }
+}
 
-    &--wide {
-      padding: 0;
-    }
+@include below(md) {
+  .shell-command span {
+    display: none;
   }
 
-  @include below(xs) {
-    padding: var(--bm-space-4) var(--bm-space-3) var(--bm-space-7);
+  .shell-brand-copy small {
+    display: none;
+  }
+}
 
-    &--wide {
-      padding: 0;
-    }
+@include below(sm) {
+  .shell-command kbd {
+    display: none;
+  }
+
+  .shell-slot {
+    display: none;
   }
 }

@@ -1,133 +1,161 @@
 <bm-app-shell section="Administration">
-  <a routerLink="/listuser" class="back-link">
+  <a routerLink="/listuser" class="back-link" data-stage>
     <mat-icon aria-hidden="true">arrow_back</mat-icon>
     Back to users
   </a>
 
-  <div class="bm-page-head">
+  <div class="page-head" data-stage>
+    <p class="bm-marker"><span>ADM</span><i></i> Identity provisioning</p>
     <h1>Add user</h1>
-    <p>Create an account and grant access to the workspace.</p>
+    <p class="page-lede">Create an account and grant access to the workspace.</p>
   </div>
 
-  <section class="bm-panel form-panel" aria-labelledby="new-user-title">
-    <div class="bm-panel-head">
-      <div class="bm-panel-copy">
+  <div class="provision-layout">
+    <section class="form-panel" aria-labelledby="new-user-title" data-stage>
+      <header class="form-head">
         <h2 id="new-user-title">Account details</h2>
         <p>The account is created immediately and can be edited afterwards.</p>
-      </div>
-    </div>
+      </header>
 
-    <form (ngSubmit)="onSubmit()" #userForm="ngForm" autocomplete="off" class="form-body" novalidate>
-      <div class="field-row">
+      <form (ngSubmit)="onSubmit()" #userForm="ngForm" autocomplete="off" class="form-body" novalidate>
+        <div class="field-pair">
+          <mat-form-field appearance="outline">
+            <mat-label>First name</mat-label>
+            <mat-icon matIconPrefix>badge</mat-icon>
+            <input
+              matInput
+              [(ngModel)]="user.name"
+              name="name"
+              #name="ngModel"
+              required
+              minlength="1"
+              maxlength="18"
+              pattern="[a-zA-Z\s'-]*"
+              placeholder="Jane"
+              autocomplete="given-name"
+            />
+            @if (name.invalid && (name.dirty || name.touched)) {
+              <mat-error>Use 1–18 letters</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Last name</mat-label>
+            <mat-icon matIconPrefix>person</mat-icon>
+            <input
+              matInput
+              [(ngModel)]="user.surname"
+              name="surname"
+              #surname="ngModel"
+              required
+              minlength="1"
+              maxlength="18"
+              pattern="[a-zA-Z\s'-]*"
+              placeholder="Doe"
+              autocomplete="family-name"
+            />
+            @if (surname.invalid && (surname.dirty || surname.touched)) {
+              <mat-error>Use 1–18 letters</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
         <mat-form-field appearance="outline">
-          <mat-label>First name</mat-label>
-          <mat-icon matIconPrefix>badge</mat-icon>
+          <mat-label>Email address</mat-label>
+          <mat-icon matIconPrefix>mail</mat-icon>
           <input
             matInput
-            [(ngModel)]="user.name"
-            name="name"
-            #name="ngModel"
+            [(ngModel)]="user.email"
+            name="email"
+            #email="ngModel"
             required
-            minlength="1"
-            maxlength="18"
-            pattern="[a-zA-Z\s'-]*"
-            placeholder="Jane"
-            autocomplete="given-name"
+            email
+            minlength="3"
+            maxlength="100"
+            placeholder="name@company.com"
+            autocomplete="email"
+            autocapitalize="none"
+            spellcheck="false"
+            (blur)="onFocusOutEvent()"
           />
-          @if (name.invalid && (name.dirty || name.touched)) {
-            <mat-error>Use 1–18 letters</mat-error>
+          @if (emailTaken()) {
+            <mat-error>That email is already registered</mat-error>
+          } @else if (email.invalid && (email.dirty || email.touched)) {
+            <mat-error>Enter a valid email address</mat-error>
           }
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Last name</mat-label>
-          <mat-icon matIconPrefix>person</mat-icon>
+          <mat-label>Password</mat-label>
+          <mat-icon matIconPrefix>lock</mat-icon>
           <input
             matInput
-            [(ngModel)]="user.surname"
-            name="surname"
-            #surname="ngModel"
+            [type]="hidePassword() ? 'password' : 'text'"
+            [(ngModel)]="user.password"
+            name="password"
+            #password="ngModel"
             required
-            minlength="1"
-            maxlength="18"
-            pattern="[a-zA-Z\s'-]*"
-            placeholder="Doe"
-            autocomplete="family-name"
+            minlength="8"
+            maxlength="32"
+            placeholder="At least 8 characters"
+            autocomplete="new-password"
           />
-          @if (surname.invalid && (surname.dirty || surname.touched)) {
-            <mat-error>Use 1–18 letters</mat-error>
-          }
+          <button
+            mat-icon-button
+            matIconSuffix
+            type="button"
+            tabindex="-1"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+            [attr.aria-pressed]="!hidePassword()"
+          >
+            <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
         </mat-form-field>
-      </div>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Email address</mat-label>
-        <mat-icon matIconPrefix>mail</mat-icon>
-        <input
-          matInput
-          [(ngModel)]="user.email"
-          name="email"
-          #email="ngModel"
-          required
-          email
-          minlength="3"
-          maxlength="100"
-          placeholder="name@company.com"
-          autocomplete="email"
-          autocapitalize="none"
-          spellcheck="false"
-          (blur)="onFocusOutEvent()"
-        />
-        @if (emailTaken()) {
-          <mat-error>That email is already registered</mat-error>
-        } @else if (email.invalid && (email.dirty || email.touched)) {
-          <mat-error>Enter a valid email address</mat-error>
+        @if (user.password) {
+          <bm-password-strength [password]="user.password" />
         }
-      </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Password</mat-label>
-        <mat-icon matIconPrefix>lock</mat-icon>
-        <input
-          matInput
-          [type]="hidePassword() ? 'password' : 'text'"
-          [(ngModel)]="user.password"
-          name="password"
-          #password="ngModel"
-          required
-          minlength="8"
-          maxlength="32"
-          placeholder="At least 8 characters"
-          autocomplete="new-password"
-        />
-        <button
-          mat-icon-button
-          matIconSuffix
-          type="button"
-          tabindex="-1"
-          (click)="togglePasswordVisibility()"
-          [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
-          [attr.aria-pressed]="!hidePassword()"
-        >
-          <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
-        </button>
-        @if (password.invalid && (password.dirty || password.touched)) {
-          <mat-error>Use between 8 and 32 characters</mat-error>
-        } @else {
-          <mat-hint>8–32 characters</mat-hint>
-        }
-      </mat-form-field>
+        <div class="form-actions">
+          <a routerLink="/listuser" class="bm-action-ghost">Cancel</a>
+          <button
+            type="submit"
+            class="bm-action"
+            [disabled]="userForm.invalid || emailTaken() || isSubmitting()"
+            bmMagnetic="7"
+          >
+            <span class="bm-magnetic-label">{{ isSubmitting() ? 'Creating…' : 'Create user' }}</span>
+          </button>
+        </div>
+      </form>
+    </section>
 
-      <div class="form-actions">
-        <a mat-stroked-button routerLink="/listuser">Cancel</a>
-        <button
-          type="submit"
-          mat-flat-button
-          [disabled]="userForm.invalid || emailTaken() || isSubmitting()"
-        >
-          {{ isSubmitting() ? 'Creating…' : 'Create user' }}
-        </button>
-      </div>
-    </form>
-  </section>
+    <!-- A live preview of the account being provisioned: the card fills in as
+         the form is typed, so the operator sees the result, not just the fields. -->
+    <aside class="preview" aria-label="Account preview" data-stage bmTilt="5">
+      <span class="preview-orbit" aria-hidden="true"><i></i><i></i></span>
+
+      <span class="preview-avatar" aria-hidden="true">{{ previewInitials() }}</span>
+
+      <strong class="preview-name">{{ previewName() }}</strong>
+      <span class="preview-email">{{ user.email || 'name@company.com' }}</span>
+
+      <dl class="preview-meta">
+        <div>
+          <dt>Role</dt>
+          <dd><span class="bm-chip bm-chip--plain">Standard</span></dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd><span class="bm-chip bm-chip--warning">Not confirmed</span></dd>
+        </div>
+      </dl>
+
+      <p class="preview-note">
+        The account joins the spatial workspace with a clear role and a secure identity. Status
+        changes once the confirmation email is acknowledged.
+      </p>
+    </aside>
+  </div>
 </bm-app-shell>

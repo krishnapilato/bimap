@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   HostListener,
@@ -15,7 +16,10 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { gsap } from 'gsap';
 import * as L from 'leaflet';
+
+import { MotionService } from '../core/motion';
 
 declare var google: any;
 
@@ -32,10 +36,12 @@ export type MapViewMode = 'map' | 'split' | 'street';
   imports: [MatTooltipModule, MatIconModule],
   templateUrl: 'streetview.html',
   styleUrl: 'streetview.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StreetviewComponent implements AfterViewInit, OnDestroy {
   private readonly mapWrapper = viewChild<ElementRef<HTMLDivElement>>('mapWrapper');
   private readonly zone = inject(NgZone);
+  private readonly motion = inject(MotionService);
 
   private leafletMap?: L.Map;
   private streetViewPanorama?: any;
@@ -44,6 +50,8 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   private resizeObserver?: ResizeObserver;
   private streetViewResizeObserver?: ResizeObserver;
   private streetViewResizeFrame?: number;
+  private panoramaPositionFrame?: number;
+  private panoramaPovFrame?: number;
   private movePending = false;
   private wasMobileViewport = false;
 
@@ -84,6 +92,30 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
 
       this.queueMapResize();
       this.queueStreetViewResize();
+      this.revealActivePane();
+    });
+  }
+
+  /**
+   * Softens the mode switch.
+   *
+   * Panes are layered rather than collapsed (see the stacking rules in the
+   * stylesheet), so without this the incoming surface simply blinks into
+   * existence. A short scale-and-fade on the pane coming forward makes the
+   * switch read as one camera moving rather than two images swapping.
+   */
+  private revealActivePane(): void {
+    if (!this.motion.enabled()) return;
+
+    requestAnimationFrame(() => {
+      const front = this.mapWrapper()?.nativeElement.querySelector('.map-pane.is-front');
+      if (!front) return;
+
+      gsap.fromTo(
+        front,
+        { opacity: 0.55, scale: 1.015 },
+        { opacity: 1, scale: 1, duration: 0.5, ease: 'bmGlide', overwrite: 'auto' },
+      );
     });
   }
 
@@ -109,9 +141,14 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.focusPulseTimeout) window.clearTimeout(this.focusPulseTimeout);
     if (this.streetViewResizeFrame) cancelAnimationFrame(this.streetViewResizeFrame);
+    if (this.panoramaPositionFrame) cancelAnimationFrame(this.panoramaPositionFrame);
+    if (this.panoramaPovFrame) cancelAnimationFrame(this.panoramaPovFrame);
 
     this.resizeObserver?.disconnect();
     this.streetViewResizeObserver?.disconnect();
+    if (this.streetViewPanorama && typeof google !== 'undefined') {
+      google.maps.event.clearInstanceListeners(this.streetViewPanorama);
+    }
     this.leafletMap?.remove();
   }
 
@@ -313,16 +350,26 @@ export class StreetviewComponent implements AfterViewInit, OnDestroy {
       this.updatePosition(e.latlng.lat, e.latlng.lng),
     );
 
-    google.maps.event.addListener(this.streetViewPanorama, 'position_changed', () => {
-      const pos = this.streetViewPanorama!.getPosition();
-      if (!pos) return;
+    this.zone.runOutsideAngular(() => {
+      google.maps.event.addListener(this.streetViewPanorama, 'position_changed', () => {
+        if (this.panoramaPositionFrame) cancelAnimationFrame(this.panoramaPositionFrame);
+        this.panoramaPositionFrame = requestAnimationFrame(() => {
+          this.panoramaPositionFrame = undefined;
+          const pos = this.streetViewPanorama!.getPosition();
+          if (!pos) return;
 
-      this.moveMarker(pos.lat(), pos.lng(), true);
-    });
+          this.moveMarker(pos.lat(), pos.lng(), true);
+        });
+      });
 
-    google.maps.event.addListener(this.streetViewPanorama, 'pov_changed', () => {
-      this.currentHeading = this.streetViewPanorama!.getPov().heading;
-      this.updateMarkerRotation(this.currentHeading);
+      google.maps.event.addListener(this.streetViewPanorama, 'pov_changed', () => {
+        if (this.panoramaPovFrame) cancelAnimationFrame(this.panoramaPovFrame);
+        this.panoramaPovFrame = requestAnimationFrame(() => {
+          this.panoramaPovFrame = undefined;
+          this.currentHeading = this.streetViewPanorama!.getPov().heading;
+          this.updateMarkerRotation(this.currentHeading);
+        });
+      });
     });
   }
 

@@ -1,15 +1,19 @@
 import { AsyncPipe, DatePipe } from '@angular/common';
 import {
   Component,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   DestroyRef,
+  ElementRef,
   OnInit,
+  afterNextRender,
   computed,
   effect,
   inject,
   signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,9 +26,21 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Observable, debounceTime, distinctUntilChanged, interval, of, switchMap } from 'rxjs';
+import { gsap } from 'gsap';
+import {
+  Observable,
+  Subject,
+  debounceTime,
+  distinctUntilChanged,
+  interval,
+  of,
+  switchMap,
+} from 'rxjs';
 
+import { CommandService } from '../core/commands/command.service';
+import { BM_MOTION, MotionService } from '../core/motion';
 import { AppShellComponent } from '../shared/app-shell/app-shell';
+import { FloatPanelComponent } from '../shared/float-panel/float-panel';
 import { MapViewMode, StreetviewComponent } from '../streetview/streetview';
 import { ApiService } from './api.service';
 import { Tables } from './tables';
@@ -55,9 +71,12 @@ declare var google: any;
     MatDialogModule,
     AppShellComponent,
     StreetviewComponent,
+    FloatPanelComponent,
+    ...BM_MOTION,
   ],
   templateUrl: './main.html',
   styleUrl: './main.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainComponent implements OnInit {
   private readonly apiService = inject(ApiService);
@@ -65,12 +84,17 @@ export class MainComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly motion = inject(MotionService);
+  private readonly commands = inject(CommandService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly tableFilterChanges = new Subject<string>();
 
   readonly currentTime = signal(new Date());
   readonly isSaving = signal(false);
 
   /** Which surfaces the canvas shows; Street View is verification, not the default work surface. */
-  readonly viewMode = signal<MapViewMode>('split');
+  readonly viewMode = signal<MapViewMode>('map');
 
   readonly viewModes: ReadonlyArray<{ value: MapViewMode; label: string; icon: string }> = [
     { value: 'map', label: 'Map', icon: 'map' },
@@ -78,8 +102,25 @@ export class MainComponent implements OnInit {
     { value: 'street', label: 'Street', icon: 'streetview' },
   ];
 
-  /** Past records are reference material, so the drawer starts closed. */
-  readonly recordsOpen = signal(false);
+  /**
+   * The register palette's collapsed state.
+   *
+   * There is no separate "open" concept: the chip in the corner *is* the
+   * collapsed panel, so this single flag is the whole of it. Past records are
+   * reference material, so it starts parked.
+   */
+  readonly registerCollapsed = signal(true);
+
+  /**
+   * Whether the locality strip is showing its three inputs.
+   *
+   * An operator works one comune at a time — often for a whole afternoon — so
+   * the administrative chain is treated as session context rather than as part
+   * of each record: set once, collapsed to a breadcrumb, and deliberately *not*
+   * cleared by `clearForm`. That takes three of the eight fields out of the
+   * per-record loop.
+   */
+  readonly localityEditing = signal(true);
 
   private _geocoder?: any;
   private get geocoder() {
@@ -97,17 +138,22 @@ export class MainComponent implements OnInit {
   readonly displayedColumns = ['id', 'prov', 'comune', 'indirizzo', 'civico', 'actions'];
   readonly dataSource = new MatTableDataSource<Tables>();
 
+  /** Drives the animated record counter, which a plain getter could not. */
+  readonly recordCount = signal(0);
+
   // Optional: the records table only exists while the drawer is open.
   private readonly paginator = viewChild(MatPaginator);
   private readonly sort = viewChild(MatSort);
   private readonly streetView = viewChild(StreetviewComponent);
+  private readonly viewSwitch = viewChild<ElementRef<HTMLElement>>('viewSwitch');
+  private readonly switchThumb = viewChild<ElementRef<HTMLElement>>('switchThumb');
+  private readonly positionCard = viewChild<ElementRef<HTMLElement>>('positionCard');
+  // `#recordsPanel` sits on a component, so the element has to be read
+  // explicitly — the default query would hand back the component instance.
+  private readonly recordsPanel = viewChild('recordsPanel', { read: ElementRef });
 
   /** Live marker position, surfaced in the canvas bar. */
   readonly liveCoords = computed(() => this.streetView()?.currentCoords() ?? '—');
-
-  get recordCount(): number {
-    return this.dataSource.data.length;
-  }
 
   readonly mainForm: FormGroup = this.fb.group({
     searchRegions: ['', Validators.required],
@@ -122,6 +168,25 @@ export class MainComponent implements OnInit {
     ilongitude: [{ value: '', disabled: true }],
   });
 
+  /** Re-evaluated on every keystroke so the locality breadcrumb tracks the form. */
+  private readonly formValue = toSignal(this.mainForm.valueChanges, {
+    initialValue: this.mainForm.value,
+  });
+
+  /** Region › Province › Municipality, for the collapsed breadcrumb. */
+  readonly localityPath = computed(() => {
+    this.formValue();
+
+    return ['searchRegions', 'searchTerm', 'searchMunicipalities']
+      .map((control) => `${this.mainForm.get(control)?.value ?? ''}`.trim())
+      .filter(Boolean);
+  });
+
+  readonly localityComplete = computed(() => this.localityPath().length === 3);
+
+  /** Complete *and* confirmed — only then does the strip collapse. */
+  readonly localitySettled = computed(() => this.localityComplete() && !this.localityEditing());
+
   ngOnInit(): void {
     interval(1000)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -130,7 +195,18 @@ export class MainComponent implements OnInit {
     this.apiService
       .findAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((data) => (this.dataSource.data = data));
+      .subscribe((data) => {
+        this.dataSource.data = data;
+        this.recordCount.set(data.length);
+        this.changeDetector.markForCheck();
+      });
+
+    this.tableFilterChanges
+      .pipe(debounceTime(160), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((filter) => {
+        this.dataSource.filter = filter;
+        this.dataSource.paginator?.firstPage();
+      });
 
     this.regionsOptions$ = this.setupAutocomplete('searchRegions', (term) =>
       this.apiService.searchRegions(term),
@@ -153,6 +229,102 @@ export class MainComponent implements OnInit {
       if (paginator) this.dataSource.paginator = paginator;
       if (sort) this.dataSource.sort = sort;
     });
+
+    // The mode pills share one sliding thumb, so the selection travels between
+    // them instead of blinking out of one and into the next.
+    effect(() => {
+      this.viewMode();
+      requestAnimationFrame(() => this.moveSwitchThumb());
+    });
+
+    // Capturing a point is the moment the whole screen exists for; it gets the
+    // one genuinely emphatic animation in the workspace.
+    effect(() => {
+      if (this.hasCoordinates()) this.celebrateCapture();
+    });
+
+    effect(() => {
+      if (!this.registerCollapsed()) requestAnimationFrame(() => this.revealRecords());
+    });
+
+    this.registerCommands();
+
+    afterNextRender(() => {
+      this.playEntrance();
+      this.moveSwitchThumb();
+    });
+  }
+
+  /** Everything on this screen is also reachable from ⌘K. */
+  private registerCommands(): void {
+    const dispose = this.commands.register([
+      {
+        id: 'main.locate',
+        label: 'Locate on map',
+        hint: 'Geocode the address currently in the form',
+        group: 'Workspace',
+        icon: 'travel_explore',
+        keywords: 'find geocode search address',
+        run: () => this.locateOnMap(),
+      },
+      {
+        id: 'main.view.split',
+        label: 'Split map and Street View',
+        group: 'Workspace',
+        icon: 'splitscreen',
+        keywords: 'compare panes side by side',
+        run: () => this.setViewMode('split'),
+      },
+      {
+        id: 'main.view.map',
+        label: 'Show map only',
+        group: 'Workspace',
+        icon: 'map',
+        run: () => this.setViewMode('map'),
+      },
+      {
+        id: 'main.view.street',
+        label: 'Show Street View only',
+        group: 'Workspace',
+        icon: 'streetview',
+        keywords: 'panorama',
+        run: () => this.setViewMode('street'),
+      },
+      {
+        id: 'main.recentre',
+        label: 'Recentre on marker',
+        group: 'Workspace',
+        icon: 'my_location',
+        run: () => this.recenterMap(),
+      },
+      {
+        id: 'main.records',
+        label: 'Toggle the register',
+        hint: 'Expand or park the saved records palette',
+        group: 'Workspace',
+        icon: 'database',
+        keywords: 'saved records table register',
+        run: () => this.toggleRecords(),
+      },
+      {
+        id: 'main.save',
+        label: 'Save record',
+        hint: 'Commit the current asset to the register',
+        group: 'Workspace',
+        icon: 'save',
+        run: () => this.saveData(),
+      },
+      {
+        id: 'main.clear',
+        label: 'Clear the form',
+        group: 'Workspace',
+        icon: 'restart_alt',
+        keywords: 'reset empty start over',
+        run: () => this.clearForm(),
+      },
+    ]);
+
+    this.destroyRef.onDestroy(dispose);
   }
 
   private setupAutocomplete(
@@ -167,8 +339,7 @@ export class MainComponent implements OnInit {
   }
 
   applyFilter(event: Event): void {
-    this.dataSource.filter = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    this.dataSource.paginator?.firstPage();
+    this.tableFilterChanges.next((event.target as HTMLInputElement).value.trim().toLowerCase());
   }
 
   setViewMode(mode: MapViewMode): void {
@@ -176,7 +347,7 @@ export class MainComponent implements OnInit {
   }
 
   toggleRecords(): void {
-    this.recordsOpen.update((open) => !open);
+    this.registerCollapsed.update((collapsed) => !collapsed);
   }
 
   recenterMap(): void {
@@ -225,8 +396,40 @@ export class MainComponent implements OnInit {
     });
   }
 
+  editLocality(): void {
+    this.localityEditing.set(true);
+  }
+
+  confirmLocality(): void {
+    if (!this.localityComplete()) return;
+
+    this.localityEditing.set(false);
+  }
+
+  /**
+   * Resets the record — but not the locality.
+   *
+   * This is the whole point of promoting the administrative chain to session
+   * context: saving a record and starting the next one in the same comune
+   * should cost nothing. `mainForm.reset()` would have thrown that away every
+   * time, which is exactly the repetition the old layout imposed.
+   */
   clearForm(): void {
-    this.mainForm.reset();
+    this.mainForm.patchValue({
+      address: '',
+      number: '',
+      goodNaming: '',
+      goodID: '',
+      istatCode: '',
+      ilatitude: '',
+      ilongitude: '',
+    });
+
+    for (const control of ['address', 'number', 'goodNaming', 'goodID', 'istatCode']) {
+      this.mainForm.get(control)?.markAsPristine();
+      this.mainForm.get(control)?.markAsUntouched();
+    }
+
     this.latitude.set(null);
     this.longitude.set(null);
   }
@@ -297,8 +500,8 @@ export class MainComponent implements OnInit {
 
     this.snackbar.open(`Record ${row.id} loaded into the form`, 'Close', { duration: 2500 });
 
-    // Get out of the way so the map result is immediately visible.
-    this.recordsOpen.set(false);
+    // Park the register so the map result is immediately visible.
+    this.registerCollapsed.set(true);
 
     this.panMapToAddress(row.comune, normalizedAddress, civico);
   }
@@ -308,13 +511,100 @@ export class MainComponent implements OnInit {
     this.mainForm.controls['istatCode'].setValue(value, { emitEvent: false });
   }
 
-  focusOut(): void {
-    const municipality = this.mainForm.get('searchMunicipalities')?.value;
-    const address = this.mainForm.get('address')?.value;
-    const number = this.mainForm.get('number')?.value;
+  // ── Choreography ───────────────────────────────────────────────────────────
 
-    if (municipality && address && number) this.panMapToAddress(municipality, address, number);
+  /**
+   * The map settles first and the floating chrome arrives on top of it, which
+   * is the order the screen is actually stacked.
+   */
+  private playEntrance(): void {
+    if (!this.motion.enabled()) return;
+
+    const context = gsap.context(() => {
+      this.motion
+        .timeline({ delay: 0.1 })
+        .from('.canvas', { opacity: 0, duration: 0.7 })
+        .from('.panel', { opacity: 0, x: -22, duration: 0.65, ease: 'bmGlide' }, '-=0.4')
+        .from(
+          '.chrome, .records',
+          { opacity: 0, y: -10, duration: 0.5, stagger: 0.08 },
+          '-=0.45',
+        );
+    }, this.host.nativeElement);
+
+    this.destroyRef.onDestroy(() => context.revert());
   }
+
+  /**
+   * Slides the shared selection thumb under the active mode pill. Measuring the
+   * button rather than assuming equal widths keeps it aligned when a label is
+   * hidden at narrow widths.
+   */
+  private moveSwitchThumb(): void {
+    const container = this.viewSwitch()?.nativeElement;
+    const thumb = this.switchThumb()?.nativeElement;
+    if (!container || !thumb) return;
+
+    const index = this.viewModes.findIndex((option) => option.value === this.viewMode());
+    const target = container.querySelectorAll<HTMLElement>('[data-view-option]')[index];
+    if (!target) return;
+
+    const vars = {
+      x: target.offsetLeft,
+      width: target.offsetWidth,
+      duration: this.motion.enabled() ? 0.45 : 0,
+      ease: 'bmArrive',
+      overwrite: 'auto' as const,
+    };
+
+    gsap.to(thumb, vars);
+  }
+
+  /**
+   * The capture confirmation: the position card lifts, its icon spins into a
+   * tick, and a ring expands out of it. Short, but unmistakably a success.
+   */
+  private celebrateCapture(): void {
+    if (!this.motion.enabled()) return;
+
+    requestAnimationFrame(() => {
+      const card = this.positionCard()?.nativeElement;
+      if (!card) return;
+
+      this.motion
+        .timeline()
+        .fromTo(card, { scale: 0.96 }, { scale: 1, duration: 0.6, ease: 'elastic.out(1, 0.5)' })
+        .fromTo(
+          card.querySelectorAll('dd'),
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.45, stagger: 0.07 },
+          0.05,
+        );
+    });
+  }
+
+  /**
+   * The records overlay slides in over the dock and its rows cascade. It covers
+   * rather than pushes: the map must not resize to show a list, or every
+   * lookup would cost the operator their view.
+   */
+  private revealRecords(): void {
+    if (!this.motion.enabled()) return;
+
+    const panel = this.recordsPanel()?.nativeElement;
+    if (!panel) return;
+
+    this.motion
+      .timeline()
+      .from(panel, { opacity: 0, scale: 0.97, x: -14, duration: 0.4, ease: 'bmArrive' })
+      .from(
+        panel.querySelectorAll('.mat-mdc-row'),
+        { opacity: 0, x: -12, duration: 0.35, stagger: 0.03 },
+        '-=0.2',
+      );
+  }
+
+  // ── Geocoding ──────────────────────────────────────────────────────────────
 
   private panMapToAddress(municipality: string, address: string, number: string): void {
     const fullAddress = `${address} - ${number}, ${municipality}, Italy`;

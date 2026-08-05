@@ -9,9 +9,19 @@ import { authGuard } from './auth/auth.guard';
  */
 export const routes: Routes = [
   {
+    path: '',
+    title: 'BiMap · Geographic asset intelligence',
+    loadComponent: () => import('./landing/landing').then((m) => m.LandingComponent),
+  },
+  {
     path: 'login',
     title: 'Sign in · BiMap',
     loadComponent: () => import('./auth/login').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'register',
+    title: 'Create account · BiMap',
+    loadComponent: () => import('./auth/register').then((m) => m.RegisterComponent),
   },
   {
     path: 'logout',
@@ -19,12 +29,6 @@ export const routes: Routes = [
     loadComponent: () => import('./auth/logout').then((m) => m.LogoutComponent),
   },
 
-  {
-    path: '',
-    title: 'Asset registration · BiMap',
-    canActivate: [authGuard],
-    loadComponent: () => import('./main/main').then((m) => m.MainComponent),
-  },
   {
     path: 'main',
     title: 'Asset registration · BiMap',

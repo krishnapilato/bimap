@@ -9,41 +9,18 @@
       name="description"
       content="BiMap is a field workspace for registering geographic assets: search regions, provinces and municipalities, capture exact coordinates from the map, and keep records in one place."
     />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0a0e15" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f5f8fc" />
 
     <link
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a5fe0'/%3E%3Cpath d='M22.6 9.4 18.3 18.3 9.4 22.6l4.3-8.9z' fill='%23fff'/%3E%3C/svg%3E"
     />
 
-    <!--
-      Applied before first paint so the correct colour scheme is in place on the
-      very first frame. Mirrors the resolution logic in ThemeService.
-    -->
-    <script>
-      (function () {
-        try {
-          var stored = localStorage.getItem('bimap.theme');
-          var preference =
-            stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system';
-          var dark =
-            preference === 'dark' ||
-            (preference === 'system' &&
-              window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-          document.documentElement.dataset.theme = dark ? 'dark' : 'light';
-        } catch (error) {
-          document.documentElement.dataset.theme = 'light';
-        }
-      })();
-    </script>
-
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;650&family=JetBrains+Mono:wght@400;500&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;550;600;650;700&family=JetBrains+Mono:wght@400;500&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0..1,0&display=swap"
       rel="stylesheet"
     />
 
@@ -53,7 +30,7 @@
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAvQNjK8mukjCu4a5hNE7Sjg1I7g3syYAo&loading=async"
     ></script>
   </head>
-  <body>
+  <body class="user-select-none" oncontextmenu="return false">
     <app-root></app-root>
   </body>
 </html>

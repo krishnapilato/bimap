@@ -1,25 +1,31 @@
 <bm-app-shell section="Administration">
-  <div class="bm-page-head">
+  <a routerLink="/main" class="back-link" data-stage>
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Back to workspace
+  </a>
+
+  <div class="page-head" data-stage>
+    <p class="bm-marker"><span>ADM</span><i></i> Access control</p>
     <h1>Users</h1>
-    <p>Manage workspace access, roles, and account status.</p>
+    <p class="page-lede">Manage workspace access, roles, and account status.</p>
   </div>
 
-  <dl class="stats">
-    <div class="stat">
-      <dt>Total users</dt>
-      <dd class="bm-numeric">{{ totalUsersCount }}</dd>
-    </div>
-    <div class="stat">
-      <dt>Confirmed</dt>
-      <dd class="bm-numeric">{{ activeUsersCount }}</dd>
-    </div>
-    <div class="stat">
-      <dt>Administrators</dt>
-      <dd class="bm-numeric">{{ adminUsersCount }}</dd>
-    </div>
+  <dl class="stats" data-stage>
+    @for (stat of stats(); track stat.label) {
+      <div class="stat" [attr.data-tone]="stat.tone">
+        <dt>
+          <span class="stat-icon"><mat-icon aria-hidden="true">{{ stat.icon }}</mat-icon></span>
+          {{ stat.label }}
+        </dt>
+        <dd class="bm-numeric" [bmCountUp]="stat.value"></dd>
+        <span class="stat-bar" aria-hidden="true">
+          <i [style.transform]="'scaleX(' + stat.share + ')'"></i>
+        </span>
+      </div>
+    }
   </dl>
 
-  <section class="bm-panel" aria-labelledby="users-title">
+  <section class="bm-panel" aria-labelledby="users-title" data-stage>
     <div class="bm-panel-head">
       <div class="bm-panel-copy">
         <h2 id="users-title">All accounts</h2>
@@ -40,9 +46,8 @@
           />
         </mat-form-field>
 
-        <a mat-flat-button routerLink="/adduser" class="toolbar-add">
-          <mat-icon aria-hidden="true">add</mat-icon>
-          Add user
+        <a routerLink="/adduser" class="bm-action toolbar-add" bmMagnetic="6">
+          <span class="bm-magnetic-label">Add user</span>
         </a>
       </div>
     </div>

@@ -130,7 +130,9 @@
   --mat-paginator-disabled-icon-color: var(--bm-text-3);
 
   // ── Dialog ─────────────────────────────────────────────────────────────────
-  --mdc-dialog-container-color: var(--bm-surface);
+  // Opaque: a dialog is the only thing the user can interact with while it is
+  // open, so its text must not compete with whatever is behind it.
+  --mdc-dialog-container-color: var(--bm-paper);
   --mdc-dialog-container-shape: var(--bm-radius-xl);
   --mdc-dialog-subhead-color: var(--bm-text);
   --mdc-dialog-supporting-text-color: var(--bm-text-2);
@@ -217,8 +219,17 @@ input.mat-mdc-input-element[type='number'] {
 
 .mat-mdc-button-base {
   letter-spacing: 0;
+  transition:
+    transform var(--bm-duration) var(--bm-ease-cinematic),
+    box-shadow var(--bm-duration) var(--bm-ease),
+    background-color var(--bm-duration-fast) var(--bm-ease);
 
   @include focusable(2px);
+}
+
+.mat-mdc-unelevated-button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -14px rgba(18, 104, 232, 0.65);
 }
 
 // Material's default focus indicator is a subtle state layer; ours must be
@@ -240,14 +251,32 @@ input.mat-mdc-input-element[type='number'] {
 }
 
 // A destructive variant, so "delete" never renders in the same hue as "save".
-.bm-btn-danger.mat-mdc-unelevated-button {
+//
+// Scoped to the class alone rather than to a Material internal: the rendered
+// class for a filled button has been renamed more than once across major
+// versions, and this silently fell back to the accent colour when it did.
+// A filled button with no `color` input gets Material's `.mat-unthemed` class,
+// which re-points the container token to `--mat-sys-primary` from a two-class
+// selector. Overriding the token from a single class silently loses that
+// specificity race, so the colour is set on the property itself and the
+// selector is doubled to outrank the framework rule outright.
+.bm-btn-danger.bm-btn-danger {
+  --mat-filled-button-container-color: var(--bm-danger);
+  --mat-filled-button-label-text-color: var(--bm-text-inverse);
+  --mat-filled-button-state-layer-color: var(--bm-text-inverse);
   --mdc-filled-button-container-color: var(--bm-danger);
-  // `--bm-danger` is a deep red in light mode and a light red in dark mode, so
-  // the label has to flip with it to stay legible on the fill.
   --mdc-filled-button-label-text-color: var(--bm-text-inverse);
 
+  // `!important` because Material paints the container with a `background`
+  // shorthand from inside its own cascade layer, which no author-level
+  // specificity can outrank. Same approach as the dialog elevation above.
+  background: var(--bm-danger) !important;
+  color: var(--bm-text-inverse) !important;
+
   &:not(:disabled):hover {
+    --mat-filled-button-container-color: var(--bm-danger-hover);
     --mdc-filled-button-container-color: var(--bm-danger-hover);
+    background: var(--bm-danger-hover) !important;
   }
 }
 
@@ -308,11 +337,23 @@ input.mat-mdc-input-element[type='number'] {
 .mat-mdc-dialog-surface {
   border: 1px solid var(--bm-line);
   box-shadow: var(--bm-shadow-lg) !important;
+  animation: dialog-arrive 0.65s var(--bm-ease-spring) both;
 }
 
 .cdk-overlay-dark-backdrop {
   background: var(--bm-overlay);
   @include glass(2px);
+}
+
+@keyframes dialog-arrive {
+  from {
+    opacity: 0;
+    transform: perspective(900px) translateY(28px) rotateX(-7deg) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(900px) translateY(0) rotateX(0) scale(1);
+  }
 }
 
 // ── Overlay panels ───────────────────────────────────────────────────────────
@@ -332,17 +373,49 @@ input.mat-mdc-input-element[type='number'] {
 
 // ── Snackbar ─────────────────────────────────────────────────────────────────
 
+//  Feedback after a save, a delete or a failed request. Given a leading accent
+//  bar so a message that arrives while the eye is elsewhere still registers in
+//  peripheral vision as *something happened here*.
+
 .mat-mdc-snack-bar-container {
   .mdc-snackbar__surface {
+    position: relative;
+    overflow: hidden;
     box-shadow: var(--bm-shadow-lg);
+    border-radius: var(--bm-radius-md) !important;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--bm-accent), var(--bm-cyan));
+    }
   }
 
   .mdc-snackbar__label {
     font: var(--bm-text-small);
+    font-weight: 500;
+    padding-left: 20px !important;
   }
 
   .mat-mdc-button {
-    font-weight: 600;
+    font-weight: 650;
+  }
+
+  animation: snack-arrive 0.45s var(--bm-ease-cinematic) both;
+}
+
+@keyframes snack-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 

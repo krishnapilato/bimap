@@ -1,0 +1,26 @@
+// =============================================================================
+//  Registration — layout is shared with sign in.
+// =============================================================================
+
+@use './access-layout';
+
+.access-body {
+  max-width: 540px;
+}
+
+// The strength meter mounts and unmounts with the password field, so it eases
+// itself in rather than snapping the form taller under the user's cursor.
+bm-password-strength {
+  animation: strength-in 0.45s var(--bm-ease-cinematic) both;
+}
+
+@keyframes strength-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

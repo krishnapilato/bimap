@@ -1,5 +1,18 @@
 import { TitleCasePipe } from '@angular/common';
-import { AfterViewInit, Component, DestroyRef, OnInit, inject, viewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  ElementRef,
+  OnInit,
+  afterNextRender,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -11,8 +24,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { gsap } from 'gsap';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
+import { CommandService } from '../core/commands/command.service';
+import { BM_MOTION, MotionService } from '../core/motion';
 import { AppShellComponent } from '../shared/app-shell/app-shell';
 import { User } from '../user';
 import {
@@ -38,15 +55,23 @@ import { UserService } from './user-service.service';
     MatSortModule,
     MatDialogModule,
     AppShellComponent,
+    ...BM_MOTION,
   ],
   templateUrl: './user-list.html',
   styleUrl: './user-list.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserListComponent implements OnInit, AfterViewInit {
   private readonly userService = inject(UserService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly motion = inject(MotionService);
+  private readonly commands = inject(CommandService);
+  private readonly router = inject(Router);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly filterChanges = new Subject<string>();
 
   readonly displayedColumns = [
     'name',
@@ -62,26 +87,76 @@ export class UserListComponent implements OnInit, AfterViewInit {
   readonly paginator = viewChild(MatPaginator);
   readonly sort = viewChild(MatSort);
 
-  get totalUsersCount(): number {
-    return this.dataSource.data.length;
-  }
+  /**
+   * The table's own `data` array is not reactive, so the roster is also held in
+   * a signal — that is what lets the stat tiles re-count themselves when a user
+   * is deleted instead of silently going stale.
+   */
+  private readonly users = signal<ReadonlyArray<User>>([]);
 
-  get activeUsersCount(): number {
-    return this.dataSource.data.filter((user) => user.userStatus?.toLowerCase() === 'confirmed')
-      .length;
-  }
-
-  get adminUsersCount(): number {
-    return this.dataSource.data.filter(
+  readonly stats = computed(() => {
+    const users = this.users();
+    const total = users.length;
+    const confirmed = users.filter((user) => user.userStatus?.toLowerCase() === 'confirmed').length;
+    const admins = users.filter(
       (user) => user.applicationRole?.toLowerCase() === 'administrator',
     ).length;
-  }
+
+    // `share` drives each tile's bar. Total is the denominator the other two
+    // are read against, so its bar is full whenever there is anyone at all —
+    // but an empty roster must not render as a full bar reading zero.
+    return [
+      { label: 'Total users', value: total, share: total ? 1 : 0, icon: 'group', tone: 'neutral' },
+      {
+        label: 'Confirmed',
+        value: confirmed,
+        share: total ? confirmed / total : 0,
+        icon: 'verified',
+        tone: 'success',
+      },
+      {
+        label: 'Administrators',
+        value: admins,
+        share: total ? admins / total : 0,
+        icon: 'shield_person',
+        tone: 'accent',
+      },
+    ];
+  });
 
   ngOnInit(): void {
     this.userService
       .findAll()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((users) => (this.dataSource.data = users));
+      .subscribe((users) => {
+        this.setUsers(users);
+        this.changeDetector.markForCheck();
+      });
+
+    this.filterChanges
+      .pipe(debounceTime(160), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((filter) => {
+        this.dataSource.filter = filter;
+        this.dataSource.paginator?.firstPage();
+      });
+  }
+
+  constructor() {
+    const dispose = this.commands.register([
+      {
+        id: 'users.add',
+        label: 'Add a user',
+        hint: 'Create a new account',
+        group: 'Administration',
+        icon: 'person_add',
+        keywords: 'new invite create account',
+        run: () => this.router.navigate(['/adduser']),
+      },
+    ]);
+
+    this.destroyRef.onDestroy(dispose);
+
+    afterNextRender(() => this.playEntrance());
   }
 
   ngAfterViewInit(): void {
@@ -92,9 +167,36 @@ export class UserListComponent implements OnInit, AfterViewInit {
     if (sort) this.dataSource.sort = sort;
   }
 
+  /** Keeps the reactive roster and the table's data array in step. */
+  private setUsers(users: User[]): void {
+    this.dataSource.data = users;
+    this.users.set(users);
+  }
+
+  /**
+   * The page builds top-down, then the rows cascade — a long list arriving all
+   * at once is a wall, arriving in sequence it is a list.
+   */
+  private playEntrance(): void {
+    if (!this.motion.enabled()) return;
+
+    const context = gsap.context(() => {
+      this.motion
+        .timeline({ delay: 0.1 })
+        .from('[data-stage]', { opacity: 0, y: 24, duration: 0.75, stagger: 0.09, ease: 'bmGlide' })
+        .from('.stat', { opacity: 0, y: 18, duration: 0.6, stagger: 0.08 }, '-=0.5')
+        .from(
+          '.mat-mdc-row',
+          { opacity: 0, x: -18, duration: 0.5, stagger: 0.035, ease: 'bmGlide' },
+          '-=0.35',
+        );
+    }, this.host.nativeElement);
+
+    this.destroyRef.onDestroy(() => context.revert());
+  }
+
   applyFilter(event: Event): void {
-    this.dataSource.filter = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    this.dataSource.paginator?.firstPage();
+    this.filterChanges.next((event.target as HTMLInputElement).value.trim().toLowerCase());
   }
 
   /** Maps a backend status onto one of the shared chip variants. */
@@ -175,7 +277,8 @@ export class UserListComponent implements OnInit, AfterViewInit {
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
             next: () => {
-              this.dataSource.data = this.dataSource.data.filter((u) => u.id !== user.id);
+              this.setUsers(this.dataSource.data.filter((u) => u.id !== user.id));
+              this.changeDetector.markForCheck();
               this.snackBar.open('User deleted', 'Close', { duration: 2500 });
             },
             error: (err) => {

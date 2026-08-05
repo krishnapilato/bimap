@@ -1,0 +1,136 @@
+// =============================================================================
+//  Float panel — a draggable, collapsible tool palette
+// -----------------------------------------------------------------------------
+//  Glass over imagery: translucent so the map is never fully hidden, blurred so
+//  the text on it stays legible over whatever happens to be underneath.
+// =============================================================================
+
+@use '../../../styles/mixins' as *;
+
+:host {
+  position: absolute;
+  z-index: 520;
+  display: flex;
+  flex-direction: column;
+  width: var(--float-width, 340px);
+  // Sized by its content, never by the viewport — which is what keeps a
+  // scrollbar from ever appearing inside one.
+  min-height: min-content;
+  max-height: calc(100% - var(--float, 16px) * 2);
+  border: 1px solid var(--bm-map-chrome-border);
+  border-radius: var(--bm-radius-lg);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--bm-shadow-lg);
+  @include glass(18px);
+
+  // Collapsed, the panel shrinks to its own title bar and gives the map back
+  // everything it was covering.
+  &.is-collapsed {
+    width: max-content;
+    max-width: calc(100% - var(--float, 16px) * 2);
+  }
+
+  // Lifted while held, so it is obvious which panel the pointer has hold of.
+  &.is-dragging {
+    box-shadow: var(--bm-shadow-float), var(--bm-shadow-lg);
+    cursor: grabbing;
+  }
+}
+
+// ── Head ─────────────────────────────────────────────────────────────────────
+
+.float-head {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-2);
+  padding: 7px 7px 7px 10px;
+  cursor: grab;
+  // A drag must not select the heading text on the way past.
+  -webkit-user-select: none;
+  user-select: none;
+
+  :host(:not(.is-collapsed)) & {
+    @include ruled(bottom);
+  }
+
+  .is-dragging & {
+    cursor: grabbing;
+  }
+}
+
+// Two short rules — the universal "this is a handle" mark, and the only
+// affordance the header needs.
+.float-grip {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  flex: none;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--bm-text-3);
+  }
+
+  &::before {
+    top: 3px;
+  }
+
+  &::after {
+    bottom: 3px;
+  }
+}
+
+.float-heading {
+  @include label;
+  font-size: 9px;
+  color: var(--bm-text-2);
+  white-space: nowrap;
+}
+
+.float-toggle {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  margin-left: auto;
+  border: none;
+  border-radius: var(--bm-radius-xs);
+  background: none;
+  color: var(--bm-text-3);
+  cursor: pointer;
+  transition:
+    background var(--bm-duration-fast) var(--bm-ease),
+    color var(--bm-duration-fast) var(--bm-ease);
+
+  &:hover {
+    background: var(--bm-surface-2);
+    color: var(--bm-text);
+  }
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+  }
+
+  @include focusable(2px);
+}
+
+// Anything projected after the toggle (a close button) keeps the same shape.
+::ng-deep .bm-float [panelActions] {
+  flex: none;
+}
+
+.float-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+

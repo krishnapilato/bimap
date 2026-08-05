@@ -3,6 +3,7 @@
 //  Breakpoints are named for the layout change they trigger, not for devices.
 // =============================================================================
 
+@use 'sass:list';
 @use 'sass:map';
 
 $bp: (
@@ -46,6 +47,8 @@ $bp: (
   border: 1px solid var(--bm-line);
   border-radius: $radius;
   box-shadow: $shadow;
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  backdrop-filter: blur(18px) saturate(1.15);
 }
 
 /// Keyboard-only focus ring. Always paired with `:focus-visible` so pointer
@@ -122,10 +125,169 @@ $bp: (
 
 /// Faint graticule — a nod to a map grid, at an opacity that reads as texture
 /// rather than pattern. Used only on the unauthenticated shell.
-@mixin graticule($size: 32px) {
+@mixin graticule($size: 32px, $colour: var(--bm-line)) {
   background-image:
-    linear-gradient(var(--bm-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--bm-line) 1px, transparent 1px);
+    linear-gradient(#{$colour} 1px, transparent 1px),
+    linear-gradient(90deg, #{$colour} 1px, transparent 1px);
   background-size: $size $size;
   background-position: center center;
+}
+
+/// A solid paper card. Where `surface` is translucent glass for chrome that
+/// floats over the map, `plate` is opaque stock for content that *is* the page:
+/// forms, tables, panels. Opaque means text on it is always at full contrast.
+@mixin plate($radius: var(--bm-radius-xl)) {
+  position: relative;
+  background: var(--bm-paper);
+  border: 1px solid var(--bm-line);
+  border-radius: $radius;
+  box-shadow: var(--bm-shadow-sm);
+}
+
+/// The specular highlight that pairs with `bmTilt`. The directive publishes the
+/// pointer position as `--bm-tilt-x/y`, so the sheen tracks the light source the
+/// rotation implies rather than sitting statically in one corner.
+@mixin specular($strength: 0.5) {
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      420px circle at var(--bm-tilt-x, 50%) var(--bm-tilt-y, 0%),
+      rgba(255, 255, 255, $strength),
+      transparent 62%
+    );
+    opacity: 0;
+    transition: opacity var(--bm-duration-slow) var(--bm-ease);
+    pointer-events: none;
+  }
+
+  &:hover::after {
+    opacity: 1;
+  }
+}
+
+/// The uppercase eyebrow with its leading tick — used above every section
+/// heading so the page has one consistent entry rhythm.
+@mixin eyebrow($colour: var(--bm-accent)) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bm-space-2);
+  @include label;
+  color: $colour;
+
+  &::before {
+    content: '';
+    width: 18px;
+    height: 1px;
+    background: currentcolor;
+    flex: none;
+  }
+}
+
+/// A region bounded by hairlines instead of by a card.
+///
+/// The house style after the landing redesign: structure is carried by ruled
+/// lines and negative space, not by nested boxes. A boxed region spends ~40px
+/// of padding and a border on every edge; a ruled one spends a single pixel,
+/// which is what lets the workspace fit three stages and a map on one screen.
+@mixin ruled($sides: bottom) {
+  @if list.index($sides, top) {
+    border-top: 1px solid var(--bm-line);
+  }
+  @if list.index($sides, bottom) {
+    border-bottom: 1px solid var(--bm-line);
+  }
+  @if list.index($sides, left) {
+    border-left: 1px solid var(--bm-line);
+  }
+  @if list.index($sides, right) {
+    border-right: 1px solid var(--bm-line);
+  }
+}
+
+/// The near-black pill that is now the product's primary action. Cobalt is
+/// reserved for navigation and state; the single most important control on a
+/// screen is the only thing allowed to be black, so it can never be confused
+/// with a link.
+@mixin action-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 24px;
+  border: none;
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-text);
+  color: var(--bm-text-inverse);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  box-shadow: 0 16px 30px -20px rgba(8, 23, 44, 0.85);
+  transition:
+    background var(--bm-duration) var(--bm-ease),
+    box-shadow var(--bm-duration) var(--bm-ease);
+
+  &:hover:not(:disabled) {
+    background: #16283f;
+    text-decoration: none;
+  }
+
+  &:disabled {
+    background: var(--bm-surface-3);
+    color: var(--bm-text-3);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  @include focusable(3px);
+}
+
+/// The quiet counterpart: an outlined pill for the secondary path.
+@mixin action-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border: 1px solid var(--bm-line-strong);
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-surface-solid);
+  color: var(--bm-text);
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    border-color var(--bm-duration) var(--bm-ease),
+    background var(--bm-duration) var(--bm-ease);
+
+  &:hover:not(:disabled) {
+    border-color: var(--bm-accent-border);
+    background: var(--bm-accent-softer);
+    text-decoration: none;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @include focusable(3px);
+}
+
+/// Hides an element's overflow so a `bmSplitText` character can travel up from
+/// under its own baseline without bleeding into the line above.
+@mixin split-clip {
+  .bm-split-word {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+  }
+
+  .bm-split-char {
+    display: inline-block;
+    will-change: transform;
+  }
 }

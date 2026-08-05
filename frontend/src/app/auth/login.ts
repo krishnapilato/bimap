@@ -1,15 +1,25 @@
-import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  afterNextRender,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { gsap } from 'gsap';
 import { finalize } from 'rxjs';
 
-import { ThemeService } from '../core/theme.service';
+import { MotionService } from '../core/motion';
+import { AccessConsoleComponent } from './access-console';
 import { AuthService } from './auth.service';
 import { LoginRequest } from './loginrequest';
 
@@ -21,8 +31,9 @@ import { LoginRequest } from './loginrequest';
     MatButtonModule,
     MatInputModule,
     MatFormFieldModule,
-    MatTooltipModule,
     MatIconModule,
+    RouterModule,
+    AccessConsoleComponent,
   ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
@@ -31,23 +42,49 @@ export class LoginComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
-  private readonly theme = inject(ThemeService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly motion = inject(MotionService);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  private readonly errorBanner = viewChild<ElementRef<HTMLElement>>('errorBanner');
 
   readonly hidePassword = signal(true);
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal('');
-
-  readonly isDark = computed(() => this.theme.resolved() === 'dark');
+  readonly registrationComplete = signal(
+    this.route.snapshot.queryParamMap.get('registered') === 'true',
+  );
 
   loginRequest = new LoginRequest();
 
-  togglePassword(): void {
-    this.hidePassword.update((hidden) => !hidden);
+  constructor() {
+    afterNextRender(() => this.playEntrance());
+
+    // A rejected sign-in needs to be *felt*, not just read — the banner arrives
+    // with a short lateral shake, which is the one place in the product where
+    // motion carries meaning rather than polish.
+    effect(() => {
+      if (!this.errorMessage()) return;
+
+      requestAnimationFrame(() => {
+        const banner = this.errorBanner()?.nativeElement;
+        if (!banner) return;
+
+        this.motion
+          .timeline()
+          .from(banner, { opacity: 0, y: -10, duration: 0.35 })
+          .fromTo(
+            banner,
+            { x: -7 },
+            { x: 0, duration: 0.55, ease: 'elastic.out(1, 0.35)' },
+            '-=0.15',
+          );
+      });
+    });
   }
 
-  toggleTheme(): void {
-    this.theme.toggle();
+  togglePassword(): void {
+    this.hidePassword.update((hidden) => !hidden);
   }
 
   onSubmit(): void {
@@ -67,8 +104,30 @@ export class LoginComponent {
         // the page they were actually trying to reach.
         next: () => this.router.navigateByUrl(this.returnUrl()),
         error: () =>
-          this.errorMessage.set('Those credentials were not recognised. Please try again.'),
+          this.errorMessage.set(
+            'We could not sign you in. Check your username and password, then try again.',
+          ),
       });
+  }
+
+  /** The column arrives one element at a time, top to bottom, as it is read. */
+  private playEntrance(): void {
+    if (!this.motion.enabled()) return;
+
+    const context = gsap.context(() => {
+      this.motion
+        .timeline({ delay: 0.2 })
+        .from('[data-access-stage]', {
+          opacity: 0,
+          y: 24,
+          duration: 0.75,
+          stagger: 0.075,
+          ease: 'bmGlide',
+        })
+        .from('.access-console', { opacity: 0, x: 40, duration: 1, ease: 'bmArrive' }, 0.1);
+    }, this.host.nativeElement);
+
+    this.destroyRef.onDestroy(() => context.revert());
   }
 
   private returnUrl(): string {

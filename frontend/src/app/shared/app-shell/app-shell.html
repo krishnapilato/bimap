@@ -1,54 +1,26 @@
 <a class="bm-skip-link" href="#bm-main">Skip to main content</a>
 
-<header class="shell-header">
-  <a class="brand" routerLink="/" aria-label="BiMap home">
-    <span class="brand-mark" aria-hidden="true">
-      <mat-icon>explore</mat-icon>
-    </span>
-    <span class="brand-text">
-      <span class="brand-name">BiMap</span>
+<!--
+  The bar carries identity and exit, and nothing else. Everything that was
+  competing with the page for attention up here — a clock, a command trigger,
+  a spelled-out user card — has either moved into the work itself or been
+  reduced to the smallest thing that still answers its question.
+-->
+<header class="shell-bar" #shellBar>
+  <a class="shell-brand" routerLink="/main" aria-label="BiMap workspace">
+    <span class="bm-benchmark" aria-hidden="true"></span>
+    <span class="shell-brand-copy">
+      <strong>BiMap</strong>
       @if (section()) {
-        <span class="brand-divider" aria-hidden="true">/</span>
-        <span class="brand-section">{{ section() }}</span>
+        <small>{{ section() }}</small>
       }
     </span>
   </a>
 
-  <div class="header-slot">
-    <ng-content select="[shellActions]" />
-  </div>
-
-  <div class="header-actions">
-    @if (user()) {
-      <div class="identity" [attr.title]="displayName()">
-        <span class="identity-avatar" aria-hidden="true">{{ initials() }}</span>
-        <span class="identity-copy">
-          <span class="identity-name">{{ displayName() }}</span>
-          @if (roleLabel()) {
-            <span class="identity-role">{{ roleLabel() }}</span>
-          }
-        </span>
-      </div>
-    }
-
-    <span class="header-rule" aria-hidden="true"></span>
-
-    <button
-      mat-icon-button
-      type="button"
-      class="icon-action"
-      [matTooltip]="isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
-      [attr.aria-label]="isDark() ? 'Switch to light theme' : 'Switch to dark theme'"
-      [attr.aria-pressed]="isDark()"
-      (click)="toggleTheme()"
-    >
-      <mat-icon>{{ isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-    </button>
-
+  <div class="shell-rail">
     @if (isAdmin()) {
       <a
-        mat-icon-button
-        class="icon-action"
+        class="shell-icon"
         routerLink="/listuser"
         routerLinkActive="is-current"
         matTooltip="User administration"
@@ -58,9 +30,16 @@
       </a>
     }
 
+    @if (user()) {
+      <!-- The avatar answers "who am I signed in as" at a glance; the full
+           name and role are one hover away rather than always on screen. -->
+      <span class="identity" [matTooltip]="identityTooltip()" [attr.aria-label]="identityTooltip()">
+        {{ initials() }}
+      </span>
+    }
+
     <a
-      mat-icon-button
-      class="icon-action icon-action--danger"
+      class="shell-icon shell-icon--danger"
       routerLink="/logout"
       matTooltip="Sign out"
       aria-label="Sign out"
@@ -70,6 +49,12 @@
   </div>
 </header>
 
-<main id="bm-main" class="shell-main" [class.shell-main--wide]="wide()" tabindex="-1">
+<main
+  id="bm-main"
+  class="shell-main"
+  [class.shell-main--wide]="wide()"
+  [class.shell-main--flush]="flush()"
+  tabindex="-1"
+>
   <ng-content />
 </main>

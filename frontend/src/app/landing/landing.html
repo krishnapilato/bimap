@@ -1,0 +1,314 @@
+<!--
+  The descent.
+  ─────────────────────────────────────────────────────────────────────────────
+  The page is one continuous zoom from z03 (the world) to z21 (a façade). The
+  fixed instrument layer below is the constant: its graticule subdivides, its
+  readout gains decimal places, and its reticle converges — all scrubbed to
+  scroll position. Scrolling *is* the product's act of resolving a place.
+-->
+
+<div class="instrument" aria-hidden="true" #instrument>
+  <span class="graticule graticule--coarse"></span>
+  <span class="graticule graticule--fine"></span>
+
+  <!-- The reticle: unlocked and drifting at the top of the page, locked on the
+       target by the time the reader reaches the call to action. -->
+  <span class="reticle" #reticle>
+    <span class="reticle-ring"></span>
+    <span class="reticle-ring reticle-ring--inner"></span>
+    <span class="reticle-cross"></span>
+    <span class="reticle-core"></span>
+  </span>
+</div>
+
+<!-- The readout. Precision increases as you descend, exactly as it does on a
+     real map: at z03 you know the degree, at z21 you know the metre. -->
+<aside class="readout" aria-hidden="true" #readout>
+  <span class="readout-zoom" #readoutZoom>z03</span>
+  <span class="readout-line"><i>LAT</i><b #readoutLat>45.5° N</b></span>
+  <span class="readout-line"><i>LON</i><b #readoutLon>9.2° E</b></span>
+  <span class="readout-state" #readoutState>Unresolved</span>
+</aside>
+
+<!-- The sight: a pointer companion that reads as a survey target rather than a
+     decorative blob. Hidden on coarse pointers and under reduced motion. -->
+<span class="sight" #sight aria-hidden="true"></span>
+
+<header class="masthead" #masthead>
+  <a class="wordmark" routerLink="/" aria-label="BiMap home">
+    <span class="wordmark-mark" aria-hidden="true"></span>
+    <span class="wordmark-text">
+      <b>BiMap</b>
+      <i>Heritage asset registration</i>
+    </span>
+  </a>
+
+  <nav class="acts" aria-label="Sections">
+    <span class="acts-tick" aria-hidden="true" #actsTick></span>
+    @for (act of acts; track act.id) {
+      <a
+        [href]="'#' + act.id"
+        [class.is-current]="currentAct() === act.id"
+        [attr.aria-current]="currentAct() === act.id ? 'true' : null"
+        data-act-link
+      >
+        <em>{{ act.z }}</em>
+        <span>{{ act.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <a class="enter" routerLink="/login" bmMagnetic="5">
+    <span class="bm-magnetic-label">Sign in</span>
+  </a>
+</header>
+
+<main class="descent" #descent>
+  <!-- ══ z03 · Who are we, and what is at stake ══════════════════════════ -->
+  <section class="act act--open" id="act-open" aria-labelledby="open-title" data-act="act-open">
+    <p class="marker">
+      <span class="marker-z">z03</span>
+      <span class="marker-rule"></span>
+      Protected heritage · Italy
+    </p>
+
+    <h1 id="open-title" class="headline" #headline>
+      A coordinate is a claim.<br />
+      <em>Make it evidence.</em>
+    </h1>
+
+    <p class="lede" #lede>
+      BiMap is the workspace for registering protected heritage assets — the buildings a
+      <i lang="it">vincolo</i> is attached to. It resolves the address, verifies it against the
+      street itself, and fixes the exact point, so the record carries the proof of where it came
+      from.
+    </p>
+
+    <div class="entry" #entry>
+      <a class="act-primary" routerLink="/register" bmMagnetic="10">
+        <span class="bm-magnetic-label">Create an account</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" /></svg>
+      </a>
+      <a class="act-secondary" routerLink="/login">Open your workspace</a>
+    </div>
+
+    <a class="descend" href="#act-problem" #descendCue>
+      <span class="descend-rail" aria-hidden="true"><i></i></span>
+      Descend
+    </a>
+  </section>
+
+  <!-- ══ z08 · What problem do we solve ═════════════════════════════════ -->
+  <section class="act act--problem" id="act-problem" aria-labelledby="problem-title" data-act="act-problem">
+    <p class="marker" data-lift>
+      <span class="marker-z">z08</span>
+      <span class="marker-rule"></span>
+      The problem
+    </p>
+
+    <h2 id="problem-title" class="title" data-lift>
+      Three tools. Two exports.<br />One number nobody can check.
+    </h2>
+
+    <p class="body" data-lift>
+      A protection register is only as good as the point inside it. Most are assembled by hand: a
+      gazetteer in one window, imagery in another, a spreadsheet in a third. The coordinate that
+      comes out the far side has no memory of how it was chosen — and a point attached to the wrong
+      façade attaches the protection to the wrong building.
+    </p>
+
+    <ol class="faults" data-lift-group>
+      @for (fault of faults; track fault.title) {
+        <li>
+          <span class="fault-index">{{ fault.index }}</span>
+          <h3>{{ fault.title }}</h3>
+          <p>{{ fault.body }}</p>
+        </li>
+      }
+    </ol>
+  </section>
+
+  <!-- ══ z13 · Why is it different ══════════════════════════════════════ -->
+  <!-- The three surfaces are spread apart in depth and converge into a single
+       composed workspace as you scroll. The claim is "three tools become one
+       screen"; the section performs it rather than asserting it. -->
+  <section class="act act--method" id="act-method" aria-labelledby="method-title" data-act="act-method" #method>
+    <div class="method-stage" #methodStage>
+      <div class="method-copy">
+        <p class="marker">
+          <span class="marker-z">z13</span>
+          <span class="marker-rule"></span>
+          The method
+        </p>
+        <h2 id="method-title" class="title">Three surfaces,<br />one screen.</h2>
+        <p class="body">
+          Search, verification and registration stop being separate tools. They share one workspace,
+          one address, and one record — so nothing has to be copied between them, and there is
+          nothing to reconcile afterwards.
+        </p>
+      </div>
+
+      <div class="plates" #plates>
+        @for (surface of surfaces; track surface.title; let i = $index) {
+          <article class="plate" [attr.data-plate]="i">
+            <header>
+              <span class="plate-index">{{ surface.index }}</span>
+              <h3>{{ surface.title }}</h3>
+            </header>
+            <p>{{ surface.body }}</p>
+            <ul>
+              @for (point of surface.points; track point) {
+                <li>{{ point }}</li>
+              }
+            </ul>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ z17 · How does it work — the signature detail ══════════════════ -->
+  <section class="act act--sight" id="act-sight" aria-labelledby="sight-title" data-act="act-sight">
+    <div class="sight-copy">
+      <p class="marker" data-lift>
+        <span class="marker-z">z17</span>
+        <span class="marker-rule"></span>
+        The instrument
+      </p>
+
+      <h2 id="sight-title" class="title" data-lift>The marker knows<br />where it is looking.</h2>
+
+      <p class="body" data-lift>
+        On the map the marker is not a dot. It carries the field of view of the panorama beside it —
+        turn the camera and the cone turns with it. On a street of six identical doorways, you are
+        never guessing which façade the record belongs to.
+      </p>
+
+      <p class="hint" data-lift>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4m0 10v4M3 12h4m10 0h4" /></svg>
+        Drag the dial, or focus it and use the arrow keys.
+      </p>
+    </div>
+
+    <!-- Interactive, because reading about a bearing teaches less than turning
+         one. Keyboard-operable for the same reason it is in the product. -->
+    <div class="dial-frame" data-lift>
+      <div
+        class="dial"
+        #dial
+        role="slider"
+        tabindex="0"
+        aria-label="Camera bearing"
+        aria-valuemin="0"
+        aria-valuemax="359"
+        [attr.aria-valuenow]="heading()"
+        [attr.aria-valuetext]="bearingLabel()"
+        (pointerdown)="onDialPointerDown($event)"
+        (pointermove)="onDialPointerMove($event)"
+        (pointerup)="onDialPointerUp($event)"
+        (pointercancel)="onDialPointerUp($event)"
+        (keydown)="onDialKeydown($event)"
+      >
+        <span class="dial-face" aria-hidden="true">
+          @for (tick of dialTicks; track tick) {
+            <i [style.transform]="'rotate(' + tick + 'deg)'"></i>
+          }
+        </span>
+
+        <span class="dial-cardinals" aria-hidden="true">
+          <b class="n">N</b><b class="e">E</b><b class="s">S</b><b class="w">W</b>
+        </span>
+
+        <span class="dial-marker" [style.--heading]="heading()" aria-hidden="true">
+          <span class="dial-cone"></span>
+          <span class="dial-pin"></span>
+        </span>
+
+        <span class="dial-value" aria-hidden="true">
+          <b>{{ heading() }}°</b>
+          <i>{{ bearingLabel() }}</i>
+        </span>
+      </div>
+
+      <figcaption class="dial-note">
+        Field of view · marker heading tracks the Street&nbsp;View camera
+      </figcaption>
+    </div>
+  </section>
+
+  <!-- ══ z19 · Why trust us ═════════════════════════════════════════════ -->
+  <section class="act act--proof" id="act-proof" aria-labelledby="proof-title" data-act="act-proof">
+    <div class="proof-copy">
+      <p class="marker" data-lift>
+        <span class="marker-z">z19</span>
+        <span class="marker-rule"></span>
+        Provenance
+      </p>
+
+      <h2 id="proof-title" class="title" data-lift>What a finished record<br />is able to prove.</h2>
+
+      <p class="body" data-lift>
+        Every point is captured deliberately — never inferred, never geocoded behind your back. It
+        is stored beside the address that produced it and the administrative chain it belongs to, so
+        a record can be re-opened, re-checked, and reused years later.
+      </p>
+
+      <dl class="figures" data-lift>
+        @for (figure of figures; track figure.label) {
+          <div>
+            <dt>{{ figure.label }}</dt>
+            <dd>
+              <span [bmCountUp]="figure.value"></span><em>{{ figure.unit }}</em>
+            </dd>
+          </div>
+        }
+      </dl>
+    </div>
+
+    <figure class="record" data-lift #record>
+      <figcaption>
+        <span>Record 4128</span>
+        <span class="record-seal">Verified</span>
+      </figcaption>
+
+      <dl>
+        @for (row of recordRows; track row.label) {
+          <div [class.is-fix]="row.fix">
+            <dt>{{ row.label }}</dt>
+            <dd>{{ row.value }}</dd>
+          </div>
+        }
+      </dl>
+
+      <p class="record-foot">Captured from the map · six decimal places</p>
+    </figure>
+  </section>
+
+  <!-- ══ z21 · The fix ══════════════════════════════════════════════════ -->
+  <section class="act act--fix" id="act-fix" aria-labelledby="fix-title" data-act="act-fix">
+    <p class="marker" data-lift>
+      <span class="marker-z">z21</span>
+      <span class="marker-rule"></span>
+      Maximum resolution
+    </p>
+
+    <h2 id="fix-title" class="closing" data-lift>The position is fixed.</h2>
+
+    <p class="body" data-lift>
+      Create an account and open the workspace. Nothing to install, nothing to export.
+    </p>
+
+    <div class="entry" data-lift>
+      <a class="act-primary" routerLink="/register" bmMagnetic="10">
+        <span class="bm-magnetic-label">Create an account</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15m-6-6 6 6-6 6" /></svg>
+      </a>
+      <a class="act-secondary" routerLink="/login">Sign in</a>
+    </div>
+  </section>
+</main>
+
+<footer class="colophon">
+  <span>BiMap · Heritage asset registration</span>
+  <span class="colophon-fix">45.469654° N · 9.182206° E</span>
+</footer>

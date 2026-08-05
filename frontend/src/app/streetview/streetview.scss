@@ -11,6 +11,7 @@
   min-height: 0;
   background: var(--bm-map-void);
   overflow: hidden;
+  contain: layout paint style;
 }
 
 .map-split {
@@ -66,13 +67,6 @@
   background: var(--bm-map-void);
 }
 
-// In dark mode the raster road tiles are inverted so the map sits at the same
-// luminance as the rest of the app. Only the tile pane is filtered, so markers,
-// Street View and our own chrome keep their true colours.
-:host-context(:root[data-theme='dark']) ::ng-deep .leaflet-tile-pane {
-  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.92) saturate(0.75);
-}
-
 // ── Pane chrome ──────────────────────────────────────────────────────────────
 
 .pane-badge {
@@ -83,20 +77,22 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 10px;
+  padding: 5px 11px;
   border-radius: var(--bm-radius-pill);
   background: var(--bm-map-chrome);
   border: 1px solid var(--bm-map-chrome-border);
-  @include glass;
+  @include glass(10px);
+  @include label;
   color: var(--bm-map-chrome-text);
-  font-size: 11.5px;
-  font-weight: 600;
+  font-size: 10px;
+  box-shadow: var(--bm-shadow-xs);
   pointer-events: none;
 
   mat-icon {
     font-size: 14px;
     width: 14px;
     height: 14px;
+    color: var(--bm-accent);
   }
 }
 
@@ -110,9 +106,9 @@
 // orientations without any absolute positioning.
 .splitter {
   position: relative;
-  flex: 0 0 10px;
+  flex: 0 0 12px;
   z-index: 700;
-  background: var(--bm-surface);
+  background: var(--bm-surface-solid);
   border-inline: 1px solid var(--bm-line);
   cursor: col-resize;
   touch-action: none; // dragging must not scroll the page
@@ -134,20 +130,35 @@
   }
 }
 
+// The grip grows toward the pointer, which makes a 12px hit target read as an
+// affordance without widening the seam between the two maps.
 .splitter-grip {
-  width: 2px;
-  height: 26px;
+  width: 3px;
+  height: 28px;
   border-radius: var(--bm-radius-pill);
   background: var(--bm-line-strong);
+  transition:
+    background-color var(--bm-duration) var(--bm-ease),
+    height var(--bm-duration) var(--bm-ease-cinematic),
+    width var(--bm-duration) var(--bm-ease-cinematic);
 
   .splitter:hover &,
+  .splitter:focus-visible &,
   .splitter.is-active & {
     background: var(--bm-accent);
+    height: 52px;
   }
 
   @include below(md) {
-    width: 26px;
-    height: 2px;
+    width: 28px;
+    height: 3px;
+
+    .splitter:hover &,
+    .splitter:focus-visible &,
+    .splitter.is-active & {
+      width: 52px;
+      height: 3px;
+    }
   }
 }
 
@@ -169,13 +180,16 @@
     border: none;
   }
 
-  // The marker floats over map imagery, not over an app surface, and is not
-  // affected by the dark-mode tile inversion — so it keeps one fixed, high
-  // contrast treatment in both themes rather than following the text tokens.
+  // The marker floats over map imagery, not over an app surface, so it keeps a
+  // fixed high-contrast treatment rather than following the text tokens.
+  //
+  // It is warm, not blue: the signal hue is reserved product-wide for *this is
+  // the position*, and against a blue-grey road map an amber mark is the one
+  // thing that cannot be mistaken for cartography.
   .fov-marker-shell {
     --marker-heading: 0deg;
-    --marker-accent: #0a5fe0;
-    --marker-accent-mid: rgba(10, 95, 224, 0.55);
+    --marker-accent: #d97012;
+    --marker-accent-mid: rgba(217, 112, 18, 0.58);
     position: relative;
     width: 62px;
     height: 62px;
@@ -212,7 +226,7 @@
       from calc(var(--marker-heading) - 23deg),
       transparent 0deg,
       var(--marker-accent-mid) 21deg,
-      rgba(120, 170, 250, 0.2) 44deg,
+      rgba(250, 190, 130, 0.22) 44deg,
       transparent 66deg,
       transparent 360deg
     );
@@ -245,7 +259,7 @@
     background: var(--marker-accent);
     border: 3px solid #ffffff;
     box-shadow:
-      0 0 0 2px rgba(10, 95, 224, 0.3),
+      0 0 0 2px rgba(217, 112, 18, 0.32),
       0 3px 10px rgba(12, 17, 27, 0.28);
   }
 
@@ -290,4 +304,3 @@
     transform: scale(1.75);
   }
 }
-

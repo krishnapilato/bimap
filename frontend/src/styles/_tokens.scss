@@ -1,71 +1,100 @@
 // =============================================================================
 //  BiMap — Design Tokens
 // -----------------------------------------------------------------------------
-//  BiMap is a field instrument for cadastral / heritage-asset registration.
-//  The interface is a chassis around a map: neutral, quiet, and dense enough to
-//  work in all day. One accent carries every interactive affordance; semantic
-//  hues are reserved for state. Nothing else is coloured.
+//  BiMap is a cinematic field instrument for cadastral and heritage registration.
+//  The system is light only, and built on two hues rather than one:
 //
-//  Every value below is exposed as a CSS custom property so components never
-//  hardcode a hex and dark mode is a single attribute swap on <html>.
+//    · Cobalt  — everything interactive. Navigation, primary actions, links.
+//    · Signal  — a warm amber reserved for *position*: captured coordinates,
+//                the map reticle, the marker. It is the only warm thing on
+//                screen, so the eye finds the point instantly on a blue map.
+//
+//  Nothing else is allowed to be saturated. Structure comes from hairlines and
+//  paper, not from colour, which is what lets an all-day GIS tool stay legible.
+//
+//  Every value is exposed as a CSS custom property so components share one
+//  vocabulary and never hard-code a hex.
 // =============================================================================
 
 :root {
   color-scheme: light;
 
-  // ── Surfaces ───────────────────────────────────────────────────────────────
-  --bm-canvas: #f5f7fa; // page background
-  --bm-surface: #ffffff; // cards, panels, dialogs
-  --bm-surface-2: #f2f4f8; // table headers, inset wells
-  --bm-surface-3: #e8ecf2; // hover on inset surfaces
-  --bm-overlay: rgba(12, 17, 27, 0.42); // dialog scrim
+  // ── Paper ──────────────────────────────────────────────────────────────────
+  //  A faintly cool white that keeps large map surfaces from glaring.
+  --bm-canvas: #f4f7fb;
+  --bm-paper: #fbfcfe;
+  --bm-surface: rgba(255, 255, 255, 0.86);
+  --bm-surface-solid: #ffffff;
+  --bm-surface-2: #f1f5fa;
+  --bm-surface-3: #e6edf6;
+  --bm-surface-sunken: #eaf0f7;
+  --bm-overlay: rgba(9, 24, 46, 0.32);
 
-  // ── Lines ──────────────────────────────────────────────────────────────────
-  --bm-line: #e4e8ee; // default hairline
-  --bm-line-soft: #eef1f5; // row separators
-  --bm-line-strong: #cfd6e0; // input borders, dividers that must read
+  // ── Hairlines ──────────────────────────────────────────────────────────────
+  --bm-line: rgba(37, 71, 112, 0.12);
+  --bm-line-soft: rgba(37, 71, 112, 0.07);
+  --bm-line-strong: rgba(37, 71, 112, 0.2);
+  --bm-line-bright: rgba(255, 255, 255, 0.88);
 
-  // ── Text ───────────────────────────────────────────────────────────────────
-  --bm-text: #0c111b; // primary
-  --bm-text-2: #566074; // secondary / descriptions
-  --bm-text-3: #8590a3; // tertiary / placeholders, field icons
+  // ── Ink ────────────────────────────────────────────────────────────────────
+  --bm-text: #08172c;
+  --bm-text-2: #4c5f79;
+  --bm-text-3: #7e8ea6;
   --bm-text-inverse: #ffffff;
 
-  // ── Accent — the single interactive hue ────────────────────────────────────
-  --bm-accent: #0a5fe0;
-  --bm-accent-hover: #0a52c2;
-  --bm-accent-active: #08459f;
-  --bm-accent-soft: #eaf1fe; // tinted backgrounds
-  --bm-accent-border: #c3d8fb;
-  --bm-accent-text: #0a4fbb; // accent text on soft background (AA on --bm-accent-soft)
+  // ── Cobalt — the interactive hue ───────────────────────────────────────────
+  --bm-accent: #1157e3;
+  --bm-accent-hover: #0b48c4;
+  --bm-accent-active: #093a9f;
+  --bm-accent-soft: #e8f0ff;
+  --bm-accent-softer: #f2f7ff;
+  --bm-accent-border: #bcd5fb;
+  --bm-accent-text: #0a45ab;
   --bm-on-accent: #ffffff;
 
+  // ── Signal — position, and only position ───────────────────────────────────
+  --bm-signal: #d97012;
+  --bm-signal-strong: #b85a08;
+  --bm-signal-soft: #fdf1e3;
+  --bm-signal-border: #f3d3ab;
+  --bm-signal-glow: rgba(217, 112, 18, 0.28);
+
+  // Retained for the map coverage layer and quiet secondary marks.
+  --bm-cyan: #0e9aa4;
+  --bm-cyan-soft: #e6f7f8;
+
   // ── Semantic state ─────────────────────────────────────────────────────────
-  --bm-success: #047857;
-  --bm-success-soft: #e8f6f0;
-  --bm-success-border: #b7e2d1;
+  --bm-success: #04785a;
+  --bm-success-soft: #e6f6f0;
+  --bm-success-border: #b2e0cf;
 
-  --bm-warning: #b45309;
+  --bm-warning: #a9560a;
   --bm-warning-soft: #fdf3e6;
-  --bm-warning-border: #f2d9b4;
+  --bm-warning-border: #f0d6b0;
 
-  --bm-danger: #c62b30;
-  --bm-danger-hover: #a92126;
-  --bm-danger-soft: #fdeced;
-  --bm-danger-border: #f5c6c8;
+  --bm-danger: #c22a2f;
+  --bm-danger-hover: #a41f24;
+  --bm-danger-soft: #fdecec;
+  --bm-danger-border: #f4c4c6;
 
-  // ── Elevation — restrained; borders do most of the work ────────────────────
-  --bm-shadow-xs: 0 1px 2px rgba(12, 17, 27, 0.05);
-  --bm-shadow-sm: 0 1px 2px rgba(12, 17, 27, 0.05), 0 2px 6px -2px rgba(12, 17, 27, 0.07);
-  --bm-shadow-md: 0 2px 4px rgba(12, 17, 27, 0.04), 0 8px 20px -8px rgba(12, 17, 27, 0.14);
-  --bm-shadow-lg: 0 4px 8px rgba(12, 17, 27, 0.05), 0 20px 44px -16px rgba(12, 17, 27, 0.22);
+  // ── Elevation ──────────────────────────────────────────────────────────────
+  //  Long, low-opacity shadows read as height in a light room; short dark ones
+  //  read as dirt.
+  --bm-shadow-xs: 0 1px 2px rgba(11, 33, 62, 0.06);
+  --bm-shadow-sm: 0 8px 24px -16px rgba(17, 48, 88, 0.26), 0 1px 3px rgba(17, 48, 88, 0.06);
+  --bm-shadow-md: 0 20px 45px -24px rgba(17, 48, 88, 0.34), 0 4px 12px rgba(17, 48, 88, 0.07);
+  --bm-shadow-lg: 0 36px 80px -34px rgba(13, 48, 96, 0.44), 0 12px 30px -18px rgba(13, 48, 96, 0.2);
+  --bm-shadow-float: 0 28px 60px -28px rgba(11, 45, 94, 0.46);
+  --bm-shadow-accent: 0 18px 34px -18px rgba(17, 87, 227, 0.55);
+  --bm-shadow-signal: 0 16px 30px -16px rgba(217, 112, 18, 0.5);
 
   // ── Radii ──────────────────────────────────────────────────────────────────
-  --bm-radius-xs: 4px;
-  --bm-radius-sm: 6px;
-  --bm-radius-md: 8px;
-  --bm-radius-lg: 12px;
-  --bm-radius-xl: 16px;
+  --bm-radius-xs: 6px;
+  --bm-radius-sm: 9px;
+  --bm-radius-md: 12px;
+  --bm-radius-lg: 18px;
+  --bm-radius-xl: 26px;
+  --bm-radius-2xl: 34px;
   --bm-radius-pill: 999px;
 
   // ── Space — 4px base ───────────────────────────────────────────────────────
@@ -79,99 +108,51 @@
   --bm-space-8: 40px;
   --bm-space-9: 48px;
   --bm-space-10: 64px;
+  --bm-space-12: 96px;
 
   // ── Type ───────────────────────────────────────────────────────────────────
+  //  Manrope for everything spoken, JetBrains Mono for everything measured.
+  //  Coordinates, ISTAT codes and IDs are *data* and always set in the mono
+  //  face, which is how the eye tells a reading from a label.
   --bm-font-sans:
-    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --bm-font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, monospace;
 
-  --bm-text-display: 600 clamp(22px, 1.1rem + 1vw, 28px) / 1.18 var(--bm-font-sans);
-  --bm-text-h1: 600 20px / 1.25 var(--bm-font-sans);
-  --bm-text-h2: 600 16px / 1.35 var(--bm-font-sans);
-  --bm-text-h3: 600 14px / 1.4 var(--bm-font-sans);
-  --bm-text-body: 400 14px / 1.55 var(--bm-font-sans);
-  --bm-text-small: 400 13px / 1.5 var(--bm-font-sans);
+  --bm-text-hero: 700 clamp(38px, 2rem + 3.2vw, 82px) / 0.98 var(--bm-font-sans);
+  --bm-text-display: 700 clamp(27px, 1.2rem + 1.5vw, 42px) / 1.1 var(--bm-font-sans);
+  --bm-text-h1: 700 23px / 1.18 var(--bm-font-sans);
+  --bm-text-h2: 650 17px / 1.3 var(--bm-font-sans);
+  --bm-text-h3: 650 14px / 1.4 var(--bm-font-sans);
+  --bm-text-body: 400 14px / 1.6 var(--bm-font-sans);
+  --bm-text-small: 400 13px / 1.55 var(--bm-font-sans);
   --bm-text-micro: 500 12px / 1.45 var(--bm-font-sans);
 
-  --bm-tracking-tight: -0.015em;
-  --bm-tracking-label: 0.06em;
+  --bm-tracking-hero: -0.045em;
+  --bm-tracking-tight: -0.032em;
+  --bm-tracking-label: 0.11em;
 
-  // ── Motion — short, functional, never decorative ───────────────────────────
+  // ── Motion ─────────────────────────────────────────────────────────────────
+  //  GSAP owns choreography; these remain for CSS-level state changes (hover,
+  //  focus, disclosure) where a tween would be overkill.
   --bm-ease: cubic-bezier(0.2, 0, 0.1, 1);
+  --bm-ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+  --bm-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --bm-duration-fast: 120ms;
-  --bm-duration: 180ms;
-  --bm-duration-slow: 260ms;
+  --bm-duration: 220ms;
+  --bm-duration-slow: 600ms;
 
   // ── Layout ─────────────────────────────────────────────────────────────────
-  --bm-header-height: 56px;
-  --bm-rail-width: clamp(340px, 26vw, 400px);
+  --bm-header-height: 0px;
+  --bm-rail-width: clamp(340px, 26vw, 408px);
   --bm-content-max: 1360px;
   --bm-prose-max: 62ch;
 
   // ── Focus ring ─────────────────────────────────────────────────────────────
-  --bm-focus-ring: 0 0 0 2px var(--bm-surface), 0 0 0 4px var(--bm-accent);
+  --bm-focus-ring: 0 0 0 2px var(--bm-surface-solid), 0 0 0 4px var(--bm-accent);
 
   // ── Map chrome — the map is the only saturated thing on screen ─────────────
-  --bm-map-void: #e9edf2; // shown while tiles load
-  --bm-map-chrome: rgba(255, 255, 255, 0.94);
+  --bm-map-void: #e6edf5;
+  --bm-map-chrome: rgba(255, 255, 255, 0.9);
   --bm-map-chrome-border: rgba(12, 17, 27, 0.08);
-  --bm-map-chrome-text: #26303f;
-}
-
-// =============================================================================
-//  Dark — for long sessions beside dark map tiles and Street View.
-//  Surfaces lift with lightness rather than shadow; the accent brightens so it
-//  still clears AA against the darker canvas.
-// =============================================================================
-
-:root[data-theme='dark'] {
-  color-scheme: dark;
-
-  --bm-canvas: #0a0e15;
-  --bm-surface: #111721;
-  --bm-surface-2: #19212d;
-  --bm-surface-3: #222c3b;
-  --bm-overlay: rgba(3, 6, 11, 0.66);
-
-  --bm-line: #232c3a;
-  --bm-line-soft: #1b232f;
-  --bm-line-strong: #334053;
-
-  --bm-text: #e9edf4;
-  --bm-text-2: #9aa5b8;
-  --bm-text-3: #6d7889;
-  --bm-text-inverse: #0c111b;
-
-  --bm-accent: #4f95ff;
-  --bm-accent-hover: #6ba6ff;
-  --bm-accent-active: #85b6ff;
-  --bm-accent-soft: #14243c;
-  --bm-accent-border: #26456e;
-  --bm-accent-text: #8ab8ff;
-  --bm-on-accent: #06152b;
-
-  --bm-success: #34d399;
-  --bm-success-soft: #0f2a22;
-  --bm-success-border: #1d4c3c;
-
-  --bm-warning: #fbbf24;
-  --bm-warning-soft: #2b2110;
-  --bm-warning-border: #4d3a15;
-
-  --bm-danger: #f87171;
-  --bm-danger-hover: #fb8b8b;
-  --bm-danger-soft: #2c1518;
-  --bm-danger-border: #542427;
-
-  --bm-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --bm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 6px -2px rgba(0, 0, 0, 0.5);
-  --bm-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.4), 0 8px 20px -8px rgba(0, 0, 0, 0.6);
-  --bm-shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.45), 0 20px 44px -16px rgba(0, 0, 0, 0.7);
-
-  --bm-focus-ring: 0 0 0 2px var(--bm-canvas), 0 0 0 4px var(--bm-accent);
-
-  --bm-map-void: #0d1219;
-  --bm-map-chrome: rgba(17, 23, 33, 0.92);
-  --bm-map-chrome-border: rgba(255, 255, 255, 0.12);
-  --bm-map-chrome-text: #dce3ec;
+  --bm-map-chrome-text: #24303f;
 }
