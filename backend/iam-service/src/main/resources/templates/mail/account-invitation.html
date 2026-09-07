@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body th:replace="~{mail/_layout :: page(
+        'You have been invited to BiMap',
+        'Set your password and start registering assets.',
+        ~{::content})}">
+<content th:fragment="content">
+    <p style="margin:0 0 14px 0;">Hello <span th:text="${firstName}">there</span>,</p>
+    <p style="margin:0;">
+        <span th:text="${invitedBy}">An administrator</span> created a BiMap account for you with the
+        <strong th:text="${role}" style="color:#08172c;">USER</strong> role.
+        Confirm this address to choose your password.
+    </p>
+
+    <div th:replace="~{mail/_layout :: button('Accept the invitation', ${activationLink})}"></div>
+
+    <p style="margin:0 0 14px 0;font-size:13px;color:#7e8ea6;">
+        The invitation is valid for <span th:text="${validForHours}">48</span> hours.
+    </p>
+
+    <div th:replace="~{mail/_layout :: fallback(${activationLink})}"></div>
+</content>
+</body>
+</html>

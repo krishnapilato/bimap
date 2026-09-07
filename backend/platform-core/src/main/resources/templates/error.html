@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${status} + ' · BiMap'">Error · BiMap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/platform.css}"/>
+</head>
+
+<body>
+
+<div class="wash" aria-hidden="true"></div>
+<div class="graticule" aria-hidden="true"></div>
+
+<div class="shell">
+    <main class="fault">
+
+        <span class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 3 3 5.4v15.2L9 18l6 2.6 6-2.4V3l-6 2.4Z"/>
+                <path d="M9 3v15M15 5.4v15.2"/>
+            </svg>
+        </span>
+
+        <p class="fault-code" th:text="${status} ?: '500'">404</p>
+
+        <h1 th:switch="${#strings.toString(status)}">
+            <span th:case="'400'">That request could not be read</span>
+            <span th:case="'401'">You need to sign in</span>
+            <span th:case="'403'">You do not have access</span>
+            <span th:case="'404'">Nothing is mapped here</span>
+            <span th:case="'405'">Wrong method for this endpoint</span>
+            <span th:case="'415'">That media type is not accepted</span>
+            <span th:case="'503'">The service is still starting</span>
+            <span th:case="*">Something went wrong</span>
+        </h1>
+
+        <p class="fault-lede">
+            API clients receive this as an <code>application/problem+json</code> document.
+            This page is the browser rendering of the same failure.
+        </p>
+
+        <div class="detail">
+            <div class="detail-row">
+                <span class="detail-key">Path</span>
+                <span class="detail-value" th:text="${path} ?: '—'">/</span>
+            </div>
+            <div class="detail-row" th:if="${error}">
+                <span class="detail-key">Error</span>
+                <span class="detail-value" th:text="${error}">Not Found</span>
+            </div>
+            <div class="detail-row" th:if="${message != null and !#strings.isEmpty(message)}">
+                <span class="detail-key">Detail</span>
+                <span class="detail-value" th:text="${message}"></span>
+            </div>
+            <div class="detail-row" th:if="${timestamp}">
+                <span class="detail-key">Time</span>
+                <span class="detail-value" th:text="${#dates.format(timestamp, 'dd MMM yyyy, HH:mm:ss')}"></span>
+            </div>
+        </div>
+
+        <nav class="actions" aria-label="Recovery">
+            <a class="button button--primary" th:href="@{/}">Back to the service</a>
+            <a class="button" th:href="@{/swagger-ui.html}">API reference</a>
+        </nav>
+
+        <footer class="footer">
+            Quote the <strong>X-Correlation-Id</strong> from the response headers when reporting this.
+        </footer>
+
+    </main>
+</div>
+
+</body>
+</html>

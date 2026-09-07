@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <!--
+    Starts both services together. Author: Khova Krishna Pilato
+  -->
+  <configuration default="false" name="BiMap backend (both)" type="CompoundRunConfigurationType">
+    <toRun name="IAM Service (dev)" type="SpringBootApplicationConfigurationType" />
+    <toRun name="Business Core (dev)" type="SpringBootApplicationConfigurationType" />
+    <method v="2" />
+  </configuration>
+</component>

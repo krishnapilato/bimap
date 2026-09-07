@@ -1,0 +1,2 @@
+com.bimap.platform.autoconfigure.PlatformCoreAutoConfiguration
+com.bimap.platform.autoconfigure.PlatformSecurityAutoConfiguration

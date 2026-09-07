@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body th:replace="~{mail/_layout :: page(
+        'Confirm your email address',
+        'One click and your BiMap account is ready.',
+        ~{::content})}">
+<content th:fragment="content">
+    <p style="margin:0 0 14px 0;">Hello <span th:text="${firstName}">there</span>,</p>
+    <p style="margin:0;">
+        Your BiMap account is created but not active yet. Confirm this address to finish setting it up.
+    </p>
+
+    <div th:replace="~{mail/_layout :: button('Activate my account', ${activationLink})}"></div>
+
+    <p style="margin:0 0 14px 0;font-size:13px;color:#7e8ea6;">
+        The link works for <span th:text="${validForHours}">48</span> hours and can be used once.
+        If it expires, request a new one from the sign-in page.
+    </p>
+
+    <div th:replace="~{mail/_layout :: fallback(${activationLink})}"></div>
+</content>
+</body>
+</html>

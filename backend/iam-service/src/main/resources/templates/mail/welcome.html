@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body th:replace="~{mail/_layout :: page(
+        'Your account is active',
+        'Welcome to BiMap.',
+        ~{::content})}">
+<content th:fragment="content">
+    <p style="margin:0 0 14px 0;">Hello <span th:text="${firstName}">there</span>,</p>
+    <p style="margin:0;">
+        Your address is confirmed and you can sign in. From here you can look up Italian
+        municipalities and ISTAT codes, resolve addresses, and register assets in the field.
+    </p>
+
+    <div th:replace="~{mail/_layout :: button('Open BiMap', ${appBaseUrl})}"></div>
+
+    <p style="margin:0;font-size:13px;color:#7e8ea6;">
+        If you did not create this account, reply to your administrator so it can be removed.
+    </p>
+</content>
+</body>
+</html>

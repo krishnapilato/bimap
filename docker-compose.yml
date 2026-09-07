@@ -1,0 +1,165 @@
+# BiMap — production stack.
+#
+# Copy .env.example to .env, fill it in, then:
+#     docker compose up -d --build
+#
+# Nothing sensitive is written here. Every secret comes from .env, which is git-ignored.
+#
+# Author: Khova Krishna Pilato
+
+name: bimap
+
+services:
+
+  mysql:
+    image: mysql:8.4
+    container_name: bimap-mysql
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --default-time-zone=+00:00
+      - --max-connections=200
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_USER: ${DB_USERNAME:?set DB_USERNAME in .env}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      MYSQL_DATABASE: bimap_iam
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # Creates the second schema and grants the application user access to both.
+      - ./ops/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    networks: [bimap]
+    # Not published: only the services on this network need to reach the database.
+    expose:
+      - "3306"
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+  iam-service:
+    build:
+      context: ./backend
+      dockerfile: iam-service/Dockerfile
+      args:
+        JAVA_VERSION: ${JAVA_VERSION:-26}
+    image: bimap/iam-service:${BIMAP_VERSION:-2.0.0}
+    container_name: bimap-iam
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      IAM_SERVER_PORT: 9843
+
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: bimap_iam
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-10}
+
+      BIMAP_JWT_SECRET: ${BIMAP_JWT_SECRET:?set BIMAP_JWT_SECRET in .env}
+      BIMAP_JWT_ISSUER: ${BIMAP_JWT_ISSUER:-bimap}
+      BIMAP_ACCESS_TOKEN_TTL: ${BIMAP_ACCESS_TOKEN_TTL:-15m}
+      BIMAP_REFRESH_TOKEN_TTL: ${BIMAP_REFRESH_TOKEN_TTL:-30d}
+
+      BIMAP_APP_URL: ${BIMAP_APP_URL:-http://localhost:4200}
+      BIMAP_CORS_ORIGINS: ${BIMAP_CORS_ORIGINS:-http://localhost:4200}
+      BIMAP_SELF_REGISTRATION: ${BIMAP_SELF_REGISTRATION:-false}
+      BIMAP_MAX_LOGIN_ATTEMPTS: ${BIMAP_MAX_LOGIN_ATTEMPTS:-5}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+
+      # Leave BIMAP_SEED_PASSWORD unset in production: the five seed accounts are then created
+      # pending activation and each person chooses their own password from the emailed link.
+      BIMAP_SEED_ENABLED: ${BIMAP_SEED_ENABLED:-true}
+      BIMAP_SEED_PASSWORD: ${BIMAP_SEED_PASSWORD:-}
+
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_FROM: ${MAIL_FROM:-no-reply@bimap.local}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-BiMap}
+      MAIL_ENABLED: ${MAIL_ENABLED:-true}
+
+      LOG_LEVEL_ROOT: ${LOG_LEVEL_ROOT:-INFO}
+      LOG_LEVEL_APP: ${LOG_LEVEL_APP:-INFO}
+    ports:
+      - "${IAM_PUBLIC_PORT:-9843}:9843"
+    volumes:
+      - iam-logs:/app/logs
+    networks: [bimap]
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+
+  business-service:
+    build:
+      context: ./backend
+      dockerfile: business-service/Dockerfile
+      args:
+        JAVA_VERSION: ${JAVA_VERSION:-26}
+    image: bimap/business-service:${BIMAP_VERSION:-2.0.0}
+    container_name: bimap-business
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      iam-service:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      BUSINESS_SERVER_PORT: 9844
+
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: bimap_core
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-10}
+
+      # The same signing key as IAM. This service only verifies tokens, it never issues them.
+      BIMAP_JWT_SECRET: ${BIMAP_JWT_SECRET}
+      BIMAP_JWT_ISSUER: ${BIMAP_JWT_ISSUER:-bimap}
+
+      BIMAP_APP_URL: ${BIMAP_APP_URL:-http://localhost:4200}
+      BIMAP_CORS_ORIGINS: ${BIMAP_CORS_ORIGINS:-http://localhost:4200}
+
+      COMUNI_ITA_URL: ${COMUNI_ITA_URL:-https://comuni-ita.nicolorebaioli.dev}
+      COMUNI_ITA_CACHE_TTL: ${COMUNI_ITA_CACHE_TTL:-24h}
+      NOMINATIM_URL: ${NOMINATIM_URL:-https://nominatim.openstreetmap.org}
+      NOMINATIM_CACHE_TTL: ${NOMINATIM_CACHE_TTL:-12h}
+      CODICE_UNIVOCO_URL: ${CODICE_UNIVOCO_URL:-https://codiceunivoco.it}
+      CODICE_UNIVOCO_CACHE_TTL: ${CODICE_UNIVOCO_CACHE_TTL:-12h}
+      INTEGRATION_USER_AGENT: ${INTEGRATION_USER_AGENT:-BiMap/2.0 (https://github.com/krishnapilato/bimap)}
+
+      LOG_LEVEL_ROOT: ${LOG_LEVEL_ROOT:-INFO}
+      LOG_LEVEL_APP: ${LOG_LEVEL_APP:-INFO}
+    ports:
+      - "${BUSINESS_PUBLIC_PORT:-9844}:9844"
+    volumes:
+      - business-logs:/app/logs
+    networks: [bimap]
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+
+volumes:
+  mysql-data:
+  iam-logs:
+  business-logs:
+
+networks:
+  bimap:
+    driver: bridge

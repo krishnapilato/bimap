@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <!--
+    Local run of the IAM service. Secrets are NOT here: they come from the .env at the repository
+    root, which application.properties imports. Author: Khova Krishna Pilato
+  -->
+  <configuration default="false" name="IAM Service (dev)" type="SpringBootApplicationConfigurationType"
+                 factoryName="Spring Boot" nameIsGenerated="false">
+    <module name="iam-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.bimap.iam.IamServiceApplication" />
+    <option name="ACTIVE_PROFILES" value="dev" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

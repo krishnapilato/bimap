@@ -1,0 +1,49 @@
+# BiMap - local infrastructure only.
+#
+# Brings up MySQL and a throwaway mail catcher, and leaves both services to run from your IDE or
+# from `./mvnw spring-boot:run`. Use this while developing; use docker-compose.yml to run the
+# whole stack the way production does.
+#
+#     docker compose -f docker-compose.dev.yml up -d
+#
+# Author: Khova Krishna Pilato
+
+name: bimap-dev
+
+services:
+
+  mysql:
+    image: mysql:8.4
+    container_name: bimap-dev-mysql
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --default-time-zone=+00:00
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: bimap
+      MYSQL_PASSWORD: bimap
+      MYSQL_DATABASE: bimap_iam
+    ports:
+      - "3306:3306"
+    volumes:
+      - dev-mysql-data:/var/lib/mysql
+      - ./ops/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  # Catches every outgoing email and shows it at http://localhost:8025 - no real inbox needed.
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: bimap-dev-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  dev-mysql-data:

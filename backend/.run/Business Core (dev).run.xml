@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <!--
+    Local run of the business core service. Author: Khova Krishna Pilato
+  -->
+  <configuration default="false" name="Business Core (dev)" type="SpringBootApplicationConfigurationType"
+                 factoryName="Spring Boot" nameIsGenerated="false">
+    <module name="business-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.bimap.business.BusinessServiceApplication" />
+    <option name="ACTIVE_PROFILES" value="dev" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

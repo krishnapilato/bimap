@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title th:text="${platform.serviceName()} + ' · BiMap'">BiMap Service</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/platform.css}"/>
+</head>
+
+<body>
+
+<div class="wash" aria-hidden="true"></div>
+<div class="graticule" aria-hidden="true"></div>
+
+<div class="shell">
+
+    <!-- ── Masthead ─────────────────────────────────────────────────────── -->
+    <header class="masthead">
+        <span class="mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 3 3 5.4v15.2L9 18l6 2.6 6-2.4V3l-6 2.4Z"/>
+                <path d="M9 3v15M15 5.4v15.2"/>
+            </svg>
+        </span>
+
+        <div class="masthead-text">
+            <p class="eyebrow">BiMap Platform</p>
+            <h1 th:text="${platform.serviceName()}">BiMap Service</h1>
+            <p class="lede" th:text="${platform.tagline()}">Backend service</p>
+        </div>
+
+        <div class="masthead-status">
+            <span class="status" th:classappend="${snapshot.healthy()} ? 'status--up' : 'status--down'">
+                <span class="beacon" aria-hidden="true"></span>
+                <span data-bind="status" th:text="${snapshot.status()}">UP</span>
+            </span>
+            <p class="masthead-uptime">
+                up <strong data-bind="uptime" th:text="${snapshot.uptime().display()}">0s</strong>
+            </p>
+        </div>
+    </header>
+
+    <!-- ── Identity strip ───────────────────────────────────────────────── -->
+    <div class="strip">
+        <span class="chip">v<span data-bind="version" th:text="${snapshot.version()}">dev</span></span>
+        <span class="chip" th:each="profile : ${snapshot.profiles()}" th:text="${profile}">dev</span>
+        <span class="chip chip--quiet">:<span th:text="${snapshot.runtime().port()}">9843</span></span>
+        <span class="chip chip--quiet" th:text="'Java ' + ${snapshot.runtime().java()}">Java 26</span>
+        <span class="strip-spacer"></span>
+        <span class="strip-time">sampled <time data-bind="sampledAt">just now</time></span>
+    </div>
+
+    <!-- ── Body: metrics left, diagnostics right ────────────────────────── -->
+    <main class="layout">
+
+        <section class="column" aria-label="Runtime metrics">
+
+            <div class="grid">
+                <article class="tile">
+                    <h2>Heap</h2>
+                    <p class="reading" data-bind="heap" th:text="${snapshot.heap().usedDisplay()}">0 MB</p>
+                    <div class="meter">
+                        <span data-meter="heap" th:style="'width:' + ${snapshot.heap().usedRatio()} * 100 + '%'"></span>
+                    </div>
+                    <p class="caption">
+                        of <span data-bind="heapMax" th:text="${snapshot.heap().maxDisplay()}">0 GB</span> ·
+                        non-heap <span data-bind="nonHeap" th:text="${snapshot.nonHeap().usedDisplay()}">0 MB</span>
+                    </p>
+                </article>
+
+                <article class="tile">
+                    <h2>CPU</h2>
+                    <p class="reading" data-bind="cpu"
+                       th:text="${#numbers.formatPercent(snapshot.cpu().process(), 1, 1)}">0%</p>
+                    <p class="caption"><span th:text="${snapshot.cpu().cores()}">8</span> cores</p>
+                </article>
+
+                <article class="tile">
+                    <h2>Threads</h2>
+                    <p class="reading" data-bind="threads" th:text="${snapshot.threads().live()}">0</p>
+                    <p class="caption">
+                        peak <span data-bind="threadsPeak" th:text="${snapshot.threads().peak()}">0</span> ·
+                        daemon <span data-bind="threadsDaemon" th:text="${snapshot.threads().daemon()}">0</span>
+                    </p>
+                </article>
+
+                <article class="tile">
+                    <h2>Requests</h2>
+                    <p class="reading" data-bind="requests" th:text="${snapshot.http().requests()}">0</p>
+                    <p class="caption">
+                        avg <span data-bind="latency" th:text="${snapshot.http().averageMillis()}">0</span> ms ·
+                        peak <span data-bind="slowest" th:text="${snapshot.http().slowestMillis()}">0</span> ms
+                    </p>
+                </article>
+
+                <article class="tile">
+                    <h2>Failed</h2>
+                    <p class="reading">
+                        <span data-bind="clientErrors" th:text="${snapshot.http().clientErrors()}">0</span><span
+                            class="divider">/</span><span class="reading--alert" data-bind="serverErrors"
+                            th:text="${snapshot.http().serverErrors()}">0</span>
+                    </p>
+                    <p class="caption">4xx / 5xx</p>
+                </article>
+
+                <article class="tile">
+                    <h2>Connections</h2>
+                    <p class="reading">
+                        <span data-bind="dbActive" th:text="${snapshot.database().active()}">0</span><span
+                            class="divider">/</span><span data-bind="dbMax"
+                            th:text="${snapshot.database().max()}">0</span>
+                    </p>
+                    <p class="caption">
+                        <span data-bind="dbIdle" th:text="${snapshot.database().idle()}">0</span> idle
+                    </p>
+                </article>
+            </div>
+
+            <nav class="actions" aria-label="Destinations">
+                <a class="button button--primary" th:href="${platform.appUrl()}" target="_blank" rel="noreferrer noopener">
+                    Open BiMap
+                </a>
+                <a class="button" th:href="@{/swagger-ui.html}">API reference</a>
+                <a class="button" th:href="@{/actuator/health}">Health</a>
+                <a class="button" th:href="${platform.repositoryUrl()}" target="_blank" rel="noreferrer noopener">Source</a>
+            </nav>
+        </section>
+
+        <aside class="column column--rail" aria-label="Diagnostics">
+
+            <section class="card">
+                <h2 class="card-title">Health checks</h2>
+                <ul class="checks" data-bind="components">
+                    <li th:each="component : ${snapshot.components()}">
+                        <span class="dot" th:classappend="${component.status() == 'UP'} ? 'dot--up' : 'dot--down'"></span>
+                        <span class="check-name" th:text="${component.name()}">db</span>
+                        <span class="check-status" th:text="${component.status()}">UP</span>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card" th:if="${platform.hasPeers()}">
+                <h2 class="card-title">Other services</h2>
+                <p class="card-note">Each service publishes its own API contract.</p>
+                <ul class="peers">
+                    <li th:each="peer : ${platform.peers()}">
+                        <a class="peer-name" th:href="${peer.docsUrl()}" th:text="${peer.name()}" target="_blank" rel="noreferrer noopener">Service</a>
+                        <span class="peer-owns" th:text="${peer.owns()}">what it owns</span>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card" th:if="${platform.hasAttributions()}">
+                <h2 class="card-title">Data sources</h2>
+                <p class="card-note">Italian reference data, courtesy of these projects.</p>
+                <ul class="credits">
+                    <li th:each="source : ${platform.attributions()}">
+                        <a class="credit-name" th:href="${source.url()}" th:text="${source.name()}"
+                           target="_blank" rel="noreferrer noopener">Source</a>
+                        <span class="credit-provides" th:text="${source.provides()}">what it provides</span>
+                        <span class="credit-licence" th:if="${source.licence()}" th:text="${source.licence()}">licence</span>
+                    </li>
+                </ul>
+            </section>
+
+        </aside>
+    </main>
+
+    <footer class="footer">
+        <span th:text="${snapshot.runtime().jvm()}">JVM</span>
+        <span class="footer-dot">·</span>
+        <span th:text="${snapshot.runtime().os()} + ' (' + ${snapshot.runtime().architecture()} + ')'">OS</span>
+        <span class="footer-dot">·</span>
+        <span>started <span th:text="${#temporals.format(snapshot.startedAt(), 'dd MMM yyyy, HH:mm')}">—</span></span>
+    </footer>
+
+</div>
+
+<script th:src="@{/platform.js}"></script>
+
+</body>
+</html>

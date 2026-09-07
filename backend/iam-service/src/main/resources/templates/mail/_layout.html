@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!--
+    Shared shell for every transactional email.
+
+    Tables and inline styles are not a stylistic choice here: Outlook and several webmail clients
+    still drop <style> blocks and flexbox, so anything structural has to survive without them.
+
+    Author: Khova Krishna Pilato
+-->
+<body>
+
+<div th:fragment="page(heading, intro, content)"
+     style="margin:0;padding:0;background-color:#f4f7fb;">
+
+    <div th:text="${intro}"
+         style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;height:0;width:0;"></div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+           style="background-color:#f4f7fb;padding:32px 12px;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+        <tr>
+            <td align="center">
+
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                       style="max-width:560px;background-color:#ffffff;border:1px solid #dfe7f1;border-radius:18px;overflow:hidden;">
+
+                    <tr>
+                        <td style="padding:26px 32px 0 32px;">
+                            <span style="display:inline-block;font-size:15px;font-weight:700;letter-spacing:-0.02em;color:#08172c;">BiMap</span>
+                            <span style="display:inline-block;margin-left:8px;font-size:11px;font-weight:600;letter-spacing:0.11em;text-transform:uppercase;color:#7e8ea6;">Cadastral registry</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:20px 32px 0 32px;">
+                            <h1 th:text="${heading}"
+                                style="margin:0;font-size:22px;line-height:1.25;font-weight:700;letter-spacing:-0.03em;color:#08172c;">
+                                Heading
+                            </h1>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:14px 32px 30px 32px;font-size:15px;line-height:1.65;color:#4c5f79;">
+                            <div th:replace="${content}">Body</div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:18px 32px;background-color:#f8fafd;border-top:1px solid #eef2f8;font-size:12px;line-height:1.6;color:#7e8ea6;">
+                            You are receiving this because an account exists for
+                            <span th:text="${email}" style="color:#4c5f79;">you</span>.
+                            <br/>
+                            <span th:text="'© ' + ${year} + ' BiMap'">© BiMap</span> · This mailbox is not monitored.
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+<!-- Reusable primary button. -->
+<table th:fragment="button(label, href)" role="presentation" cellpadding="0" cellspacing="0" border="0"
+       style="margin:24px 0;">
+    <tr>
+        <td style="border-radius:12px;background-color:#1157e3;">
+            <a th:href="${href}" th:text="${label}"
+               style="display:inline-block;padding:13px 26px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:12px;">
+                Continue
+            </a>
+        </td>
+    </tr>
+</table>
+
+<!-- Fallback for clients that strip links, and for anyone who prefers to see the URL. -->
+<p th:fragment="fallback(href)"
+   style="margin:0;font-size:12px;line-height:1.6;color:#7e8ea6;word-break:break-all;">
+    If the button does not work, paste this into your browser:<br/>
+    <span th:text="${href}" style="color:#0a45ab;">https://</span>
+</p>
+
+</body>
+</html>

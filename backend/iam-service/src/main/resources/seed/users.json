@@ -1,0 +1,32 @@
+[
+  {
+    "firstName": "Khova Krishna",
+    "lastName": "Pilato",
+    "email": "krishnak.pilato@gmail.com",
+    "role": "ADMINISTRATOR"
+  },
+  {
+    "firstName": "Elena",
+    "lastName": "Ferrari",
+    "email": "elena.ferrari@bimap.local",
+    "role": "ADMINISTRATOR"
+  },
+  {
+    "firstName": "Marco",
+    "lastName": "Bianchi",
+    "email": "marco.bianchi@bimap.local",
+    "role": "MANAGER"
+  },
+  {
+    "firstName": "Giulia",
+    "lastName": "Rossi",
+    "email": "giulia.rossi@bimap.local",
+    "role": "USER"
+  },
+  {
+    "firstName": "Luca",
+    "lastName": "Conti",
+    "email": "luca.conti@bimap.local",
+    "role": "USER"
+  }
+]

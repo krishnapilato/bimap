@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body th:replace="~{mail/_layout :: page(
+        'Your account is temporarily locked',
+        'Too many failed sign-in attempts.',
+        ~{::content})}">
+<content th:fragment="content">
+    <p style="margin:0 0 14px 0;">Hello <span th:text="${firstName}">there</span>,</p>
+    <p style="margin:0 0 14px 0;">
+        We stopped accepting sign-ins for this account after too many wrong passwords.
+        It unlocks itself in <span th:text="${lockedForMinutes}">15</span> minutes.
+    </p>
+    <p style="margin:0;padding:14px 16px;background-color:#fdecec;border-left:3px solid #c22a2f;border-radius:8px;font-size:14px;color:#a41f24;">
+        If those attempts were not yours, reset your password as soon as the lock lifts.
+    </p>
+</content>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Nothing here belongs in a build context.
+**/target/
+**/.git/
+**/.gitignore
+**/.idea/
+**/*.iml
+**/node_modules/
+**/logs/
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+README.md
+docker-compose*.yml

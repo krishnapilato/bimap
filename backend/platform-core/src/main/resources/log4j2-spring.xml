@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Shared logging configuration for every BiMap service.
+
+    Lives in platform-core so both services log identically. The `-spring` suffix is what lets
+    Spring Boot resolve `${spring:...}` and honour <SpringProfile>, so the same file behaves
+    differently in development and in production without a second copy.
+
+    Author: Khova Krishna Pilato
+-->
+<Configuration status="WARN" monitorInterval="60" shutdownHook="disable">
+
+    <Properties>
+        <Property name="APP">${spring:spring.application.name:-bimap}</Property>
+        <Property name="LOG_DIR">${env:LOG_PATH:-logs}</Property>
+
+        <!-- Correlation id and caller come from the MDC the platform filters populate. -->
+        <Property name="CONSOLE_PATTERN">%highlight{%d{HH:mm:ss.SSS} %-5level}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=green, DEBUG=cyan, TRACE=blue} %style{[%X{correlationId:-%.-8t}]}{magenta} %style{%-40.40c{1.}}{cyan} : %msg%n%xwEx</Property>
+        <Property name="FILE_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%t] [%X{correlationId:-}] [%X{user:-anonymous}] %c{1.} - %msg%n%xEx</Property>
+    </Properties>
+
+    <Appenders>
+
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${CONSOLE_PATTERN}" disableAnsi="false"/>
+        </Console>
+
+        <!-- Structured output for log shippers. One JSON object per line, MDC included. -->
+        <Console name="ConsoleJson" target="SYSTEM_OUT" follow="true">
+            <JsonTemplateLayout eventTemplateUri="classpath:EcsLayout.json">
+                <EventTemplateAdditionalField key="service.name" value="${APP}"/>
+            </JsonTemplateLayout>
+        </Console>
+
+        <RollingFile name="ApplicationLog"
+                     fileName="${LOG_DIR}/${APP}.log"
+                     filePattern="${LOG_DIR}/archive/${APP}-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${FILE_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="50 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30">
+                <Delete basePath="${LOG_DIR}/archive" maxDepth="1">
+                    <IfFileName glob="${APP}-*.log.gz"/>
+                    <IfLastModified age="P30D"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!-- Errors also land in their own file, so an on-call read is not a grep exercise. -->
+        <RollingFile name="ErrorLog"
+                     fileName="${LOG_DIR}/${APP}-error.log"
+                     filePattern="${LOG_DIR}/archive/${APP}-error-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${FILE_PATTERN}"/>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="20 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="60">
+                <Delete basePath="${LOG_DIR}/archive" maxDepth="1">
+                    <IfFileName glob="${APP}-error-*.log.gz"/>
+                    <IfLastModified age="P90D"/>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+
+        <!-- Application loggers are async: the disruptor ring buffer keeps a log call off the
+             request thread, which matters most on the paths that log the most. -->
+        <AsyncLogger name="com.bimap" level="${env:LOG_LEVEL_APP:-INFO}" includeLocation="false" additivity="false">
+            <SpringProfile name="prod">
+                <AppenderRef ref="ConsoleJson"/>
+            </SpringProfile>
+            <SpringProfile name="!prod">
+                <AppenderRef ref="Console"/>
+            </SpringProfile>
+            <AppenderRef ref="ApplicationLog"/>
+            <AppenderRef ref="ErrorLog"/>
+        </AsyncLogger>
+
+        <!-- Noisy by default, and rarely what you are looking for. -->
+        <AsyncLogger name="org.hibernate.SQL" level="${env:LOG_LEVEL_SQL:-WARN}" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="ApplicationLog"/>
+        </AsyncLogger>
+        <AsyncLogger name="org.hibernate.orm.jdbc.bind" level="${env:LOG_LEVEL_SQL_PARAMS:-WARN}" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="ApplicationLog"/>
+        </AsyncLogger>
+        <AsyncLogger name="org.springframework.web.filter.CommonsRequestLoggingFilter" level="WARN"/>
+        <AsyncLogger name="_org.springframework.android" level="OFF"/>
+        <AsyncLogger name="com.zaxxer.hikari" level="WARN"/>
+        <AsyncLogger name="org.apache.catalina" level="WARN"/>
+
+        <!-- Security decisions are worth keeping even when the rest is quiet. -->
+        <AsyncLogger name="org.springframework.security" level="${env:LOG_LEVEL_SECURITY:-INFO}"/>
+
+        <!-- Two advisories we have already answered, and which would otherwise make a healthy
+             start look like it had problems.
+
+             SpringDoc warns that the API docs are reachable; the prod profile switches them off,
+             and having them on in development is the whole point. Flyway warns that MySQL 26.7 is
+             newer than the version it was verified against; the migrations are plain DDL and run
+             clean, which is what the build proves. -->
+        <AsyncLogger name="org.springdoc.core.events.SpringDocAppInitializer" level="ERROR"/>
+        <AsyncLogger name="org.flywaydb.core.internal.database.base.Database" level="ERROR"/>
+
+        <Root level="${env:LOG_LEVEL_ROOT:-INFO}">
+            <SpringProfile name="prod">
+                <AppenderRef ref="ConsoleJson"/>
+            </SpringProfile>
+            <SpringProfile name="!prod">
+                <AppenderRef ref="Console"/>
+            </SpringProfile>
+            <AppenderRef ref="ApplicationLog"/>
+            <AppenderRef ref="ErrorLog"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>
