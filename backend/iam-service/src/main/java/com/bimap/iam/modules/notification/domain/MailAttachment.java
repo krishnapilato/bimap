@@ -19,6 +19,11 @@ public record MailAttachment(String filename, String contentType, byte[] content
         return new MailAttachment(path.getFileName().toString(), contentType, Files.readAllBytes(path));
     }
 
+    /// How big the file is, for the delivery log — which records the size but never the bytes.
+    public long size() {
+        return content.length;
+    }
+
     public Resource asResource() {
         return new ByteArrayResource(content) {
             @Override

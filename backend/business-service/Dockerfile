@@ -20,7 +20,13 @@ COPY mvnw pom.xml ./
 COPY platform-core/pom.xml platform-core/
 COPY iam-service/pom.xml iam-service/
 COPY business-service/pom.xml business-service/
-RUN chmod +x mvnw && ./mvnw -B -q dependency:go-offline -pl platform-core,business-service -am -DskipTests
+# Checked out on Windows, `mvnw` arrives with CRLF endings, and the carriage return becomes part
+# of the shebang: Linux looks for an interpreter called `/bin/sh\r`, does not find one, and reports
+# `./mvnw: not found` with exit 127. Stripping it here makes the build independent of whatever
+# `core.autocrlf` did on the machine that cloned the repository.
+RUN sed -i 's/\r$//' mvnw \
+ && chmod +x mvnw \
+ && ./mvnw -B -q dependency:go-offline -pl platform-core,business-service -am -DskipTests
 
 COPY platform-core/src platform-core/src
 COPY business-service/src business-service/src

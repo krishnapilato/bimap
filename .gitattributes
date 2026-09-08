@@ -1,0 +1,31 @@
+# Line endings.
+#
+# The Maven wrapper and every shell script must keep LF wherever they are checked out. On Windows,
+# Git's autocrlf rewrites them to CRLF, the carriage return becomes part of the shebang, and Linux
+# then looks for an interpreter literally called `/bin/sh\r` — which surfaces as the memorable
+# `./mvnw: not found` with exit code 127 inside a Docker build.
+#
+# Author: Khova Krishna Pilato
+
+* text=auto
+
+mvnw        text eol=lf
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+
+# Windows launchers are the mirror image: they need CRLF.
+mvnw.cmd    text eol=crlf
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+
+# Never touched.
+*.jar   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary

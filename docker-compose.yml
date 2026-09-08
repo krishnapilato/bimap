@@ -1,9 +1,17 @@
-# BiMap — production stack.
+# BiMap — full stack: MySQL, both services and the client.
 #
-# Copy .env.example to .env, fill it in, then:
 #     docker compose up -d --build
 #
-# Nothing sensitive is written here. Every secret comes from .env, which is git-ignored.
+# That works with no setup at all: every value below falls back to a local development default, so
+# a fresh clone comes up on http://localhost:8080 without a single file to create first.
+#
+# Those defaults are for a laptop and nothing else. Before any real deployment, create .env:
+#
+#     cp .env.example .env
+#     openssl rand -base64 64      # a value for BIMAP_JWT_SECRET
+#
+# .env is git-ignored, Compose reads it automatically, and real environment variables win over it,
+# so the same file serves docker, the IDE and CI. Nothing secret is written in this file.
 #
 # Author: Khova Krishna Pilato
 
@@ -21,16 +29,16 @@ services:
       - --default-time-zone=+00:00
       - --max-connections=200
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
-      MYSQL_USER: ${DB_USERNAME:?set DB_USERNAME in .env}
-      MYSQL_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-bimap-local-root}
+      MYSQL_USER: ${DB_USERNAME:-bimap}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-bimap-local-app}
       MYSQL_DATABASE: bimap_iam
     volumes:
       - mysql-data:/var/lib/mysql
       # Creates the second schema and grants the application user access to both.
       - ./ops/mysql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${MYSQL_ROOT_PASSWORD:-bimap-local-root}"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -63,17 +71,17 @@ services:
       DB_HOST: mysql
       DB_PORT: 3306
       DB_NAME: bimap_iam
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_USERNAME: ${DB_USERNAME:-bimap}
+      DB_PASSWORD: ${DB_PASSWORD:-bimap-local-app}
       DB_POOL_SIZE: ${DB_POOL_SIZE:-10}
 
-      BIMAP_JWT_SECRET: ${BIMAP_JWT_SECRET:?set BIMAP_JWT_SECRET in .env}
+      BIMAP_JWT_SECRET: ${BIMAP_JWT_SECRET:-local-development-signing-key-replace-before-deploying-anywhere-real}
       BIMAP_JWT_ISSUER: ${BIMAP_JWT_ISSUER:-bimap}
       BIMAP_ACCESS_TOKEN_TTL: ${BIMAP_ACCESS_TOKEN_TTL:-15m}
       BIMAP_REFRESH_TOKEN_TTL: ${BIMAP_REFRESH_TOKEN_TTL:-30d}
 
-      BIMAP_APP_URL: ${BIMAP_APP_URL:-http://localhost:4200}
-      BIMAP_CORS_ORIGINS: ${BIMAP_CORS_ORIGINS:-http://localhost:4200}
+      BIMAP_APP_URL: ${BIMAP_APP_URL:-http://localhost:8080}
+      BIMAP_CORS_ORIGINS: ${BIMAP_CORS_ORIGINS:-http://localhost:8080}
       BIMAP_SELF_REGISTRATION: ${BIMAP_SELF_REGISTRATION:-false}
       BIMAP_MAX_LOGIN_ATTEMPTS: ${BIMAP_MAX_LOGIN_ATTEMPTS:-5}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
@@ -83,13 +91,13 @@ services:
       BIMAP_SEED_ENABLED: ${BIMAP_SEED_ENABLED:-true}
       BIMAP_SEED_PASSWORD: ${BIMAP_SEED_PASSWORD:-}
 
-      MAIL_HOST: ${MAIL_HOST}
+      MAIL_HOST: ${MAIL_HOST:-}
       MAIL_PORT: ${MAIL_PORT:-587}
-      MAIL_USERNAME: ${MAIL_USERNAME}
-      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       MAIL_FROM: ${MAIL_FROM:-no-reply@bimap.local}
       MAIL_FROM_NAME: ${MAIL_FROM_NAME:-BiMap}
-      MAIL_ENABLED: ${MAIL_ENABLED:-true}
+      MAIL_ENABLED: ${MAIL_ENABLED:-false}
 
       LOG_LEVEL_ROOT: ${LOG_LEVEL_ROOT:-INFO}
       LOG_LEVEL_APP: ${LOG_LEVEL_APP:-INFO}
@@ -124,16 +132,16 @@ services:
       DB_HOST: mysql
       DB_PORT: 3306
       DB_NAME: bimap_core
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
+      DB_USERNAME: ${DB_USERNAME:-bimap}
+      DB_PASSWORD: ${DB_PASSWORD:-bimap-local-app}
       DB_POOL_SIZE: ${DB_POOL_SIZE:-10}
 
       # The same signing key as IAM. This service only verifies tokens, it never issues them.
-      BIMAP_JWT_SECRET: ${BIMAP_JWT_SECRET}
+      BIMAP_JWT_SECRET: ${BIMAP_JWT_SECRET:-local-development-signing-key-replace-before-deploying-anywhere-real}
       BIMAP_JWT_ISSUER: ${BIMAP_JWT_ISSUER:-bimap}
 
-      BIMAP_APP_URL: ${BIMAP_APP_URL:-http://localhost:4200}
-      BIMAP_CORS_ORIGINS: ${BIMAP_CORS_ORIGINS:-http://localhost:4200}
+      BIMAP_APP_URL: ${BIMAP_APP_URL:-http://localhost:8080}
+      BIMAP_CORS_ORIGINS: ${BIMAP_CORS_ORIGINS:-http://localhost:8080}
 
       COMUNI_ITA_URL: ${COMUNI_ITA_URL:-https://comuni-ita.nicolorebaioli.dev}
       COMUNI_ITA_CACHE_TTL: ${COMUNI_ITA_CACHE_TTL:-24h}
@@ -154,6 +162,29 @@ services:
       resources:
         limits:
           memory: 768m
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        BUILD_CONFIGURATION: production
+    image: bimap/frontend:${BIMAP_VERSION:-2.0.0}
+    container_name: bimap-frontend
+    restart: unless-stopped
+    depends_on:
+      iam-service:
+        condition: service_healthy
+      business-service:
+        condition: service_healthy
+    # The only port anyone needs. nginx proxies /iam and /core to the services behind it, so the
+    # browser talks to a single origin and CORS never enters the picture.
+    ports:
+      - "${FRONTEND_PUBLIC_PORT:-8080}:8080"
+    networks: [bimap]
+    deploy:
+      resources:
+        limits:
+          memory: 128m
 
 volumes:
   mysql-data:
