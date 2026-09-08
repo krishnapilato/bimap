@@ -1,0 +1,246 @@
+// =============================================================================
+//  User administration
+// =============================================================================
+
+@use '../../styles/mixins' as *;
+
+:host {
+  display: block;
+}
+
+// ── Head ─────────────────────────────────────────────────────────────────────
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: var(--bm-space-5);
+  padding: 8px 14px;
+  border: 1px solid var(--bm-line);
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-surface);
+  color: var(--bm-text-2);
+  font-size: 12.5px;
+  font-weight: 550;
+  transition:
+    border-color var(--bm-duration) var(--bm-ease),
+    color var(--bm-duration) var(--bm-ease);
+
+  &:hover {
+    border-color: var(--bm-accent-border);
+    color: var(--bm-accent-text);
+    text-decoration: none;
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    transition: transform var(--bm-duration) var(--bm-ease-cinematic);
+  }
+
+  &:hover mat-icon {
+    transform: translateX(-3px);
+  }
+}
+
+.page-head {
+  margin-bottom: var(--bm-space-6);
+
+  h1 {
+    margin-top: var(--bm-space-3);
+    font: var(--bm-text-display);
+    letter-spacing: var(--bm-tracking-hero);
+  }
+
+  .page-lede {
+    max-width: var(--bm-prose-max);
+    margin-top: var(--bm-space-3);
+    color: var(--bm-text-2);
+    font: var(--bm-text-small);
+  }
+}
+
+// ── Stats ────────────────────────────────────────────────────────────────────
+//  Each tile carries a bar showing its share of the total, so "12 confirmed"
+//  is immediately readable as most of the roster or barely any of it — a figure
+//  on its own cannot say that.
+
+// Ruled columns rather than three cards: these are three readings off one
+// roster, and a shared rule says that better than three separate boxes.
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0;
+  margin: 0;
+  @include ruled(top);
+}
+
+.stat {
+  position: relative;
+  padding: var(--bm-space-5) var(--bm-space-5) var(--bm-space-5) 0;
+  border-right: 1px solid var(--bm-line);
+  overflow: hidden;
+
+  &:last-child {
+    border-right: none;
+  }
+
+  dt {
+    display: flex;
+    align-items: center;
+    gap: var(--bm-space-2);
+    @include label;
+  }
+
+  dd {
+    margin: var(--bm-space-3) 0 0;
+    @include numeric;
+    font-size: 34px;
+    font-weight: 500;
+    letter-spacing: -0.045em;
+    color: var(--bm-text);
+    line-height: 1;
+  }
+}
+
+.stat-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--bm-radius-xs);
+  background: var(--bm-surface-3);
+  color: var(--bm-text-3);
+
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+  }
+
+  [data-tone='success'] & {
+    background: var(--bm-success-soft);
+    color: var(--bm-success);
+  }
+
+  [data-tone='accent'] & {
+    background: var(--bm-accent-soft);
+    color: var(--bm-accent);
+  }
+}
+
+.stat-bar {
+  display: block;
+  height: 3px;
+  margin-top: var(--bm-space-4);
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-surface-3);
+  overflow: hidden;
+
+  i {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--bm-text-3);
+    transform-origin: 0 50%;
+    transition: transform 0.9s var(--bm-ease-cinematic);
+  }
+
+  [data-tone='success'] & i {
+    background: var(--bm-success);
+  }
+
+  [data-tone='accent'] & i {
+    background: var(--bm-accent);
+  }
+}
+
+// ── Toolbar ──────────────────────────────────────────────────────────────────
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-3);
+  flex: none;
+}
+
+.toolbar-search {
+  width: min(280px, 46vw);
+}
+
+.toolbar-add {
+  height: 44px;
+}
+
+// ── Table ────────────────────────────────────────────────────────────────────
+
+.email-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  padding: 4px 9px;
+  margin-left: -9px;
+  border: 1px solid transparent;
+  border-radius: var(--bm-radius-sm);
+  background: none;
+  color: var(--bm-text-2);
+  font-size: 12.5px;
+  transition:
+    border-color var(--bm-duration-fast) var(--bm-ease),
+    background var(--bm-duration-fast) var(--bm-ease),
+    color var(--bm-duration-fast) var(--bm-ease);
+
+  &:hover {
+    border-color: var(--bm-accent-border);
+    background: var(--bm-accent-soft);
+    color: var(--bm-accent-text);
+  }
+
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+    color: var(--bm-text-3);
+  }
+
+  &:hover mat-icon {
+    color: var(--bm-accent);
+  }
+
+  span {
+    @include truncate;
+  }
+
+  @include focusable(2px);
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.row-action--danger:hover {
+  color: var(--bm-danger) !important;
+  background: var(--bm-danger-soft) !important;
+}
+
+.col-actions {
+  width: 96px;
+  text-align: right;
+}
+
+@include below(sm) {
+  .bm-panel-head .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar-search {
+    width: 100%;
+  }
+}

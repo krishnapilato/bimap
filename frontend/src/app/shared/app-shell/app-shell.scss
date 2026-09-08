@@ -1,0 +1,285 @@
+// =============================================================================
+//  App shell — the chrome around every authenticated page
+// =============================================================================
+
+@use '../../../styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  --shell-gutter: clamp(16px, 3vw, 40px);
+}
+
+// ── Bar ──────────────────────────────────────────────────────────────────────
+
+.shell-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-4);
+  padding: var(--bm-space-3) var(--shell-gutter);
+  border-bottom: 1px solid var(--bm-line);
+  background: rgba(250, 252, 255, 0.82);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+}
+
+.shell-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-3);
+  color: inherit;
+  flex: none;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.shell-brand-copy {
+  display: grid;
+
+  strong {
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: var(--bm-tracking-tight);
+  }
+
+  small {
+    color: var(--bm-text-3);
+    font-size: 10.5px;
+  }
+}
+
+.shell-slot {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-3);
+  min-width: 0;
+  margin-inline: auto;
+}
+
+.shell-rail {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-2);
+  flex: none;
+}
+
+// ── Command trigger ──────────────────────────────────────────────────────────
+
+.shell-command {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--bm-space-2);
+  padding: 7px 9px 7px 11px;
+  border: 1px solid var(--bm-line);
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-surface-solid);
+  color: var(--bm-text-2);
+  font-size: 12.5px;
+  font-weight: 550;
+  transition:
+    border-color var(--bm-duration) var(--bm-ease),
+    color var(--bm-duration) var(--bm-ease),
+    box-shadow var(--bm-duration) var(--bm-ease);
+
+  &:hover {
+    border-color: var(--bm-accent-border);
+    color: var(--bm-accent-text);
+    box-shadow: var(--bm-shadow-xs);
+  }
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--bm-accent);
+  }
+
+  kbd {
+    padding: 1px 6px;
+    border: 1px solid var(--bm-line);
+    border-radius: 5px;
+    background: var(--bm-surface-2);
+    color: var(--bm-text-3);
+    font: 500 10px/1.6 var(--bm-font-mono);
+  }
+
+  @include focusable(2px);
+}
+
+// ── Icon actions ─────────────────────────────────────────────────────────────
+
+.shell-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: var(--bm-radius-sm);
+  color: var(--bm-text-2);
+  transition:
+    background var(--bm-duration-fast) var(--bm-ease),
+    color var(--bm-duration-fast) var(--bm-ease),
+    border-color var(--bm-duration-fast) var(--bm-ease);
+
+  &:hover {
+    border-color: var(--bm-accent-border);
+    background: var(--bm-accent-soft);
+    color: var(--bm-accent-text);
+    text-decoration: none;
+  }
+
+  &.is-current {
+    border-color: var(--bm-accent-border);
+    background: var(--bm-accent-soft);
+    color: var(--bm-accent-text);
+  }
+
+  &--danger:hover {
+    border-color: var(--bm-danger-border);
+    background: var(--bm-danger-soft);
+    color: var(--bm-danger);
+  }
+
+  mat-icon {
+    font-size: 19px;
+    width: 19px;
+    height: 19px;
+  }
+
+  @include focusable(2px);
+}
+
+// ── Identity ─────────────────────────────────────────────────────────────────
+
+.shell-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-3);
+  padding: 4px 12px 4px 4px;
+  border: 1px solid var(--bm-line);
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-surface-solid);
+  min-width: 0;
+}
+
+.identity-avatar {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 50%;
+  background: linear-gradient(145deg, var(--bm-accent), #0a3f9e);
+  color: var(--bm-on-accent);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+
+  // Presence dot, in the semantic success hue rather than the signal hue —
+  // signal means position, and this is not one.
+  i {
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    width: 9px;
+    height: 9px;
+    border: 2px solid var(--bm-surface-solid);
+    border-radius: 50%;
+    background: var(--bm-success);
+  }
+}
+
+.identity-copy {
+  display: grid;
+  min-width: 0;
+}
+
+.identity-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  @include truncate;
+}
+
+.identity-role {
+  @include label;
+  font-size: 10px;
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
+
+.shell-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--bm-content-max);
+  margin-inline: auto;
+  padding: clamp(24px, 4vw, 44px) var(--shell-gutter) var(--bm-space-9);
+
+  &:focus {
+    outline: none;
+  }
+
+  // The workspace manages its own full-bleed grid and must not be boxed in.
+  &--wide {
+    max-width: none;
+    padding: var(--bm-space-4) var(--shell-gutter) var(--bm-space-5);
+  }
+
+  // Hands the page the whole viewport below the bar. `min-height: 0` is what
+  // lets a flex child actually shrink to its container instead of being sized
+  // by its content — without it the map would push the page taller and the
+  // document would scroll after all.
+  &--flush {
+    max-width: none;
+    padding: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+// The bar is sticky on scrolling pages and simply fixed in place on flush ones.
+:host:has(.shell-main--flush) {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+
+@include below(lg) {
+  .identity-copy {
+    display: none;
+  }
+
+  .shell-identity {
+    padding: 4px;
+  }
+}
+
+@include below(md) {
+  .shell-command span {
+    display: none;
+  }
+
+  .shell-brand-copy small {
+    display: none;
+  }
+}
+
+@include below(sm) {
+  .shell-command kbd {
+    display: none;
+  }
+
+  .shell-slot {
+    display: none;
+  }
+}

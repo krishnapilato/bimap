@@ -1,0 +1,192 @@
+<main class="access-page">
+  <div class="access-column">
+    <header class="access-header" data-access-stage>
+      <a class="access-brand" routerLink="/" aria-label="BiMap home">
+        <span class="bm-benchmark" aria-hidden="true"></span>
+        <span class="access-brand-copy">
+          <strong>BiMap</strong>
+          <small>Heritage asset registration</small>
+        </span>
+      </a>
+
+      <a class="overview-link" routerLink="/">
+        <mat-icon aria-hidden="true">arrow_back</mat-icon>
+        <span>Back to overview</span>
+      </a>
+    </header>
+
+    <div class="access-body">
+      <p class="bm-marker" data-access-stage><span>NEW</span><i></i> Standard workspace access</p>
+
+      <h1 class="access-title" id="register-title" data-access-stage>
+        Create your BiMap account.
+      </h1>
+
+      <p class="access-lede" data-access-stage>
+        Set up your identity once, then locate, verify and register geographic assets from any
+        browser. No installation, no export step.
+      </p>
+
+      <form
+        (ngSubmit)="onSubmit()"
+        #registerForm="ngForm"
+        class="access-form"
+        autocomplete="on"
+        aria-labelledby="register-title"
+        novalidate
+      >
+        <div class="field-pair" data-access-stage>
+          <mat-form-field appearance="outline">
+            <mat-label>First name</mat-label>
+            <mat-icon matIconPrefix aria-hidden="true">badge</mat-icon>
+            <input
+              matInput
+              name="name"
+              [(ngModel)]="user.name"
+              #name="ngModel"
+              required
+              minlength="1"
+              maxlength="18"
+              pattern="[a-zA-Z\s'-]*"
+              autocomplete="given-name"
+            />
+            @if (name.invalid && name.touched) {
+              <mat-error>Use 1–18 letters.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Last name</mat-label>
+            <mat-icon matIconPrefix aria-hidden="true">person</mat-icon>
+            <input
+              matInput
+              name="surname"
+              [(ngModel)]="user.surname"
+              #surname="ngModel"
+              required
+              minlength="1"
+              maxlength="18"
+              pattern="[a-zA-Z\s'-]*"
+              autocomplete="family-name"
+            />
+            @if (surname.invalid && surname.touched) {
+              <mat-error>Use 1–18 letters.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" data-access-stage>
+          <mat-label>Work email</mat-label>
+          <mat-icon matIconPrefix aria-hidden="true">mail</mat-icon>
+          <input
+            matInput
+            type="email"
+            name="email"
+            [(ngModel)]="user.email"
+            #email="ngModel"
+            required
+            email
+            maxlength="100"
+            autocomplete="email"
+            autocapitalize="none"
+            spellcheck="false"
+          />
+          @if (email.invalid && email.touched) {
+            <mat-error>Enter a valid email address.</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="field-pair" data-access-stage>
+          <mat-form-field appearance="outline">
+            <mat-label>Password</mat-label>
+            <mat-icon matIconPrefix aria-hidden="true">lock</mat-icon>
+            <input
+              matInput
+              [type]="hidePassword() ? 'password' : 'text'"
+              name="password"
+              [(ngModel)]="user.password"
+              #password="ngModel"
+              required
+              minlength="8"
+              maxlength="32"
+              autocomplete="new-password"
+            />
+            <button
+              mat-icon-button
+              matIconSuffix
+              type="button"
+              (click)="togglePassword()"
+              [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+              [attr.aria-pressed]="!hidePassword()"
+            >
+              <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Confirm password</mat-label>
+            <mat-icon matIconPrefix aria-hidden="true">key</mat-icon>
+            <input
+              matInput
+              [type]="hideConfirmation() ? 'password' : 'text'"
+              name="passwordConfirmation"
+              [(ngModel)]="passwordConfirmation"
+              #confirmation="ngModel"
+              required
+              autocomplete="new-password"
+            />
+            <button
+              mat-icon-button
+              matIconSuffix
+              type="button"
+              (click)="toggleConfirmation()"
+              [attr.aria-label]="
+                hideConfirmation() ? 'Show password confirmation' : 'Hide password confirmation'
+              "
+              [attr.aria-pressed]="!hideConfirmation()"
+            >
+              <mat-icon>{{ hideConfirmation() ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+            @if (confirmation.touched && !passwordsMatch) {
+              <mat-error>Passwords must match.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Guidance while the password is being chosen, rather than a rejection
+             after it has been committed to. -->
+        @if (user.password) {
+          <bm-password-strength [password]="user.password" />
+        }
+
+        @if (errorMessage()) {
+          <div class="access-message access-message--error" role="alert" aria-live="assertive" #errorBanner>
+            <mat-icon aria-hidden="true">error</mat-icon>
+            <span>{{ errorMessage() }}</span>
+          </div>
+        }
+
+        <button
+          mat-flat-button
+          type="submit"
+          class="access-submit"
+          data-access-stage
+          [disabled]="registerForm.invalid || !passwordsMatch || isSubmitting()"
+        >
+          <span>{{ isSubmitting() ? 'Creating your account…' : 'Create account' }}</span>
+          @if (!isSubmitting()) {
+            <mat-icon iconPositionEnd aria-hidden="true">arrow_forward</mat-icon>
+          }
+        </button>
+      </form>
+
+      <p class="access-alternative" data-access-stage>
+        Already registered? <a routerLink="/login">Sign in</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="access-console">
+    <bm-access-console />
+  </div>
+</main>

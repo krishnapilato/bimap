@@ -1,0 +1,44 @@
+<div
+  class="dialog"
+  #dialog
+  role="alertdialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="titleId"
+  [attr.aria-describedby]="messageId"
+>
+  <div class="dialog-visual" [class]="'tone-' + (data.tone ?? 'primary')" aria-hidden="true">
+    <span class="dialog-orbit dialog-orbit--one"></span>
+    <span class="dialog-orbit dialog-orbit--two"></span>
+    <div class="dialog-icon">
+      <mat-icon>{{ data.icon ?? 'help' }}</mat-icon>
+    </div>
+  </div>
+
+  <h2 class="dialog-title" [id]="titleId">{{ resolvedTitle }}</h2>
+  <p class="dialog-message" [id]="messageId">{{ resolvedMessage }}</p>
+
+  @if (data.details) {
+    <div class="dialog-details">
+      @if (data.detailsLabel) {
+        <span class="dialog-details-label">{{ data.detailsLabel }}</span>
+      }
+      <span class="dialog-details-value">{{ data.details }}</span>
+    </div>
+  }
+
+  <div class="dialog-actions">
+    <button type="button" mat-stroked-button cdkFocusInitial (click)="cancel()">
+      {{ data.cancelText ?? 'Cancel' }}
+    </button>
+
+    <button
+      type="button"
+      mat-flat-button
+      [class.bm-btn-danger]="data.tone === 'warn'"
+      (click)="confirm()"
+    >
+      <span>{{ data.confirmText ?? 'Confirm' }}</span>
+      <mat-icon iconPositionEnd aria-hidden="true">arrow_forward</mat-icon>
+    </button>
+  </div>
+</div>

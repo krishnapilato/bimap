@@ -25,17 +25,10 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "stylePreprocessorOptions": {
-              "includePaths": [
-                "src"
-              ]
+              "includePaths": ["src"]
             },
-            "allowedCommonJsDependencies": [
-              "leaflet"
-            ],
-            "styles": [
-              "node_modules/leaflet/dist/leaflet.css",
-              "src/tailwind.css"
-            ]
+            "allowedCommonJsDependencies": ["leaflet"],
+            "styles": ["src/styles.scss", "node_modules/leaflet/dist/leaflet.css"]
           },
           "configurations": {
             "production": {
@@ -51,41 +44,12 @@
                   "maximumError": "32kB"
                 }
               ],
-              "outputHashing": "all",
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.production.ts"
-                }
-              ]
+              "outputHashing": "all"
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
-            },
-            "demo": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "700kB",
-                  "maximumError": "900kB"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "20kB",
-                  "maximumError": "32kB"
-                }
-              ],
-              "outputHashing": "all",
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.demo.ts"
-                }
-              ],
-              "baseHref": "/bimap/",
-              "deployUrl": ""
             }
           },
           "defaultConfiguration": "production"
@@ -98,9 +62,6 @@
             },
             "development": {
               "buildTarget": "frontend:build:development"
-            },
-            "demo": {
-              "buildTarget": "frontend:build:demo"
             }
           },
           "defaultConfiguration": "development"

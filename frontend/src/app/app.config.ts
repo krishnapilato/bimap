@@ -1,35 +1,34 @@
-/**
- * @author Khova Krishna Pilato
- */
-
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import {
   ApplicationConfig,
+  inject,
+  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
-  provideZonelessChangeDetection,
 } from '@angular/core';
-import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
+import { MatIconRegistry } from '@angular/material/icon';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 
-import { provideBimapApi } from './core/api/api.providers';
+import { securityInterceptor } from './auth/auth.interceptor';
 import { routes } from './app.routes';
-import { securityInterceptor } from './core/auth.interceptor';
+import { ThemeService } from './core/theme.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'enabled' })),
 
-    // Everything is signals, so there is nothing for Zone.js to do.
-    provideZonelessChangeDetection(),
+    // HttpClient was previously never provided, and `securityInterceptor` was
+    // defined but never registered — so no request ever carried the JWT.
+    provideHttpClient(withInterceptors([securityInterceptor])),
 
-    provideRouter(
-      routes,
-      withComponentInputBinding(),
-      withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
-    ),
+    provideAppInitializer(() => {
+      // Every `<mat-icon>` renders from the Material Symbols Rounded variable
+      // font loaded in index.html rather than the legacy Material Icons bitmap.
+      inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-rounded');
 
-    provideHttpClient(withFetch(), withInterceptors([securityInterceptor])),
-
-    // The one place live and demo diverge.
-    provideBimapApi(),
+      // Instantiate eagerly so the resolved colour scheme is applied and kept in
+      // sync with the OS setting for the whole session.
+      inject(ThemeService);
+    }),
   ],
 };

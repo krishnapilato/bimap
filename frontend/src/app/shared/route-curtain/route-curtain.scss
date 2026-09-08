@@ -1,0 +1,131 @@
+// =============================================================================
+//  Route curtain
+//  Geometry only — every value that moves is driven by GSAP in the component.
+// =============================================================================
+
+@use '../../../styles/mixins' as *;
+
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  pointer-events: none;
+}
+
+.curtain {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+}
+
+// ── Blades ───────────────────────────────────────────────────────────────────
+//  Five panels rather than one so the wipe has a direction and a grain. Each is
+//  a hair wider than its share to avoid seams from sub-pixel rounding.
+
+.curtain-blades {
+  position: absolute;
+  inset: 0;
+  display: flex;
+
+  span {
+    flex: 1;
+    margin-inline: -0.5px;
+    background: linear-gradient(178deg, var(--bm-paper), var(--bm-canvas));
+    border-right: 1px solid rgba(37, 71, 112, 0.05);
+
+    &:last-child {
+      border-right: none;
+    }
+  }
+}
+
+// ── Core ─────────────────────────────────────────────────────────────────────
+
+.curtain-core {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--bm-space-5);
+}
+
+.reticle {
+  width: clamp(92px, 13vw, 132px);
+  height: clamp(92px, 13vw, 132px);
+  overflow: visible;
+}
+
+.reticle-ring {
+  stroke: var(--bm-accent-border);
+  stroke-width: 1.25;
+
+  &--inner {
+    stroke: var(--bm-line-strong);
+    stroke-dasharray: 3 6;
+  }
+}
+
+.reticle-cross {
+  stroke: var(--bm-accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  // Set here so GSAP only has to animate the offset.
+  stroke-dasharray: 120;
+}
+
+// The needle is the one warm element: it is the "position" mark, and the
+// signal hue is reserved for exactly that everywhere in the product.
+.reticle-needle {
+  fill: var(--bm-signal);
+}
+
+.reticle-dot {
+  fill: var(--bm-accent);
+}
+
+.curtain-copy {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  text-align: center;
+
+  strong {
+    display: block;
+    font-size: clamp(19px, 2.4vw, 25px);
+    font-weight: 700;
+    letter-spacing: var(--bm-tracking-tight);
+    color: var(--bm-text);
+  }
+}
+
+.curtain-readout {
+  @include numeric;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--bm-text-3);
+}
+
+// ── Progress ─────────────────────────────────────────────────────────────────
+
+.curtain-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--bm-accent), var(--bm-signal));
+  transform-origin: 0 50%;
+}
+
+// With motion suppressed the curtain would otherwise sit opaque over the page
+// for the length of the navigation with nothing to indicate progress.
+@media (prefers-reduced-motion: reduce) {
+  .curtain-blades {
+    display: none;
+  }
+
+  .curtain {
+    background: var(--bm-canvas);
+  }
+}

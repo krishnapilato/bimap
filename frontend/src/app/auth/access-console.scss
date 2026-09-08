@@ -1,0 +1,207 @@
+// =============================================================================
+//  Access console — the animated panel beside the auth forms
+// =============================================================================
+
+@use '../../styles/mixins' as *;
+
+:host {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-4);
+  min-height: 0;
+}
+
+.console-plate {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  overflow: hidden;
+  border: 1px solid var(--bm-line-bright);
+  border-radius: var(--bm-radius-2xl);
+  background:
+    radial-gradient(circle at 18% 8%, rgba(17, 87, 227, 0.1), transparent 44%),
+    radial-gradient(circle at 86% 92%, rgba(217, 112, 18, 0.08), transparent 42%),
+    linear-gradient(165deg, #ffffff, #eaf1fa);
+  box-shadow: var(--bm-shadow-lg);
+}
+
+.console-grid {
+  position: absolute;
+  inset: -8%;
+  @include graticule(26px, rgba(37, 71, 112, 0.075));
+  -webkit-mask-image: radial-gradient(circle at 45% 40%, #000 8%, transparent 76%);
+  mask-image: radial-gradient(circle at 45% 40%, #000 8%, transparent 76%);
+}
+
+.console-field {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+
+  // `slice` scales the viewBox to cover the plate, which would scale the stroke
+  // widths with it — at wide viewports the route would render as a fat band.
+  // `non-scaling-stroke` keeps every line at its authored weight.
+  .contour,
+  .route {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .contour {
+    stroke: rgba(37, 71, 112, 0.14);
+    stroke-width: 1.25;
+  }
+
+  .route {
+    stroke: var(--bm-accent);
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    opacity: 0.5;
+  }
+}
+
+// ── The travelling marker ────────────────────────────────────────────────────
+//  Positioned at the origin and moved entirely by MotionPath, which also keeps
+//  it rotated tangent to the route — so the cone always points the way it is
+//  heading, exactly as the map marker faces the Street View camera.
+
+.probe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+}
+
+.probe-core {
+  position: relative;
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bm-signal);
+  box-shadow:
+    0 0 0 3.5px rgba(255, 255, 255, 0.92),
+    var(--bm-shadow-signal);
+}
+
+.probe-pulse {
+  position: absolute;
+  inset: 4px;
+  border: 1.5px solid var(--bm-signal);
+  border-radius: 50%;
+  opacity: 0.55;
+}
+
+// A field-of-view wedge, drawn with a clip so it stays a true cone at any size.
+.probe-cone {
+  position: absolute;
+  width: 74px;
+  height: 74px;
+  background: radial-gradient(
+    circle at 50% 50%,
+    var(--bm-signal-glow),
+    rgba(217, 112, 18, 0.04) 62%,
+    transparent 72%
+  );
+  clip-path: polygon(50% 50%, 90% -6%, 106% 40%);
+}
+
+// ── Readouts ─────────────────────────────────────────────────────────────────
+
+.console-readout {
+  position: absolute;
+  display: grid;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 1px solid var(--bm-line-bright);
+  border-radius: var(--bm-radius-md);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--bm-shadow-sm);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+
+  small {
+    @include label;
+    font-size: 9.5px;
+  }
+
+  strong {
+    font-size: 11.5px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+
+  &--position {
+    right: var(--bm-space-5);
+    top: var(--bm-space-5);
+
+    strong {
+      color: var(--bm-signal-strong);
+      // Digits change every frame; tabular figures stop the box from twitching.
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  &--asset {
+    left: var(--bm-space-5);
+    bottom: var(--bm-space-5);
+  }
+}
+
+// ── Checklist ────────────────────────────────────────────────────────────────
+//  `--check-fill` is tweened 0→1 by GSAP; everything visual reads from it, so
+//  the ring, the icon and the text all confirm as one gesture.
+
+.console-checks {
+  display: grid;
+  gap: var(--bm-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.console-check {
+  --check-fill: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--bm-space-3);
+  padding: 10px var(--bm-space-4);
+  border: 1px solid var(--bm-line);
+  border-radius: var(--bm-radius-md);
+  background: var(--bm-surface);
+  color: var(--bm-text-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.check-mark {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border: 1px solid;
+  border-radius: 50%;
+  // Colour-mix drives both border and fill from the one tweened value, so there
+  // is no second animation to keep in sync.
+  border-color: color-mix(in srgb, var(--bm-success) calc(var(--check-fill) * 100%), var(--bm-line));
+  background: color-mix(in srgb, var(--bm-success-soft) calc(var(--check-fill) * 100%), transparent);
+  color: color-mix(in srgb, var(--bm-success) calc(var(--check-fill) * 100%), var(--bm-text-3));
+
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+  }
+}
+
+@include below(lg) {
+  .console-plate {
+    min-height: 220px;
+  }
+}

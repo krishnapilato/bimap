@@ -1,0 +1,43 @@
+<div class="console-plate" aria-hidden="true">
+  <span class="console-grid"></span>
+
+  <svg class="console-field" viewBox="0 0 400 460" fill="none" preserveAspectRatio="xMidYMid slice">
+    <path class="contour" d="M-20 330c70-64 132-26 196-92s118-44 244-96" />
+    <path class="contour" d="M-20 386c76-72 142-32 210-100s126-50 230-104" />
+    <path class="contour" d="M-20 274c62-56 118-22 176-82s104-38 224-84" />
+
+    <path
+      #routePath
+      class="route"
+      d="M52 396C112 372 118 300 176 268s126 4 168-52 26-104 4-140"
+    />
+  </svg>
+
+  <span class="probe" #probe>
+    <span class="probe-pulse"></span>
+    <span class="probe-cone"></span>
+    <span class="probe-core"></span>
+  </span>
+
+  <div class="console-readout console-readout--position">
+    <small>Live position</small>
+    <strong class="bm-numeric" #latitude>45.469654° N</strong>
+    <strong class="bm-numeric" #longitude>9.182206° E</strong>
+  </div>
+
+  <div class="console-readout console-readout--asset">
+    <small>Surveying</small>
+    <strong>Milano · Centro storico</strong>
+  </div>
+</div>
+
+<ul class="console-checks">
+  @for (check of checks; track check.label) {
+    <li class="console-check">
+      <span class="check-mark" aria-hidden="true">
+        <mat-icon>{{ check.icon }}</mat-icon>
+      </span>
+      {{ check.label }}
+    </li>
+  }
+</ul>

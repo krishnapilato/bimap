@@ -1,0 +1,74 @@
+@if (isOpen()) {
+  <div class="palette-backdrop" #backdrop (click)="close()"></div>
+
+  <div
+    class="palette"
+    #panel
+    role="dialog"
+    aria-modal="true"
+    aria-label="Command palette"
+  >
+    <div class="palette-field">
+      <mat-icon aria-hidden="true">search</mat-icon>
+      <input
+        #field
+        type="text"
+        role="combobox"
+        aria-expanded="true"
+        aria-controls="palette-results"
+        aria-autocomplete="list"
+        [attr.aria-activedescendant]="'command-' + activeIndex()"
+        placeholder="Search commands, pages and actions…"
+        autocomplete="off"
+        spellcheck="false"
+        [ngModel]="query()"
+        (ngModelChange)="query.set($event)"
+      />
+      <kbd>esc</kbd>
+    </div>
+
+    <div class="palette-results bm-scroll" id="palette-results" role="listbox">
+      @for (group of groups(); track group.name) {
+        <div class="palette-group">
+          <span class="palette-group-name">{{ group.name }}</span>
+
+          @for (command of group.commands; track command.id) {
+            <button
+              type="button"
+              class="command"
+              role="option"
+              [id]="'command-' + indexOf(command)"
+              [class.is-active]="indexOf(command) === activeIndex()"
+              [attr.aria-selected]="indexOf(command) === activeIndex()"
+              (mouseenter)="activeIndex.set(indexOf(command))"
+              (click)="run(command)"
+            >
+              <span class="command-icon"><mat-icon>{{ command.icon }}</mat-icon></span>
+              <span class="command-copy">
+                <strong>{{ command.label }}</strong>
+                @if (command.hint) {
+                  <small>{{ command.hint }}</small>
+                }
+              </span>
+              @if (command.shortcut) {
+                <kbd>{{ command.shortcut }}</kbd>
+              }
+              <mat-icon class="command-go" aria-hidden="true">subdirectory_arrow_left</mat-icon>
+            </button>
+          }
+        </div>
+      } @empty {
+        <p class="palette-empty">
+          <mat-icon aria-hidden="true">search_off</mat-icon>
+          Nothing matches “{{ query() }}”.
+        </p>
+      }
+    </div>
+
+    <footer class="palette-foot">
+      <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+      <span><kbd>↵</kbd> run</span>
+      <span class="palette-brand">BiMap command</span>
+    </footer>
+  </div>
+}

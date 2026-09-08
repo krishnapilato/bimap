@@ -1,0 +1,82 @@
+@use 'styles/mixins' as *;
+
+.dialog {
+  width: 100%;
+  max-width: 520px;
+  padding: var(--bm-space-6);
+  background:
+    radial-gradient(circle at 95% 0, rgba(18, 104, 232, 0.08), transparent 28%),
+    var(--bm-surface);
+
+  @include below(xs) {
+    padding: var(--bm-space-5) var(--bm-space-4);
+  }
+}
+
+.dialog-head {
+  padding-bottom: var(--bm-space-5);
+  margin-bottom: var(--bm-space-5);
+  border-bottom: 1px solid var(--bm-line);
+  animation: edit-head-arrive 0.65s var(--bm-ease-cinematic) both;
+
+  h2 {
+    font: var(--bm-text-h1);
+    letter-spacing: var(--bm-tracking-tight);
+  }
+
+  p {
+    margin-top: var(--bm-space-1);
+    color: var(--bm-text-2);
+    font: var(--bm-text-small);
+
+    span {
+      color: var(--bm-text);
+      font-weight: 500;
+    }
+  }
+}
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bm-space-2);
+  animation: edit-form-arrive 0.7s 0.08s var(--bm-ease-cinematic) both;
+}
+
+@keyframes edit-head-arrive {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes edit-form-arrive {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--bm-space-3);
+
+  @include below(xs) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--bm-space-3);
+  margin-top: var(--bm-space-4);
+  padding-top: var(--bm-space-5);
+  border-top: 1px solid var(--bm-line);
+
+  @include below(xs) {
+    flex-direction: column-reverse;
+
+    > * {
+      width: 100%;
+    }
+  }
+}
