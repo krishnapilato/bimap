@@ -1,11 +1,11 @@
 import { AppEnvironment } from './environment.model';
 
-/** Local development: both Spring Boot services running on localhost. */
+/** Deployed alongside the real services, behind whatever host serves them. */
 export const environment: AppEnvironment = {
-  production: false,
+  production: true,
   appMode: 'live',
-  iamApiUrl: 'http://localhost:9843',
-  businessApiUrl: 'http://localhost:9844',
+  iamApiUrl: '/iam',
+  businessApiUrl: '/core',
   googleClientId: '543470445081-16vr7ola7vh6984uuom30rp7ljv1dl7n.apps.googleusercontent.com',
   /**
    * A Maps JS browser key. This one is public on purpose: it ships inside the bundle, so anybody

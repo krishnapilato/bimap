@@ -1,52 +1,48 @@
-import { Routes } from '@angular/router';
-import { adminAuthGuard } from './auth/admin.auth.guard';
-import { authGuard } from './auth/auth.guard';
-
 /**
- * Routes are lazy so the initial download carries only what the first screen
- * needs — signing in no longer pulls in Leaflet, the Material table, or the
- * admin views.
+ * Every view is lazy, so the landing page carries none of the module code.
+ *
+ * @author Khova Krishna Pilato
  */
+
+import { Routes } from '@angular/router';
+
+import { administrator, authenticated } from './core/guards';
+
 export const routes: Routes = [
   {
     path: '',
-    title: 'BiMap · Geographic asset intelligence',
-    loadComponent: () => import('./landing/landing').then((m) => m.LandingComponent),
+    title: 'BiMap · Cadastral and heritage asset intelligence',
+    loadComponent: () => import('./features/landing/landing').then((m) => m.LandingComponent),
   },
   {
-    path: 'login',
-    title: 'Sign in · BiMap',
-    loadComponent: () => import('./auth/login').then((m) => m.LoginComponent),
+    path: 'hub',
+    title: 'Modules · BiMap',
+    canActivate: [authenticated],
+    loadComponent: () => import('./features/hub/hub').then((m) => m.HubComponent),
   },
   {
-    path: 'register',
-    title: 'Create account · BiMap',
-    loadComponent: () => import('./auth/register').then((m) => m.RegisterComponent),
+    path: 'geo',
+    title: 'Geographic asset engine · BiMap',
+    canActivate: [authenticated],
+    loadComponent: () => import('./features/geo/geo').then((m) => m.GeoComponent),
   },
   {
-    path: 'logout',
-    canActivate: [authGuard],
-    loadComponent: () => import('./auth/logout').then((m) => m.LogoutComponent),
-  },
-
-  {
-    path: 'main',
-    title: 'Asset registration · BiMap',
-    canActivate: [authGuard],
-    loadComponent: () => import('./main/main').then((m) => m.MainComponent),
-  },
-
-  {
-    path: 'adduser',
-    title: 'Add user · BiMap',
-    canActivate: [adminAuthGuard],
-    loadComponent: () => import('./user-form/user-form').then((m) => m.UserFormComponent),
+    path: 'iam',
+    title: 'Identity & access · BiMap',
+    canActivate: [administrator],
+    loadComponent: () => import('./features/iam/iam').then((m) => m.IamComponent),
   },
   {
-    path: 'listuser',
-    title: 'Users · BiMap',
-    canActivate: [adminAuthGuard],
-    loadComponent: () => import('./user-list/user-list').then((m) => m.UserListComponent),
+    path: 'email',
+    title: 'Email dispatcher · BiMap',
+    canActivate: [authenticated],
+    loadComponent: () => import('./features/email/email').then((m) => m.EmailComponent),
+  },
+  {
+    path: 'health',
+    title: 'System health · BiMap',
+    canActivate: [authenticated],
+    loadComponent: () => import('./features/health/health').then((m) => m.HealthComponent),
   },
 
   { path: '**', redirectTo: '', pathMatch: 'full' },

@@ -1,84 +1,56 @@
-import { Component, DestroyRef, afterNextRender, inject, viewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  NavigationCancel,
-  NavigationEnd,
-  NavigationError,
-  NavigationStart,
-  Router,
-  RouterOutlet,
-} from '@angular/router';
-
-import { BootService } from './core/boot.service';
-import { CommandPaletteComponent } from './shared/command-palette/command-palette';
-import { RouteCurtainComponent } from './shared/route-curtain/route-curtain';
-
 /**
- * The application frame: an outlet, the transition that covers it, and the
- * command palette that floats above everything.
+ * The application shell.
  *
- * The previous implementation held a 2-second overlay on *every* navigation,
- * timed by a `setTimeout` that had no relationship to whether the next page was
- * ready. Here the curtain and the router are actually coupled — the page is
- * swapped while the viewport is genuinely hidden, and the curtain lifts as soon
- * as both the sweep and the navigation have finished, so a cached lazy chunk
- * costs the user about half a second rather than two.
+ * Paper wash, graticule, one corner, and whatever the router puts on screen. There is no navbar and
+ * no rail: navigation lives behind ⌘K, and every view owns the whole viewport.
+ *
+ * A demo build carries a corner ribbon, in the spirit of Flutter's debug banner — the two builds are
+ * otherwise identical on screen, and nobody looking at a mocked sign-in should have to wonder which
+ * one they are looking at.
+ *
+ * @author Khova Krishna Pilato
  */
+
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
+
+import { CommandBarComponent } from './shared/command-bar/command-bar';
+import { isDemoMode } from './core/api/api.providers';
+import { refreshScrollTriggers } from './core/motion/motion';
+
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouteCurtainComponent, CommandPaletteComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RouterOutlet, CommandBarComponent],
   template: `
+    <div class="bm-wash" aria-hidden="true"></div>
+    <div class="bm-graticule" aria-hidden="true"></div>
+
+    @if (demo) {
+      <div class="bm-ribbon" role="note" aria-label="Demo build: data is mocked in the browser">
+        <span>DEMO</span>
+      </div>
+    }
+
     <router-outlet />
 
-    <bm-command-palette />
-    <bm-route-curtain />
+    <bm-command-bar />
   `,
-  styleUrl: './app.scss',
 })
 export class App {
-  private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly boot = inject(BootService);
-  private readonly curtain = viewChild.required(RouteCurtainComponent);
+  protected readonly demo = isDemoMode;
 
-  /** Until the opening sequence has finished, navigations do not draw a curtain. */
-  private booted = false;
-
-  /** Resolves when the viewport is fully hidden for the navigation in flight. */
-  private covered?: Promise<void>;
+  readonly #router = inject(Router);
 
   constructor() {
-    afterNextRender(() => {
-      this.curtain()
-        .boot()
-        .then(() => {
-          this.booted = true;
-          // Releases any page holding its entrance until the viewport is
-          // actually visible.
-          this.boot.markReady();
-        });
-    });
-
-    this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
-      if (event instanceof NavigationStart) {
-        if (this.booted) this.covered = this.curtain().cover();
-        return;
-      }
-
-      if (
-        event instanceof NavigationEnd ||
-        event instanceof NavigationCancel ||
-        event instanceof NavigationError
-      ) {
-        if (!this.booted) return;
-
-        // Lift only once the sweep has actually closed. Without this a fast
-        // navigation reveals a half-drawn curtain over the page it just built.
-        const covered = this.covered ?? Promise.resolve();
-        this.covered = undefined;
-
-        covered.then(() => this.curtain().reveal());
-      }
-    });
+    // A new view means new geometry, and a ScrollTrigger measured against the old page is wrong.
+    this.#router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => refreshScrollTriggers());
   }
 }

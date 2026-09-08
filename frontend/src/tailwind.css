@@ -1,0 +1,433 @@
+/*
+ * Tailwind v4 + daisyUI, themed to BiMap.
+ *
+ * daisyUI is here so the markup reads as `btn btn-primary` rather than a paragraph of utilities,
+ * and so modals, toggles and progress arrive already accessible. What it is NOT here for is its
+ * default look: every colour below is the BiMap palette, the same one the Spring Boot operator
+ * pages use, so the product looks like one thing from the sign-in screen to the actuator readout.
+ *
+ * Light only. There is no dark theme and no toggle: this is a field instrument read in daylight.
+ *
+ * Three rules hold the whole system together:
+ *
+ *   1. One accent. Cobalt means "interactive or current". Ochre means "position" and nothing else.
+ *      Everything not one of those two is grey on purpose.
+ *   2. Panels never nest. A card inside a card inside a card is the fastest way to make a dense
+ *      screen unreadable, so structure inside a panel is drawn with hairlines instead.
+ *   3. Nothing is said twice. There is no chrome repeating what the content already states — no
+ *      navbar, no rail, no title echoing the thing directly beneath it.
+ *
+ * Author: Khova Krishna Pilato
+ */
+
+@import 'tailwindcss';
+
+@plugin "daisyui" {
+  themes: bimap --default;
+  logs: false;
+}
+
+@plugin "daisyui/theme" {
+  name: 'bimap';
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  /* ── Paper ──────────────────────────────────────────────────────────────── */
+  --color-base-100: #ffffff;
+  --color-base-200: #f6f8fb;
+  --color-base-300: #e2e8f0;
+  --color-base-content: #0b1524;
+
+  /* ── Cobalt: interactive, or current ────────────────────────────────────── */
+  --color-primary: #1157e3;
+  --color-primary-content: #ffffff;
+
+  /* ── Ochre: position, and nothing else ──────────────────────────────────── */
+  --color-secondary: #d97012;
+  --color-secondary-content: #ffffff;
+
+  --color-accent: #0e9aa4;
+  --color-accent-content: #ffffff;
+
+  --color-neutral: #334155;
+  --color-neutral-content: #f8fafc;
+
+  --color-info: #1157e3;
+  --color-info-content: #ffffff;
+  --color-success: #04785a;
+  --color-success-content: #ffffff;
+  --color-warning: #a9560a;
+  --color-warning-content: #ffffff;
+  --color-error: #c22a2f;
+  --color-error-content: #ffffff;
+
+  /* ── Geometry. One radius for controls, one for panels. ─────────────────── */
+  --radius-selector: 0.5rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.75rem;
+
+  --size-selector: 0.25rem;
+  --size-field: 0.26rem;
+
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme {
+  --color-ink: #0b1524;
+  --color-ink-2: #47566b;
+  --color-ink-3: #7d8ba1;
+
+  --color-hairline: #e2e8f0;
+
+  --font-sans:
+    'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Cascadia Mono', Menlo, monospace;
+
+  /* Five sizes at comfortable density. Below the label size is decoration, not text. */
+  --text-label: 0.75rem;
+  --text-body: 0.9375rem;
+  --text-subtitle: 1.0625rem;
+  --text-title: 1.375rem;
+  --text-display: 2rem;
+
+  /* Long, low-opacity shadows read as height in a light room; short dark ones read as dirt. */
+  --shadow-hair: 0 1px 2px rgb(11 33 62 / 0.05);
+  --shadow-lift: 0 8px 24px -16px rgb(17 48 88 / 0.28), 0 1px 3px rgb(17 48 88 / 0.06);
+  --shadow-float: 0 20px 45px -24px rgb(17 48 88 / 0.34), 0 4px 12px rgb(17 48 88 / 0.07);
+}
+
+/* ── Document ─────────────────────────────────────────────────────────────── */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    /*
+      The vertical scrollbar is always present, so a page that grows past one screen does not shove
+      the layout sideways by its width the moment it does. The horizontal one never appears: `clip`
+      rather than `hidden`, because hidden on one axis forces the other to compute to `auto` and
+      quietly turns the element into its own scroll container.
+    */
+    overflow-y: scroll;
+    overflow-x: clip;
+  }
+
+  body {
+    @apply bg-base-200 text-ink antialiased;
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.55;
+    margin: 0;
+    overflow-x: clip;
+  }
+
+  /* Nothing here is ever allowed to push the page sideways. */
+  img,
+  video,
+  canvas,
+  svg,
+  iframe {
+    max-width: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-primary) 18%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+/* ── The room ─────────────────────────────────────────────────────────────── */
+
+@layer components {
+  .bm-wash {
+    @apply pointer-events-none fixed inset-0 -z-20;
+    background:
+      radial-gradient(circle at 6% 0%, rgb(17 87 227 / 0.07), transparent 34%),
+      radial-gradient(circle at 96% 96%, rgb(217 112 18 / 0.05), transparent 32%),
+      linear-gradient(152deg, #ffffff 0%, #f6f8fb 58%, #eef3f9 100%);
+  }
+
+  .bm-graticule {
+    @apply pointer-events-none fixed inset-0 -z-10;
+    background-image:
+      linear-gradient(to right, rgb(37 71 112 / 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(37 71 112 / 0.04) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 22%, #000 0%, transparent 76%);
+  }
+}
+
+/* ── Structure ────────────────────────────────────────────────────────────── */
+
+@layer components {
+  /*
+    A screen. There is no rail to clear and no navbar to sit under, so a view owns the whole
+    viewport and starts at the top of it.
+  */
+  .bm-screen {
+    @apply mx-auto grid w-full max-w-[92rem] content-start gap-4 p-4;
+    min-height: 100dvh;
+  }
+
+  /* One screen exactly, for views that manage their own internal scrolling. */
+  .bm-screen-fixed {
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /*
+    A panel sits directly on the plane. Panels do not nest — structure inside one is drawn with
+    hairlines, which is what keeps a dense screen readable.
+  */
+  .bm-panel {
+    @apply rounded-box border border-hairline bg-base-100;
+    box-shadow: var(--shadow-hair);
+  }
+
+  /* Laid over the map, translucent, so the place stays visible underneath. */
+  .bm-float {
+    @apply rounded-box border border-hairline bg-base-100/94 backdrop-blur-xl;
+    box-shadow: var(--shadow-float);
+  }
+
+  /*
+    Chrome over a map ignores the pointer; each panel inside it takes it back.
+
+    The z-index is 1000 and not 2 because Leaflet builds its own stacking context and puts its panes
+    between 200 and 800 — anything lower than that renders underneath the tiles, which looks exactly
+    like markup that failed to render at all.
+  */
+  .bm-overlay {
+    @apply pointer-events-none absolute inset-0 z-[1000];
+  }
+
+  .bm-overlay > * {
+    @apply pointer-events-auto;
+  }
+
+  /* The only place overflow is allowed, and it says so in its name. */
+  .bm-scroll {
+    @apply min-h-0 overflow-y-auto overflow-x-hidden;
+  }
+
+  /* Hairline-divided cells: the grid gap *is* the rule. */
+  .bm-cells {
+    @apply grid gap-px bg-hairline;
+  }
+
+  .bm-cells > * {
+    @apply bg-base-100;
+  }
+}
+
+/* ── Type ─────────────────────────────────────────────────────────────────── */
+
+@layer components {
+  .bm-display {
+    font-size: clamp(1.6rem, 1rem + 1.8vw, var(--text-display));
+    @apply font-extrabold leading-[1.06] tracking-[-0.035em];
+  }
+
+  .bm-title {
+    font-size: var(--text-title);
+    @apply font-bold leading-tight tracking-[-0.02em];
+  }
+
+  .bm-subtitle {
+    font-size: var(--text-subtitle);
+    @apply font-semibold leading-snug;
+  }
+
+  .bm-label {
+    font-size: var(--text-label);
+    @apply font-semibold uppercase tracking-[0.1em] text-ink-3;
+  }
+
+  /* A number that is a reading, not prose. Tabular so digits stop jittering as they animate. */
+  .bm-reading {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    @apply tracking-tight;
+  }
+}
+
+/* ── Parts ────────────────────────────────────────────────────────────────── */
+
+@layer components {
+  /* One row in a result list: full width, quiet until hovered. */
+  .bm-row {
+    @apply flex w-full items-center gap-2 rounded-field px-3 py-2 text-left transition
+           hover:bg-primary/8;
+    font-size: var(--text-body);
+  }
+
+  .bm-row-active {
+    @apply bg-primary/10 text-primary;
+  }
+
+  /* A status pill whose colour carries the meaning. */
+  .bm-pill {
+    @apply badge badge-sm gap-1 font-semibold uppercase tracking-wide;
+  }
+
+  /* Anything GSAP reveals starts invisible, so there is no flash before the timeline runs. */
+  .bm-reveal {
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  /*
+    The one piece of persistent chrome, and it is a corner: initials, and the key that opens
+    everything else. A rail would cost 3.5rem of every screen for a jump made twice a session.
+  */
+  .bm-corner {
+    @apply fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-full border border-hairline
+           bg-base-100/92 py-1.5 pl-1.5 pr-3 backdrop-blur-xl transition hover:border-primary/40;
+    box-shadow: var(--shadow-lift);
+  }
+}
+
+/* ── The map ──────────────────────────────────────────────────────────────── */
+
+@layer components {
+  /* The marker: a plain element, so it carries the accent and needs no image path. */
+  .bm-pin {
+    position: relative;
+    display: block;
+    height: 1.25rem;
+    width: 1.25rem;
+    border-radius: 9999px;
+    border: 3px solid #fff;
+    background: var(--color-primary);
+    box-shadow:
+      0 0 0 1px rgb(17 87 227 / 0.3),
+      0 0.375rem 1rem rgb(17 87 227 / 0.4);
+  }
+
+  .bm-pin::after {
+    content: '';
+    position: absolute;
+    inset: -0.5rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(17 87 227 / 0.45);
+    animation: bm-ping 2.4s ease-out infinite;
+  }
+
+  .bm-map-btn {
+    @apply grid h-7 w-7 cursor-pointer place-items-center bg-base-100/92 text-ink-2
+           backdrop-blur-sm transition hover:text-primary disabled:cursor-not-allowed
+           disabled:opacity-40;
+  }
+
+  .bm-map-cluster {
+    @apply overflow-hidden rounded-field border border-hairline;
+    box-shadow: var(--shadow-lift);
+  }
+
+  /*
+    The keyless basemap, toned down. OpenStreetMap's own tiles are drawn for a page that is all
+    map; behind a light product UI they read as loud and slightly green.
+  */
+  .bm-basemap .leaflet-tile-pane {
+    filter: saturate(0.4) brightness(1.06) contrast(0.96);
+  }
+
+  .leaflet-container {
+    background: var(--color-base-200);
+    font: inherit;
+  }
+
+  .leaflet-control-attribution {
+    border-radius: var(--radius-field) 0 0 0;
+    background: rgb(255 255 255 / 0.82) !important;
+    font-size: 0.625rem;
+    color: var(--color-ink-3);
+  }
+
+  .leaflet-control-attribution a {
+    color: var(--color-ink-2);
+  }
+}
+
+/* ── The demo banner ──────────────────────────────────────────────────────── */
+
+@layer components {
+  /*
+    In the spirit of Flutter's. Fixed to the viewport rather than to any view, so it survives every
+    route and scroll position; above everything, because a label a drawer can cover is a label that
+    lies; and inert to the pointer, so it is never what a click lands on.
+  */
+  .bm-ribbon {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2147483647;
+    display: grid;
+    height: 6.5rem;
+    width: 6.5rem;
+    place-items: center;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .bm-ribbon span {
+    position: absolute;
+    top: 1.15rem;
+    left: -2.6rem;
+    width: 9.5rem;
+    transform: rotate(-45deg);
+    background: var(--color-secondary);
+    padding-block: 0.2rem;
+    text-align: center;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    color: #fff;
+    box-shadow: 0 0.25rem 0.75rem rgb(17 48 88 / 0.28);
+  }
+}
+
+@keyframes bm-ping {
+  from {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bm-pin::after {
+    animation: none;
+  }
+}

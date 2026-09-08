@@ -1,9 +1,0 @@
-// =============================================================================
-//  Sign in — layout is shared with registration; only the intro width differs.
-// =============================================================================
-
-@use './access-layout';
-
-.access-body {
-  max-width: 480px;
-}

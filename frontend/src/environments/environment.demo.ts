@@ -1,11 +1,14 @@
 import { AppEnvironment } from './environment.model';
 
-/** Local development: both Spring Boot services running on localhost. */
+/**
+ * GitHub Pages. There is no backend, so identity, email and health are mocked in the browser.
+ * Geography is left pointing at the public APIs, which the adapters call directly.
+ */
 export const environment: AppEnvironment = {
-  production: false,
-  appMode: 'live',
-  iamApiUrl: 'http://localhost:9843',
-  businessApiUrl: 'http://localhost:9844',
+  production: true,
+  appMode: 'demo',
+  iamApiUrl: '',
+  businessApiUrl: '',
   googleClientId: '543470445081-16vr7ola7vh6984uuom30rp7ljv1dl7n.apps.googleusercontent.com',
   /**
    * A Maps JS browser key. This one is public on purpose: it ships inside the bundle, so anybody

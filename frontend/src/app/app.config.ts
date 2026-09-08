@@ -1,34 +1,35 @@
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+/**
+ * @author Khova Krishna Pilato
+ */
+
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import {
   ApplicationConfig,
-  inject,
-  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection,
 } from '@angular/core';
-import { MatIconRegistry } from '@angular/material/icon';
-import { provideRouter, withInMemoryScrolling } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
 
-import { securityInterceptor } from './auth/auth.interceptor';
+import { provideBimapApi } from './core/api/api.providers';
 import { routes } from './app.routes';
-import { ThemeService } from './core/theme.service';
+import { securityInterceptor } from './core/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'enabled' })),
 
-    // HttpClient was previously never provided, and `securityInterceptor` was
-    // defined but never registered — so no request ever carried the JWT.
-    provideHttpClient(withInterceptors([securityInterceptor])),
+    // Everything is signals, so there is nothing for Zone.js to do.
+    provideZonelessChangeDetection(),
 
-    provideAppInitializer(() => {
-      // Every `<mat-icon>` renders from the Material Symbols Rounded variable
-      // font loaded in index.html rather than the legacy Material Icons bitmap.
-      inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-rounded');
+    provideRouter(
+      routes,
+      withComponentInputBinding(),
+      withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
+    ),
 
-      // Instantiate eagerly so the resolved colour scheme is applied and kept in
-      // sync with the OS setting for the whole session.
-      inject(ThemeService);
-    }),
+    provideHttpClient(withFetch(), withInterceptors([securityInterceptor])),
+
+    // The one place live and demo diverge.
+    provideBimapApi(),
   ],
 };

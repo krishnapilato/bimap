@@ -1,0 +1,193 @@
+<!--
+  Email dispatcher: the delivery log on the left, the composer on the right.
+
+  There is no format to choose and no preview. You write one message and attach what you like, and
+  the MIME type is derived from what is actually there — a sender who declares it separately gets a
+  second chance to disagree with themselves. The resolved type is stated once, above the send
+  button, and nowhere else.
+
+  The log is the real `sent_email` table: every transactional message the platform sends lands in it
+  too, which is why it is worth looking at.
+
+  Author: Khova Krishna Pilato
+-->
+
+<div
+  class="bm-screen bm-screen-fixed content-stretch grid-rows-[auto_minmax(0,1fr)] gap-4"
+>
+  <header class="flex flex-wrap items-center gap-3 border-b border-hairline pb-3">
+    <h1 class="bm-title">Email dispatcher</h1>
+    <span class="badge badge-success badge-soft font-semibold">{{ sentCount() }} delivered</span>
+    @if (failedCount() > 0) {
+      <span class="badge badge-error badge-soft font-semibold">{{ failedCount() }} rejected</span>
+    }
+
+    <button
+      type="button"
+      class="btn btn-ghost btn-sm ml-auto rounded-field border border-hairline"
+      (click)="reloadToken.set(reloadToken() + 1)"
+    >
+      <span class="material-symbols-rounded text-[1.05rem]">refresh</span>
+      <span class="hidden sm:inline">Refresh</span>
+    </button>
+  </header>
+
+  <div class="grid min-h-0 gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+    <!-- ── The log ───────────────────────────────────────────────────────── -->
+    <section class="bm-panel grid min-h-0 grid-rows-[auto_minmax(0,1fr)] overflow-hidden">
+      <p class="border-b border-hairline px-4 py-3">
+        <span class="bm-label">Delivery log</span>
+      </p>
+
+      @if (loading()) {
+        <div class="space-y-2 p-3">
+          @for (skeleton of [1, 2, 3, 4, 5]; track skeleton) {
+            <div class="h-16 animate-pulse rounded-field bg-base-200"></div>
+          }
+        </div>
+      } @else {
+        <ul class="bm-scroll divide-y divide-hairline">
+          @for (message of messages(); track message.id) {
+            <li class="p-3 transition hover:bg-base-200/50">
+              <div class="flex items-start gap-2">
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate font-semibold">{{ message.subject }}</span>
+                  <span class="block truncate text-label text-ink-3">{{ message.to }}</span>
+                </span>
+                <span class="bm-pill shrink-0" [class]="'bm-pill badge-soft ' + style(message.status).badge">
+                  {{ message.status }}
+                </span>
+              </div>
+
+              <div class="mt-2 flex flex-wrap items-center gap-1">
+                <span class="badge badge-xs badge-ghost font-medium">{{ message.format }}</span>
+                @if (message.template) {
+                  <span class="badge badge-xs badge-primary badge-soft bm-reading font-medium">
+                    {{ message.template }}
+                  </span>
+                }
+                @for (file of message.attachments; track file.filename) {
+                  <span class="badge badge-xs badge-ghost max-w-[9rem] gap-1 font-medium">
+                    <span class="material-symbols-rounded text-[0.75rem]">attach_file</span>
+                    <span class="truncate">{{ file.filename }}</span>
+                  </span>
+                }
+                <span class="ml-auto text-label text-ink-3">
+                  {{ message.sentAt | date: 'dd MMM, HH:mm' }}
+                </span>
+              </div>
+
+              @if (message.failureReason) {
+                <p class="bm-reading mt-2 text-label text-error">{{ message.failureReason }}</p>
+              }
+            </li>
+          } @empty {
+            <li class="px-4 py-12 text-center text-ink-3">Nothing sent yet.</li>
+          }
+        </ul>
+      }
+    </section>
+
+    <!-- ── The composer ──────────────────────────────────────────────────── -->
+    <section class="bm-panel grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden">
+      <div class="grid gap-3 border-b border-hairline p-4 sm:grid-cols-2">
+        <label class="min-w-0">
+          <span class="bm-label">To</span>
+          <input
+            class="input input-bordered mt-1 w-full rounded-field"
+            type="email"
+            placeholder="recipient@example.com"
+            name="to"
+            [ngModel]="to()"
+            (ngModelChange)="to.set($event)"
+          />
+        </label>
+        <label class="min-w-0">
+          <span class="bm-label">Subject</span>
+          <input
+            class="input input-bordered mt-1 w-full rounded-field"
+            placeholder="Registrations export"
+            name="subject"
+            [ngModel]="subject()"
+            (ngModelChange)="subject.set($event)"
+          />
+        </label>
+      </div>
+
+      <!-- One field. What it is sent as follows from what is in it. -->
+      <div class="grid min-h-0 p-4">
+        <label class="grid min-h-0 grid-rows-[auto_minmax(0,1fr)]">
+          <span class="bm-label mb-1">Message</span>
+          <textarea
+            class="textarea textarea-bordered min-h-[8rem] w-full resize-none rounded-field
+                   font-mono text-label leading-relaxed"
+            spellcheck="false"
+            name="body"
+            placeholder="Write in plain words, or paste HTML — whichever you use decides how it is sent."
+            [ngModel]="body()"
+            (ngModelChange)="body.set($event)"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="border-t border-hairline p-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="btn btn-sm rounded-field border-hairline bg-base-200">
+            <span class="material-symbols-rounded text-[1rem]">attach_file</span>
+            Attach
+            <input type="file" class="hidden" multiple (change)="addFiles($event)" />
+          </label>
+
+          @for (file of attachments(); track file.filename) {
+            <button
+              type="button"
+              class="badge badge-ghost max-w-[13rem] gap-1 py-3 font-medium"
+              [attr.aria-label]="'Remove ' + file.filename"
+              (click)="removeFile(file.filename)"
+            >
+              <span class="truncate">{{ file.filename }}</span>
+              <span class="bm-reading shrink-0 text-label text-ink-3">
+                {{ humanBytes(file.sizeBytes) }}
+              </span>
+              <span class="material-symbols-rounded shrink-0 text-[0.8rem]">close</span>
+            </button>
+          }
+        </div>
+
+        @if (failure(); as message) {
+          <div class="alert alert-error alert-soft mt-3 rounded-field py-2 text-body">
+            <span class="material-symbols-rounded text-[1.1rem]">error</span>
+            <span>{{ message }}</span>
+          </div>
+        }
+
+        <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <p class="min-w-0 text-label text-ink-3">
+            Sending as
+            <span class="bm-reading font-semibold text-ink-2">{{ contentType() }}</span>
+            <span> — {{ structure() }}</span>
+          </p>
+
+          <div class="flex items-center gap-3">
+            @if (justSent(); as message) {
+              <span class="text-label font-medium text-success">{{ message }}</span>
+            }
+            <button
+              type="button"
+              class="btn btn-primary rounded-field"
+              [disabled]="!canSend()"
+              (click)="send()"
+            >
+              @if (sending()) {
+                <span class="loading loading-spinner loading-sm"></span>
+              } @else {
+                <span class="material-symbols-rounded text-[1.05rem]">send</span>
+              }
+              Dispatch
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

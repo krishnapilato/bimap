@@ -1,0 +1,161 @@
+<!--
+  System health: real Actuator indicators and Micrometer meters from both services.
+
+  One panel per service, and inside it a grid of readings divided by hairlines rather than a set of
+  nested cards. Every number here is measured on the server; the browser formats and nothing else.
+
+  Author: Khova Krishna Pilato
+-->
+
+<div class="bm-screen">
+  <header class="flex flex-wrap items-center gap-3 border-b border-hairline pb-3">
+    <h1 class="bm-title">System health</h1>
+
+    <span
+      class="bm-pill"
+      [class.badge-success]="allHealthy()"
+      [class.badge-error]="!allHealthy() && !loading()"
+      [class.badge-ghost]="loading()"
+    >
+      <span class="relative flex h-1.5 w-1.5">
+        <span
+          class="absolute inline-flex h-full w-full rounded-full bg-current opacity-70
+                 motion-safe:animate-ping"
+        ></span>
+        <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-current"></span>
+      </span>
+      @if (loading()) {
+        Connecting
+      } @else if (paused()) {
+        Paused
+      } @else {
+        {{ allHealthy() ? 'All systems up' : 'Degraded' }}
+      }
+    </span>
+
+    <p class="hidden text-label text-ink-3 sm:block">
+      <code class="rounded bg-base-200 px-1 py-0.5 font-mono">/api/platform/runtime</code>
+      on both services, every five seconds
+    </p>
+  </header>
+
+  @if (loading()) {
+    <div class="grid gap-4 xl:grid-cols-2">
+      @for (skeleton of [1, 2]; track skeleton) {
+        <div class="bm-panel h-[20rem] animate-pulse"></div>
+      }
+    </div>
+  } @else {
+    <div bmStagger [stagger]="0.08" class="grid gap-4 xl:grid-cols-2">
+      @for (service of services(); track service.service) {
+        <article class="bm-reveal bm-panel overflow-hidden">
+          <header class="flex flex-wrap items-center gap-2 border-b border-hairline px-4 py-3">
+            <h2 class="bm-subtitle truncate">{{ service.service }}</h2>
+            <span
+              class="bm-pill"
+              [class.badge-success]="service.status === 'UP'"
+              [class.badge-error]="service.status !== 'UP'"
+            >
+              {{ service.status }}
+            </span>
+            <span class="bm-reading ml-auto text-label text-ink-3">
+              v{{ service.version }} · {{ service.uptime.display }}
+            </span>
+          </header>
+
+          <div class="bm-cells grid-cols-2 sm:grid-cols-4">
+            <div class="px-4 py-3">
+              <p class="bm-label">Heap</p>
+              <p
+                class="bm-reading mt-0.5 text-subtitle font-semibold"
+                [class]="pressure(service.heap.usedRatio)"
+              >
+                {{ percent(service.heap.usedRatio) }}%
+              </p>
+              <p class="bm-reading mt-1 truncate text-label text-ink-3">
+                {{ service.heap.usedDisplay }} of {{ service.heap.maxDisplay }}
+              </p>
+            </div>
+
+            <div class="px-4 py-3">
+              <p class="bm-label">CPU</p>
+              <p
+                class="bm-reading mt-0.5 text-subtitle font-semibold"
+                [class]="pressure(service.cpu.process)"
+              >
+                {{ percent(service.cpu.process) }}%
+              </p>
+              <p class="mt-1 text-label text-ink-3">{{ service.cpu.cores }} cores</p>
+            </div>
+
+            <div class="px-4 py-3">
+              <p class="bm-label">Threads</p>
+              <p class="bm-reading mt-0.5 text-subtitle font-semibold">{{ service.threads.live }}</p>
+              <p class="mt-1 text-label text-ink-3">peak {{ service.threads.peak }}</p>
+            </div>
+
+            <div class="px-4 py-3">
+              <p class="bm-label">Pool</p>
+              <p
+                class="bm-reading mt-0.5 text-subtitle font-semibold"
+                [class]="pressure(poolRatio(service))"
+              >
+                {{ service.database.active }}/{{ service.database.max }}
+              </p>
+              <p class="mt-1 text-label text-ink-3">{{ service.database.pending }} waiting</p>
+            </div>
+          </div>
+
+          <div class="bm-cells grid-cols-2 border-t border-hairline sm:grid-cols-4">
+            <div class="px-4 py-3">
+              <p class="bm-label">Requests</p>
+              <p class="bm-reading mt-0.5 font-semibold">{{ service.http.requests }}</p>
+            </div>
+            <div class="px-4 py-3">
+              <p class="bm-label">Average</p>
+              <p class="bm-reading mt-0.5 font-semibold">{{ service.http.averageMillis }} ms</p>
+            </div>
+            <div class="px-4 py-3">
+              <p class="bm-label">Slowest</p>
+              <p class="bm-reading mt-0.5 font-semibold">{{ service.http.slowestMillis }} ms</p>
+            </div>
+            <div class="px-4 py-3">
+              <p class="bm-label">Errors 4xx / 5xx</p>
+              <p
+                class="bm-reading mt-0.5 font-semibold"
+                [class.text-error]="service.http.serverErrors > 0"
+              >
+                {{ service.http.clientErrors }} / {{ service.http.serverErrors }}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-1.5 border-t border-hairline px-4 py-3">
+            @for (component of service.components; track component.name) {
+              <span
+                class="badge badge-sm gap-1 font-medium"
+                [class.badge-success]="component.status === 'UP'"
+                [class.badge-soft]="component.status === 'UP'"
+                [class.badge-error]="component.status !== 'UP'"
+              >
+                {{ component.name }}
+              </span>
+            }
+          </div>
+
+          <footer
+            class="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-hairline
+                   bg-base-200/50 px-4 py-2 text-label text-ink-3"
+          >
+            <span class="bm-reading">Java {{ service.runtime.java }}</span>
+            <span class="bm-reading">{{ service.runtime.os }} · {{ service.runtime.architecture }}</span>
+            <span class="bm-reading">:{{ service.runtime.port }}</span>
+            @for (profile of service.profiles; track profile) {
+              <span class="badge badge-xs badge-ghost font-medium">{{ profile }}</span>
+            }
+          </footer>
+        </article>
+      }
+    </div>
+  }
+</div>
