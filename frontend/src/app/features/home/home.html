@@ -1,0 +1,225 @@
+<div class="bm-page home">
+  <section class="home__hero" bmSpotlight>
+    <div class="home__hero-text">
+      <span class="home__date">{{ today }}</span>
+      <h1 class="home__greeting">{{ greeting() }}</h1>
+      @if (counts.isPending()) {
+        <bm-skeleton width="260px" height="16px" />
+      } @else {
+        <p class="home__summary">{{ summary() }}</p>
+      }
+    </div>
+    <div class="home__hero-actions">
+      @if (canWrite()) {
+        <a bmButton variant="primary" size="lg" routerLink="/survey">
+          <svg lucideIcon="map-pin-plus"></svg>
+          Register an asset
+        </a>
+      }
+      <a bmButton size="lg" routerLink="/geography">
+        <svg lucideIcon="earth"></svg>
+        Look up a comune
+      </a>
+    </div>
+    <svg class="home__hero-art" viewBox="0 0 240 160" aria-hidden="true">
+      <g class="home__contours">
+        <path d="M-10 120 C 40 90, 70 140, 120 104 S 200 60, 250 88" />
+        <path d="M-10 96 C 50 64, 80 118, 130 80 S 196 36, 250 62" />
+        <path d="M-10 72 C 44 40, 92 94, 138 58 S 204 16, 250 38" />
+        <path d="M-10 48 C 48 20, 96 70, 146 36 S 210 -4, 250 14" />
+      </g>
+      <g class="home__pin">
+        <circle cx="168" cy="70" r="16" class="home__pin-pulse" />
+        <circle cx="168" cy="70" r="6" />
+      </g>
+    </svg>
+  </section>
+
+  <section class="home__kpis bm-grid" aria-label="Registrations by status">
+    @if (seesEverything()) {
+      <bm-stat-tile label="All registrations" icon="landmark" [value]="counts.data()?.total" [loading]="counts.isPending()" selectable (click)="filterRegistry('')" (keydown.enter)="filterRegistry('')" />
+    } @else {
+      <bm-stat-tile label="Your drafts" icon="file-pen" tone="neutral" [value]="counts.data()?.DRAFT" [loading]="counts.isPending()" selectable (click)="filterRegistry('DRAFT')" (keydown.enter)="filterRegistry('DRAFT')" />
+    }
+    <bm-stat-tile label="In review" icon="file-clock" [value]="counts.data()?.SUBMITTED" [loading]="counts.isPending()" selectable (click)="filterRegistry('SUBMITTED')" (keydown.enter)="filterRegistry('SUBMITTED')" />
+    <bm-stat-tile label="Verified" icon="badge-check" tone="positive" [value]="counts.data()?.VERIFIED" [loading]="counts.isPending()" selectable (click)="filterRegistry('VERIFIED')" (keydown.enter)="filterRegistry('VERIFIED')" />
+    <bm-stat-tile label="Rejected" icon="circle-x" tone="negative" [value]="counts.data()?.REJECTED" [loading]="counts.isPending()" selectable (click)="filterRegistry('REJECTED')" (keydown.enter)="filterRegistry('REJECTED')" />
+  </section>
+
+  @if (counts.isError()) {
+    <bm-error-state [error]="counts.error()" title="Registration figures could not be loaded" (retry)="counts.refetch()" />
+  }
+
+  <div class="home__columns">
+    <div class="home__main">
+      @if (seesEverything()) {
+        <bm-panel heading="Review queue" subheading="Oldest submissions first">
+          <a bmPanelActions bmButton size="sm" variant="ghost" routerLink="/registry" [queryParams]="{ status: 'SUBMITTED' }">
+            Open all
+            <svg lucideIcon="arrow-right"></svg>
+          </a>
+          @if (attention.isPending()) {
+            @for (row of [0, 1, 2]; track row) {
+              <div class="home__row is-placeholder"><bm-skeleton width="45%" height="14px" /><bm-skeleton width="25%" height="12px" /></div>
+            }
+          } @else if (attention.isError()) {
+            <bm-error-state [error]="attention.error()" (retry)="attention.refetch()" />
+          } @else {
+            @for (registration of attention.data()?.content ?? []; track registration.id; let i = $index) {
+              <div class="home__row" role="button" tabindex="0" bmRipple [style.--bm-i]="i" (click)="open(registration)" (keydown.enter)="open(registration)">
+                <span class="home__row-icon"><svg lucideIcon="file-clock" [size]="17"></svg></span>
+                <span class="home__row-main">
+                  <strong>{{ registration.assetName }}</strong>
+                  <span>{{ registration.municipality }} ({{ registration.provinceCode }}) · {{ registration.createdBy }}</span>
+                </span>
+                <span class="home__row-when">{{ relativeTime(registration.submittedAt) }}</span>
+                <span class="home__row-actions">
+                  <button bmButton size="sm" variant="subtle" type="button" [loading]="isReviewing(registration.id)" (click)="verify(registration, $event)">
+                    <svg lucideIcon="check"></svg>
+                    Verify
+                  </button>
+                  <button bmButton size="sm" variant="ghost" iconOnly type="button" bmTooltip="Send back with a note" (click)="reject(registration, $event)">
+                    <svg lucideIcon="undo-2"></svg>
+                  </button>
+                </span>
+              </div>
+            } @empty {
+              <bm-empty-state compact icon="clipboard-check" title="Nothing to review" description="Every submission has been checked." />
+            }
+          }
+        </bm-panel>
+      } @else {
+        <bm-panel heading="Came back with notes" subheading="Fix and resubmit">
+          @if (attention.isPending()) {
+            <div class="home__row is-placeholder"><bm-skeleton width="45%" height="14px" /><bm-skeleton width="25%" height="12px" /></div>
+          } @else {
+            @for (registration of attention.data()?.content ?? []; track registration.id; let i = $index) {
+              <div class="home__row is-note" role="button" tabindex="0" bmRipple [style.--bm-i]="i" (click)="open(registration)" (keydown.enter)="open(registration)">
+                <span class="home__row-icon is-negative"><svg lucideIcon="circle-x" [size]="17"></svg></span>
+                <span class="home__row-main">
+                  <strong>{{ registration.assetName }}</strong>
+                  @if (registration.reviewNote) {
+                    <span class="home__note">“{{ registration.reviewNote }}”</span>
+                  }
+                  <span>{{ registration.reviewedBy }} · {{ relativeTime(registration.reviewedAt) }}</span>
+                </span>
+                <span class="home__row-actions">
+                  <a bmButton size="sm" variant="subtle" [routerLink]="['/survey', registration.id]" (click)="$event.stopPropagation()">
+                    <svg lucideIcon="pencil"></svg>
+                    Fix it
+                  </a>
+                </span>
+              </div>
+            } @empty {
+              <bm-empty-state compact icon="badge-check" title="Nothing came back" description="None of your registrations are waiting on a correction." />
+            }
+          }
+        </bm-panel>
+
+        @if ((drafts.data()?.content?.length ?? 0) > 0) {
+          <bm-panel heading="Your drafts" subheading="Saved in the field, not yet submitted">
+            @for (registration of drafts.data()?.content ?? []; track registration.id; let i = $index) {
+              <div class="home__row" role="button" tabindex="0" bmRipple [style.--bm-i]="i" [routerLink]="['/survey', registration.id]">
+                <span class="home__row-icon"><svg lucideIcon="file-pen" [size]="17"></svg></span>
+                <span class="home__row-main">
+                  <strong>{{ registration.assetName }}</strong>
+                  <span>{{ registration.fullAddress }}, {{ registration.municipality }}</span>
+                </span>
+                <span class="home__row-when">{{ relativeTime(registration.updatedAt) }}</span>
+                <svg lucideIcon="arrow-right" [size]="16" class="home__row-go"></svg>
+              </div>
+            }
+          </bm-panel>
+        }
+      }
+
+      <bm-panel heading="Recently changed">
+        <a bmPanelActions bmButton size="sm" variant="ghost" routerLink="/registry">
+          Registry
+          <svg lucideIcon="arrow-right"></svg>
+        </a>
+        @if (recent.isPending()) {
+          @for (row of [0, 1, 2, 3]; track row) {
+            <div class="home__row is-placeholder"><bm-skeleton width="50%" height="14px" /><bm-skeleton width="20%" height="12px" /></div>
+          }
+        } @else {
+          @for (registration of recent.data()?.content ?? []; track registration.id; let i = $index) {
+            <div class="home__row" role="button" tabindex="0" bmRipple [style.--bm-i]="i" (click)="open(registration)" (keydown.enter)="open(registration)">
+              <span class="home__row-main">
+                <strong>{{ registration.assetName }}</strong>
+                <span>{{ registration.municipality }} · {{ registration.region }}</span>
+              </span>
+              <bm-status [label]="status[registration.status].label" [tone]="status[registration.status].tone" size="sm" />
+              <span class="home__row-when">{{ relativeTime(registration.updatedAt) }}</span>
+            </div>
+          } @empty {
+            <bm-empty-state compact icon="landmark" title="No registrations yet" description="The first asset you register appears here." />
+          }
+        }
+      </bm-panel>
+    </div>
+
+    <aside class="home__side">
+      <bm-panel [heading]="seesEverything() ? 'Registry at a glance' : 'Your registrations'">
+        @if (counts.isPending()) {
+          <bm-skeleton height="12px" />
+          <div class="home__legend-placeholder">
+            <bm-skeleton width="70%" height="12px" /><bm-skeleton width="60%" height="12px" /><bm-skeleton width="66%" height="12px" />
+          </div>
+        } @else {
+          <bm-stacked-meter [segments]="segments()" [interactive]="true" (picked)="filterRegistry($event.key)" />
+        }
+      </bm-panel>
+
+      @if (seesEverything() && regions().length) {
+        <bm-panel heading="Where the work is" subheading="Registrations by region">
+          <bm-bar-list [items]="regions()" [interactive]="true" (picked)="filterRegion($event.key)" />
+        </bm-panel>
+      }
+
+      @if (sessions.can('user:read')) {
+        <bm-panel heading="People">
+          <a bmPanelActions bmButton size="sm" variant="ghost" routerLink="/people">
+            Directory
+            <svg lucideIcon="arrow-right"></svg>
+          </a>
+          <div class="home__people">
+            <a routerLink="/people" [queryParams]="{ status: 'ACTIVE' }" class="home__mini" bmRipple>
+              <span class="home__mini-value">{{ people.data()?.active ?? '—' }}</span>
+              <span class="home__mini-label">Active</span>
+            </a>
+            <a routerLink="/people" [queryParams]="{ status: 'PENDING_ACTIVATION' }" class="home__mini" bmRipple>
+              <span class="home__mini-value">{{ people.data()?.pendingActivation ?? '—' }}</span>
+              <span class="home__mini-label">Pending</span>
+            </a>
+            <a routerLink="/people" [queryParams]="{ status: 'LOCKED' }" class="home__mini" bmRipple>
+              <span class="home__mini-value">{{ people.data()?.locked ?? '—' }}</span>
+              <span class="home__mini-label">Locked</span>
+            </a>
+          </div>
+        </bm-panel>
+      }
+
+      @if (sessions.isAtLeast('MANAGER')) {
+        <bm-panel heading="Services">
+          <a bmPanelActions bmButton size="sm" variant="ghost" routerLink="/health">
+            Health
+            <svg lucideIcon="arrow-right"></svg>
+          </a>
+          <div class="home__services">
+            <div class="home__service">
+              <svg lucideIcon="shield-check" [size]="18"></svg>
+              <span>Identity and mail</span>
+              <bm-status [label]="services.data()?.iam ?? 'Checking'" [tone]="services.data()?.iam === 'UP' ? 'positive' : services.data() ? 'negative' : 'neutral'" [live]="services.data()?.iam === 'UP'" size="sm" />
+            </div>
+            <div class="home__service">
+              <svg lucideIcon="server" [size]="18"></svg>
+              <span>Registry and geography</span>
+              <bm-status [label]="services.data()?.core ?? 'Checking'" [tone]="services.data()?.core === 'UP' ? 'positive' : services.data() ? 'negative' : 'neutral'" [live]="services.data()?.core === 'UP'" size="sm" />
+            </div>
+          </div>
+        </bm-panel>
+      }
+    </aside>
+  </div>
+</div>

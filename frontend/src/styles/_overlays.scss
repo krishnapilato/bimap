@@ -1,0 +1,221 @@
+// =============================================================================
+//  Overlays: dialogs, menus. Rendered in the CDK overlay container, outside any
+//  component, so they are styled globally.
+// =============================================================================
+
+@use 'mixins' as *;
+
+// ── Dialog ───────────────────────────────────────────────────────────────────
+
+.bm-dialog-backdrop {
+  background: var(--bm-scrim);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: bm-fade var(--bm-duration-base) var(--bm-ease-standard) both;
+
+  &.is-leaving {
+    animation: bm-fade-out var(--bm-duration-fast) var(--bm-ease-exit) both;
+  }
+}
+
+.bm-dialog-pane {
+  animation: bm-dialog-in var(--bm-duration-slow) var(--bm-ease-emphasized) both;
+
+  .cdk-dialog-container {
+    display: block;
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+    border-radius: var(--bm-radius-xl);
+    background: var(--bm-surface);
+    box-shadow: var(--bm-shadow-xl);
+    outline: none;
+  }
+
+  @include down(sm) {
+    align-self: flex-end;
+    margin-bottom: 0;
+
+    .cdk-dialog-container {
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      padding-bottom: var(--bm-safe-bottom);
+    }
+  }
+}
+
+.is-leaving .bm-dialog-pane {
+  animation: bm-dialog-out var(--bm-duration-fast) var(--bm-ease-exit) both;
+}
+
+@keyframes bm-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(14px * var(--bm-motion))) scale(calc(1 - 0.025 * var(--bm-motion)));
+  }
+}
+
+@keyframes bm-dialog-out {
+  to {
+    opacity: 0;
+    transform: translateY(calc(8px * var(--bm-motion))) scale(calc(1 - 0.015 * var(--bm-motion)));
+  }
+}
+
+.bm-dialog {
+  display: block;
+  padding: 24px;
+
+  @include down(sm) {
+    padding: 20px 18px;
+  }
+}
+
+.bm-dialog__title {
+  font: var(--bm-text-heading);
+  font-size: 18px;
+  letter-spacing: var(--bm-tracking-tight);
+}
+
+.bm-dialog__text {
+  margin-top: 6px;
+  font: var(--bm-text-body);
+  color: var(--bm-text-2);
+}
+
+.bm-dialog__body {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.bm-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+
+  @include down(sm) {
+    flex-direction: column-reverse;
+
+    > * {
+      width: 100%;
+    }
+  }
+}
+
+// ── Menu ─────────────────────────────────────────────────────────────────────
+
+.bm-menu {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  max-width: 320px;
+  padding: 6px;
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius-lg);
+  background: var(--bm-surface);
+  box-shadow: var(--bm-shadow-lg);
+  transform-origin: top right;
+  animation: bm-menu-in 200ms var(--bm-ease-emphasized) both;
+  outline: none;
+}
+
+@keyframes bm-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-4px * var(--bm-motion))) scale(calc(1 - 0.03 * var(--bm-motion)));
+  }
+}
+
+.bm-menu__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: var(--bm-radius-sm);
+  color: var(--bm-text);
+  font: var(--bm-text-small);
+  font-weight: 550;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  animation: bm-rise 260ms var(--bm-ease-emphasized) both;
+  animation-delay: calc(var(--bm-i, 0) * 22ms + 40ms);
+  transition:
+    background-color var(--bm-duration-fast) var(--bm-ease-standard),
+    color var(--bm-duration-fast) var(--bm-ease-standard);
+
+  @include touch {
+    min-height: 44px;
+  }
+
+  svg {
+    flex-shrink: 0;
+    color: var(--bm-text-3);
+    transition:
+      color var(--bm-duration-fast) var(--bm-ease-standard),
+      transform var(--bm-duration-base) var(--bm-ease-spring);
+  }
+
+  &:hover,
+  &:focus-visible,
+  &.cdk-menu-item-active {
+    outline: none;
+    background: var(--bm-surface-hover);
+
+    svg {
+      color: var(--bm-accent);
+      transform: translateX(1px) scale(1.06);
+    }
+  }
+
+  &[data-tone='danger'] {
+    color: var(--bm-negative);
+
+    svg {
+      color: var(--bm-negative);
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: var(--bm-negative-soft);
+    }
+  }
+
+  &[aria-checked='true']::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: var(--bm-accent);
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    opacity: 0.45;
+    pointer-events: none;
+  }
+}
+
+.bm-menu__label {
+  padding: 8px 10px 4px;
+  @include overline;
+}
+
+.bm-menu__divider {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--bm-border-subtle);
+}
+
+.bm-menu__hint {
+  margin-left: auto;
+  font: var(--bm-text-caption);
+  color: var(--bm-text-3);
+}

@@ -1,0 +1,195 @@
+@use 'styles/mixins' as *;
+
+.bm-lookup {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.bm-lookup__control {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  min-height: inherit;
+}
+
+.bm-lookup__icon {
+  flex-shrink: 0;
+  margin-left: 11px;
+  color: var(--bm-text-3);
+  transition: color var(--bm-duration-fast) var(--bm-ease-standard);
+
+  .bm-field__control:focus-within & {
+    color: var(--bm-accent);
+  }
+}
+
+.bm-lookup__icon + .bm-lookup__input {
+  padding-left: 9px;
+}
+
+.bm-lookup__input.is-mono {
+  @include mono;
+}
+
+.bm-lookup__clear {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  margin-right: 6px;
+  border-radius: 8px;
+  color: var(--bm-text-3);
+  opacity: 0;
+  transform: scale(0.8);
+  transition:
+    opacity var(--bm-duration-fast) var(--bm-ease-standard),
+    transform var(--bm-duration-base) var(--bm-ease-spring),
+    background-color var(--bm-duration-fast) var(--bm-ease-standard);
+
+  .bm-field__control:hover &,
+  .bm-field__control:focus-within & {
+    opacity: 1;
+    transform: none;
+  }
+
+  @include touch {
+    opacity: 1;
+    transform: none;
+  }
+
+  @include hover {
+    background: var(--bm-surface-3);
+    color: var(--bm-text);
+  }
+}
+
+.bm-lookup__spinner {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  margin-right: 12px;
+  border: 2px solid var(--bm-accent-border);
+  border-top-color: var(--bm-accent);
+  border-radius: 50%;
+  animation: bm-spin 700ms linear infinite;
+}
+
+// ── Suggestions ──────────────────────────────────────────────────────────────
+
+.bm-lookup-pane {
+  z-index: var(--bm-z-overlay);
+}
+
+.bm-lookup__panel {
+  flex: 1 1 auto;
+  width: 100%;
+  max-height: min(320px, 50vh);
+  padding: 5px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius-lg);
+  background: var(--bm-surface);
+  box-shadow: var(--bm-shadow-lg);
+  transform-origin: top center;
+  animation: bm-lookup-in 200ms var(--bm-ease-emphasized) both;
+  scrollbar-width: thin;
+
+  .is-above & {
+    transform-origin: bottom center;
+  }
+}
+
+@keyframes bm-lookup-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-4px * var(--bm-motion))) scaleY(calc(1 - 0.04 * var(--bm-motion)));
+  }
+}
+
+.bm-lookup__option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 6px 10px;
+  border-radius: var(--bm-radius-sm);
+  cursor: pointer;
+  animation: bm-rise 240ms var(--bm-ease-emphasized) both;
+  animation-delay: calc(min(var(--bm-i, 0), 6) * 18ms);
+  transition: background-color var(--bm-duration-instant) var(--bm-ease-standard);
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    border-radius: 0 3px 3px 0;
+    background: var(--bm-accent);
+    transform: scaleY(0);
+    transition: transform var(--bm-duration-base) var(--bm-ease-spring);
+  }
+
+  &.is-active {
+    background: var(--bm-accent-softer);
+
+    &::before {
+      transform: none;
+    }
+  }
+}
+
+.bm-lookup__option-main {
+  display: grid;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.bm-lookup__option-label {
+  @include truncate;
+  font: var(--bm-text-small);
+  font-weight: 600;
+  color: var(--bm-text);
+
+  .bm-lookup__mark {
+    border-radius: 3px;
+    background: var(--bm-accent-soft);
+    box-shadow: 0 0 0 1px var(--bm-accent-soft);
+    color: var(--bm-accent-text);
+  }
+}
+
+.bm-lookup__option-detail {
+  @include truncate;
+  font: var(--bm-text-caption);
+  font-weight: 500;
+  color: var(--bm-text-3);
+}
+
+.bm-lookup__badge {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: var(--bm-radius-xs);
+  background: var(--bm-surface-3);
+  color: var(--bm-text-2);
+  font: 550 11.5px/1.4 var(--bm-font-mono);
+
+  .is-active & {
+    background: var(--bm-surface);
+    box-shadow: inset 0 0 0 1px var(--bm-accent-border);
+  }
+}
+
+.bm-lookup__empty {
+  padding: 12px;
+  font: var(--bm-text-small);
+  color: var(--bm-text-3);
+  text-align: center;
+}

@@ -1,0 +1,401 @@
+<bm-geo-canvas
+  [(mode)]="mode"
+  [(basemap)]="basemap"
+  [(coverage)]="coverage"
+  [editable]="!readOnly() && !submitted()"
+  [asset]="position()"
+  [points]="points()"
+  [insets]="insets()"
+  (capture)="onCapture($event)"
+  (pointSelected)="onPointSelected($event)"
+>
+  @if (selectedPoint(); as point) {
+    <div class="survey__point" role="group" aria-label="A registration nearby" animate.enter="bm-enter-rise" animate.leave="bm-leave-fade">
+      <span class="survey__point-dot" [attr.data-tone]="point.tone" aria-hidden="true"></span>
+      <div class="survey__point-text">
+        <strong>{{ point.label }}</strong>
+        <span>{{ point.detail }}</span>
+      </div>
+      <a bmButton size="sm" variant="secondary" [routerLink]="['/registry', point.id]">Open</a>
+      <button type="button" bmButton size="sm" variant="ghost" iconOnly aria-label="Close" (click)="selectedPoint.set(null)">
+        <svg lucideIcon="x"></svg>
+      </button>
+    </div>
+  }
+</bm-geo-canvas>
+
+@if (!viewport.isHandset()) {
+  <aside #panel class="survey__panel" aria-label="Registration record" [class.is-open]="panelOpen()" [inert]="!panelOpen()">
+    <ng-container [ngTemplateOutlet]="head" />
+    <div class="survey__body">
+      <ng-container [ngTemplateOutlet]="body" />
+    </div>
+    <ng-container [ngTemplateOutlet]="foot" />
+  </aside>
+
+  @if (!panelOpen()) {
+    <button type="button" class="survey__reopen" bmRipple (click)="togglePanel()" animate.enter="survey-reopen-in" animate.leave="bm-leave-fade">
+      <span class="survey__ring" [style.--survey-progress]="cascade().length ? answered() / cascade().length : 0" aria-hidden="true">
+        <svg lucideIcon="map-pin-plus" [size]="15"></svg>
+      </span>
+      <span class="survey__reopen-text">
+        <strong>{{ model().assetName.trim() || (registration() ? 'Registration' : 'New registration') }}</strong>
+        <span>{{ answered() }} of {{ cascade().length }} steps · {{ savedText() }}</span>
+      </span>
+      <svg lucideIcon="panel-left-open" [size]="18"></svg>
+    </button>
+  }
+} @else {
+  <bm-sheet label="the record" [(snap)]="sheetSnap" (visible)="onSheetHeight($event)">
+    <div bmSheetHeader>
+      <ng-container [ngTemplateOutlet]="head" />
+    </div>
+    <ng-container [ngTemplateOutlet]="body" />
+    <div bmSheetFooter>
+      <ng-container [ngTemplateOutlet]="foot" />
+    </div>
+  </bm-sheet>
+}
+
+<div class="bm-visually-hidden" aria-live="polite">{{ announcement() }}</div>
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+
+<ng-template #head>
+  <header class="survey__head">
+    <div class="survey__heading">
+      <span class="survey__eyebrow">{{ registration() ? 'Registration' : 'New registration' }}</span>
+      <h1 class="survey__title">{{ model().assetName.trim() || 'Record an asset' }}</h1>
+    </div>
+    <div class="survey__head-actions">
+      @if (registration(); as saved) {
+        <bm-status size="sm" [label]="status[saved.status].label" [tone]="status[saved.status].tone" />
+      }
+      <button type="button" bmButton variant="ghost" size="sm" iconOnly aria-label="More actions" [cdkMenuTriggerFor]="more">
+        <svg lucideIcon="ellipsis-vertical"></svg>
+      </button>
+      @if (!viewport.isHandset()) {
+        <button type="button" bmButton variant="ghost" size="sm" iconOnly aria-label="Hide the record" bmTooltip="Hide the record · [" [bmTooltipLabels]="false" (click)="togglePanel()">
+          <svg lucideIcon="panel-left-close"></svg>
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (cascade().length && !submitted()) {
+    <div class="survey__progress">
+      <div class="survey__steps" role="progressbar" aria-label="Guided steps" aria-valuemin="0" [attr.aria-valuemax]="cascade().length" [attr.aria-valuenow]="answered()">
+        @for (step of cascade(); track step.name; let i = $index) {
+          <span class="survey__step" [class.is-done]="step.done" [class.is-next]="step.name === next()?.name" [style.--bm-i]="i"></span>
+        }
+      </div>
+      <div class="survey__progress-text">
+        @if (next(); as step) {
+          <span class="survey__next">Next · <strong>{{ step.label }}</strong></span>
+        } @else {
+          <span class="survey__next is-complete">
+            <svg lucideIcon="circle-check" [size]="14"></svg>
+            Every step answered
+          </span>
+        }
+        <span class="survey__saved" [class.is-pending]="hasChanges()" [class.is-saving]="!!saving()">{{ savedText() }}</span>
+      </div>
+    </div>
+  }
+</ng-template>
+
+<!-- ── Body ───────────────────────────────────────────────────────────────── -->
+
+<ng-template #body>
+  <div class="survey__content">
+    @if (submitted(); as saved) {
+      <div class="survey__done" animate.enter="bm-enter-rise">
+        <svg class="survey__done-mark" viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="29" />
+          <path d="M20 33.5 28 41.5 45 24" />
+        </svg>
+        <h2>Sent for review</h2>
+        <p>
+          <strong>{{ saved.assetName }}</strong>, {{ saved.fullAddress }}, {{ saved.municipality }}, is with the reviewers now.
+          Their decision will show in the registry.
+        </p>
+        <dl class="survey__facts">
+          <div>
+            <dt>ISTAT</dt>
+            <dd class="bm-numeric">{{ saved.istatCode }}</dd>
+          </div>
+          @if (position(); as at) {
+            <div>
+              <dt>Position</dt>
+              <dd class="bm-numeric">{{ formatPosition(at, 5) }}</dd>
+            </div>
+          }
+        </dl>
+        <div class="survey__done-actions">
+          <button type="button" bmButton variant="primary" (click)="startAnother()">
+            <svg lucideIcon="map-pin-plus"></svg>
+            Another in {{ saved.municipality }}
+          </button>
+          <a bmButton variant="secondary" [routerLink]="['/registry', saved.id]">
+            <svg lucideIcon="arrow-up-right"></svg>
+            Open in the registry
+          </a>
+        </div>
+      </div>
+    } @else {
+      @if (recordQuery.isError()) {
+        <bm-error-state title="This registration could not be opened" [error]="recordQuery.error()" (retry)="recordQuery.refetch()" />
+      }
+
+      @if (restorable(); as draft) {
+        <bm-message-strip tone="info" icon="rotate-ccw-clock">
+          <strong>Unsaved work</strong> saved on this device {{ relativeClause(draft.savedAt) }} is still here. Restore it, or discard it to start
+          keeping new changes.
+          <button bmStripAction type="button" bmButton size="sm" variant="primary" (click)="restore()">Restore</button>
+          <button bmStripAction type="button" bmButton size="sm" variant="ghost" (click)="discardRestorable()">Discard</button>
+        </bm-message-strip>
+      }
+
+      @if (readOnly()) {
+        <bm-message-strip tone="info" icon="lock">
+          This registration is <strong>{{ status[registration()!.status].label.toLowerCase() }}</strong>, so it can no longer be changed here.
+        </bm-message-strip>
+      } @else if (registration()?.status === 'REJECTED' && registration()?.reviewNote) {
+        <bm-message-strip tone="negative" icon="circle-x">
+          <strong>Sent back by the reviewer:</strong> {{ registration()!.reviewNote }}
+        </bm-message-strip>
+      }
+
+      @if (schema(); as schema) {
+        @for (section of schema.sections; track section.id; let s = $index) {
+          <section class="survey__section" [style.--bm-i]="s" [attr.aria-labelledby]="'survey-section-' + section.id">
+            @if (isOptionalSection(section.id)) {
+              <button
+                type="button"
+                class="survey__section-toggle"
+                [attr.aria-expanded]="optionalOpen() || sectionHasValues(section.fields)"
+                (click)="optionalOpen.set(!optionalOpen())"
+              >
+                <span class="survey__section-head">
+                  <h2 [id]="'survey-section-' + section.id">{{ section.title }}</h2>
+                  <p>Optional details from the paper record</p>
+                </span>
+                <svg lucideIcon="chevron-down" [size]="18"></svg>
+              </button>
+            } @else {
+              <header class="survey__section-head">
+                <h2 [id]="'survey-section-' + section.id">{{ section.title }}</h2>
+                @if (section.description) {
+                  <p>{{ section.description }}</p>
+                }
+              </header>
+            }
+
+            @if (!isOptionalSection(section.id) || optionalOpen() || sectionHasValues(section.fields)) {
+              <div class="survey__grid" animate.enter="survey-grid-in">
+                @for (field of section.fields; track field.name) {
+                  @switch (kindOf(field)) {
+                    @case ('lookup') {
+                      <bm-field
+                        class="survey__cell"
+                        [attr.data-span]="spanOf(field.name)"
+                        [class.is-next]="next()?.name === field.name"
+                        [class.is-flashed]="flashed().has(field.name)"
+                        [label]="field.label"
+                        [hint]="spanOf(field.name) === 'narrow' ? undefined : field.help"
+                        [control]="text(field.name)"
+                      >
+                        <bm-lookup
+                          [formField]="text(field.name)"
+                          [search]="searches.get($any(field.name))!"
+                          [icon]="step(field.name).icon"
+                          [placeholder]="field.placeholder ?? step(field.name).placeholder ?? ''"
+                          [minChars]="step(field.name).minLength"
+                          [mono]="!!step(field.name).mono"
+                          [ariaLabel]="field.label + ' suggestions'"
+                          (picked)="onPicked(field.name, $event)"
+                          (edited)="onEdited(field.name, $event)"
+                          (committed)="onCommitted(field.name, $event)"
+                          (focusin)="onFieldFocus()"
+                        />
+                      </bm-field>
+                    }
+                    @case ('text') {
+                      <bm-field
+                        class="survey__cell"
+                        [attr.data-span]="spanOf(field.name)"
+                        [class.is-next]="next()?.name === field.name"
+                        [class.is-flashed]="flashed().has(field.name)"
+                        [label]="field.label"
+                        [hint]="spanOf(field.name) === 'narrow' ? undefined : field.help"
+                        [control]="text(field.name)"
+                      >
+                        <input
+                          bmInput
+                          [formField]="text(field.name)"
+                          [class.is-mono]="isCode(field.name)"
+                          [placeholder]="field.placeholder ?? ''"
+                          [attr.autocapitalize]="isCode(field.name) ? 'characters' : null"
+                          (focus)="onFieldFocus()"
+                        />
+                      </bm-field>
+                      @if (field.name === 'assetName' && duplicate(); as twin) {
+                        <bm-message-strip class="survey__cell" data-span="full" tone="critical" icon="copy">
+                          <strong>Already registered here.</strong> {{ twin.assetName }} at {{ twin.fullAddress }} is
+                          {{ status[twin.status].label.toLowerCase() }}.
+                          <a bmStripAction bmButton size="sm" variant="ghost" [routerLink]="['/registry', twin.id]">Open</a>
+                        </bm-message-strip>
+                      }
+                    }
+                    @case ('textarea') {
+                      <bm-field class="survey__cell" data-span="full" [label]="field.label" [hint]="field.help" [control]="text(field.name)">
+                        <textarea bmInput rows="3" [formField]="text(field.name)" (focus)="onFieldFocus()"></textarea>
+                      </bm-field>
+                    }
+                    @case ('position') {
+                      <div class="survey__position survey__cell" data-span="full" [class.is-set]="position()" [class.is-flashed]="flashed().has('latitude')">
+                        <div class="survey__position-head">
+                          <span class="survey__position-icon" aria-hidden="true">
+                            <svg [lucideIcon]="position() ? 'map-pinned' : 'map-pin-plus'" [size]="18"></svg>
+                          </span>
+                          <div class="survey__position-text">
+                            <strong>{{ position() ? 'Asset position' : 'Place the asset' }}</strong>
+                            <span>
+                              @if (position()) {
+                                Drag the pin to the exact façade.
+                              } @else if (viewport.isCoarsePointer()) {
+                                Long-press the map, choose a street, or use the middle of the map.
+                              } @else {
+                                Double-click the map, choose a street, or right-click for more.
+                              }
+                            </span>
+                          </div>
+                          @if (position()) {
+                            <button type="button" bmButton variant="ghost" size="sm" iconOnly aria-label="Copy the coordinates" bmTooltip="Copy the coordinates" (click)="copyPosition()">
+                              <svg lucideIcon="copy"></svg>
+                            </button>
+                          }
+                        </div>
+                        <div class="survey__position-grid">
+                          <bm-field label="Latitude" [control]="form.latitude">
+                            <input bmInput class="is-mono" type="number" step="any" inputmode="decimal" placeholder="45.464211" [formField]="form.latitude" (paste)="pastePosition($event)" (focus)="onFieldFocus()" />
+                          </bm-field>
+                          <bm-field label="Longitude" [control]="form.longitude">
+                            <input bmInput class="is-mono" type="number" step="any" inputmode="decimal" placeholder="9.191383" [formField]="form.longitude" (paste)="pastePosition($event)" (focus)="onFieldFocus()" />
+                          </bm-field>
+                        </div>
+                        @if (!readOnly()) {
+                          <div class="survey__position-actions">
+                            <button type="button" bmButton variant="subtle" size="sm" (click)="placeAtCentre()">
+                              <svg lucideIcon="crosshair"></svg>
+                              Middle of the map
+                            </button>
+                            <button type="button" bmButton variant="subtle" size="sm" [disabled]="!canLocateAddress()" [loading]="locatingAddress()" (click)="locateAddress()">
+                              <svg lucideIcon="scan-search"></svg>
+                              Find the street
+                            </button>
+                            @if (position()) {
+                              <button type="button" bmButton variant="ghost" size="sm" (click)="clearPosition()">Clear</button>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+                  }
+                }
+              </div>
+            }
+          </section>
+        }
+      } @else if (schemaQuery.isError()) {
+        <bm-error-state title="The form could not be loaded" [error]="schemaQuery.error()" (retry)="schemaQuery.refetch()" />
+      } @else {
+        <div class="survey__skeleton" aria-hidden="true">
+          @for (row of [1, 2, 3, 4, 5]; track row) {
+            <bm-skeleton width="32%" height="11px" />
+            <bm-skeleton height="40px" />
+          }
+        </div>
+      }
+    }
+  </div>
+</ng-template>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+
+<ng-template #foot>
+  @if (!submitted()) {
+    <footer class="survey__foot">
+      @if (readOnly()) {
+        @if (registration(); as saved) {
+          <a bmButton variant="secondary" [routerLink]="['/registry', saved.id]">
+            <svg lucideIcon="arrow-up-right"></svg>
+            Open in the registry
+          </a>
+        }
+      } @else {
+        <button
+          type="button"
+          bmButton
+          variant="secondary"
+          [loading]="saving() === 'draft'"
+          [disabled]="!!saving()"
+          [bmTooltip]="'Save draft · ' + mod + 'S'"
+          [bmTooltipLabels]="false"
+          (click)="save('draft')"
+        >
+          <svg lucideIcon="file-pen"></svg>
+          Save draft
+        </button>
+        <button
+          type="button"
+          bmButton
+          variant="primary"
+          class="survey__submit"
+          [loading]="saving() === 'submit'"
+          [disabled]="!!saving()"
+          [bmTooltip]="'Submit · ' + mod + 'Enter'"
+          [bmTooltipLabels]="false"
+          (click)="save('submit')"
+        >
+          <svg lucideIcon="send"></svg>
+          {{ registration()?.status === 'REJECTED' ? 'Resubmit' : 'Submit for review' }}
+        </button>
+      }
+    </footer>
+  }
+</ng-template>
+
+<ng-template #more>
+  <div class="bm-menu" cdkMenu>
+    @if (position()) {
+      <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 0" (cdkMenuItemTriggered)="canvas().focusAsset()">
+        <svg lucideIcon="map-pinned" [size]="17"></svg>
+        Show the asset on the map
+      </button>
+    }
+    @if (registration(); as saved) {
+      <a class="bm-menu__item" cdkMenuItem style="--bm-i: 1" [routerLink]="['/registry', saved.id]">
+        <svg lucideIcon="arrow-up-right" [size]="17"></svg>
+        Open in the registry
+      </a>
+    }
+    @if (hasChanges() && registration() && !readOnly()) {
+      <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 2" (cdkMenuItemTriggered)="revert()">
+        <svg lucideIcon="undo-2" [size]="17"></svg>
+        Discard changes
+      </button>
+    }
+    <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 3" (cdkMenuItemTriggered)="startOver()">
+      <svg lucideIcon="rotate-ccw" [size]="17"></svg>
+      {{ registration() ? 'New registration' : 'Start over' }}
+    </button>
+    @if (registration()?.status === 'DRAFT') {
+      <div class="bm-menu__divider"></div>
+      <button type="button" class="bm-menu__item" cdkMenuItem data-tone="danger" style="--bm-i: 4" (cdkMenuItemTriggered)="deleteDraft()">
+        <svg lucideIcon="trash" [size]="17"></svg>
+        Delete draft
+      </button>
+    }
+  </div>
+</ng-template>

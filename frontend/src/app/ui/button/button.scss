@@ -1,0 +1,214 @@
+@use 'styles/mixins' as *;
+
+.bm-button {
+  --bm-button-bg: var(--bm-surface);
+  --bm-button-bg-hover: var(--bm-surface-hover);
+  --bm-button-fg: var(--bm-text);
+  --bm-button-border: var(--bm-border);
+  --bm-button-shadow: var(--bm-shadow-xs);
+  --bm-button-shadow-hover: var(--bm-shadow-sm);
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: var(--bm-button-height, 36px);
+  padding: 0 14px;
+  border: 1px solid var(--bm-button-border);
+  border-radius: var(--bm-radius-md);
+  background: var(--bm-button-bg);
+  color: var(--bm-button-fg);
+  box-shadow: var(--bm-button-shadow);
+  font: var(--bm-text-subheading);
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  user-select: none;
+  -webkit-user-select: none;
+  @include pressable(0.965);
+
+  @include hover {
+    background: var(--bm-button-bg-hover);
+    box-shadow: var(--bm-button-shadow-hover);
+    transform: translateY(-1px);
+  }
+
+  @include focus-ring;
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    opacity: 0.5;
+    box-shadow: none;
+    transform: none;
+    pointer-events: none;
+  }
+
+  svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    transition: transform var(--bm-duration-base) var(--bm-ease-spring);
+  }
+
+  // Icons lean into the direction they point, a small promise of what the press will do.
+  @include hover {
+    svg[lucideIcon='arrow-right'],
+    svg[lucideIcon='chevron-right'],
+    svg[lucideIcon='arrow-up-right'] {
+      transform: translateX(2px);
+    }
+
+    svg[lucideIcon='arrow-left'],
+    svg[lucideIcon='chevron-left'] {
+      transform: translateX(-2px);
+    }
+
+    svg[lucideIcon='plus'] {
+      transform: rotate(90deg);
+    }
+
+    svg[lucideIcon='refresh-cw'],
+    svg[lucideIcon='rotate-ccw'] {
+      transform: rotate(-60deg);
+    }
+
+    svg[lucideIcon='download'] {
+      transform: translateY(2px);
+    }
+
+    svg[lucideIcon='upload'],
+    svg[lucideIcon='send'] {
+      transform: translate(1px, -2px);
+    }
+  }
+
+  &[data-size='sm'] {
+    --bm-button-height: 30px;
+    padding: 0 10px;
+    gap: 6px;
+    border-radius: var(--bm-radius-sm);
+    font: var(--bm-text-caption);
+
+    svg {
+      width: 15px;
+      height: 15px;
+    }
+  }
+
+  &[data-size='lg'] {
+    --bm-button-height: 44px;
+    padding: 0 20px;
+    border-radius: var(--bm-radius-lg);
+    font-size: 15px;
+  }
+
+  @include touch {
+    --bm-button-height: 42px;
+
+    &[data-size='sm'] {
+      --bm-button-height: 36px;
+    }
+
+    &[data-size='lg'] {
+      --bm-button-height: 50px;
+    }
+  }
+
+  &[data-icon-only] {
+    width: var(--bm-button-height, 36px);
+    padding: 0;
+  }
+
+  &[data-variant='primary'] {
+    --bm-button-bg: var(--bm-accent);
+    --bm-button-bg-hover: var(--bm-accent-hover);
+    --bm-button-fg: var(--bm-text-inverse);
+    --bm-button-border: transparent;
+    --bm-button-shadow: 0 1px 2px rgba(11, 61, 168, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    --bm-button-shadow-hover: var(--bm-shadow-accent), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+
+    &:active:not(:disabled) {
+      background-color: var(--bm-accent-pressed);
+    }
+  }
+
+  &[data-variant='signal'] {
+    --bm-button-bg: var(--bm-signal);
+    --bm-button-bg-hover: var(--bm-signal-strong);
+    --bm-button-fg: var(--bm-text-inverse);
+    --bm-button-border: transparent;
+    --bm-button-shadow: 0 1px 2px rgba(185, 96, 15, 0.3);
+    --bm-button-shadow-hover: var(--bm-shadow-signal);
+  }
+
+  &[data-variant='danger'] {
+    --bm-button-bg: var(--bm-negative);
+    --bm-button-bg-hover: var(--bm-negative-hover);
+    --bm-button-fg: var(--bm-text-inverse);
+    --bm-button-border: transparent;
+    --bm-button-shadow: 0 1px 2px rgba(176, 39, 45, 0.3);
+    --bm-button-shadow-hover: 0 10px 24px -12px rgba(207, 50, 57, 0.6);
+  }
+
+  &[data-variant='ghost'] {
+    --bm-button-bg: transparent;
+    --bm-button-bg-hover: var(--bm-surface-3);
+    --bm-button-border: transparent;
+    --bm-button-shadow: none;
+    --bm-button-shadow-hover: none;
+    --bm-button-fg: var(--bm-text-2);
+
+    @include hover {
+      color: var(--bm-text);
+      transform: none;
+    }
+  }
+
+  &[data-variant='subtle'] {
+    --bm-button-bg: var(--bm-accent-soft);
+    --bm-button-bg-hover: #dce8fd;
+    --bm-button-fg: var(--bm-accent-text);
+    --bm-button-border: transparent;
+    --bm-button-shadow: none;
+    --bm-button-shadow-hover: none;
+  }
+
+  &.is-loading {
+    pointer-events: none;
+
+    .bm-button__content {
+      opacity: 0;
+      transform: scale(0.92);
+    }
+  }
+}
+
+.bm-button__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: inherit;
+  min-width: 0;
+  transition:
+    opacity var(--bm-duration-fast) var(--bm-ease-standard),
+    transform var(--bm-duration-base) var(--bm-ease-emphasized);
+}
+
+.bm-button__spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation:
+    bm-pop var(--bm-duration-base) var(--bm-ease-emphasized) both,
+    bm-spin 0.7s linear infinite;
+}

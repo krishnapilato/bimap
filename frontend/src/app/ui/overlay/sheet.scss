@@ -1,0 +1,88 @@
+@use 'styles/mixins' as *;
+
+.bm-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  border-radius: 22px 22px 0 0;
+  background: var(--bm-surface);
+  box-shadow:
+    0 -1px 0 var(--bm-border),
+    0 -18px 48px -20px rgba(11, 23, 38, 0.34);
+  overflow: hidden;
+  overscroll-behavior: contain;
+  transition: height 460ms var(--bm-ease-emphasized);
+  animation: bm-sheet-in 560ms var(--bm-ease-emphasized) both;
+
+  &.is-dragging {
+    transition: none;
+    user-select: none;
+  }
+}
+
+@keyframes bm-sheet-in {
+  from {
+    opacity: var(--bm-motion);
+    transform: translate3d(0, calc(100% * var(--bm-motion)), 0);
+  }
+}
+
+.bm-sheet__handle {
+  flex-shrink: 0;
+  padding: 0 16px 10px;
+  touch-action: none;
+  cursor: grab;
+
+  .is-dragging & {
+    cursor: grabbing;
+  }
+}
+
+.bm-sheet__grip {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 22px;
+  outline: none;
+  cursor: inherit;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 9px;
+    width: 40px;
+    height: 5px;
+    margin-left: -20px;
+    border-radius: var(--bm-radius-pill);
+    background: var(--bm-border-strong);
+    transition:
+      width var(--bm-duration-base) var(--bm-ease-spring),
+      margin var(--bm-duration-base) var(--bm-ease-spring),
+      background-color var(--bm-duration-fast) var(--bm-ease-standard);
+  }
+
+  &:focus-visible::before,
+  .is-dragging &::before {
+    width: 64px;
+    margin-left: -32px;
+    background: var(--bm-accent);
+  }
+}
+
+.bm-sheet__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+
+  .bm-sheet[data-snap='peek'] & {
+    overflow: hidden;
+  }
+}

@@ -1,0 +1,143 @@
+@use 'styles/mixins' as *;
+
+.bm-switch,
+.bm-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font: var(--bm-text-body);
+  color: var(--bm-text);
+  -webkit-tap-highlight-color: transparent;
+
+  &.is-disabled {
+    opacity: 0.55;
+  }
+}
+
+.bm-switch__label,
+.bm-checkbox__label {
+  cursor: pointer;
+  user-select: none;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.bm-switch__track {
+  position: relative;
+  flex-shrink: 0;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--bm-border-strong);
+  box-shadow: inset 0 1px 2px rgba(11, 23, 38, 0.12);
+  transition:
+    background-color var(--bm-duration-base) var(--bm-ease-standard),
+    box-shadow var(--bm-duration-base) var(--bm-ease-standard);
+  @include focus-ring(999px);
+
+  @include touch {
+    width: 46px;
+    height: 28px;
+  }
+
+  .is-on & {
+    background: var(--bm-accent);
+  }
+
+  @include hover {
+    box-shadow:
+      inset 0 1px 2px rgba(11, 23, 38, 0.12),
+      0 0 0 4px var(--bm-accent-glow);
+  }
+}
+
+.bm-switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(11, 23, 38, 0.3);
+  transition:
+    transform var(--bm-duration-slow) var(--bm-ease-spring),
+    width var(--bm-duration-fast) var(--bm-ease-standard);
+
+  @include touch {
+    width: 22px;
+    height: 22px;
+  }
+
+  .is-on & {
+    transform: translateX(16px);
+
+    @include touch {
+      transform: translateX(18px);
+    }
+  }
+
+  // The thumb stretches while pressed, the way a physical toggle gives before it flips.
+  .bm-switch__track:active & {
+    width: 20px;
+  }
+
+  .is-on .bm-switch__track:active & {
+    transform: translateX(12px);
+  }
+}
+
+.bm-checkbox__box {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--bm-border-strong);
+  border-radius: 5px;
+  background: var(--bm-surface);
+  color: #fff;
+  transition:
+    background-color var(--bm-duration-fast) var(--bm-ease-standard),
+    border-color var(--bm-duration-fast) var(--bm-ease-standard),
+    transform var(--bm-duration-base) var(--bm-ease-spring);
+  @include focus-ring(5px);
+
+  @include touch {
+    width: 22px;
+    height: 22px;
+  }
+
+  @include hover {
+    border-color: var(--bm-accent);
+  }
+
+  &:active {
+    transform: scale(0.88);
+  }
+
+  svg {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 16;
+    stroke-dashoffset: 16;
+    transition: stroke-dashoffset var(--bm-duration-slow) var(--bm-ease-emphasized);
+  }
+
+  .is-checked & {
+    border-color: var(--bm-accent);
+    background: var(--bm-accent);
+
+    svg {
+      stroke-dashoffset: 0;
+    }
+  }
+}

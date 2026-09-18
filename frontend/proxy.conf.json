@@ -1,0 +1,14 @@
+{
+  "/iam": {
+    "target": "http://localhost:9843",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": { "^/iam": "" }
+  },
+  "/core": {
+    "target": "http://localhost:9844",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": { "^/core": "" }
+  }
+}

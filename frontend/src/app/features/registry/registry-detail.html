@@ -1,0 +1,167 @@
+<div class="bm-page registry-detail">
+  @if (query.isPending()) {
+    <div class="registry-detail__loading" aria-busy="true">
+      <bm-skeleton width="120px" height="12px" />
+      <bm-skeleton width="45%" height="30px" />
+      <bm-skeleton width="60%" height="14px" />
+      <bm-skeleton height="420px" />
+    </div>
+  } @else if (query.isError()) {
+    @if (notFound()) {
+      <bm-empty-state icon="scan-search" title="This registration is not here" description="It may have been deleted, or it belongs to someone else and you cannot see it.">
+        <a bmButton routerLink="/registry">
+          <svg lucideIcon="arrow-left"></svg>
+          Back to the registry
+        </a>
+      </bm-empty-state>
+    } @else {
+      <bm-error-state title="This registration could not be loaded" [error]="query.error()" (retry)="query.refetch()" />
+    }
+  } @else if (registration(); as r) {
+    <bm-page-header [title]="r.assetName" [crumbs]="crumbs()">
+      <bm-status bmTitleAddon [label]="statusInfo[r.status].label" [tone]="statusInfo[r.status].tone" [live]="r.status === 'SUBMITTED'" />
+      <p bmSubtitle class="registry-detail__place">
+        <svg lucideIcon="map-pin" [size]="15"></svg>
+        {{ place() }}
+      </p>
+      <div bmActions>
+        @for (action of primary(); track action) {
+          <button type="button" bmButton [variant]="meta[action].variant" [loading]="running() === action" (click)="run(action)">
+            <svg [lucideIcon]="meta[action].icon"></svg>
+            {{ meta[action].label }}
+          </button>
+        }
+        <button type="button" bmButton variant="ghost" iconOnly aria-label="More actions" [cdkMenuTriggerFor]="more">
+          <svg lucideIcon="ellipsis-vertical"></svg>
+        </button>
+      </div>
+    </bm-page-header>
+
+    @if (r.status === 'REJECTED' && r.reviewNote) {
+      <bm-message-strip tone="negative" icon="circle-x">
+        <strong>Sent back by {{ r.reviewedBy }}:</strong> {{ r.reviewNote }}
+      </bm-message-strip>
+    }
+
+    <div class="registry-detail__layout">
+      <div class="registry-detail__main">
+        <section class="registry-detail__canvas" aria-label="Map and Street View">
+          @if (position(); as at) {
+            <bm-geo-canvas [fullscreenable]="false" [asset]="at" [initialView]="initialView()!" [(mode)]="mode">
+              <div class="registry-detail__coordinates">
+                <svg lucideIcon="crosshair" [size]="13"></svg>
+                <span class="bm-mono">{{ formatPosition(at, 6) }}</span>
+                <bm-copy-button [value]="formatPosition(at, 6)" label="Coordinates" />
+              </div>
+            </bm-geo-canvas>
+          } @else {
+            <bm-empty-state icon="map-pin" title="No position recorded" description="Without coordinates the asset cannot be shown on the map or in Street View.">
+              @if (available().includes('edit')) {
+                <button type="button" bmButton (click)="run('edit')">
+                  <svg lucideIcon="map-pin-plus"></svg>
+                  Place it on the map
+                </button>
+              }
+            </bm-empty-state>
+          }
+        </section>
+
+        <bm-panel heading="Where the asset stands">
+          <dl class="bm-properties">
+            <bm-property label="Region" [value]="r.region" />
+            <bm-property label="Province" [value]="r.provinceName + ' (' + r.provinceCode + ')'" />
+            <bm-property label="Municipality" [value]="r.municipality" />
+            <bm-property label="ISTAT code" [value]="r.istatCode" mono copyable />
+            <bm-property label="Cadastral code" [value]="r.cadastralCode" mono copyable />
+            <bm-property label="Street" [value]="r.fullAddress" />
+            <bm-property label="CAP" [value]="r.postalCode" mono />
+            <bm-property label="Locality" [value]="r.locality" />
+          </dl>
+        </bm-panel>
+
+        <bm-panel heading="The asset itself">
+          <dl class="bm-properties">
+            <bm-property label="Asset name" [value]="r.assetName" />
+            <bm-property label="Internal reference" [value]="r.assetReference" mono copyable />
+            <bm-property label="Responsible body" [value]="r.entityName" />
+            <bm-property label="Billing code" [value]="r.entityBillingCode" mono copyable />
+          </dl>
+        </bm-panel>
+
+        <bm-panel heading="Protection and title">
+          <dl class="bm-properties">
+            <bm-property label="Ownership" [value]="r.ownership" />
+            <bm-property label="Protection measure" [value]="r.protectionMeasure" />
+            <bm-property label="Constraint" [value]="r.constraintType" />
+            <bm-property label="Cadastral reference" [value]="r.cadastralReference" mono />
+            <bm-property label="Transcription" [value]="r.transcription" />
+          </dl>
+          @if (r.notes) {
+            <div class="registry-detail__notes">
+              <span>Notes</span>
+              <p>{{ r.notes }}</p>
+            </div>
+          }
+        </bm-panel>
+      </div>
+
+      <aside class="registry-detail__side">
+        <bm-panel heading="Review">
+          <ol class="registry-detail__journey" [attr.data-status]="r.status" aria-label="Where it is in review">
+            @for (step of journey; track step.status; let i = $index) {
+              <li
+                class="registry-detail__step"
+                [class.is-done]="i < journeyIndex(r.status)"
+                [class.is-current]="i === journeyIndex(r.status)"
+                [class.is-rejected]="r.status === 'REJECTED' && i === 1"
+                [style.--bm-i]="i"
+              >
+                <span class="registry-detail__step-dot" aria-hidden="true"></span>
+                <span class="registry-detail__step-label">{{ r.status === 'REJECTED' && i === 1 ? 'Sent back' : step.label }}</span>
+              </li>
+            }
+          </ol>
+          <bm-status-timeline [registration]="r" />
+        </bm-panel>
+
+        <bm-panel heading="Record">
+          <dl class="registry-detail__record">
+            <bm-property label="Recorded by" [value]="r.createdBy" />
+            <bm-property label="Recorded" [value]="dateTime(r.createdAt)" />
+            <bm-property label="Last changed" [value]="dateTime(r.updatedAt)" />
+            <bm-property label="Reference" [value]="r.id" mono copyable />
+          </dl>
+        </bm-panel>
+      </aside>
+    </div>
+
+    <ng-template #more>
+      <div class="bm-menu" cdkMenu>
+        @for (action of secondary(); track action; let i = $index) {
+          <button
+            type="button"
+            class="bm-menu__item"
+            cdkMenuItem
+            [attr.data-tone]="action === 'delete' ? 'danger' : null"
+            [style.--bm-i]="i"
+            (cdkMenuItemTriggered)="run(action)"
+          >
+            <svg [lucideIcon]="meta[action].icon" [size]="17"></svg>
+            {{ meta[action].label }}
+          </button>
+        }
+        @if (secondary().length) {
+          <div class="bm-menu__divider"></div>
+        }
+        <button type="button" class="bm-menu__item" cdkMenuItem (cdkMenuItemTriggered)="copyLink()">
+          <svg lucideIcon="link" [size]="17"></svg>
+          Copy link
+        </button>
+        <button type="button" class="bm-menu__item" cdkMenuItem (cdkMenuItemTriggered)="openInGoogleMaps(r)">
+          <svg lucideIcon="external-link" [size]="17"></svg>
+          Open in Google Maps
+        </button>
+      </div>
+    </ng-template>
+  }
+</div>

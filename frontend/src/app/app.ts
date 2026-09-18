@@ -1,84 +1,51 @@
-import { Component, DestroyRef, afterNextRender, inject, viewChild } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  NavigationCancel,
-  NavigationEnd,
-  NavigationError,
-  NavigationStart,
-  Router,
-  RouterOutlet,
-} from '@angular/router';
+import { ChangeDetectionStrategy, Component, effect, inject, untracked } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
+import { NgxSonnerToaster, toast } from 'ngx-sonner';
 
-import { BootService } from './core/boot.service';
-import { CommandPaletteComponent } from './shared/command-palette/command-palette';
-import { RouteCurtainComponent } from './shared/route-curtain/route-curtain';
+import { SessionStore } from './core/auth/session.store';
+import { Viewport } from './core/ui/viewport';
 
-/**
- * The application frame: an outlet, the transition that covers it, and the
- * command palette that floats above everything.
- *
- * The previous implementation held a 2-second overlay on *every* navigation,
- * timed by a `setTimeout` that had no relationship to whether the next page was
- * ready. Here the curtain and the router are actually coupled — the page is
- * swapped while the viewport is genuinely hidden, and the curtain lifts as soon
- * as both the sweep and the navigation have finished, so a cached lazy chunk
- * costs the user about half a second rather than two.
- */
+const PUBLIC_PREFIXES = ['/auth', '/subscribe', '/subscriptions'];
+
+const END_MESSAGES = {
+  expired: 'Your session expired. Sign in again to carry on.',
+  revoked: 'Your session was ended for safety. Sign in again.',
+  elsewhere: 'You signed out in another tab.',
+} as const;
+
 @Component({
-  selector: 'app-root',
-  imports: [RouterOutlet, RouteCurtainComponent, CommandPaletteComponent],
+  selector: 'bm-root',
+  imports: [RouterOutlet, NgxSonnerToaster],
   template: `
     <router-outlet />
-
-    <bm-command-palette />
-    <bm-route-curtain />
+    <ngx-sonner-toaster
+      [position]="viewport.isHandset() ? 'top-center' : 'bottom-right'"
+      [visibleToasts]="3"
+      [duration]="4200"
+      closeButton
+      [offset]="viewport.isHandset() ? '12px' : '20px'"
+    />
   `,
-  styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
+  protected readonly viewport = inject(Viewport);
+  private readonly sessions = inject(SessionStore);
   private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly boot = inject(BootService);
-  private readonly curtain = viewChild.required(RouteCurtainComponent);
-
-  /** Until the opening sequence has finished, navigations do not draw a curtain. */
-  private booted = false;
-
-  /** Resolves when the viewport is fully hidden for the navigation in flight. */
-  private covered?: Promise<void>;
 
   constructor() {
-    afterNextRender(() => {
-      this.curtain()
-        .boot()
-        .then(() => {
-          this.booted = true;
-          // Releases any page holding its entrance until the viewport is
-          // actually visible.
-          this.boot.markReady();
-        });
-    });
-
-    this.router.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((event) => {
-      if (event instanceof NavigationStart) {
-        if (this.booted) this.covered = this.curtain().cover();
-        return;
-      }
-
-      if (
-        event instanceof NavigationEnd ||
-        event instanceof NavigationCancel ||
-        event instanceof NavigationError
-      ) {
-        if (!this.booted) return;
-
-        // Lift only once the sweep has actually closed. Without this a fast
-        // navigation reveals a half-drawn curtain over the page it just built.
-        const covered = this.covered ?? Promise.resolve();
-        this.covered = undefined;
-
-        covered.then(() => this.curtain().reveal());
-      }
+    // A session that ends on its own — expiry, revocation, another tab — sends the person back to
+    // sign in, and says why, instead of leaving them on a page whose every request now fails.
+    effect(() => {
+      const signedIn = this.sessions.isAuthenticated();
+      const reason = this.sessions.endReason();
+      untracked(() => {
+        if (signedIn || !reason || reason === 'signed-out') return;
+        const url = this.router.url;
+        if (PUBLIC_PREFIXES.some((prefix) => url.startsWith(prefix))) return;
+        toast.info(END_MESSAGES[reason]);
+        void this.router.navigate(['/auth/sign-in'], { queryParams: { returnUrl: url } });
+      });
     });
   }
 }

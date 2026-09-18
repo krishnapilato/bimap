@@ -1,0 +1,258 @@
+<div class="bm-dialog import" [attr.data-step]="step()">
+  <ol class="import__steps" aria-label="Import steps">
+    <li [class.is-current]="step() === 'choose'" [class.is-done]="step() !== 'choose'"><span>1</span>File</li>
+    <li [class.is-current]="step() === 'review'" [class.is-done]="step() === 'report'"><span>2</span>Check</li>
+    <li [class.is-current]="step() === 'report'"><span>3</span>Result</li>
+  </ol>
+
+  @switch (step()) {
+    @case ('choose') {
+      <section class="import__stage" animate.enter="bm-enter-rise">
+        <h2 class="bm-dialog__title">Import addresses into {{ list.name }}</h2>
+        <p class="bm-dialog__text">A CSV file with a column of email addresses is all it takes. Names are optional, and nothing is imported until you have checked what was read.</p>
+
+        @if (readError(); as message) {
+          <bm-message-strip tone="negative">{{ message }}</bm-message-strip>
+        }
+
+        @if (!pasting()) {
+          <div
+            class="import__drop"
+            role="button"
+            tabindex="0"
+            aria-label="Choose a CSV file, or drop one here"
+            [class.is-dragging]="dragging()"
+            (click)="browse()"
+            (keydown.enter)="browse()"
+            (keydown.space)="$event.preventDefault(); browse()"
+            (dragover)="over($event)"
+            (dragleave)="dragging.set(false)"
+            (drop)="drop($event)"
+          >
+            <input #file type="file" class="bm-visually-hidden" accept=".csv,.tsv,.txt,text/csv,text/plain" tabindex="-1" (change)="picked($event)" (click)="$event.stopPropagation()" />
+            <span class="import__drop-art" aria-hidden="true">
+              <span class="import__drop-sheet"></span>
+              <svg lucideIcon="file-up" [size]="26"></svg>
+            </span>
+            <strong>{{ dragging() ? 'Let go to read the file' : 'Drop a CSV file here' }}</strong>
+            <span>or <u>choose one from this device</u></span>
+            <span class="import__drop-hint">Up to {{ formatNumber(maxRows) }} addresses in one go.</span>
+          </div>
+        } @else {
+          <label class="import__paste">
+            <span>One address per line. A name can follow each one after a comma.</span>
+            <textarea
+              class="bm-input"
+              rows="7"
+              spellcheck="false"
+              placeholder="giulia.rossi@example.com, Giulia, Rossi&#10;marco.bianchi@example.org"
+              [value]="pasted()"
+              (input)="pasted.set($any($event.target).value)"
+            ></textarea>
+          </label>
+        }
+
+        <div class="import__alternatives">
+          @if (!pasting()) {
+            <button type="button" bmButton variant="ghost" size="sm" (click)="pasting.set(true)">
+              <svg lucideIcon="clipboard-list"></svg>
+              Paste addresses instead
+            </button>
+          } @else {
+            <button type="button" bmButton variant="ghost" size="sm" (click)="pasting.set(false)">
+              <svg lucideIcon="file-up"></svg>
+              Use a file instead
+            </button>
+          }
+          <button type="button" bmButton variant="ghost" size="sm" (click)="template()">
+            <svg lucideIcon="download"></svg>
+            Download a template
+          </button>
+        </div>
+
+        <div class="bm-dialog__actions">
+          <button bmButton type="button" variant="ghost" (click)="close()">Cancel</button>
+          @if (pasting()) {
+            <button bmButton type="button" variant="primary" [disabled]="!pasted().trim()" (click)="readPasted()">
+              <svg lucideIcon="arrow-right"></svg>
+              Read these addresses
+            </button>
+          }
+        </div>
+      </section>
+    }
+
+    @case ('review') {
+      @if (source(); as file) {
+        <section class="import__stage" animate.enter="bm-enter-rise">
+          <div class="import__file">
+            <span class="import__file-icon"><svg lucideIcon="file-spreadsheet" [size]="20"></svg></span>
+            <span class="import__file-name">
+              <strong>{{ file.name }}</strong>
+              <span>{{ formatNumber(checks().total) }} {{ checks().total === 1 ? 'row' : 'rows' }}</span>
+            </span>
+            <button type="button" bmButton variant="ghost" size="sm" (click)="back()">Choose another</button>
+          </div>
+
+          @if (tooMany()) {
+            <bm-message-strip tone="negative">
+              <strong>This is more than one import can carry.</strong> Split the file into parts of up to {{ formatNumber(maxRows) }} rows and import them one after another.
+            </bm-message-strip>
+          }
+          @if (problem(); as message) {
+            <bm-message-strip tone="negative">{{ message }}</bm-message-strip>
+          }
+
+          <div class="import__mapping">
+            <label class="import__select">
+              <span>Email address</span>
+              <select class="bm-input" [value]="mapping().email" (change)="map('email', $event)">
+                @for (column of columns(); track column.index) {
+                  <option [value]="column.index" [selected]="column.index === mapping().email">{{ column.label }}</option>
+                }
+              </select>
+            </label>
+            <label class="import__select">
+              <span>First name</span>
+              <select class="bm-input" [value]="mapping().firstName" (change)="map('firstName', $event)">
+                <option [value]="-1" [selected]="mapping().firstName === -1">Not in the file</option>
+                @for (column of columns(); track column.index) {
+                  <option [value]="column.index" [selected]="column.index === mapping().firstName">{{ column.label }}</option>
+                }
+              </select>
+            </label>
+            <label class="import__select">
+              <span>Last name</span>
+              <select class="bm-input" [value]="mapping().lastName" (change)="map('lastName', $event)">
+                <option [value]="-1" [selected]="mapping().lastName === -1">Not in the file</option>
+                @for (column of columns(); track column.index) {
+                  <option [value]="column.index" [selected]="column.index === mapping().lastName">{{ column.label }}</option>
+                }
+              </select>
+            </label>
+          </div>
+          <bm-checkbox [checked]="hasHeader()" (checkedChange)="hasHeader.set($event)">The first row holds column names</bm-checkbox>
+
+          <div class="import__checks" aria-live="polite">
+            <span class="import__check" data-tone="positive"><svg lucideIcon="circle-check" [size]="15"></svg><strong>{{ formatNumber(checks().valid) }}</strong> ready to import</span>
+            @if (checks().invalid) {
+              <span class="import__check" data-tone="negative"><svg lucideIcon="circle-alert" [size]="15"></svg><strong>{{ formatNumber(checks().invalid) }}</strong> not a valid address</span>
+            }
+            @if (checks().duplicates) {
+              <span class="import__check" data-tone="neutral"><svg lucideIcon="copy" [size]="15"></svg><strong>{{ formatNumber(checks().duplicates) }}</strong> repeated in the file</span>
+            }
+          </div>
+
+          <div class="import__preview">
+            <table>
+              <caption class="bm-visually-hidden">The first rows, as they will be imported</caption>
+              <thead>
+                <tr><th scope="col">Row</th><th scope="col">Email address</th><th scope="col">First name</th><th scope="col">Last name</th></tr>
+              </thead>
+              <tbody>
+                @for (row of preview(); track row.row; let i = $index) {
+                  <tr [class.is-invalid]="!row.valid" [class.is-duplicate]="row.duplicate" [style.--bm-i]="i">
+                    <td class="bm-mono">{{ row.row }}</td>
+                    <td>
+                      <span class="import__address">
+                        @if (!row.valid) {
+                          <svg lucideIcon="circle-alert" [size]="14" aria-label="Not a valid address"></svg>
+                        }
+                        {{ row.email || 'Empty' }}
+                      </span>
+                    </td>
+                    <td>{{ row.firstName || '—' }}</td>
+                    <td>{{ row.lastName || '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            @if (checks().total > preview().length) {
+              <p class="import__more">and {{ formatNumber(checks().total - preview().length) }} more</p>
+            }
+          </div>
+
+          <bm-choice-cards legend="Did these people agree to receive this list?" [columns]="2" [options]="consentOptions" [value]="consent()" (valueChange)="consent.set($event)" />
+
+          <div class="import__option">
+            <bm-checkbox [checked]="updateExisting()" (checkedChange)="updateExisting.set($event)">Correct the names of people already on the list</bm-checkbox>
+            <p>An import never changes anyone's subscription, so nobody who opted out is put back on the list.</p>
+          </div>
+
+          <div class="bm-dialog__actions">
+            <button bmButton type="button" variant="ghost" (click)="back()">Back</button>
+            <button bmButton type="button" variant="primary" [loading]="importing()" [disabled]="tooMany() || checks().valid === 0" (click)="run()">
+              <svg lucideIcon="import"></svg>
+              Import {{ formatNumber(checks().valid) }} {{ checks().valid === 1 ? 'address' : 'addresses' }}
+            </button>
+          </div>
+        </section>
+      }
+    }
+
+    @case ('report') {
+      @if (report(); as result) {
+        <section class="import__stage import__report" animate.enter="bm-enter-rise">
+          <div class="import__done" aria-hidden="true">
+            <svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" /><path d="M15 27.5 22.5 35 37.5 19" /></svg>
+          </div>
+          <h2 class="bm-dialog__title">Import finished</h2>
+          <p class="bm-dialog__text">{{ formatNumber(result.received) }} rows read from {{ source()?.name }}.</p>
+
+          <div class="import__figures">
+            <div class="import__figure" data-tone="positive" style="--bm-i: 0">
+              <strong [bmCountUp]="result.created"></strong>
+              <span>added</span>
+            </div>
+            <div class="import__figure" data-tone="info" style="--bm-i: 1">
+              <strong [bmCountUp]="result.updated"></strong>
+              <span>names corrected</span>
+            </div>
+            <div class="import__figure" data-tone="neutral" style="--bm-i: 2">
+              <strong [bmCountUp]="result.unchanged"></strong>
+              <span>already there</span>
+            </div>
+            <div class="import__figure" [attr.data-tone]="result.rejected.length ? 'negative' : 'neutral'" style="--bm-i: 3">
+              <strong [bmCountUp]="result.rejected.length"></strong>
+              <span>refused</span>
+            </div>
+          </div>
+
+          @if (consent() === 'REQUEST_CONFIRMATION' && result.created > 0) {
+            <bm-message-strip tone="info" icon="mail-question">
+              {{ formatNumber(result.created) }} confirmation {{ result.created === 1 ? 'email is' : 'emails are' }} on the way. People join the list as they click the link.
+            </bm-message-strip>
+          }
+
+          @if (result.rejected.length) {
+            <div class="import__refused">
+              <div class="import__refused-head">
+                <h3>Refused rows</h3>
+                <button type="button" bmButton variant="ghost" size="sm" (click)="downloadRefused()">
+                  <svg lucideIcon="download"></svg>
+                  Download to fix
+                </button>
+              </div>
+              <ul>
+                @for (entry of result.rejected; track entry.row) {
+                  <li>
+                    <span class="bm-mono">Row {{ entry.row }}</span>
+                    <strong>{{ entry.email || 'Empty' }}</strong>
+                    <span>{{ entry.reason }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+
+          <div class="bm-dialog__actions">
+            <button bmButton type="button" variant="primary" (click)="close()">
+              <svg lucideIcon="check"></svg>
+              Done
+            </button>
+          </div>
+        </section>
+      }
+    }
+  }
+</div>

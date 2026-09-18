@@ -1,0 +1,142 @@
+<div class="bm-page is-wide audiences">
+  <bm-page-header title="Audiences" [subtitle]="subtitle()">
+    <div bmActions>
+      @if (sessions.can('mailing:write')) {
+        <button type="button" bmButton variant="primary" (click)="newList()">
+          <svg lucideIcon="plus"></svg>
+          New list
+        </button>
+      }
+    </div>
+  </bm-page-header>
+
+  @if (overview.isError()) {
+    <bm-error-state title="The audience figures could not be loaded" [error]="overview.error()" (retry)="overview.refetch()" />
+  } @else {
+    @let data = overview.data();
+    <section class="audiences__kpis bm-grid" aria-label="Audience figures">
+      <bm-stat-tile label="Subscribed" icon="users-round" tone="positive" caption="in 30 days" [value]="data?.audience?.subscribed" [delta]="monthDelta()" [loading]="overview.isPending()" />
+      <bm-stat-tile label="Unconfirmed" icon="hourglass" tone="critical" caption="waiting for their link" [value]="data?.audience?.pending" [loading]="overview.isPending()" />
+      <bm-stat-tile label="Unsubscribed" icon="user-minus" tone="neutral" caption="kept on record, never emailed" [value]="data?.audience?.unsubscribed" [loading]="overview.isPending()" />
+      <bm-stat-tile label="Campaigns sent" icon="send" caption="{{ data?.campaigns?.scheduled ?? 0 }} scheduled" [value]="data?.campaigns?.sent" [loading]="overview.isPending()" />
+      <bm-stat-tile label="Delivered" icon="mail-check" tone="positive" [caption]="data ? rateCaption(data) : undefined" [value]="deliveryRate()" [format]="formatRate" [loading]="overview.isPending()" />
+    </section>
+
+    <section class="audiences__insights" aria-label="Activity">
+      <bm-panel class="audiences__growth">
+        @if (data) {
+          <bm-growth-chart title="Joins and leaves" caption="People per day across every list, last 30 days" [points]="data.growth" />
+        } @else {
+          <div class="audiences__chart-loading">
+            <bm-skeleton width="40%" height="16px" />
+            <bm-skeleton height="190px" />
+          </div>
+        }
+      </bm-panel>
+
+      <bm-panel class="audiences__activity" heading="Campaigns" subheading="Every campaign on every list, by where it stands">
+        @if (data) {
+          <bm-stacked-meter [segments]="campaignSegments()" />
+          <div class="audiences__activity-divider"></div>
+          <div class="audiences__activity-title">
+            <h3>Deliveries</h3>
+            <p>Campaign messages in the last 30 days</p>
+          </div>
+          <bm-stacked-meter [segments]="deliverySegments()" />
+        } @else {
+          <bm-skeleton height="120px" />
+        }
+      </bm-panel>
+    </section>
+  }
+
+  <section class="audiences__lists" aria-labelledby="audiences-lists-title">
+    <div class="audiences__toolbar">
+      <h2 id="audiences-lists-title">Mailing lists</h2>
+      <bm-segmented size="sm" ariaLabel="Show lists" [options]="statusOptions()" [value]="shown()" (valueChange)="filter($event)" />
+      <span class="bm-toolbar__spacer"></span>
+      <bm-search-box placeholder="Search lists" [value]="q() ?? ''" [busy]="lists.isFetching() && !lists.isPending()" (search)="search($event)" />
+    </div>
+
+    @if (lists.isError()) {
+      <bm-error-state [error]="lists.error()" (retry)="lists.refetch()" />
+    } @else if (lists.isPending()) {
+      <div class="audiences__cards" aria-busy="true">
+        @for (placeholder of [0, 1, 2]; track placeholder) {
+          <div class="audiences__card is-placeholder">
+            <bm-skeleton width="55%" height="18px" />
+            <bm-skeleton width="85%" height="12px" />
+            <bm-skeleton width="30%" height="30px" />
+            <bm-skeleton height="8px" />
+          </div>
+        }
+      </div>
+    } @else if (lists.data()?.content?.length) {
+      <div class="audiences__cards" [class.is-refreshing]="lists.isPlaceholderData()">
+        @for (list of lists.data()!.content; track list.id; let i = $index) {
+          <a class="audiences__card" bmSpotlight [routerLink]="['/audiences', list.id]" [style.--bm-i]="i" [class.is-archived]="list.status === 'ARCHIVED'">
+            <div class="audiences__card-head">
+              <span class="audiences__card-icon" aria-hidden="true"><svg [lucideIcon]="list.status === 'ARCHIVED' ? 'archive' : 'megaphone'" [size]="18"></svg></span>
+              <div class="audiences__card-titles">
+                <h3>{{ list.name }}</h3>
+                <p>{{ list.description || 'No description yet.' }}</p>
+              </div>
+              <svg class="audiences__card-go" lucideIcon="arrow-up-right" [size]="18" aria-hidden="true"></svg>
+            </div>
+
+            <div class="audiences__card-figure">
+              <strong [bmCountUp]="list.audience.subscribed"></strong>
+              <span>subscribed</span>
+            </div>
+
+            <div class="audiences__card-bar" role="img" [attr.aria-label]="list.audience.subscribed + ' subscribed, ' + list.audience.pending + ' unconfirmed, ' + list.audience.unsubscribed + ' unsubscribed'">
+              @if (list.audience.total) {
+                <span class="is-subscribed" [style.flex-grow]="list.audience.subscribed"></span>
+                <span class="is-pending" [style.flex-grow]="list.audience.pending"></span>
+                <span class="is-unsubscribed" [style.flex-grow]="list.audience.unsubscribed"></span>
+              }
+            </div>
+            <ul class="audiences__card-counts">
+              <li><span class="audiences__dot is-subscribed"></span>{{ formatNumber(list.audience.subscribed) }} subscribed</li>
+              <li><span class="audiences__dot is-pending"></span>{{ formatNumber(list.audience.pending) }} unconfirmed</li>
+              <li><span class="audiences__dot is-unsubscribed"></span>{{ formatNumber(list.audience.unsubscribed) }} left</li>
+            </ul>
+
+            <footer class="audiences__card-foot">
+              @if (list.status === 'ARCHIVED') {
+                <bm-status size="sm" label="Archived" tone="special" />
+              } @else {
+                <span class="audiences__chip" [class.is-on]="list.doubleOptIn">
+                  <svg [lucideIcon]="list.doubleOptIn ? 'shield-check' : 'shield'" [size]="13"></svg>
+                  {{ list.doubleOptIn ? 'Double opt-in' : 'Single opt-in' }}
+                </span>
+                @if (list.publicSignup) {
+                  <span class="audiences__chip is-on"><svg lucideIcon="globe" [size]="13"></svg>Public sign-up</span>
+                }
+              }
+              <span class="audiences__card-sent">
+                {{ list.lastSentAt ? 'Last sent ' + relativeClause(list.lastSentAt) : list.campaignCount ? list.campaignCount + (list.campaignCount === 1 ? ' campaign' : ' campaigns') + ', none sent' : 'Nothing sent yet' }}
+              </span>
+            </footer>
+          </a>
+        }
+      </div>
+      @if ((lists.data()?.totalPages ?? 0) > 1) {
+        <bm-paginator class="audiences__paginator" [page]="lists.data()" [sizes]="[]" (pageChange)="goToPage($event)" />
+      }
+    } @else if (searching()) {
+      <bm-empty-state icon="scan-search" title="No list matches" description="Try another part of the name or the description." compact />
+    } @else if (shown() === 'ARCHIVED') {
+      <bm-empty-state icon="archive" title="Nothing archived" description="Lists you archive stay here, with their subscribers and history, until they are restored or deleted." compact />
+    } @else {
+      <bm-empty-state icon="megaphone" title="No mailing lists yet" description="Create a list for each audience: surveyors, coordinators, anyone who wants registry news.">
+        @if (sessions.can('mailing:write')) {
+          <button type="button" bmButton variant="primary" (click)="newList()">
+            <svg lucideIcon="plus"></svg>
+            Create the first list
+          </button>
+        }
+      </bm-empty-state>
+    }
+  </section>
+</div>

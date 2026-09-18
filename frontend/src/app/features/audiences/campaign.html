@@ -1,0 +1,367 @@
+<div class="bm-page is-wide campaign" [attr.data-mode]="mode()">
+  @if (listQuery.isError() || (!isNew() && query.isError())) {
+    @if (notFound() || listQuery.isError()) {
+      <bm-empty-state icon="scan-search" title="This campaign is not here" description="It may have been deleted, or its list no longer exists.">
+        <a bmButton [routerLink]="['/audiences', listId()]" [queryParams]="{ tab: 'campaigns' }">
+          <svg lucideIcon="arrow-left"></svg>
+          Back to the list
+        </a>
+      </bm-empty-state>
+    } @else {
+      <bm-error-state title="This campaign could not be loaded" [error]="query.error()" (retry)="query.refetch()" />
+    }
+  } @else if (mode() === 'loading' || !list()) {
+    <div class="campaign__loading" aria-busy="true">
+      <bm-skeleton width="220px" height="12px" />
+      <bm-skeleton width="42%" height="30px" />
+      <bm-skeleton width="30%" height="14px" />
+      <div class="campaign__loading-grid">
+        <bm-skeleton height="460px" />
+        <bm-skeleton height="460px" />
+      </div>
+    </div>
+  } @else {
+    @let l = list()!;
+    @let c = campaign();
+
+    <bm-page-header [crumbs]="crumbs()" [title]="isNew() ? 'New campaign' : c?.subject || 'Untitled campaign'">
+      <span bmTitleAddon class="campaign__addon">
+        @if (c) {
+          <bm-status [label]="statusInfo[c.status].label" [tone]="statusInfo[c.status].tone" [live]="c.status === 'SENDING'" />
+        }
+        @if (mode() === 'compose' && editable()) {
+          <span class="campaign__saved" [class.is-dirty]="dirty()" [class.is-saving]="saving()" [class.is-new]="isNew() && !dirty()" aria-live="polite">
+            <span class="campaign__saved-dot" aria-hidden="true"></span>
+            {{ savedLabel() }}
+          </span>
+        }
+      </span>
+      <p bmSubtitle class="campaign__to">
+        <svg lucideIcon="users-round" [size]="15"></svg>
+        @if (mode() === 'report' && c) {
+          <span>Sent to {{ formatNumber(c.recipientCount) }} {{ c.recipientCount === 1 ? 'person' : 'people' }} on <a [routerLink]="['/audiences', l.id]">{{ l.name }}</a></span>
+        } @else {
+          <span>For the {{ formatNumber(l.audience.subscribed) }} {{ l.audience.subscribed === 1 ? 'person' : 'people' }} subscribed to <a [routerLink]="['/audiences', l.id]">{{ l.name }}</a></span>
+        }
+      </p>
+      <div bmActions>
+        @if (mode() === 'compose') {
+          @if (editable()) {
+            <button type="button" bmButton variant="ghost" bmTooltip="Save (Ctrl S)" [loading]="saving()" [disabled]="!isNew() && !dirty()" (click)="save()">
+              <svg lucideIcon="check"></svg>
+              Save
+            </button>
+          }
+          @if (isNew() ? editable() : available().includes('test')) {
+            <button type="button" bmButton [loading]="running() === 'test'" (click)="run('test')">
+              <svg lucideIcon="mail-check"></svg>
+              Send a test
+            </button>
+          }
+          @if (available().includes('unschedule')) {
+            <button type="button" bmButton [loading]="running() === 'unschedule'" (click)="run('unschedule')">
+              <svg lucideIcon="calendar-x"></svg>
+              Back to drafts
+            </button>
+          }
+          @if (isNew() ? editable() : available().includes('schedule')) {
+            <button type="button" bmButton [loading]="running() === 'schedule'" (click)="run('schedule')">
+              <svg lucideIcon="calendar-clock"></svg>
+              {{ c?.status === 'SCHEDULED' ? 'Reschedule' : 'Schedule' }}
+            </button>
+          }
+          @if (isNew() ? editable() : available().includes('send')) {
+            <button type="button" bmButton variant="primary" [loading]="running() === 'send'" (click)="run('send')">
+              <svg lucideIcon="send"></svg>
+              Send now
+            </button>
+          }
+          @if (available().includes('duplicate') || available().includes('delete')) {
+            <button type="button" bmButton variant="ghost" iconOnly aria-label="More actions" [cdkMenuTriggerFor]="more">
+              <svg lucideIcon="ellipsis-vertical"></svg>
+            </button>
+          }
+        } @else {
+          @if (available().includes('cancel')) {
+            <button type="button" bmButton variant="danger" [loading]="running() === 'cancel'" (click)="run('cancel')">
+              <svg lucideIcon="octagon-x"></svg>
+              Stop sending
+            </button>
+          }
+          @if (available().includes('duplicate')) {
+            <button type="button" bmButton [loading]="running() === 'duplicate'" (click)="run('duplicate')">
+              <svg lucideIcon="copy-plus"></svg>
+              Duplicate
+            </button>
+          }
+        }
+      </div>
+    </bm-page-header>
+
+    @if (c?.status === 'SCHEDULED') {
+      <bm-message-strip tone="info" icon="calendar-clock">
+        <strong>Goes out {{ dateTime(c!.scheduledAt) }}</strong> to everyone subscribed at that moment. It can still be changed until then, and what is saved is what gets sent.
+      </bm-message-strip>
+    }
+    @if (mode() === 'compose' && l.status === 'ARCHIVED') {
+      <bm-message-strip tone="critical" icon="archive">The list is archived, so this campaign cannot be changed or sent. Restore the list to carry on.</bm-message-strip>
+    } @else if (!canWrite()) {
+      <bm-message-strip icon="eye">You can read this campaign, but only people who run mailing lists can change or send it.</bm-message-strip>
+    }
+
+    @if (mode() === 'compose') {
+      @if (viewport.isHandset()) {
+        <bm-segmented class="campaign__panes" ariaLabel="Write or preview" [options]="paneOptions" [value]="pane()" (valueChange)="pane.set($event)" />
+      }
+
+      <div class="campaign__compose" [attr.data-pane]="pane()">
+        <section class="campaign__editor" aria-label="Write the campaign">
+          <bm-panel class="campaign__headers">
+            <bm-field label="Subject" [control]="form.subject">
+              <input #subjectInput bmInput autocomplete="off" placeholder="What is this email about?" [formField]="form.subject" (focus)="focus('subject')" />
+              <span bmMeta class="campaign__count" [class.is-near]="model().subject.length > 200">{{ model().subject.length }}/255</span>
+            </bm-field>
+            <bm-field label="Preview text" optional hint="Shown after the subject in most inboxes, before the email is opened." [control]="form.preheader">
+              <input #preheaderInput bmInput autocomplete="off" [formField]="form.preheader" (focus)="focus('preheader')" />
+            </bm-field>
+          </bm-panel>
+
+          <bm-panel class="campaign__body-panel" [flush]="true">
+            <div class="campaign__body-bar">
+              <span class="campaign__format" [class.is-markup]="markup()">
+                <svg [lucideIcon]="markup() ? 'code' : 'type'" [size]="14"></svg>
+                {{ markup() ? 'HTML' : 'Plain text' }}
+              </span>
+              <span class="campaign__format-hint">{{ markup() ? 'Sent as written, inside the list frame.' : 'A blank line starts a new paragraph.' }}</span>
+              <span class="bm-toolbar__spacer"></span>
+              @if (editable()) {
+                <button type="button" bmButton variant="ghost" size="sm" [cdkMenuTriggerFor]="tags">
+                  <svg lucideIcon="braces"></svg>
+                  Merge tag
+                  <svg lucideIcon="chevron-down"></svg>
+                </button>
+              }
+            </div>
+
+            @if (editable() && !model().body.trim()) {
+              <div class="campaign__starters" animate.leave="bm-leave-fade">
+                <span class="campaign__starters-title">Start from</span>
+                <div class="campaign__starter-list">
+                  @for (starter of starters; track starter.key; let i = $index) {
+                    <button type="button" class="campaign__starter" [style.--bm-i]="i" (click)="start(starter)">
+                      <span class="campaign__starter-icon"><svg [lucideIcon]="starter.icon" [size]="16"></svg></span>
+                      <span class="campaign__starter-text">
+                        <strong>{{ starter.label }}</strong>
+                        <span>{{ starter.description }}</span>
+                      </span>
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+
+            <textarea
+              #bodyArea
+              class="campaign__body"
+              [class.is-markup]="markup()"
+              [class.has-error]="form.body().touched() && form.body().invalid()"
+              aria-label="Email body"
+              placeholder="Write the email. Plain text works, and so does HTML."
+              [formField]="form.body"
+              (focus)="focus('body')"
+            ></textarea>
+
+            <div class="campaign__body-foot">
+              @if (form.body().touched() && form.body().invalid()) {
+                <p class="campaign__error" animate.enter="bm-enter-fade">{{ form.body().errors()[0]?.message }}</p>
+              }
+              @for (tag of unknown(); track tag) {
+                <bm-message-strip tone="critical">
+                  <span class="bm-mono">{{ tag }}</span> is not a merge tag, so it will be sent exactly as written. Check its spelling in the merge tag menu.
+                </bm-message-strip>
+              }
+              <p class="campaign__frame-note">
+                <svg lucideIcon="info" [size]="14"></svg>
+                Every campaign goes out inside the list frame, with the list name and an unsubscribe link at the bottom, so neither needs writing here.
+              </p>
+            </div>
+          </bm-panel>
+        </section>
+
+        <section class="campaign__preview" aria-label="Preview">
+          <div class="campaign__preview-bar">
+            <span class="campaign__preview-as">Previewed as <strong>{{ recipient().firstName }} {{ recipient().lastName }}</strong></span>
+            <bm-segmented size="sm" [iconsOnly]="true" ariaLabel="Preview size" [options]="deviceOptions" [value]="device()" (valueChange)="device.set($event)" />
+          </div>
+
+          <div class="campaign__inbox" aria-label="How it appears in an inbox">
+            <span class="campaign__inbox-avatar" aria-hidden="true">B</span>
+            <span class="campaign__inbox-text">
+              <span class="campaign__inbox-from">BiMap · {{ l.name }}<time>now</time></span>
+              <strong>{{ inboxSubject() }}</strong>
+              <span>{{ inboxPreheader() }}</span>
+            </span>
+          </div>
+
+          <div class="campaign__device" [attr.data-device]="device()">
+            <bm-mail-frame label="Campaign preview" [html]="previewHtml()" [minHeight]="440" />
+          </div>
+        </section>
+      </div>
+    } @else if (c && progress(); as p) {
+      <div class="campaign__report">
+        <bm-panel class="campaign__hero">
+          <div class="campaign__hero-inner">
+            <div class="campaign__ring" role="img" [attr.aria-label]="formatPercent(p.share) + ' of recipients handled'">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="campaign__ring-track" cx="60" cy="60" r="52" />
+                <circle class="campaign__ring-sent" cx="60" cy="60" r="52" [attr.stroke-dasharray]="p.sentArc + ' ' + p.circumference" />
+                <circle class="campaign__ring-failed" cx="60" cy="60" r="52" [attr.stroke-dasharray]="p.failedArc + ' ' + p.circumference" [attr.stroke-dashoffset]="-p.sentArc" />
+              </svg>
+              <span class="campaign__ring-label" [class.is-live]="c.status === 'SENDING'">
+                <strong>{{ formatPercent(p.share) }}</strong>
+                <span>{{ c.status === 'SENDING' ? 'so far' : 'handled' }}</span>
+              </span>
+            </div>
+
+            <div class="campaign__hero-body">
+              @switch (c.status) {
+                @case ('SENDING') {
+                  <h2>Sending to {{ formatNumber(c.recipientCount) }} people</h2>
+                  <p>{{ formatNumber(p.left) }} still to go{{ p.etaMinutes !== null ? ', about ' + minutes(p.etaMinutes) + ' at this pace' : '' }}. It can be stopped at any moment.</p>
+                }
+                @case ('SENT') {
+                  <h2>Sent to {{ formatNumber(c.recipientCount) }} people</h2>
+                  <p>Finished {{ relativeClause(c.completedAt) }}, in {{ minutes(p.duration) }}. {{ p.successRate === null ? '' : formatPercent(p.successRate, 1) + ' reached their inbox.' }}</p>
+                }
+                @case ('CANCELLED') {
+                  <h2>Stopped after {{ formatNumber(p.sent + p.failed) }} of {{ formatNumber(c.recipientCount) }}</h2>
+                  <p>Stopped {{ relativeClause(c.completedAt) }}. The other {{ formatNumber(p.left) }} people will not receive it.</p>
+                }
+              }
+
+              <div class="campaign__figures">
+                <div class="campaign__figure" data-tone="positive">
+                  <span class="campaign__figure-key" aria-hidden="true"></span>
+                  <strong>{{ formatNumber(p.sent) }}</strong>
+                  <span>delivered</span>
+                </div>
+                <div class="campaign__figure" data-tone="negative">
+                  <span class="campaign__figure-key" aria-hidden="true"></span>
+                  <strong>{{ formatNumber(p.failed) }}</strong>
+                  <span>failed</span>
+                </div>
+                <div class="campaign__figure" data-tone="neutral">
+                  <span class="campaign__figure-key" aria-hidden="true"></span>
+                  <strong>{{ formatNumber(p.left) }}</strong>
+                  <span>{{ c.status === 'SENDING' ? 'still to send' : 'not sent' }}</span>
+                </div>
+                @if (c.status === 'SENDING' && p.perMinute > 0) {
+                  <div class="campaign__figure" data-tone="info">
+                    <span class="campaign__figure-key" aria-hidden="true"></span>
+                    <strong>{{ formatNumber(p.perMinute) }}</strong>
+                    <span>per minute</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </bm-panel>
+
+        <div class="campaign__report-grid">
+          <bm-panel class="campaign__deliveries" heading="Deliveries" subheading="Every message, and what the mail server said about it" [flush]="true">
+            <div bmPanelActions>
+              <bm-segmented size="sm" ariaLabel="Show deliveries" [options]="deliveryFilters" [value]="deliveryFilter()" (valueChange)="filterDeliveries($event)" />
+            </div>
+            <bm-table
+              caption="Deliveries"
+              density="compact"
+              [rows]="deliveries.data()?.content"
+              [rowKey]="deliveryKey"
+              [loading]="deliveries.isPending()"
+              [refreshing]="deliveries.isPlaceholderData()"
+              [interactive]="sessions.isAtLeast('MANAGER')"
+              (rowOpen)="openDelivery($event)"
+            >
+              <ng-template bmColumn="to" header="Recipient" let-row>
+                <span class="campaign__recipient">{{ row.to }}</span>
+              </ng-template>
+              <ng-template bmColumn="status" header="Status" let-row>
+                <bm-status size="sm" [label]="deliveryStatus[presented(row).status].label" [tone]="deliveryStatus[presented(row).status].tone" />
+              </ng-template>
+              <ng-template bmColumn="failureReason" header="What the server said" [priority]="2" let-row>
+                <span class="campaign__reason" [class.is-failure]="!!row.failureReason">{{ row.failureReason || 'Accepted for delivery' }}</span>
+              </ng-template>
+              <ng-template bmColumn="sentAt" header="When" [priority]="3" let-row>
+                <span class="campaign__muted">{{ relativeTime(row.sentAt) }}</span>
+              </ng-template>
+              <ng-template bmCard let-row>
+                <span class="campaign__delivery-card">
+                  <strong>{{ row.to }}</strong>
+                  <span>{{ deliveryStatus[presented(row).status].label }} · {{ relativeTime(row.sentAt) }}</span>
+                  @if (row.failureReason) {
+                    <span class="campaign__reason is-failure">{{ row.failureReason }}</span>
+                  }
+                </span>
+              </ng-template>
+              <div bmEmpty>
+                <bm-empty-state icon="inbox" title="Nothing here" [description]="deliveryFilter() === 'ALL' ? 'Deliveries appear as each message is handed to the mail server.' : 'No delivery is in this state.'" compact />
+              </div>
+            </bm-table>
+            <bm-paginator [page]="deliveries.data()" [sizes]="[]" (pageChange)="deliveryPage.set($event)" />
+          </bm-panel>
+
+          <div class="campaign__aside">
+            <bm-panel heading="Story">
+              <bm-timeline [moments]="story()" />
+            </bm-panel>
+            <bm-panel heading="Details">
+              <dl class="bm-properties">
+                <bm-property label="Preview text" [value]="c.preheader" />
+                <bm-property label="Format" [value]="c.format === 'HTML' ? 'HTML' : 'Plain text'" />
+                <bm-property label="Written by" [value]="c.createdBy" />
+                <bm-property label="Reference" [value]="c.id" mono copyable />
+              </dl>
+            </bm-panel>
+          </div>
+        </div>
+
+        <bm-panel class="campaign__sent-copy" heading="What was sent" subheading="As it arrived, previewed with your own name in the merge tags">
+          <div class="campaign__device" data-device="desktop">
+            <bm-mail-frame label="The campaign as sent" [html]="previewHtml()" [minHeight]="360" />
+          </div>
+        </bm-panel>
+      </div>
+    }
+
+    <ng-template #tags>
+      <div class="bm-menu campaign__tag-menu" cdkMenu>
+        <span class="bm-menu__label">Filled in for each person</span>
+        @for (entry of mergeTags; track entry.tag; let i = $index) {
+          <button type="button" class="bm-menu__item" cdkMenuItem [style.--bm-i]="i" (cdkMenuItemTriggered)="insertTag(entry.tag)">
+            <svg lucideIcon="braces" [size]="16"></svg>
+            {{ entry.label }}
+            <span class="bm-menu__hint bm-mono">{{ entry.tag }}</span>
+          </button>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template #more>
+      <div class="bm-menu" cdkMenu>
+        @if (available().includes('duplicate')) {
+          <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 0" (cdkMenuItemTriggered)="run('duplicate')">
+            <svg lucideIcon="copy-plus" [size]="17"></svg>
+            Duplicate
+          </button>
+        }
+        @if (available().includes('delete')) {
+          <button type="button" class="bm-menu__item" cdkMenuItem data-tone="danger" style="--bm-i: 1" (cdkMenuItemTriggered)="run('delete')">
+            <svg lucideIcon="trash" [size]="17"></svg>
+            Delete
+          </button>
+        }
+      </div>
+    </ng-template>
+  }
+</div>

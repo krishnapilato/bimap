@@ -1,0 +1,268 @@
+<div class="bm-page is-wide registry">
+  <bm-page-header title="Registry" [subtitle]="summary()">
+    <div bmActions>
+      @if (sessions.can('registration:export')) {
+        <button type="button" bmButton [loading]="exporting()" [bmTooltip]="'Download what is on screen as CSV'" [bmTooltipLabels]="false" (click)="export()">
+          <svg lucideIcon="download"></svg>
+          Export CSV
+        </button>
+      }
+      @if (sessions.can('registration:write')) {
+        <a bmButton variant="primary" routerLink="/survey">
+          <svg lucideIcon="map-pin-plus"></svg>
+          New registration
+        </a>
+      }
+    </div>
+  </bm-page-header>
+
+  <div class="registry__filters">
+    <bm-segmented class="registry__status" ariaLabel="Status" [options]="statusOptions()" [value]="status() ?? ''" (valueChange)="setStatus($event)" />
+
+    <div class="registry__toolbar">
+      <bm-search-box
+        class="registry__search"
+        placeholder="Search assets, streets, municipalities, ISTAT codes"
+        shortcut
+        [value]="q() ?? ''"
+        [busy]="list.isFetching() && !list.isPending()"
+        (search)="setQuery($event)"
+      />
+
+      <label class="registry__select">
+        <svg lucideIcon="earth" [size]="16" aria-hidden="true"></svg>
+        <select aria-label="Region" [value]="region() ?? ''" (change)="setRegion($event)">
+          <option value="">All regions</option>
+          @for (option of regions.data() ?? []; track option.name) {
+            <option [value]="option.name" [selected]="option.name === region()">{{ option.name }}</option>
+          }
+        </select>
+        <svg lucideIcon="chevrons-up-down" [size]="14" aria-hidden="true"></svg>
+      </label>
+
+      @if (istat()) {
+        <button type="button" class="registry__place" animate.enter="bm-enter-pop" [attr.aria-label]="'Show every municipality, not only ' + (place.data()?.name ?? istat())" (click)="clearPlace()">
+          <svg lucideIcon="map-pin" [size]="14"></svg>
+          {{ place.data()?.name ?? istat() }}
+          <svg lucideIcon="x" [size]="13"></svg>
+        </button>
+      }
+
+      @if (hasFilters()) {
+        <button type="button" bmButton variant="ghost" size="sm" animate.enter="bm-enter-pop" (click)="clearFilters()">
+          <svg lucideIcon="x"></svg>
+          Clear filters
+        </button>
+      }
+
+      <span class="registry__spacer"></span>
+
+      @if (layout() === 'table' && !viewport.isHandset()) {
+        <button type="button" bmButton variant="ghost" size="sm" [cdkMenuTriggerFor]="columnsMenu">
+          <svg lucideIcon="columns-3"></svg>
+          Columns
+        </button>
+      }
+
+      <bm-segmented size="sm" ariaLabel="Layout" [iconsOnly]="true" [options]="layouts" [value]="layout()" (valueChange)="setView($event)" />
+    </div>
+  </div>
+
+  @switch (layout()) {
+    @case ('map') {
+      <section class="registry__map" animate.enter="bm-enter-fade">
+        <bm-geo-canvas [points]="points()" (pointSelected)="selectedPoint.set($event)">
+          @if (selectedPoint(); as point) {
+            <div class="registry__preview" role="group" aria-label="Selected registration" animate.enter="bm-enter-rise" animate.leave="bm-leave-fade">
+              <span class="registry__preview-dot" [attr.data-tone]="point.tone" aria-hidden="true"></span>
+              <div class="registry__preview-text">
+                <strong>{{ point.label }}</strong>
+                <span>{{ point.detail }}</span>
+              </div>
+              <button type="button" bmButton size="sm" variant="primary" (click)="open(point)">Open</button>
+              <button type="button" bmButton size="sm" variant="ghost" iconOnly aria-label="Close" (click)="selectedPoint.set(null)">
+                <svg lucideIcon="x"></svg>
+              </button>
+            </div>
+          }
+          @if (mapped.isFetching()) {
+            <div class="registry__map-status" role="status" animate.enter="bm-enter-fade" animate.leave="bm-leave-fade">
+              <span class="registry__spinner" aria-hidden="true"></span>
+              Placing registrations…
+            </div>
+          } @else if (unmapped() > 0) {
+            <div class="registry__map-status is-quiet" animate.enter="bm-enter-fade">
+              <svg lucideIcon="info" [size]="14"></svg>
+              {{ unmapped() }} without a position are not shown
+            </div>
+          }
+        </bm-geo-canvas>
+      </section>
+      @if ((mapped.data()?.totalElements ?? 0) > points().length + unmapped()) {
+        <p class="registry__note">The map shows the first {{ points().length + unmapped() }} results. Narrow the filters to see the rest.</p>
+      }
+    }
+
+    @case ('cards') {
+      @if (list.isError()) {
+        <bm-error-state [error]="list.error()" (retry)="list.refetch()" />
+      } @else {
+        <ul class="registry__cards" [class.is-refreshing]="list.isPlaceholderData()">
+          @if (list.isPending()) {
+            @for (placeholder of [0, 1, 2, 3, 4, 5]; track placeholder) {
+              <li class="registry__card is-placeholder">
+                <bm-skeleton height="132px" />
+                <div class="registry__card-body">
+                  <bm-skeleton width="30%" height="18px" />
+                  <bm-skeleton width="75%" height="15px" />
+                  <bm-skeleton width="55%" height="12px" />
+                </div>
+              </li>
+            }
+          } @else {
+            @for (registration of list.data()?.content ?? []; track registration.id; let i = $index) {
+              <li class="registry__card-item" [style.--bm-i]="i < 12 ? i : 12">
+                <a class="registry__card" bmSpotlight [routerLink]="['/registry', registration.id]">
+                  <div class="registry__card-map">
+                    @if (thumbnail(registration); as thumb) {
+                      <div class="registry__card-tiles" [style.left]="'calc(50% - ' + thumb.x + 'px)'" [style.top]="'calc(50% - ' + thumb.y + 'px)'">
+                        @for (tile of thumb.tiles; track tile) {
+                          <img [src]="tile" alt="" loading="lazy" draggable="false" />
+                        }
+                      </div>
+                      <span class="registry__card-pin" aria-hidden="true"></span>
+                    } @else {
+                      <span class="registry__card-nomap">
+                        <svg lucideIcon="map-pin" [size]="16"></svg>
+                        No position recorded
+                      </span>
+                    }
+                  </div>
+                  <div class="registry__card-body">
+                    <bm-status size="sm" [label]="statusInfo[registration.status].label" [tone]="statusInfo[registration.status].tone" />
+                    <strong class="registry__card-title">{{ registration.assetName }}</strong>
+                    <span class="registry__card-place">{{ registration.fullAddress }}, {{ registration.municipality }} ({{ registration.provinceCode }})</span>
+                    <span class="registry__card-meta">
+                      <span class="bm-mono">{{ registration.istatCode }}</span>
+                      <span>{{ relativeTime(registration.createdAt) }}</span>
+                    </span>
+                  </div>
+                </a>
+              </li>
+            }
+          }
+        </ul>
+        @if (!list.isPending() && !list.data()?.content?.length) {
+          <ng-container [ngTemplateOutlet]="empty" />
+        }
+        <bm-paginator [page]="list.data()" [sizes]="[]" (pageChange)="setPage($event)" />
+      }
+    }
+
+    @default {
+      @if (list.isError()) {
+        <bm-error-state [error]="list.error()" (retry)="list.refetch()" />
+      } @else {
+        <div class="registry__table">
+          <bm-table
+            caption="Registrations"
+            [rows]="list.data()?.content"
+            [rowKey]="rowKey"
+            [loading]="list.isPending() || schema.isPending()"
+            [refreshing]="list.isPlaceholderData()"
+            [sort]="sortState()"
+            (sortChange)="setSort($event)"
+            (rowOpen)="open($event)"
+          >
+            @for (column of columns(); track column.field) {
+              <ng-template [bmColumn]="column.field" [header]="column.header" [sortable]="column.sortable" [priority]="priorityOf(column.field)" let-row>
+                @switch (column.field) {
+                  @case ('assetName') {
+                    <span class="registry__asset">
+                      <strong>{{ row.assetName }}</strong>
+                      <span>{{ row.fullAddress }}</span>
+                    </span>
+                  }
+                  @case ('status') {
+                    <bm-status size="sm" [label]="presentation(row).label" [tone]="presentation(row).tone" />
+                  }
+                  @case ('provinceCode') {
+                    <span class="registry__code">{{ row.provinceCode }}</span>
+                  }
+                  @case ('istatCode') {
+                    <span class="bm-mono">{{ row.istatCode }}</span>
+                  }
+                  @case ('postalCode') {
+                    <span class="bm-mono">{{ row.postalCode || '—' }}</span>
+                  }
+                  @case ('entityBillingCode') {
+                    <span class="bm-mono">{{ row.entityBillingCode || '—' }}</span>
+                  }
+                  @case ('createdAt') {
+                    <time [attr.datetime]="row.createdAt" [title]="dateTime(row.createdAt)">{{ relativeTime(row.createdAt) }}</time>
+                  }
+                  @default {
+                    <span class="registry__text">{{ $any(row)[column.field] || '—' }}</span>
+                  }
+                }
+              </ng-template>
+            }
+            <ng-template bmCard let-row>
+              <span class="registry__row-card">
+                <span class="registry__row-card-head">
+                  <strong>{{ row.assetName }}</strong>
+                  <bm-status size="sm" [label]="presentation(row).label" [tone]="presentation(row).tone" />
+                </span>
+                <span>{{ row.municipality }} ({{ row.provinceCode }}) · {{ relativeTime(row.createdAt) }}</span>
+              </span>
+            </ng-template>
+            <div bmEmpty>
+              <ng-container [ngTemplateOutlet]="empty" />
+            </div>
+          </bm-table>
+          <bm-paginator [page]="list.data()" [sizes]="[]" (pageChange)="setPage($event)" />
+        </div>
+      }
+    }
+  }
+</div>
+
+<ng-template #empty>
+  @if (hasFilters()) {
+    <bm-empty-state icon="scan-search" title="Nothing matches these filters" description="Try fewer words, or another status or region.">
+      <button type="button" bmButton (click)="clearFilters()">Clear filters</button>
+    </bm-empty-state>
+  } @else {
+    <bm-empty-state icon="landmark" title="No registrations yet" description="Assets recorded in the survey workspace appear here.">
+      @if (sessions.can('registration:write')) {
+        <a bmButton variant="primary" routerLink="/survey">
+          <svg lucideIcon="map-pin-plus"></svg>
+          Record the first one
+        </a>
+      }
+    </bm-empty-state>
+  }
+</ng-template>
+
+<ng-template #columnsMenu>
+  <div class="bm-menu" cdkMenu>
+    <div class="bm-menu__label">Columns</div>
+    @for (column of schema.data()?.columns ?? []; track column.field; let i = $index) {
+      <button
+        type="button"
+        class="bm-menu__item"
+        cdkMenuItemCheckbox
+        [cdkMenuItemChecked]="visibleFields().has(column.field)"
+        [style.--bm-i]="i"
+        (cdkMenuItemTriggered)="toggleColumn(column.field)"
+      >
+        {{ column.header }}
+      </button>
+    }
+    <div class="bm-menu__divider"></div>
+    <button type="button" class="bm-menu__item" cdkMenuItem (cdkMenuItemTriggered)="resetColumns()">
+      <svg lucideIcon="rotate-ccw" [size]="17"></svg>
+      Back to the defaults
+    </button>
+  </div>
+</ng-template>

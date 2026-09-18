@@ -1,0 +1,202 @@
+.composer {
+  width: 100%;
+}
+
+.composer__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.composer__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: var(--bm-accent-soft);
+  color: var(--bm-accent);
+  animation: bm-pop 360ms var(--bm-ease-spring) 80ms both;
+}
+
+.composer__fields {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.composer__body {
+  display: grid;
+  gap: 8px;
+}
+
+.composer__body-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.composer__format {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: var(--bm-surface-3);
+  font: var(--bm-text-caption);
+  font-weight: 650;
+  color: var(--bm-text-2);
+  transition:
+    background-color var(--bm-duration-base) var(--bm-ease-standard),
+    color var(--bm-duration-base) var(--bm-ease-standard);
+
+  &.is-markup {
+    background: var(--bm-special-soft);
+    color: var(--bm-special);
+  }
+}
+
+.composer__textarea {
+  display: block;
+  width: 100%;
+  min-height: 220px;
+  padding: 12px 14px;
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius-md);
+  resize: vertical;
+  font: 14px/1.65 var(--bm-font-sans);
+  color: var(--bm-text);
+  transition:
+    border-color var(--bm-duration-fast) var(--bm-ease-standard),
+    box-shadow var(--bm-duration-base) var(--bm-ease-standard);
+
+  &.is-markup {
+    font: 13px/1.65 var(--bm-font-mono);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--bm-accent);
+    box-shadow: 0 0 0 3px var(--bm-accent-glow);
+  }
+
+  &.has-error {
+    border-color: var(--bm-negative);
+  }
+}
+
+.composer__error {
+  font: var(--bm-text-caption);
+  font-weight: 600;
+  color: var(--bm-negative);
+}
+
+.composer__preview {
+  max-height: 380px;
+  overflow: auto;
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius-md);
+}
+
+.composer__files {
+  display: grid;
+  gap: 8px;
+}
+
+.composer__drop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 10px 14px;
+  border: 1.5px dashed var(--bm-border-strong);
+  border-radius: var(--bm-radius-md);
+  background: var(--bm-surface-2);
+  font: var(--bm-text-small);
+  color: var(--bm-text-2);
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color var(--bm-duration-base) var(--bm-ease-standard),
+    background-color var(--bm-duration-base) var(--bm-ease-standard),
+    transform var(--bm-duration-base) var(--bm-ease-spring);
+
+  > svg {
+    color: var(--bm-accent);
+    transition: transform var(--bm-duration-base) var(--bm-ease-spring);
+  }
+
+  strong {
+    color: var(--bm-accent-text);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: var(--bm-accent-border);
+      background: var(--bm-accent-softer);
+
+      > svg {
+        transform: rotate(-12deg);
+      }
+    }
+  }
+
+  &:focus-visible {
+    box-shadow: var(--bm-focus-ring);
+  }
+
+  &.is-dragging {
+    border-style: solid;
+    border-color: var(--bm-accent);
+    background: var(--bm-accent-soft);
+    transform: scale(1.01);
+  }
+}
+
+.composer__limit {
+  margin-left: auto;
+  font: var(--bm-text-caption);
+  font-weight: 500;
+  color: var(--bm-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.composer__file-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 4px 4px 12px;
+    border: 1px solid var(--bm-border);
+    border-radius: var(--bm-radius-md);
+
+    > svg {
+      color: var(--bm-text-3);
+    }
+  }
+}
+
+.composer__file-name {
+  font: var(--bm-text-small);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.composer__file-size {
+  font: var(--bm-text-caption);
+  color: var(--bm-text-3);
+  font-variant-numeric: tabular-nums;
+}

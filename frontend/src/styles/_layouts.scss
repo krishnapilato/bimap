@@ -1,0 +1,134 @@
+// =============================================================================
+//  Page layouts. Each screen picks the shape its content needs rather than all
+//  screens sharing one column.
+// =============================================================================
+
+@use 'mixins' as *;
+
+/// A padded page that grows to the content width limit.
+.bm-page {
+  display: grid;
+  align-content: start;
+  gap: 20px;
+  width: 100%;
+  max-width: var(--bm-content-max);
+  margin: 0 auto;
+  padding: 24px var(--bm-gutter) 40px;
+
+  @include down(md) {
+    gap: 16px;
+    padding-top: 16px;
+  }
+
+  &.is-narrow {
+    max-width: calc(var(--bm-form-max) + 2 * var(--bm-gutter));
+  }
+
+  &.is-wide {
+    max-width: none;
+  }
+}
+
+/// Edge to edge and exactly the viewport's height, for the map workspaces.
+.bm-bleed {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: calc(100dvh - var(--bm-topbar-height));
+  overflow: hidden;
+
+  .is-handset & {
+    height: calc(100dvh - var(--bm-topbar-height) - var(--bm-bottombar-height) - var(--bm-safe-bottom));
+  }
+}
+
+/// A master list beside its detail. On desktop both share the screen; below it the detail
+/// slides over the list and a back button returns.
+.bm-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+
+  @include up(lg) {
+    &.has-detail {
+      grid-template-columns: minmax(0, 1.25fr) minmax(380px, 1fr);
+    }
+  }
+
+  @include up(xl) {
+    &.has-detail {
+      grid-template-columns: minmax(0, 1.4fr) minmax(440px, 1fr);
+    }
+  }
+}
+
+.bm-split__detail {
+  min-width: 0;
+
+  @include up(lg) {
+    position: sticky;
+    top: calc(var(--bm-topbar-height) + 16px);
+    max-height: calc(100dvh - var(--bm-topbar-height) - 32px);
+    overflow: auto;
+    border-radius: var(--bm-radius-lg);
+    animation: bm-slide-in-right var(--bm-duration-slow) var(--bm-ease-emphasized) both;
+  }
+
+  @include down(lg) {
+    position: fixed;
+    inset: var(--bm-topbar-height) 0 0 auto;
+    z-index: var(--bm-z-sheet);
+    width: min(560px, 100%);
+    overflow: auto;
+    background: var(--bm-canvas);
+    box-shadow: var(--bm-shadow-xl);
+    animation: bm-slide-in-right var(--bm-duration-slow) var(--bm-ease-emphasized) both;
+
+    .is-handset & {
+      inset: 0;
+      width: 100%;
+      z-index: calc(var(--bm-z-shell) + 1);
+    }
+  }
+}
+
+/// A responsive grid of tiles that never produces a lonely orphan column.
+.bm-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--bm-grid-min, 220px), 100%), 1fr));
+}
+
+.bm-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+
+  > .bm-search-box {
+    flex: 1 1 260px;
+    max-width: 420px;
+  }
+
+  .bm-toolbar__spacer {
+    flex: 1;
+  }
+}
+
+.bm-section-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+
+  h2 {
+    font: var(--bm-text-heading);
+  }
+
+  a {
+    font: var(--bm-text-caption);
+    font-weight: 650;
+  }
+}
