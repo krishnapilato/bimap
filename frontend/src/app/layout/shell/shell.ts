@@ -27,7 +27,6 @@ import { Immersive } from '../../core/ui/immersive';
 import { MotionPreference, PreferencesStore } from '../../core/ui/preferences';
 import { Viewport } from '../../core/ui/viewport';
 import { Avatar } from '../../ui/avatar/avatar';
-import { Button } from '../../ui/button/button';
 import { Icon } from '../../ui/icon/icon';
 import { Ripple } from '../../ui/interaction/ripple';
 import { ROLE } from '../../ui/status/status-tones';
@@ -53,7 +52,6 @@ import { NAVIGATION, NavItem } from './navigation';
     CdkMenuItem,
     CdkMenuItemRadio,
     Avatar,
-    Button,
     Ripple,
     Tooltip,
     CommandPalette,

@@ -7,7 +7,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 
 import { DEMO_CONTROLS } from '../../core/app-mode';
 
@@ -46,7 +46,7 @@ const DWELL = 9000;
  */
 @Component({
   selector: 'bm-auth-layout',
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet],
   templateUrl: './auth-layout.html',
   styleUrl: './auth-layout.scss',
   encapsulation: ViewEncapsulation.None,
