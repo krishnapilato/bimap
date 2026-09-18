@@ -46,6 +46,12 @@
             <artifactId>mapstruct</artifactId>
         </dependency>
 
+        <!-- Subscriber exports: quoting names and addresses correctly is the part that goes wrong by hand. -->
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+        </dependency>
+
         <!-- Spring Boot 4 keeps each auto-configuration in its own module: the starter is what
              actually activates Flyway, flyway-core alone does not. -->
         <dependency>

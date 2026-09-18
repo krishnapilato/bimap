@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body th:replace="~{mail/_layout :: listPage(
+        'Confirm your subscription',
+        'One click and you are on the list.',
+        ~{::content})}">
+<content th:fragment="content">
+    <p style="margin:0 0 14px 0;">Hello <span th:text="${firstName} ?: 'there'">there</span>,</p>
+    <p style="margin:0;">
+        Confirm that you want to receive <strong th:text="${listName}" style="color:#08172c;">the list</strong>.
+        Nothing is sent to this address until you do.
+    </p>
+
+    <div th:replace="~{mail/_layout :: button('Confirm my subscription', ${confirmLink})}"></div>
+
+    <p style="margin:0 0 14px 0;font-size:13px;color:#7e8ea6;">
+        You can leave again at any time, from the link at the bottom of every message.
+    </p>
+
+    <div th:replace="~{mail/_layout :: fallback(${confirmLink})}"></div>
+</content>
+</body>
+</html>

@@ -20,6 +20,7 @@ public interface UserMapper {
     @Mapping(target = "id", source = "publicId")
     @Mapping(target = "fullName", expression = "java(account.fullName())")
     @Mapping(target = "permissions", expression = "java(account.getRole().authorities())")
+    @Mapping(target = "passwordSet", expression = "java(account.getPasswordHash() != null)")
     UserResponse toResponse(UserAccount account);
 
     List<UserResponse> toResponses(List<UserAccount> accounts);

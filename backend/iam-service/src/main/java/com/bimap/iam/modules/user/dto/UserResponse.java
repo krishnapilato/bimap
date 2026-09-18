@@ -8,6 +8,9 @@ import java.time.Instant;
 import java.util.Set;
 
 /// The shape of a user on the wire. Never carries the password hash.
+///
+/// @param passwordSet False for an invited account that has not chosen a password yet, and for
+///                    accounts that only ever sign in with Google.
 /// @author Khova Krishna Pilato
 public record UserResponse(
         String id,
@@ -18,6 +21,7 @@ public record UserResponse(
         AccountStatus status,
         ApplicationRole role,
         AuthProvider authProvider,
+        boolean passwordSet,
         Set<String> permissions,
         String avatarUrl,
         String locale,

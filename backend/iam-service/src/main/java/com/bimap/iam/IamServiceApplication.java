@@ -2,6 +2,7 @@ package com.bimap.iam;
 
 import com.bimap.iam.bootstrap.AppInit;
 import com.bimap.iam.config.AuthProperties;
+import com.bimap.iam.modules.mailing.service.MailingProperties;
 import com.bimap.iam.modules.notification.service.MailProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,7 +15,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 ///
 /// @author Khova Krishna Pilato
 @SpringBootApplication
-@EnableConfigurationProperties({AuthProperties.class, MailProperties.class, AppInit.SeedProperties.class})
+@EnableConfigurationProperties({AuthProperties.class, MailProperties.class, MailingProperties.class,
+        AppInit.SeedProperties.class})
 public class IamServiceApplication {
 
     public static void main(String[] args) {

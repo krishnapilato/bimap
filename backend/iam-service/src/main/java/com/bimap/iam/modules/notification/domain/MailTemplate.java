@@ -9,7 +9,8 @@ public enum MailTemplate {
     WELCOME("mail/welcome", "Welcome to BiMap"),
     PASSWORD_RESET("mail/password-reset", "Reset your BiMap password"),
     PASSWORD_CHANGED("mail/password-changed", "Your BiMap password was changed"),
-    ACCOUNT_LOCKED("mail/account-locked", "Your BiMap account has been locked");
+    ACCOUNT_LOCKED("mail/account-locked", "Your BiMap account has been locked"),
+    SUBSCRIPTION_CONFIRMATION("mail/subscription-confirmation", "Confirm your subscription");
 
     private final String view;
     private final String subject;

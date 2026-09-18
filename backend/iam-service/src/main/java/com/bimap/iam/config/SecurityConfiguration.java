@@ -65,6 +65,10 @@ public class SecurityConfiguration {
                                 "/api/v1/auth/password/change").authenticated()
                         .requestMatchers("/api/v1/auth/**").permitAll()
 
+                        // Confirming, managing and leaving a subscription is done from an email link, by
+                        // people who have no account.
+                        .requestMatchers("/api/v1/subscriptions/**").permitAll()
+
                         .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(authenticationEntryPoint)

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!--
+    The frame every campaign is sent in.
+
+    The body is written by an administrator and inserted as markup; everything around it — the
+    list name, the recipient address and the way out — comes from the platform, so no campaign can
+    be sent without an unsubscribe link.
+
+    Author: Khova Krishna Pilato
+-->
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="${subject}">Subject</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f7fb;">
+
+<div th:if="${preheader}" th:text="${preheader}"
+     style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;height:0;width:0;"></div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+       style="background-color:#f4f7fb;padding:32px 12px;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+    <tr>
+        <td align="center">
+
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                   style="max-width:600px;background-color:#ffffff;border:1px solid #dfe7f1;border-radius:18px;overflow:hidden;">
+
+                <tr>
+                    <td style="padding:24px 32px 0 32px;">
+                        <span style="display:inline-block;font-size:15px;font-weight:700;letter-spacing:-0.02em;color:#08172c;">BiMap</span>
+                        <span th:text="${listName}"
+                              style="display:inline-block;margin-left:8px;font-size:11px;font-weight:600;letter-spacing:0.11em;text-transform:uppercase;color:#7e8ea6;">List</span>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td th:utext="${bodyHtml}"
+                        style="padding:20px 32px 28px 32px;font-size:15px;line-height:1.65;color:#2f3f55;">
+                        Body
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:18px 32px;background-color:#f8fafd;border-top:1px solid #eef2f8;font-size:12px;line-height:1.6;color:#7e8ea6;">
+                        You are receiving this because <span th:text="${email}" style="color:#4c5f79;">you</span>
+                        subscribed to <span th:text="${listName}" style="color:#4c5f79;">this list</span>.
+                        <br/>
+                        <a th:href="${manageUrl}" style="color:#0a45ab;text-decoration:underline;">Manage your subscription</a>
+                        ·
+                        <a th:href="${manageUrl}" style="color:#0a45ab;text-decoration:underline;">Unsubscribe</a>
+                        <br/>
+                        <span th:text="'© ' + ${year} + ' BiMap'">© BiMap</span>
+                    </td>
+                </tr>
+
+            </table>
+
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

@@ -27,8 +27,9 @@ public class OpenApiConfiguration {
                         .version("2.0.0")
                         .description("""
                                 Identity and access management for BiMap: registration and activation,
-                                JWT sign-in and refresh, Google sign-in, password recovery, and the
-                                account lifecycle.
+                                JWT sign-in and refresh, Google sign-in, password recovery, the
+                                account lifecycle, and mailing lists with double opt-in, campaigns and
+                                one-click unsubscribe.
 
                                 Errors are RFC 7807 problem documents. Every response carries an
                                 `X-Correlation-Id` worth quoting in a bug report.

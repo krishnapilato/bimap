@@ -35,7 +35,8 @@ import java.time.Instant;
         indexes = {
                 @Index(name = "ix_sent_email_sent_at", columnList = "sent_at"),
                 @Index(name = "ix_sent_email_recipient", columnList = "recipient"),
-                @Index(name = "ix_sent_email_status", columnList = "status")
+                @Index(name = "ix_sent_email_status", columnList = "status"),
+                @Index(name = "ix_sent_email_campaign", columnList = "campaign_id, recipient")
         })
 @Getter
 @Setter
@@ -60,6 +61,10 @@ public class SentEmail {
     /// The enum name for a transactional message, null for one composed by hand.
     @Column(length = 40)
     private String template;
+
+    /// The campaign this message was part of, null for everything that is not a campaign.
+    @Column(name = "campaign_id", length = 36)
+    private String campaignId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 8)
