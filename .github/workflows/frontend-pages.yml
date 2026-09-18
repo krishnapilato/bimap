@@ -1,0 +1,88 @@
+# Builds the Angular client and publishes the demo to GitHub Pages.
+#
+# The demo is the same application as production with one environment flag flipped: an in-browser
+# fake backend answers every API call, so Pages needs nothing but static files. Pull requests build
+# both flavours to prove neither is broken; only main is deployed.
+#
+# Author: Khova Krishna Pilato
+
+name: Frontend · GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-pages.yml'
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-pages-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: frontend
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm test -- --watch=false
+
+      - name: Build the live bundle
+        run: npm run build
+
+      # The repository name is the Pages sub-path, so a fork or a rename still deploys correctly.
+      - name: Build the demo for Pages
+        run: npm run build:demo -- --base-href "/${{ github.event.repository.name }}/"
+
+      # Pages has no rewrite rules: serving the app as the 404 page is what makes deep links work.
+      - name: Prepare the Pages site
+        run: |
+          cp dist/frontend/browser/index.html dist/frontend/browser/404.html
+          touch dist/frontend/browser/.nojekyll
+
+      - name: Upload the Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: frontend/dist/frontend/browser
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
