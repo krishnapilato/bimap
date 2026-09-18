@@ -26,3 +26,7 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Claude Code: worktrees are whole checkouts of their own, .env files included
+.claude/worktrees/
+.claude/settings.local.json

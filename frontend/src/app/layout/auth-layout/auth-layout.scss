@@ -1,0 +1,568 @@
+@use 'styles/mixins' as *;
+
+// =============================================================================
+//  Sign-in, sign-up and account recovery: the layout, and the page pieces they
+//  share. Unencapsulated so the pages can use these classes directly.
+// =============================================================================
+
+.bm-auth {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(440px, 1fr);
+  min-height: 100dvh;
+  background: var(--bm-canvas);
+
+  @include down(lg) {
+    grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1fr);
+  }
+
+  @include down(md) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+}
+
+// ── The scene ────────────────────────────────────────────────────────────────
+
+.auth__scene {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow: hidden;
+  background: #cfd8e3;
+  isolation: isolate;
+
+  @include down(md) {
+    position: relative;
+    height: 212px;
+  }
+}
+
+.auth__frame {
+  position: absolute;
+  inset: 0;
+}
+
+.auth__tiles {
+  position: absolute;
+  display: grid;
+  grid-template-columns: repeat(4, 256px);
+  width: 1024px;
+  height: 1024px;
+  animation: auth-drift 22s var(--bm-ease-standard) both;
+
+  img {
+    display: block;
+    width: 256px;
+    height: 256px;
+    user-select: none;
+  }
+}
+
+// A slow push in with a slight turn, the way a camera settles on a landmark.
+@keyframes auth-drift {
+  from {
+    transform: scale(calc(1 + 0.32 * var(--bm-motion))) rotate(calc(-1.5deg * var(--bm-motion)));
+  }
+  to {
+    transform: scale(calc(1 + 0.12 * var(--bm-motion))) rotate(0deg);
+  }
+}
+
+.auth-frame-in {
+  animation: auth-frame-in 1400ms var(--bm-ease-standard) both;
+}
+
+.auth-frame-out {
+  animation: bm-fade-out 1400ms var(--bm-ease-standard) both;
+}
+
+@keyframes auth-frame-in {
+  from {
+    opacity: 0;
+    filter: blur(calc(6px * var(--bm-motion))) saturate(0.6);
+  }
+}
+
+.auth__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(90deg, rgba(243, 245, 248, 0) 58%, rgba(243, 245, 248, 0.55) 90%, var(--bm-canvas) 100%),
+    linear-gradient(180deg, rgba(243, 245, 248, 0.25), rgba(243, 245, 248, 0) 26%, rgba(243, 245, 248, 0) 52%, rgba(243, 245, 248, 0.9) 82%, rgba(243, 245, 248, 0.96) 100%),
+    radial-gradient(60% 50% at 50% 46%, transparent 40%, rgba(11, 23, 38, 0.12) 100%);
+  pointer-events: none;
+
+  @include down(md) {
+    background: linear-gradient(180deg, rgba(243, 245, 248, 0) 45%, var(--bm-canvas) 100%);
+  }
+}
+
+.auth__marker {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  z-index: 2;
+  width: 0;
+  height: 0;
+}
+
+.auth__marker-pin {
+  position: absolute;
+  left: -17px;
+  top: -44px;
+  width: 34px;
+  max-width: none;
+  height: 44px;
+  overflow: visible;
+  filter: drop-shadow(0 6px 10px rgba(11, 23, 38, 0.35));
+  animation: auth-pin 1100ms var(--bm-ease-standard) 300ms both;
+
+  path {
+    fill: var(--bm-signal);
+    stroke: #fff;
+    stroke-width: 2;
+  }
+
+  circle {
+    fill: #fff;
+  }
+}
+
+@keyframes auth-pin {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(-40px * var(--bm-motion)));
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(0) scale(1, calc(1 - 0.08 * var(--bm-motion)));
+  }
+  75% {
+    transform: translateY(calc(-5px * var(--bm-motion)));
+  }
+  100% {
+    transform: none;
+  }
+}
+
+.auth__marker-ring {
+  position: absolute;
+  left: -34px;
+  top: -12px;
+  width: 68px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  opacity: 0;
+  animation: auth-ring 3.2s var(--bm-ease-standard) 1.2s infinite;
+
+  &.is-late {
+    animation-delay: 2.8s;
+  }
+
+  .bm-reduced-motion & {
+    animation: none;
+  }
+}
+
+@keyframes auth-ring {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.3);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(2.2);
+  }
+}
+
+.auth__caption {
+  position: absolute;
+  left: 50%;
+  top: calc(46% + 18px);
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  padding: 8px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: saturate(160%) blur(12px);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  box-shadow: var(--bm-shadow-lg);
+  text-align: center;
+  translate: -50% 0;
+  white-space: nowrap;
+
+  strong {
+    font: var(--bm-text-subheading);
+    color: var(--bm-text);
+  }
+
+  span {
+    font: var(--bm-text-caption);
+    font-weight: 500;
+    color: var(--bm-text-2);
+  }
+
+  @include down(md) {
+    top: auto;
+    bottom: 16px;
+    padding: 6px 12px;
+  }
+}
+
+.auth__caption-position {
+  color: var(--bm-text-3) !important;
+  font-size: 11px !important;
+
+  @include down(md) {
+    display: none;
+  }
+}
+
+.auth-caption-in {
+  animation: auth-caption-in 900ms var(--bm-ease-emphasized) 500ms both;
+}
+
+@keyframes auth-caption-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(8px * var(--bm-motion)));
+  }
+}
+
+.auth__story {
+  position: absolute;
+  left: clamp(24px, 4vw, 56px);
+  right: clamp(24px, 4vw, 56px);
+  bottom: clamp(24px, 5vh, 56px);
+  z-index: 2;
+  display: grid;
+  gap: 8px;
+  max-width: 480px;
+  animation: bm-rise var(--bm-duration-cinematic) var(--bm-ease-emphasized) 200ms both;
+
+  @include down(md) {
+    display: none;
+  }
+}
+
+.auth__story-title {
+  font: 700 clamp(24px, 1rem + 1.2vw, 34px) / 1.12 var(--bm-font-sans);
+  letter-spacing: var(--bm-tracking-display);
+  color: var(--bm-text);
+}
+
+.auth__story-text {
+  max-width: 44ch;
+  font: var(--bm-text-body);
+  font-size: 15px;
+  color: var(--bm-text-2);
+}
+
+.auth__progress {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.auth__progress-step {
+  position: relative;
+  width: 28px;
+  height: 3px;
+  border-radius: var(--bm-radius-pill);
+  background: rgba(11, 23, 38, 0.14);
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--bm-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  &.is-past::after {
+    transform: none;
+  }
+
+  &.is-current::after {
+    animation: auth-progress 9s linear both;
+  }
+}
+
+@keyframes auth-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+// ── The form side ────────────────────────────────────────────────────────────
+
+.auth__main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+  padding: 28px clamp(20px, 5vw, 64px) 20px;
+
+  @include down(md) {
+    min-height: 0;
+    margin-top: -28px;
+    padding-top: 0;
+    border-radius: 24px 24px 0 0;
+    background: var(--bm-canvas);
+    position: relative;
+    z-index: 3;
+  }
+}
+
+.auth__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  align-self: flex-start;
+  border-radius: var(--bm-radius-md);
+  color: var(--bm-text);
+  animation: bm-rise var(--bm-duration-slow) var(--bm-ease-emphasized) both;
+  @include focus-ring;
+
+  @include down(md) {
+    display: none;
+  }
+}
+
+.auth__wordmark {
+  font: 750 18px/1 var(--bm-font-sans);
+  letter-spacing: -0.03em;
+}
+
+.auth__card {
+  width: 100%;
+  max-width: 404px;
+  margin: auto 0;
+  padding: 40px 0;
+
+  @include down(md) {
+    padding: 28px 0 32px;
+  }
+}
+
+.auth__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 16px;
+  width: 100%;
+  font: var(--bm-text-caption);
+  font-weight: 500;
+  color: var(--bm-text-3);
+}
+
+.auth__footer-demo {
+  color: var(--bm-signal-strong);
+}
+
+// ── Shared page pieces ───────────────────────────────────────────────────────
+
+.auth-page {
+  display: grid;
+  gap: 22px;
+
+  > * {
+    animation: bm-rise var(--bm-duration-slow) var(--bm-ease-emphasized) both;
+  }
+
+  @for $i from 2 through 8 {
+    > :nth-child(#{$i}) {
+      animation-delay: #{($i - 1) * 55}ms;
+    }
+  }
+}
+
+.auth-page__head {
+  display: grid;
+  gap: 6px;
+}
+
+.auth-page__eyebrow {
+  @include overline;
+  color: var(--bm-accent-text);
+}
+
+.auth-page__title {
+  font: var(--bm-text-display);
+  font-size: clamp(28px, 1.2rem + 1vw, 34px);
+  letter-spacing: var(--bm-tracking-display);
+}
+
+.auth-page__lead {
+  font: var(--bm-text-body);
+  font-size: 15px;
+  color: var(--bm-text-2);
+
+  strong {
+    color: var(--bm-text);
+    font-weight: 650;
+  }
+}
+
+.auth-page__form {
+  display: grid;
+  gap: 16px;
+}
+
+.auth-page__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+
+  @include down(sm) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.auth-page__inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.auth-page__link {
+  font: var(--bm-text-small);
+  font-weight: 650;
+  color: var(--bm-accent-text);
+  border-radius: 4px;
+  text-underline-offset: 3px;
+  @include focus-ring;
+
+  @include hover {
+    text-decoration: underline;
+  }
+}
+
+.auth-page__submit {
+  width: 100%;
+}
+
+.auth-page__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: var(--bm-text-caption);
+  font-weight: 600;
+  color: var(--bm-text-3);
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--bm-border);
+  }
+}
+
+.auth-page__switch {
+  font: var(--bm-text-small);
+  color: var(--bm-text-2);
+  text-align: center;
+}
+
+.auth-page__reveal {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  margin-right: 2px;
+  border-radius: var(--bm-radius-sm);
+  color: var(--bm-text-3);
+  transition:
+    color var(--bm-duration-fast) var(--bm-ease-standard),
+    background-color var(--bm-duration-fast) var(--bm-ease-standard);
+  @include focus-ring;
+
+  @include hover {
+    background: var(--bm-surface-3);
+    color: var(--bm-text);
+  }
+}
+
+.auth-page__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 10px;
+  font: var(--bm-text-caption);
+  font-weight: 650;
+  white-space: nowrap;
+
+  &.is-ok {
+    color: var(--bm-positive);
+  }
+
+  &.is-taken {
+    color: var(--bm-negative);
+  }
+}
+
+// A finished step: a mark that draws itself, a message, and what to do next.
+.auth-page__done {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
+}
+
+.auth-page__mark {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: var(--bm-accent-soft);
+  color: var(--bm-accent);
+  box-shadow: 0 0 0 10px var(--bm-accent-softer);
+  animation: bm-pop var(--bm-duration-slow) var(--bm-ease-spring) both;
+
+  &.is-positive {
+    background: var(--bm-positive-soft);
+    color: var(--bm-positive);
+    box-shadow: 0 0 0 10px rgba(14, 138, 95, 0.06);
+  }
+
+  &.is-negative {
+    background: var(--bm-negative-soft);
+    color: var(--bm-negative);
+    box-shadow: 0 0 0 10px rgba(207, 50, 57, 0.05);
+  }
+
+  svg.is-envelope {
+    animation: auth-envelope 2.4s var(--bm-ease-standard) 600ms infinite;
+  }
+}
+
+@keyframes auth-envelope {
+  0%,
+  60%,
+  100% {
+    transform: none;
+  }
+  70% {
+    transform: translateY(calc(-3px * var(--bm-motion))) rotate(calc(-6deg * var(--bm-motion)));
+  }
+  80% {
+    transform: translateY(calc(-1px * var(--bm-motion))) rotate(calc(4deg * var(--bm-motion)));
+  }
+}
+
+.auth-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

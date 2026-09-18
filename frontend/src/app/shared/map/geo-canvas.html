@@ -1,0 +1,272 @@
+<div class="bm-geo-canvas__split" #splitArea>
+  <section class="bm-geo-canvas__pane is-map" [class.is-shown]="mode() !== 'street'" aria-label="Map">
+    <div
+      #mapElement
+      class="bm-geo-canvas__map"
+      [attr.aria-label]="editable() ? 'Map. Arrow keys pan, plus and minus zoom, Enter places the asset in the middle.' : 'Map. Arrow keys pan, plus and minus zoom.'"
+    ></div>
+    <span class="bm-geo-canvas__crosshair" aria-hidden="true"></span>
+
+    @if (mode() === 'split') {
+      <span class="bm-geo-canvas__badge" animate.enter="bm-enter-fade"><svg lucideIcon="map" [size]="13"></svg>Map</span>
+    }
+
+    @if (viewport.canHover() && mode() !== 'street') {
+      <button type="button" class="bm-geo-canvas__readout" (click)="copyReadout()" aria-label="Copy these coordinates">
+        <svg lucideIcon="crosshair" [size]="13"></svg>
+        <span class="bm-numeric">{{ formatPosition(readout(), 5) }}</span>
+        <span class="bm-geo-canvas__readout-zoom bm-numeric">z{{ view().zoom }}</span>
+      </button>
+    }
+  </section>
+
+  @if (mode() === 'split') {
+    <div
+      class="bm-geo-canvas__splitter"
+      role="separator"
+      tabindex="0"
+      aria-label="Resize the map and Street View"
+      aria-valuemin="22"
+      aria-valuemax="78"
+      [attr.aria-orientation]="vertical() ? 'horizontal' : 'vertical'"
+      [attr.aria-valuenow]="split()"
+      [attr.aria-valuetext]="split() + ' percent map'"
+      [class.is-active]="dragging()"
+      (pointerdown)="startDrag($event)"
+      (pointermove)="drag($event)"
+      (pointerup)="endDrag($event)"
+      (pointercancel)="endDrag($event)"
+      (keydown)="nudge($event)"
+      (dblclick)="resetSplit()"
+    >
+      <span class="bm-geo-canvas__grip" aria-hidden="true"></span>
+    </div>
+  }
+
+  <section class="bm-geo-canvas__pane is-street" [class.is-shown]="mode() !== 'map'" aria-label="Street View">
+    <div #panoramaElement class="bm-geo-canvas__panorama"></div>
+
+    @if (!streetShown() || street() === 'unavailable') {
+      <div class="bm-geo-canvas__state" [attr.data-state]="street()" animate.enter="bm-enter-fade" animate.leave="bm-leave-fade">
+        @switch (street()) {
+          @case ('loading') {
+            <span class="bm-geo-canvas__state-icon is-spinning"><svg lucideIcon="loader-circle" [size]="22"></svg></span>
+            <strong>Finding the nearest panorama…</strong>
+          }
+          @case ('no-imagery') {
+            <span class="bm-geo-canvas__state-icon"><svg lucideIcon="eye-off" [size]="22"></svg></span>
+            <strong>No Street View here</strong>
+            <p>Google has no panorama within 400 m of this point. Blue lines on the map mark where there is one.</p>
+            <button type="button" bmButton size="sm" (click)="showCoverage()">
+              <svg lucideIcon="route" [size]="15"></svg>
+              Show coverage
+            </button>
+          }
+          @case ('unavailable') {
+            <span class="bm-geo-canvas__state-icon is-negative"><svg lucideIcon="triangle-alert" [size]="22"></svg></span>
+            <strong>Street View could not load</strong>
+            <p>
+              @if (refused()) {
+                Google refused the Maps key on this address. Add it to the key’s allowed websites.
+              } @else {
+                Check the connection, then try again.
+              }
+            </p>
+            <button type="button" bmButton size="sm" (click)="retryStreetView()">
+              <svg lucideIcon="refresh-cw" [size]="15"></svg>
+              Try again
+            </button>
+          }
+          @default {
+            <span class="bm-geo-canvas__state-icon"><svg lucideIcon="scan-search" [size]="22"></svg></span>
+            <strong>Nothing to look at yet</strong>
+            <p>
+              @if (editable()) {
+                Place the asset on the map, or {{ viewport.isCoarsePointer() ? 'long-press' : 'right-click' }} anywhere and choose Look from here.
+              } @else {
+                {{ viewport.isCoarsePointer() ? 'Long-press' : 'Right-click' }} the map anywhere and choose Look from here.
+              }
+            </p>
+          }
+        }
+      </div>
+    }
+
+    @if (mode() === 'split') {
+      <span class="bm-geo-canvas__badge" animate.enter="bm-enter-fade"><svg lucideIcon="scan-search" [size]="13"></svg>Street View</span>
+    }
+
+    @if (streetShown() && street() !== 'unavailable') {
+      <div class="bm-geo-canvas__street-bar">
+        <div class="bm-geo-canvas__caption" animate.enter="bm-enter-rise">
+          @if (street() === 'loading') {
+            <span class="bm-geo-canvas__spinner" aria-hidden="true"></span>
+          } @else {
+            <svg lucideIcon="map-pin" [size]="14"></svg>
+          }
+          <span class="bm-geo-canvas__caption-text">{{ streetDetails()?.description || 'Street View' }}</span>
+          @if (imageDate(); as date) {
+            <span class="bm-geo-canvas__caption-meta">{{ date }}</span>
+          }
+          @if (cameraDistance(); as metres) {
+            <span class="bm-geo-canvas__caption-meta bm-numeric">{{ metres }} away</span>
+          }
+        </div>
+
+        @if (asset() && !facing()) {
+          <button type="button" class="bm-geo-canvas__face" bmRipple (click)="faceAsset()" animate.enter="bm-enter-pop" animate.leave="bm-leave-fade">
+            <svg lucideIcon="crosshair" [size]="15"></svg>
+            Face the asset
+          </button>
+        }
+      </div>
+    }
+
+    @if (notice(); as message) {
+      <div class="bm-geo-canvas__notice" role="status" animate.enter="bm-enter-rise" animate.leave="bm-leave-fade">
+        <svg lucideIcon="eye-off" [size]="15"></svg>
+        {{ message }}
+      </div>
+    }
+  </section>
+</div>
+
+<div class="bm-geo-canvas__chrome is-top">
+  <bm-segmented
+    class="bm-geo-canvas__modes"
+    size="sm"
+    ariaLabel="What the canvas shows"
+    [options]="modes()"
+    [value]="mode()"
+    [iconsOnly]="vertical()"
+    (valueChange)="setMode($event)"
+  />
+  <button type="button" class="bm-geo-canvas__tool" bmRipple aria-label="Map layers" bmTooltip="Map layers" bmTooltipPlacement="left" [bmTooltipLabels]="false" [cdkMenuTriggerFor]="layers">
+    <svg lucideIcon="layers" [size]="18"></svg>
+  </button>
+</div>
+
+<div class="bm-geo-canvas__chrome is-tools">
+  @if (!vertical()) {
+    <div class="bm-geo-canvas__zoom">
+      <button type="button" class="bm-geo-canvas__tool" bmRipple aria-label="Zoom in" bmTooltip="Zoom in" bmTooltipPlacement="left" [bmTooltipLabels]="false" (click)="zoomBy(1)">
+        <svg lucideIcon="plus" [size]="18"></svg>
+      </button>
+      <button type="button" class="bm-geo-canvas__tool" bmRipple aria-label="Zoom out" bmTooltip="Zoom out" bmTooltipPlacement="left" [bmTooltipLabels]="false" (click)="zoomBy(-1)">
+        <svg lucideIcon="minus" [size]="18"></svg>
+      </button>
+    </div>
+  }
+  @if (asset()) {
+    <button type="button" class="bm-geo-canvas__tool" bmRipple aria-label="Back to the asset" bmTooltip="Back to the asset" bmTooltipPlacement="left" [bmTooltipLabels]="false" (click)="focusAsset()" animate.enter="bm-enter-pop">
+      <svg lucideIcon="map-pinned" [size]="18"></svg>
+    </button>
+  }
+  <button
+    type="button"
+    class="bm-geo-canvas__tool"
+    bmRipple
+    aria-label="Show where I am"
+    bmTooltip="Where am I · L"
+    bmTooltipPlacement="left"
+    [bmTooltipLabels]="false"
+    [class.is-busy]="locating()"
+    [attr.aria-busy]="locating() || null"
+    (click)="locate()"
+  >
+    <svg lucideIcon="locate-fixed" [size]="18"></svg>
+  </button>
+  @if (fullscreenable()) {
+    <button
+      type="button"
+      class="bm-geo-canvas__tool"
+      bmRipple
+      bmTooltipPlacement="left"
+      [bmTooltip]="immersive.active() ? 'Exit full screen · F' : 'Full screen · F'"
+      [bmTooltipLabels]="false"
+      [attr.aria-label]="immersive.active() ? 'Exit full screen' : 'Full screen'"
+      [attr.aria-pressed]="immersive.active()"
+      (click)="immersive.toggle()"
+    >
+      <svg [lucideIcon]="immersive.active() ? 'minimize' : 'maximize'" [size]="18"></svg>
+    </button>
+  }
+</div>
+
+<ng-template #layers>
+  <div class="bm-menu bm-layers" cdkMenu>
+    <div class="bm-menu__label">Basemap</div>
+    <div class="bm-layers__grid">
+      @for (option of basemaps; track option.id; let i = $index) {
+        <button
+          type="button"
+          class="bm-layers__option"
+          cdkMenuItemRadio
+          [style.--bm-i]="i"
+          [cdkMenuItemChecked]="basemap() === option.id"
+          (cdkMenuItemTriggered)="basemap.set(option.id)"
+        >
+          <span class="bm-layers__preview">
+            <img [src]="preview(option.id)" alt="" draggable="false" loading="lazy" />
+          </span>
+          <span class="bm-layers__label">{{ option.label }}</span>
+        </button>
+      }
+    </div>
+    <div class="bm-menu__divider"></div>
+    <button
+      type="button"
+      class="bm-menu__item"
+      cdkMenuItemCheckbox
+      style="--bm-i: 4"
+      [cdkMenuItemChecked]="coverage()"
+      (cdkMenuItemTriggered)="coverage.set(!coverage())"
+    >
+      <svg lucideIcon="route" [size]="17"></svg>
+      Street View coverage
+    </button>
+  </div>
+</ng-template>
+
+@if (menu(); as open) {
+  <div class="bm-geo-canvas__scrim" (pointerdown)="menu.set(null)" (contextmenu)="$event.preventDefault(); menu.set(null)"></div>
+  <div
+    #contextMenu
+    class="bm-menu bm-geo-canvas__menu"
+    cdkMenu
+    [style.left.px]="open.x"
+    [style.top.px]="open.y"
+    animate.leave="bm-leave-fade"
+    (keydown.escape)="menu.set(null)"
+  >
+    <div class="bm-geo-canvas__menu-head">
+      <svg lucideIcon="map-pin" [size]="14"></svg>
+      <span class="bm-numeric">{{ formatPosition(open.position, 5) }}</span>
+    </div>
+    @if (editable()) {
+      <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 0" (cdkMenuItemTriggered)="menuPlace()">
+        <svg lucideIcon="map-pin-plus" [size]="17"></svg>
+        Place the asset here
+      </button>
+    }
+    <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 1" (cdkMenuItemTriggered)="menuLook()">
+      <svg lucideIcon="scan-search" [size]="17"></svg>
+      Look from here
+    </button>
+    <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 2" (cdkMenuItemTriggered)="menuCentre()">
+      <svg lucideIcon="crosshair" [size]="17"></svg>
+      Centre the map here
+    </button>
+    <div class="bm-menu__divider"></div>
+    <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 3" (cdkMenuItemTriggered)="menuCopy()">
+      <svg lucideIcon="copy" [size]="17"></svg>
+      Copy coordinates
+    </button>
+    <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 4" (cdkMenuItemTriggered)="menuGoogle()">
+      <svg lucideIcon="external-link" [size]="17"></svg>
+      Open in Google Maps
+    </button>
+  </div>
+}
+
+<ng-content />

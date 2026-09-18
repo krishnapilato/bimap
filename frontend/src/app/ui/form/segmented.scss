@@ -1,0 +1,105 @@
+@use 'styles/mixins' as *;
+
+.bm-segmented {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--bm-radius-md);
+  background: var(--bm-surface-3);
+  box-shadow: inset 0 1px 2px rgba(11, 23, 38, 0.06);
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.bm-segmented__thumb {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 0;
+  border-radius: calc(var(--bm-radius-md) - 3px);
+  background: var(--bm-surface);
+  box-shadow:
+    0 1px 2px rgba(11, 33, 62, 0.1),
+    0 2px 8px -2px rgba(11, 33, 62, 0.12);
+  transition:
+    transform var(--bm-duration-slow) var(--bm-ease-emphasized),
+    width var(--bm-duration-slow) var(--bm-ease-emphasized);
+}
+
+.bm-segmented__option {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: calc(var(--bm-radius-md) - 3px);
+  color: var(--bm-text-2);
+  font: var(--bm-text-caption);
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    color var(--bm-duration-base) var(--bm-ease-standard),
+    transform var(--bm-duration-base) var(--bm-ease-spring);
+  @include focus-ring;
+
+  @include touch {
+    height: 36px;
+  }
+
+  @include hover {
+    color: var(--bm-text);
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+
+  &.is-selected {
+    color: var(--bm-text);
+  }
+
+  svg {
+    transition: transform var(--bm-duration-base) var(--bm-ease-spring);
+  }
+
+  &.is-selected svg {
+    color: var(--bm-accent);
+    transform: scale(1.06);
+  }
+
+  .bm-segmented[data-size='sm'] & {
+    height: 26px;
+    padding: 0 9px;
+  }
+}
+
+.bm-segmented__count {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--bm-surface-3);
+  color: var(--bm-text-3);
+  font-size: 11px;
+  line-height: 17px;
+  text-align: center;
+  transition:
+    background-color var(--bm-duration-base) var(--bm-ease-standard),
+    color var(--bm-duration-base) var(--bm-ease-standard);
+
+  .is-selected & {
+    background: var(--bm-accent-soft);
+    color: var(--bm-accent-text);
+  }
+}

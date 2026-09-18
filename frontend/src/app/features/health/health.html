@@ -1,0 +1,280 @@
+<div class="bm-page is-wide health">
+  <bm-page-header title="System health" [subtitle]="subtitle()">
+    <div bmActions>
+      <span class="health__live" [class.is-paused]="paused()" role="status">
+        <span class="health__live-dot" aria-hidden="true"></span>
+        {{ paused() ? 'Paused' : 'Live, every 3 seconds' }}
+      </span>
+      <button type="button" bmButton (click)="paused.set(!paused())">
+        <svg [lucideIcon]="paused() ? 'play' : 'pause'"></svg>
+        {{ paused() ? 'Resume' : 'Pause' }}
+      </button>
+    </div>
+  </bm-page-header>
+
+  <section class="health__services" aria-label="Services">
+    @for (service of services; track service.name; let i = $index) {
+      @let snapshot = snapshotOf(service.name);
+      @let failure = failureOf(service.name);
+      <article class="health__service" [style.--bm-i]="i" [class.is-down]="!!failure || (snapshot && snapshot.status !== 'UP')">
+        <header class="health__service-head">
+          <span class="health__service-icon" [attr.data-series]="i + 1"><svg [lucideIcon]="service.icon" [size]="20"></svg></span>
+          <div class="health__service-title">
+            <h2>{{ service.title }}</h2>
+            @if (snapshot) {
+              <span>Version {{ snapshot.version }} · port {{ snapshot.runtime.port }} · {{ snapshot.profiles.join(', ') || 'default' }}</span>
+            } @else {
+              <span>Waiting for a first reading</span>
+            }
+          </div>
+          @if (failure) {
+            <bm-status label="Not answering" tone="negative" />
+          } @else if (snapshot) {
+            <bm-status [label]="snapshot.status === 'UP' ? 'Up' : snapshot.status" [tone]="snapshot.status === 'UP' ? 'positive' : 'negative'" [live]="!paused()" />
+          }
+        </header>
+
+        @if (failure) {
+          <div class="health__failure" animate.enter="bm-enter-rise">
+            <svg lucideIcon="wifi-off" [size]="18"></svg>
+            <div>
+              <strong>{{ service.title }} is not answering.</strong>
+              <span>{{ failure }}</span>
+              @if (snapshot) {
+                <span>Last reading {{ relativeTime(snapshot.sampledAt).toLowerCase() }}.</span>
+              }
+            </div>
+          </div>
+        }
+
+        @if (snapshot) {
+          <div class="health__uptime">
+            <span class="health__label">Up for</span>
+            <strong class="bm-numeric">{{ uptime(snapshot) }}</strong>
+            <span class="health__muted">since {{ dateTime(snapshot.startedAt) }}</span>
+          </div>
+
+          <dl class="health__figures">
+            <div>
+              <dt>Requests</dt>
+              <dd class="bm-numeric">{{ formatNumber(snapshot.http.requests) }}</dd>
+            </div>
+            <div>
+              <dt>Average</dt>
+              <dd class="bm-numeric">{{ snapshot.http.averageMillis }}<small>ms</small></dd>
+            </div>
+            <div>
+              <dt>Slowest</dt>
+              <dd class="bm-numeric">{{ formatNumber(snapshot.http.slowestMillis) }}<small>ms</small></dd>
+            </div>
+            <div>
+              <dt>4xx</dt>
+              <dd class="bm-numeric">{{ formatNumber(snapshot.http.clientErrors) }}</dd>
+            </div>
+            <div [class.is-bad]="snapshot.http.serverErrors > 0">
+              <dt>5xx</dt>
+              <dd class="bm-numeric">{{ formatNumber(snapshot.http.serverErrors) }}</dd>
+            </div>
+          </dl>
+
+          <div class="health__meters">
+            <div class="health__meter">
+              <span class="health__meter-head">
+                <span>Heap</span>
+                <span class="bm-numeric">{{ snapshot.heap.usedDisplay }} of {{ snapshot.heap.maxDisplay }}</span>
+              </span>
+              <span class="health__bar" [attr.data-level]="snapshot.heap.usedRatio > 0.85 ? 'high' : snapshot.heap.usedRatio > 0.65 ? 'raised' : 'normal'">
+                <span [style.transform]="'scaleX(' + snapshot.heap.usedRatio + ')'"></span>
+              </span>
+            </div>
+            <div class="health__meter">
+              <span class="health__meter-head">
+                <span>CPU, this service</span>
+                <span class="bm-numeric">{{ percent(snapshot.cpu.process) }} of {{ snapshot.cpu.cores }} cores</span>
+              </span>
+              <span class="health__bar" [attr.data-level]="snapshot.cpu.process > 0.85 ? 'high' : snapshot.cpu.process > 0.6 ? 'raised' : 'normal'">
+                <span [style.transform]="'scaleX(' + snapshot.cpu.process + ')'"></span>
+              </span>
+            </div>
+            @if (snapshot.database; as pool) {
+              <div class="health__meter">
+                <span class="health__meter-head">
+                  <span>Database connections</span>
+                  <span class="bm-numeric">{{ pool.active }} busy · {{ pool.idle }} idle of {{ pool.max }}</span>
+                </span>
+                <span class="health__bar" [attr.data-level]="pool.pending > 0 ? 'high' : 'normal'">
+                  <span [style.transform]="'scaleX(' + pool.active / pool.max + ')'"></span>
+                </span>
+              </div>
+            }
+          </div>
+
+          <div class="health__checks">
+            <ul class="health__components" aria-label="Components">
+              @for (component of snapshot.components; track component.name; let c = $index) {
+                <li [attr.data-status]="component.status" [style.--bm-i]="c">
+                  <svg [lucideIcon]="component.status === 'UP' ? 'circle-check' : 'circle-x'" [size]="14"></svg>
+                  {{ component.name }}
+                </li>
+              }
+            </ul>
+            <div class="health__probes">
+              @for (group of ['liveness', 'readiness']; track group) {
+                @let state = probe(service.name, $any(group));
+                <span class="health__probe" [attr.data-status]="state ?? 'UNKNOWN'" [bmTooltip]="group === 'liveness' ? 'Liveness probe: the process is running' : 'Readiness probe: it can take traffic'" [bmTooltipLabels]="false">
+                  <span class="health__probe-dot" aria-hidden="true"></span>
+                  {{ group === 'liveness' ? 'Live' : 'Ready' }}
+                  <strong>{{ state ?? '…' }}</strong>
+                </span>
+              }
+            </div>
+          </div>
+
+          <p class="health__runtime">
+            <svg lucideIcon="cpu" [size]="14"></svg>
+            Java {{ snapshot.runtime.java }} · {{ snapshot.runtime.os }} {{ snapshot.runtime.architecture }} · {{ snapshot.threads.live }} threads
+          </p>
+        } @else if (!failure) {
+          <div class="health__placeholder">
+            <bm-skeleton width="40%" height="22px" />
+            <bm-skeleton height="54px" />
+            <bm-skeleton height="12px" />
+            <bm-skeleton height="12px" />
+          </div>
+        }
+      </article>
+    }
+  </section>
+
+  <section class="health__charts" aria-label="Live charts">
+    <bm-live-chart title="Heap in use" caption="Megabytes" [series]="series" [samples]="heap()" [format]="formatWhole" [minimum]="100" />
+    <bm-live-chart title="CPU used" caption="Percent of all cores" [series]="series" [samples]="cpu()" [format]="formatOneDecimal" [minimum]="5" />
+    <bm-live-chart title="Throughput" caption="Requests per minute" [series]="series" [samples]="throughput()" [format]="formatWhole" [minimum]="10" />
+    <bm-live-chart title="Live threads" caption="Threads" [series]="series" [samples]="threads()" [format]="formatWhole" [minimum]="10" />
+  </section>
+
+  @if (isAdmin()) {
+    <section class="health__admin">
+      <bm-panel heading="Health details" subheading="What each component of the service reports about itself.">
+        <bm-segmented bmPanelActions size="sm" ariaLabel="Service" [options]="serviceOptions" [value]="detailsService()" (valueChange)="detailsService.set($event)" />
+        @if (details.isPending()) {
+          <bm-skeleton height="160px" />
+        } @else if (details.isError()) {
+          <bm-error-state [error]="details.error()" (retry)="details.refetch()" />
+        } @else {
+          <div class="health__details">
+            @for (entry of components(); track entry.name; let d = $index) {
+              <details class="health__detail" [style.--bm-i]="d" [attr.data-status]="entry.component.status">
+                <summary>
+                  <svg class="health__detail-state" [lucideIcon]="entry.component.status === 'UP' ? 'circle-check' : 'circle-x'" [size]="16"></svg>
+                  <span class="health__detail-name">{{ entry.name }}</span>
+                  <span class="health__detail-status">{{ entry.component.status }}</span>
+                  @if (entry.facts.length) {
+                    <svg class="health__detail-chevron" lucideIcon="chevron-down" [size]="16"></svg>
+                  }
+                </summary>
+                @if (entry.facts.length) {
+                  <dl>
+                    @for (fact of entry.facts; track fact.label) {
+                      <div>
+                        <dt>{{ fact.label }}</dt>
+                        <dd class="bm-mono">{{ fact.value }}</dd>
+                      </div>
+                    }
+                  </dl>
+                }
+              </details>
+            }
+          </div>
+        }
+      </bm-panel>
+
+      <bm-panel heading="Loggers" subheading="Changes apply at once and last until the service restarts.">
+        <bm-segmented bmPanelActions size="sm" ariaLabel="Service" [options]="serviceOptions" [value]="loggerService()" (valueChange)="loggerService.set($event)" />
+        @if (loggers.isError()) {
+          @switch (unexposed(loggers.error())) {
+            @case ('hidden') {
+              <bm-empty-state icon="eye-off" title="Not exposed here" description="This deployment does not publish the loggers endpoint, as production usually does not." compact />
+            }
+            @case ('forbidden') {
+              <bm-empty-state icon="lock" title="Administrators only" compact />
+            }
+            @default {
+              <bm-error-state [error]="loggers.error()" (retry)="loggers.refetch()" />
+            }
+          }
+        } @else {
+          <div class="health__logger-tools">
+            <bm-search-box placeholder="Find a logger" [value]="loggerSearch()" [debounce]="120" (search)="loggerSearch.set($event)" />
+            <bm-switch [checked]="configuredOnly()" (checkedChange)="configuredOnly.set($event)">Changed levels only</bm-switch>
+          </div>
+          @if (loggers.isPending()) {
+            <bm-skeleton height="180px" />
+          } @else {
+            <ul class="health__loggers">
+              @for (logger of loggerRows(); track logger.name; let l = $index) {
+                <li [style.--bm-i]="l < 12 ? l : 12">
+                  <span class="health__logger-name bm-mono" [title]="logger.name">{{ logger.name }}</span>
+                  <label class="health__level" [attr.data-level]="logger.effectiveLevel">
+                    <span class="bm-visually-hidden">Level of {{ logger.name }}</span>
+                    <select [value]="logger.configuredLevel ?? 'INHERIT'" (change)="setLevel(logger.name, $any($event.target).value)">
+                      @if (logger.name !== 'ROOT') {
+                        <option value="INHERIT">Inherit ({{ logger.effectiveLevel }})</option>
+                      }
+                      @for (level of levels; track level) {
+                        <option [value]="level">{{ level }}</option>
+                      }
+                    </select>
+                    <svg lucideIcon="chevrons-up-down" [size]="13" aria-hidden="true"></svg>
+                  </label>
+                </li>
+              } @empty {
+                <li class="health__loggers-empty">No logger matches.</li>
+              }
+            </ul>
+          }
+        }
+      </bm-panel>
+
+      <bm-panel heading="Caches" subheading="Clearing one makes the next lookups read from the source again.">
+        <bm-segmented bmPanelActions size="sm" ariaLabel="Service" [options]="serviceOptions" [value]="cacheService()" (valueChange)="cacheService.set($event)" />
+        @if (caches.isError()) {
+          @switch (unexposed(caches.error())) {
+            @case ('hidden') {
+              <bm-empty-state icon="eye-off" title="Not exposed here" description="This deployment does not publish the caches endpoint." compact />
+            }
+            @case ('forbidden') {
+              <bm-empty-state icon="lock" title="Administrators only" compact />
+            }
+            @default {
+              <bm-error-state [error]="caches.error()" (retry)="caches.refetch()" />
+            }
+          }
+        } @else if (caches.isPending()) {
+          <bm-skeleton height="120px" />
+        } @else if (!cacheRows().length) {
+          <bm-empty-state icon="database" title="No caches" description="This service keeps nothing in memory between requests." compact />
+        } @else {
+          <ul class="health__caches">
+            @for (cache of cacheRows(); track cache.name; let k = $index) {
+              <li [style.--bm-i]="k">
+                <span class="health__cache-icon"><svg lucideIcon="database" [size]="15"></svg></span>
+                <span class="health__cache-text">
+                  <strong class="bm-mono">{{ cache.name }}</strong>
+                  <span>{{ cache.target }}</span>
+                </span>
+                <button type="button" bmButton size="sm" variant="ghost" [loading]="evicting() === cache.name" (click)="evict(cache.name)">Clear</button>
+              </li>
+            }
+          </ul>
+          <button type="button" bmButton size="sm" class="health__evict-all" [loading]="evicting() === '*'" (click)="evict()">
+            <svg lucideIcon="rotate-ccw"></svg>
+            Clear every cache
+          </button>
+        }
+      </bm-panel>
+    </section>
+  } @else {
+    <bm-message-strip tone="info" icon="lock">Health details, loggers and caches are for administrators.</bm-message-strip>
+  }
+</div>

@@ -1,0 +1,1105 @@
+@use 'styles/mixins' as *;
+
+// =============================================================================
+//  The map and Street View canvas. Global on purpose: Leaflet and Google build
+//  their own DOM, which component encapsulation cannot reach.
+// =============================================================================
+
+.bm-geo-canvas {
+  --bm-map-void: #e6ebf1;
+  --bm-chrome-glass: rgba(255, 255, 255, 0.9);
+  --bm-chrome-border: rgba(203, 212, 223, 0.75);
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bm-map-void);
+  isolation: isolate;
+
+  &.is-dragging {
+    cursor: col-resize;
+    user-select: none;
+
+    &.is-vertical {
+      cursor: row-resize;
+    }
+  }
+}
+
+// ── Panes ────────────────────────────────────────────────────────────────────
+
+.bm-geo-canvas__split {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  transition: left var(--bm-duration-slow) var(--bm-ease-emphasized);
+
+  .bm-geo-canvas[data-mode='split']:not(.is-vertical) & {
+    left: var(--bm-panel-left, 0px);
+  }
+
+  .is-vertical & {
+    flex-direction: column;
+  }
+}
+
+.bm-geo-canvas__pane {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bm-map-void);
+  container-type: size;
+}
+
+// A narrow pane has no room for its name beside the controls.
+@container (max-width: 440px) {
+  .bm-geo-canvas__badge {
+    display: none;
+  }
+}
+
+.bm-geo-canvas[data-mode='split'] {
+  .bm-geo-canvas__pane.is-map {
+    flex: 0 0 var(--bm-split);
+  }
+
+  .bm-geo-canvas__pane.is-street {
+    flex: 1 1 0;
+  }
+}
+
+// The single modes layer both panes at full size rather than collapsing one: a panorama squeezed
+// to nothing comes back black.
+.bm-geo-canvas:not([data-mode='split']) {
+  .bm-geo-canvas__pane {
+    position: absolute;
+    inset: 0;
+  }
+
+  .bm-geo-canvas__pane:not(.is-shown) {
+    z-index: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .bm-geo-canvas__pane.is-shown {
+    z-index: 1;
+  }
+}
+
+.bm-geo-canvas__map,
+.bm-geo-canvas__panorama {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  background: var(--bm-map-void);
+}
+
+.bm-geo-canvas__map {
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--bm-accent);
+  }
+}
+
+// Only the panes carry transition names, and only while a mode change runs.
+.bm-geo-canvas.is-morphing {
+  .bm-geo-canvas__split {
+    transition: none;
+  }
+
+  .bm-geo-canvas__pane.is-map.is-shown {
+    view-transition-name: bm-canvas-map;
+  }
+
+  .bm-geo-canvas__pane.is-street.is-shown {
+    view-transition-name: bm-canvas-street;
+  }
+}
+
+::view-transition-group(bm-canvas-map),
+::view-transition-group(bm-canvas-street) {
+  animation-duration: 440ms;
+  animation-timing-function: cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+::view-transition-old(bm-canvas-map),
+::view-transition-new(bm-canvas-map),
+::view-transition-old(bm-canvas-street),
+::view-transition-new(bm-canvas-street) {
+  height: 100%;
+  object-fit: cover;
+  animation-duration: 440ms;
+}
+
+::view-transition-new(bm-canvas-map):only-child,
+::view-transition-new(bm-canvas-street):only-child {
+  animation: bm-canvas-in 440ms cubic-bezier(0.05, 0.7, 0.1, 1) both;
+}
+
+::view-transition-old(bm-canvas-map):only-child,
+::view-transition-old(bm-canvas-street):only-child {
+  animation: bm-fade-out 180ms cubic-bezier(0.3, 0, 0.8, 0.15) both;
+}
+
+@keyframes bm-canvas-in {
+  from {
+    opacity: 0;
+    transform: scale(calc(1 + 0.04 * var(--bm-motion)));
+  }
+}
+
+// ── Pane furniture ───────────────────────────────────────────────────────────
+
+.bm-geo-canvas__badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--bm-chrome-border);
+  border-radius: var(--bm-radius-pill);
+  @include glass(10px);
+  background: var(--bm-chrome-glass);
+  box-shadow: var(--bm-shadow-sm);
+  font: var(--bm-text-overline);
+  letter-spacing: var(--bm-tracking-overline);
+  text-transform: uppercase;
+  color: var(--bm-text-2);
+  pointer-events: none;
+
+  svg {
+    color: var(--bm-accent);
+  }
+}
+
+.bm-geo-canvas__crosshair {
+  position: absolute;
+  top: calc(var(--bm-inset-top) + (100% - var(--bm-inset-top) - var(--bm-inset-bottom)) / 2);
+  left: calc(var(--bm-inset-left) + (100% - var(--bm-inset-left) - var(--bm-inset-right)) / 2);
+  z-index: 450;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  opacity: 0;
+  transform: scale(0.5) rotate(-45deg);
+  pointer-events: none;
+  transition:
+    opacity var(--bm-duration-base) var(--bm-ease-standard),
+    transform var(--bm-duration-slow) var(--bm-ease-spring);
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    border-radius: 1px;
+    background: var(--bm-signal);
+    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9);
+  }
+
+  &::before {
+    top: 0;
+    bottom: 0;
+    left: 14px;
+    width: 2px;
+  }
+
+  &::after {
+    left: 0;
+    right: 0;
+    top: 14px;
+    height: 2px;
+  }
+
+  .bm-geo-canvas__map:focus-visible + & {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.bm-geo-canvas__readout {
+  position: absolute;
+  left: calc(var(--bm-inset-left) + (100% - var(--bm-inset-left) - var(--bm-inset-right)) / 2);
+  bottom: calc(var(--bm-inset-bottom) + 12px);
+  z-index: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 11px;
+  border: 1px solid var(--bm-chrome-border);
+  border-radius: var(--bm-radius-pill);
+  @include glass(10px);
+  background: var(--bm-chrome-glass);
+  box-shadow: var(--bm-shadow-sm);
+  color: var(--bm-text-2);
+  font: 500 12px/1 var(--bm-font-mono);
+  cursor: copy;
+  translate: -50% 0;
+  overflow: hidden;
+  isolation: isolate;
+  @include pressable(0.96);
+  @include focus-ring;
+
+  svg {
+    color: var(--bm-signal);
+  }
+
+  @include hover {
+    color: var(--bm-text);
+    box-shadow: var(--bm-shadow-md);
+  }
+}
+
+.bm-geo-canvas__readout-zoom {
+  padding-left: 8px;
+  border-left: 1px solid var(--bm-border);
+  color: var(--bm-text-3);
+}
+
+// ── Splitter ─────────────────────────────────────────────────────────────────
+
+.bm-geo-canvas__splitter {
+  position: relative;
+  z-index: 600;
+  flex: 0 0 10px;
+  display: grid;
+  place-items: center;
+  border-inline: 1px solid var(--bm-border);
+  background: var(--bm-surface);
+  cursor: col-resize;
+  touch-action: none;
+  outline: none;
+  transition: background-color var(--bm-duration-fast) var(--bm-ease-standard);
+
+  // A wider grab area than the seam it draws.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 -8px;
+  }
+
+  @include hover {
+    background: var(--bm-accent-softer);
+  }
+
+  &.is-active,
+  &:focus-visible {
+    background: var(--bm-accent-soft);
+  }
+
+  .is-vertical & {
+    flex-basis: 14px;
+    border-inline: 0;
+    border-block: 1px solid var(--bm-border);
+    cursor: row-resize;
+
+    &::before {
+      inset: -10px 0;
+    }
+  }
+}
+
+.bm-geo-canvas__grip {
+  width: 3px;
+  height: 32px;
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-border-strong);
+  transition:
+    height var(--bm-duration-slow) var(--bm-ease-spring),
+    width var(--bm-duration-slow) var(--bm-ease-spring),
+    background-color var(--bm-duration-fast) var(--bm-ease-standard);
+
+  .bm-geo-canvas__splitter:hover &,
+  .bm-geo-canvas__splitter:focus-visible &,
+  .bm-geo-canvas__splitter.is-active & {
+    height: 60px;
+    background: var(--bm-accent);
+  }
+
+  .is-vertical & {
+    width: 36px;
+    height: 4px;
+  }
+
+  .is-vertical .bm-geo-canvas__splitter:hover &,
+  .is-vertical .bm-geo-canvas__splitter:focus-visible &,
+  .is-vertical .bm-geo-canvas__splitter.is-active & {
+    width: 64px;
+    height: 4px;
+  }
+}
+
+// ── Street View states ───────────────────────────────────────────────────────
+
+.bm-geo-canvas__state {
+  position: absolute;
+  inset: 0;
+  z-index: 400;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
+  padding: 24px calc(var(--bm-street-inset-right) + 24px) calc(var(--bm-street-inset-bottom) + 24px) calc(var(--bm-street-inset-left) + 24px);
+  background:
+    radial-gradient(90% 70% at 50% 42%, var(--bm-surface) 0%, transparent 70%),
+    linear-gradient(180deg, var(--bm-surface-2), var(--bm-surface-3));
+  text-align: center;
+
+  strong {
+    font: var(--bm-text-heading);
+    color: var(--bm-text);
+    animation: bm-rise var(--bm-duration-slow) var(--bm-ease-emphasized) 60ms both;
+  }
+
+  p {
+    max-width: 36ch;
+    margin: 0;
+    font: var(--bm-text-small);
+    color: var(--bm-text-2);
+    animation: bm-rise var(--bm-duration-slow) var(--bm-ease-emphasized) 110ms both;
+  }
+
+  [bmButton] {
+    margin-top: 10px;
+    animation: bm-rise var(--bm-duration-slow) var(--bm-ease-emphasized) 160ms both;
+  }
+}
+
+.bm-geo-canvas__state-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 8px;
+  border-radius: 18px;
+  background: var(--bm-accent-soft);
+  color: var(--bm-accent);
+  box-shadow: 0 0 0 8px var(--bm-accent-softer);
+  animation: bm-pop var(--bm-duration-slow) var(--bm-ease-spring) both;
+
+  &.is-spinning svg {
+    animation: bm-spin 900ms linear infinite;
+  }
+
+  &.is-negative {
+    background: var(--bm-negative-soft);
+    color: var(--bm-negative);
+    box-shadow: 0 0 0 8px rgba(207, 50, 57, 0.05);
+  }
+}
+
+.bm-geo-canvas__street-bar {
+  position: absolute;
+  left: calc(var(--bm-street-inset-left) + 12px);
+  right: calc(var(--bm-street-inset-right) + 64px);
+  bottom: calc(var(--bm-street-inset-bottom) + 12px);
+  z-index: 450;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+.bm-geo-canvas__caption {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--bm-chrome-border);
+  border-radius: var(--bm-radius-pill);
+  @include glass(12px);
+  background: var(--bm-chrome-glass);
+  box-shadow: var(--bm-shadow-md);
+  color: var(--bm-text);
+  font: var(--bm-text-caption);
+
+  svg {
+    flex-shrink: 0;
+    color: var(--bm-signal);
+  }
+}
+
+.bm-geo-canvas__caption-text {
+  @include truncate;
+  font-weight: 650;
+}
+
+.bm-geo-canvas__caption-meta {
+  flex-shrink: 0;
+  padding-left: 8px;
+  border-left: 1px solid var(--bm-border);
+  color: var(--bm-text-3);
+  white-space: nowrap;
+
+  @include down(sm) {
+    display: none;
+  }
+}
+
+.bm-geo-canvas__spinner {
+  flex-shrink: 0;
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--bm-accent-border);
+  border-top-color: var(--bm-accent);
+  border-radius: 50%;
+  animation: bm-spin 700ms linear infinite;
+}
+
+.bm-geo-canvas__face {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-accent);
+  color: var(--bm-text-inverse);
+  font: var(--bm-text-subheading);
+  box-shadow: var(--bm-shadow-accent);
+  overflow: hidden;
+  isolation: isolate;
+  @include pressable(0.95);
+  @include focus-ring;
+
+  svg {
+    transition: transform var(--bm-duration-slow) var(--bm-ease-spring);
+  }
+
+  @include hover {
+    background: var(--bm-accent-hover);
+
+    svg {
+      transform: rotate(90deg);
+    }
+  }
+}
+
+.bm-geo-canvas__notice {
+  position: absolute;
+  top: 48px;
+  left: calc(var(--bm-street-inset-left) + (100% - var(--bm-street-inset-left) - var(--bm-street-inset-right)) / 2);
+  z-index: 460;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--bm-critical-border);
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-critical-soft);
+  color: var(--bm-critical);
+  font: var(--bm-text-caption);
+  font-weight: 650;
+  white-space: nowrap;
+  box-shadow: var(--bm-shadow-md);
+  translate: -50% 0;
+}
+
+// ── Chrome ───────────────────────────────────────────────────────────────────
+
+.bm-geo-canvas__chrome {
+  position: absolute;
+  right: calc(var(--bm-inset-right) + 12px);
+  z-index: 700;
+  display: flex;
+  gap: 8px;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+
+  &.is-top {
+    top: calc(var(--bm-inset-top) + 12px);
+    align-items: center;
+    animation: bm-rise var(--bm-duration-slow) var(--bm-ease-emphasized) 120ms both;
+  }
+
+  &.is-tools {
+    bottom: calc(var(--bm-inset-bottom) + 12px);
+    flex-direction: column;
+    align-items: flex-end;
+    animation: bm-rise var(--bm-duration-slow) var(--bm-ease-emphasized) 200ms both;
+  }
+
+  .is-vertical &.is-top {
+    top: calc(var(--bm-inset-top) + 10px);
+    right: calc(var(--bm-inset-right) + 10px);
+  }
+
+  .is-vertical &.is-tools {
+    top: calc(var(--bm-inset-top) + 60px);
+    right: calc(var(--bm-inset-right) + 10px);
+    bottom: auto;
+  }
+}
+
+.bm-geo-canvas__modes.bm-segmented {
+  border: 1px solid var(--bm-chrome-border);
+  @include glass(12px);
+  background: var(--bm-chrome-glass);
+  box-shadow: var(--bm-shadow-md);
+
+  .bm-segmented__thumb {
+    background: var(--bm-accent-soft);
+    box-shadow: inset 0 0 0 1px var(--bm-accent-border);
+  }
+
+  .bm-segmented__option.is-selected {
+    color: var(--bm-accent-text);
+  }
+}
+
+.bm-geo-canvas__tool {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--bm-chrome-border);
+  border-radius: 12px;
+  @include glass(12px);
+  background: var(--bm-chrome-glass);
+  box-shadow: var(--bm-shadow-md);
+  color: var(--bm-text-2);
+  overflow: hidden;
+  isolation: isolate;
+  @include pressable(0.9);
+  @include focus-ring;
+
+  @include touch {
+    width: 44px;
+    height: 44px;
+  }
+
+  svg {
+    transition: transform var(--bm-duration-base) var(--bm-ease-spring);
+  }
+
+  @include hover {
+    background: var(--bm-surface);
+    color: var(--bm-accent);
+    box-shadow: var(--bm-shadow-lg);
+
+    svg {
+      transform: scale(1.1);
+    }
+  }
+
+  &[aria-pressed='true'],
+  &[aria-expanded='true'] {
+    color: var(--bm-accent);
+    background: var(--bm-surface);
+  }
+
+  &.is-busy svg {
+    animation: bm-locating 1.1s var(--bm-ease-standard) infinite;
+  }
+}
+
+@keyframes bm-locating {
+  50% {
+    transform: scale(0.82);
+    opacity: 0.55;
+  }
+}
+
+.bm-geo-canvas__zoom {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  box-shadow: var(--bm-shadow-md);
+
+  .bm-geo-canvas__tool {
+    box-shadow: none;
+
+    &:first-child {
+      border-bottom-color: var(--bm-border-subtle);
+      border-radius: 12px 12px 0 0;
+    }
+
+    &:last-child {
+      border-top: 0;
+      border-radius: 0 0 12px 12px;
+    }
+  }
+}
+
+// ── Layers menu ──────────────────────────────────────────────────────────────
+
+.bm-layers {
+  width: 288px;
+  max-width: calc(100vw - 24px);
+}
+
+.bm-layers__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 2px 2px 4px;
+}
+
+.bm-layers__option {
+  display: grid;
+  gap: 6px;
+  padding: 5px;
+  border: 1.5px solid transparent;
+  border-radius: var(--bm-radius-md);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  animation: bm-rise 280ms var(--bm-ease-emphasized) both;
+  animation-delay: calc(var(--bm-i, 0) * 34ms + 40ms);
+  transition:
+    border-color var(--bm-duration-fast) var(--bm-ease-standard),
+    background-color var(--bm-duration-fast) var(--bm-ease-standard);
+  @include pressable(0.96);
+
+  @include hover {
+    background: var(--bm-surface-hover);
+
+    img {
+      transform: scale(1.1);
+    }
+  }
+
+  &:focus-visible,
+  &.cdk-menu-item-active {
+    background: var(--bm-surface-hover);
+  }
+
+  &[aria-checked='true'] {
+    border-color: var(--bm-accent);
+    background: var(--bm-accent-softer);
+
+    .bm-layers__label {
+      color: var(--bm-accent-text);
+    }
+  }
+}
+
+.bm-layers__preview {
+  display: block;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--bm-radius-sm);
+  overflow: hidden;
+  background: var(--bm-surface-3);
+  box-shadow: inset 0 0 0 1px rgba(11, 23, 38, 0.06);
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--bm-duration-slow) var(--bm-ease-emphasized);
+  }
+}
+
+.bm-layers__label {
+  padding: 0 3px 1px;
+  font: var(--bm-text-caption);
+  font-weight: 650;
+  color: var(--bm-text);
+}
+
+// ── Context menu ─────────────────────────────────────────────────────────────
+
+.bm-geo-canvas__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 800;
+}
+
+.bm-geo-canvas__menu {
+  position: absolute;
+  z-index: 810;
+  width: 236px;
+  transform-origin: top left;
+}
+
+.bm-geo-canvas__menu-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  padding: 6px 10px 9px;
+  border-bottom: 1px solid var(--bm-border-subtle);
+  color: var(--bm-text-2);
+  font: 500 12px/1.2 var(--bm-font-mono);
+
+  svg {
+    color: var(--bm-signal);
+  }
+}
+
+// ── Leaflet ──────────────────────────────────────────────────────────────────
+
+.bm-geo-canvas .leaflet-container {
+  background: var(--bm-map-void);
+  font: var(--bm-text-caption);
+  cursor: default;
+}
+
+.bm-geo-canvas .leaflet-grab {
+  cursor: grab;
+}
+
+.bm-geo-canvas .leaflet-dragging .leaflet-grab {
+  cursor: grabbing;
+}
+
+.bm-geo-canvas .leaflet-bottom.leaflet-left {
+  left: var(--bm-inset-left);
+  bottom: var(--bm-inset-bottom);
+}
+
+.bm-geo-canvas .leaflet-control-attribution {
+  margin: 0 0 4px 6px;
+  padding: 0 6px;
+  border-radius: var(--bm-radius-pill);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--bm-text-3);
+  font: 500 10px/16px var(--bm-font-sans);
+
+  a {
+    color: inherit;
+  }
+}
+
+.bm-geo-canvas .leaflet-marker-icon.bm-marker {
+  background: none;
+  border: 0;
+}
+
+.bm-map-tooltip.leaflet-tooltip {
+  display: grid;
+  gap: 1px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: var(--bm-radius-sm);
+  background: #0f1c2e;
+  color: #f4f7fb;
+  font: var(--bm-text-caption);
+  box-shadow: 0 8px 24px -10px rgba(8, 20, 38, 0.5);
+
+  strong {
+    font-weight: 650;
+  }
+
+  span {
+    color: rgba(244, 247, 251, 0.7);
+  }
+
+  &.leaflet-tooltip-top::before {
+    border-top-color: #0f1c2e;
+  }
+}
+
+.bm-point {
+  fill: var(--bm-neutral);
+  stroke: #fff;
+  stroke-width: 2;
+  cursor: pointer;
+  transition: stroke var(--bm-duration-fast) var(--bm-ease-standard);
+
+  &:hover {
+    stroke: var(--bm-text);
+  }
+
+  &.is-positive {
+    fill: var(--bm-positive);
+  }
+
+  &.is-critical {
+    fill: var(--bm-critical);
+  }
+
+  &.is-negative {
+    fill: var(--bm-negative);
+  }
+
+  &.is-info {
+    fill: var(--bm-accent);
+  }
+
+  &.is-special {
+    fill: var(--bm-special);
+  }
+
+  &.is-signal {
+    fill: var(--bm-signal);
+  }
+}
+
+.bm-sightline {
+  stroke: var(--bm-signal);
+  stroke-opacity: 0.9;
+  animation: bm-sightline 900ms linear infinite;
+}
+
+@keyframes bm-sightline {
+  to {
+    stroke-dashoffset: -8;
+  }
+}
+
+.bm-self-accuracy {
+  fill: var(--bm-accent);
+  fill-opacity: 0.08;
+  stroke: var(--bm-accent);
+  stroke-opacity: 0.35;
+}
+
+// ── Marks ────────────────────────────────────────────────────────────────────
+
+// Street View's position. The cone is the camera's field of view and turns with it.
+.bm-camera {
+  --bm-heading: 0deg;
+  position: relative;
+  width: 64px;
+  height: 64px;
+  cursor: grab;
+  filter: drop-shadow(0 6px 12px rgba(11, 23, 38, 0.24));
+  transition: transform var(--bm-duration-base) var(--bm-ease-spring);
+
+  .bm-marker.is-arriving & {
+    animation: bm-camera-arrive 560ms var(--bm-ease-spring) both;
+  }
+
+  .bm-marker.is-dragging & {
+    transform: scale(1.14);
+    cursor: grabbing;
+  }
+}
+
+.bm-camera__cone {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from calc(var(--bm-heading) - 34deg),
+    rgba(224, 122, 31, 0) 0deg,
+    rgba(224, 122, 31, 0.62) 34deg,
+    rgba(224, 122, 31, 0) 68deg,
+    rgba(224, 122, 31, 0) 360deg
+  );
+  -webkit-mask: radial-gradient(circle, transparent 0 11px, #000 12px, rgba(0, 0, 0, 0.35) 100%);
+  mask: radial-gradient(circle, transparent 0 11px, #000 12px, rgba(0, 0, 0, 0.35) 100%);
+}
+
+.bm-camera__disc {
+  position: absolute;
+  inset: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 0 0 1px rgba(11, 23, 38, 0.08),
+    0 2px 6px rgba(11, 23, 38, 0.18);
+}
+
+.bm-camera__tick {
+  position: absolute;
+  left: 31px;
+  top: 14px;
+  width: 2px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--bm-signal);
+  transform-origin: 1px 18px;
+  transform: rotate(var(--bm-heading));
+}
+
+.bm-camera__eye {
+  position: absolute;
+  left: 26px;
+  top: 26px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bm-text);
+  box-shadow: 0 0 0 2.5px #fff;
+}
+
+@keyframes bm-camera-arrive {
+  from {
+    opacity: 0;
+    transform: scale(calc(1 - 0.6 * var(--bm-motion)));
+  }
+}
+
+// The asset: an amber pin that drops, lands with a ripple, lifts while dragged.
+.bm-pin {
+  position: relative;
+  width: 32px;
+  height: 42px;
+  transform-origin: 50% 100%;
+  cursor: grab;
+  transition: transform var(--bm-duration-base) var(--bm-ease-spring);
+
+  .bm-marker.is-dropping & {
+    animation: bm-pin-drop 680ms var(--bm-ease-standard) both;
+  }
+
+  .bm-marker.is-landing & {
+    animation: bm-pin-land 520ms var(--bm-ease-standard) both;
+  }
+
+  .bm-marker.is-lifted & {
+    transform: translateY(-12px) scale(1.08);
+    cursor: grabbing;
+  }
+
+  .bm-marker.is-leaving & {
+    animation: bm-sink 200ms var(--bm-ease-exit) both;
+  }
+}
+
+.bm-pin__shape {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 32px;
+  height: 42px;
+  overflow: visible;
+  filter: drop-shadow(0 4px 5px rgba(11, 23, 38, 0.28));
+
+  path {
+    fill: var(--bm-signal);
+    stroke: #fff;
+    stroke-width: 2;
+  }
+
+  circle {
+    fill: #fff;
+  }
+}
+
+.bm-pin__ground {
+  position: absolute;
+  left: 7px;
+  bottom: -3px;
+  width: 18px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(11, 23, 38, 0.3);
+  filter: blur(1.5px);
+  transition:
+    transform var(--bm-duration-base) var(--bm-ease-spring),
+    opacity var(--bm-duration-base) var(--bm-ease-standard);
+
+  .bm-marker.is-lifted & {
+    transform: translateY(12px) scale(0.7);
+    opacity: 0.45;
+  }
+}
+
+.bm-pin__ring {
+  position: absolute;
+  left: -4px;
+  bottom: -12px;
+  width: 40px;
+  height: 22px;
+  border: 2px solid var(--bm-signal);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+
+  .bm-marker.is-dropping &,
+  .bm-marker.is-landing & {
+    animation: bm-pin-ring 760ms var(--bm-ease-standard) 260ms both;
+  }
+}
+
+@keyframes bm-pin-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(-56px * var(--bm-motion))) scale(calc(1 - 0.1 * var(--bm-motion)));
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(0) scale(1, calc(1 - 0.1 * var(--bm-motion)));
+  }
+  65% {
+    transform: translateY(calc(-7px * var(--bm-motion))) scale(1);
+  }
+  85% {
+    transform: translateY(0) scale(1, calc(1 - 0.03 * var(--bm-motion)));
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes bm-pin-land {
+  0% {
+    transform: translateY(calc(-14px * var(--bm-motion)));
+  }
+  55% {
+    transform: translateY(0) scale(1, calc(1 - 0.08 * var(--bm-motion)));
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes bm-pin-ring {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+
+// You, from the browser.
+.bm-self {
+  position: relative;
+  width: 24px;
+  height: 24px;
+}
+
+.bm-self__halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--bm-accent-glow);
+  animation: bm-pulse-ring 2.2s var(--bm-ease-standard) infinite;
+}
+
+.bm-self__dot {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: var(--bm-accent);
+  box-shadow:
+    0 0 0 3px #fff,
+    0 2px 8px rgba(18, 87, 230, 0.45);
+}
+
+// Decorative loops stop when motion is reduced; the states they decorate stay visible.
+.bm-reduced-motion {
+  .bm-sightline,
+  .bm-self__halo,
+  .bm-geo-canvas__tool.is-busy svg {
+    animation: none;
+  }
+}

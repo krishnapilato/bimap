@@ -1,0 +1,97 @@
+.bm-status {
+  --bm-status-fg: var(--bm-neutral);
+  --bm-status-bg: var(--bm-neutral-soft);
+  --bm-status-border: var(--bm-neutral-border);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 9px 0 8px;
+  border: 1px solid var(--bm-status-border);
+  border-radius: var(--bm-radius-pill);
+  background: var(--bm-status-bg);
+  color: var(--bm-status-fg);
+  font: var(--bm-text-caption);
+  white-space: nowrap;
+  vertical-align: middle;
+  transition:
+    color var(--bm-duration-slow) var(--bm-ease-standard),
+    background-color var(--bm-duration-slow) var(--bm-ease-standard),
+    border-color var(--bm-duration-slow) var(--bm-ease-standard);
+
+  &[data-size='sm'] {
+    height: 20px;
+    padding: 0 7px 0 6px;
+    gap: 5px;
+    font-size: 11.5px;
+  }
+
+  &.is-quiet {
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--bm-text-2);
+  }
+
+  &[data-tone='positive'] {
+    --bm-status-fg: var(--bm-positive);
+    --bm-status-bg: var(--bm-positive-soft);
+    --bm-status-border: var(--bm-positive-border);
+  }
+
+  &[data-tone='critical'] {
+    --bm-status-fg: var(--bm-critical);
+    --bm-status-bg: var(--bm-critical-soft);
+    --bm-status-border: var(--bm-critical-border);
+  }
+
+  &[data-tone='negative'] {
+    --bm-status-fg: var(--bm-negative);
+    --bm-status-bg: var(--bm-negative-soft);
+    --bm-status-border: var(--bm-negative-border);
+  }
+
+  &[data-tone='info'] {
+    --bm-status-fg: var(--bm-accent-text);
+    --bm-status-bg: var(--bm-accent-soft);
+    --bm-status-border: var(--bm-accent-border);
+  }
+
+  &[data-tone='special'] {
+    --bm-status-fg: var(--bm-special);
+    --bm-status-bg: var(--bm-special-soft);
+    --bm-status-border: var(--bm-special-border);
+  }
+
+  &[data-tone='signal'] {
+    --bm-status-fg: var(--bm-signal-strong);
+    --bm-status-bg: var(--bm-signal-soft);
+    --bm-status-border: var(--bm-signal-border);
+  }
+}
+
+.bm-status__dot {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--bm-status-fg);
+  transition: background-color var(--bm-duration-slow) var(--bm-ease-standard);
+
+  .is-quiet & {
+    width: 7px;
+    height: 7px;
+  }
+
+  .is-live &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--bm-status-fg);
+    animation: bm-pulse-ring 1.6s var(--bm-ease-standard) infinite;
+  }
+}

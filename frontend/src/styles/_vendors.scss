@@ -1,0 +1,78 @@
+// =============================================================================
+//  Vendor skins. Only what cannot be configured through the vendor API.
+// =============================================================================
+
+// ── ngx-sonner ───────────────────────────────────────────────────────────────
+
+ngx-sonner-toaster {
+  --ngx-sonner-toast-normal-background: var(--bm-surface);
+  --ngx-sonner-toast-normal-border-color: var(--bm-border);
+  --ngx-sonner-toast-normal-text-color: var(--bm-text);
+  --ngx-sonner-toast-success-background: var(--bm-surface);
+  --ngx-sonner-toast-success-border-color: var(--bm-positive-border);
+  --ngx-sonner-toast-success-text-color: var(--bm-text);
+  --ngx-sonner-toast-error-background: var(--bm-surface);
+  --ngx-sonner-toast-error-border-color: var(--bm-negative-border);
+  --ngx-sonner-toast-error-text-color: var(--bm-text);
+  --ngx-sonner-toast-warning-background: var(--bm-surface);
+  --ngx-sonner-toast-warning-border-color: var(--bm-critical-border);
+  --ngx-sonner-toast-warning-text-color: var(--bm-text);
+  --ngx-sonner-toast-info-background: var(--bm-surface);
+  --ngx-sonner-toast-info-border-color: var(--bm-accent-border);
+  --ngx-sonner-toast-info-text-color: var(--bm-text);
+  --ngx-sonner-border-radius: var(--bm-radius-lg);
+  font-family: var(--bm-font-sans);
+}
+
+[data-sonner-toast][data-styled='true'] {
+  padding: 14px 16px !important;
+  gap: 10px !important;
+  box-shadow: var(--bm-shadow-lg) !important;
+  font: var(--bm-text-small) !important;
+
+  [data-title] {
+    font: var(--bm-text-subheading) !important;
+    color: var(--bm-text) !important;
+  }
+
+  [data-description] {
+    font: var(--bm-text-small) !important;
+    color: var(--bm-text-2) !important;
+  }
+
+  [data-icon] {
+    align-self: flex-start;
+    margin-top: 1px;
+  }
+
+  &[data-type='success'] [data-icon] {
+    color: var(--bm-positive);
+  }
+
+  &[data-type='error'] [data-icon] {
+    color: var(--bm-negative);
+  }
+
+  &[data-type='warning'] [data-icon] {
+    color: var(--bm-critical);
+  }
+
+  &[data-type='info'] [data-icon] {
+    color: var(--bm-accent);
+  }
+
+  [data-button] {
+    height: 28px !important;
+    padding: 0 12px !important;
+    border-radius: var(--bm-radius-sm) !important;
+    background: var(--bm-accent) !important;
+    color: var(--bm-text-inverse) !important;
+    font: var(--bm-text-caption) !important;
+  }
+
+  [data-close-button] {
+    background: var(--bm-surface) !important;
+    border-color: var(--bm-border) !important;
+    color: var(--bm-text-2) !important;
+  }
+}

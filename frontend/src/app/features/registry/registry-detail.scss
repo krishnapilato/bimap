@@ -1,0 +1,220 @@
+@use 'styles/mixins' as *;
+
+.registry-detail__loading {
+  display: grid;
+  gap: 12px;
+}
+
+.registry-detail__place {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: var(--bm-text-body);
+  color: var(--bm-text-2);
+
+  svg {
+    flex-shrink: 0;
+    color: var(--bm-signal);
+  }
+}
+
+.registry-detail__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+
+  @include up(lg) {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  }
+}
+
+.registry-detail__main,
+.registry-detail__side {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+
+  > * {
+    animation: bm-rise var(--bm-duration-slow) var(--bm-ease-emphasized) both;
+  }
+
+  > :nth-child(2) {
+    animation-delay: 70ms;
+  }
+
+  > :nth-child(3) {
+    animation-delay: 140ms;
+  }
+
+  > :nth-child(4) {
+    animation-delay: 210ms;
+  }
+}
+
+.registry-detail__side {
+  @include up(lg) {
+    position: sticky;
+    top: calc(var(--bm-topbar-height) + 16px);
+  }
+}
+
+.registry-detail__canvas {
+  position: relative;
+  height: clamp(340px, 52vh, 520px);
+  overflow: hidden;
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius-lg);
+  background: var(--bm-surface);
+  box-shadow: var(--bm-shadow-sm);
+
+  > .bm-empty {
+    height: 100%;
+  }
+
+  @include down(md) {
+    height: 420px;
+  }
+}
+
+.registry-detail__coordinates {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 4px 0 10px;
+  border: 1px solid rgba(203, 212, 223, 0.75);
+  border-radius: var(--bm-radius-pill);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--bm-shadow-sm);
+  font-size: 12px;
+  color: var(--bm-text-2);
+
+  svg {
+    color: var(--bm-signal);
+  }
+
+  .bm-geo-canvas[data-mode='split']:not(.is-vertical) & {
+    display: none;
+  }
+}
+
+.registry-detail__notes {
+  display: grid;
+  gap: 4px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--bm-border-subtle);
+
+  span {
+    font: var(--bm-text-caption);
+    font-weight: 600;
+    color: var(--bm-text-3);
+  }
+
+  p {
+    font: var(--bm-text-body);
+    white-space: pre-line;
+  }
+}
+
+.registry-detail__record {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+// The review path: four stops, the reached ones filled, the current one ringed.
+.registry-detail__journey {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0 0 22px;
+  padding: 0;
+  list-style: none;
+}
+
+.registry-detail__step {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 7px;
+    left: calc(50% + 11px);
+    right: calc(-50% + 11px);
+    height: 2px;
+    border-radius: 2px;
+    background: var(--bm-border);
+  }
+
+  &.is-done:not(:last-child)::after {
+    background: var(--bm-accent);
+    transform-origin: left;
+    animation: registry-line 600ms var(--bm-ease-emphasized) both;
+    animation-delay: calc(var(--bm-i, 0) * 120ms + 200ms);
+  }
+}
+
+@keyframes registry-line {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.registry-detail__step-dot {
+  position: relative;
+  z-index: 1;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--bm-border-strong);
+  border-radius: 50%;
+  background: var(--bm-surface);
+  transition:
+    background-color var(--bm-duration-base) var(--bm-ease-standard),
+    border-color var(--bm-duration-base) var(--bm-ease-standard);
+
+  .is-done & {
+    border-color: var(--bm-accent);
+    background: var(--bm-accent);
+  }
+
+  .is-current & {
+    border-color: var(--bm-accent);
+    box-shadow: 0 0 0 4px var(--bm-accent-soft);
+    animation: bm-pop var(--bm-duration-slow) var(--bm-ease-spring) 400ms both;
+  }
+
+  .is-current.is-rejected & {
+    border-color: var(--bm-negative);
+    box-shadow: 0 0 0 4px var(--bm-negative-soft);
+  }
+
+  [data-status='VERIFIED'] .is-current &,
+  [data-status='ARCHIVED'] .is-current & {
+    background: var(--bm-accent);
+  }
+}
+
+.registry-detail__step-label {
+  font: var(--bm-text-caption);
+  font-weight: 600;
+  color: var(--bm-text-3);
+
+  .is-done &,
+  .is-current & {
+    color: var(--bm-text);
+  }
+
+  .is-rejected & {
+    color: var(--bm-negative);
+  }
+}

@@ -1,0 +1,60 @@
+<section class="auth__scene" aria-hidden="true">
+  @for (shown of [frame()]; track shown.key) {
+    <div class="auth__frame" animate.enter="auth-frame-in" animate.leave="auth-frame-out">
+      <div
+        class="auth__tiles"
+        [style.left]="'calc(50% - ' + shown.focus.x + 'px)'"
+        [style.top]="'calc(46% - ' + shown.focus.y + 'px)'"
+        [style.transform-origin]="shown.focus.x + 'px ' + shown.focus.y + 'px'"
+      >
+        @for (tile of shown.tiles; track tile) {
+          <img [src]="tile" alt="" draggable="false" />
+        }
+      </div>
+    </div>
+  }
+
+  <div class="auth__veil"></div>
+
+  <div class="auth__marker">
+    <span class="auth__marker-ring"></span>
+    <span class="auth__marker-ring is-late"></span>
+    <svg class="auth__marker-pin" viewBox="0 0 32 42">
+      <path d="M16 1.5C8 1.5 1.5 7.9 1.5 15.8c0 10.4 12.1 23 13.4 24.3a1.5 1.5 0 0 0 2.2 0c1.3-1.3 13.4-13.9 13.4-24.3C30.5 7.9 24 1.5 16 1.5Z" />
+      <circle cx="16" cy="15.6" r="5.4" />
+    </svg>
+  </div>
+
+  @for (shown of [frame()]; track shown.key) {
+    <div class="auth__caption" animate.enter="auth-caption-in" animate.leave="bm-leave-fade">
+      <strong>{{ shown.scene.landmark }}</strong>
+      <span>{{ shown.scene.place }}, {{ shown.scene.region }}</span>
+      <span class="auth__caption-position bm-mono">{{ formatCoordinate(shown.scene.lat) }}, {{ formatCoordinate(shown.scene.lng) }}</span>
+    </div>
+  }
+
+  <div class="auth__story">
+    <p class="auth__story-title">Italy’s heritage, recorded street by street.</p>
+    <p class="auth__story-text">Place each asset on the map, check it in Street View and send it for review, all in one workspace.</p>
+    <div class="auth__progress">
+      @for (scene of scenes; track scene.place; let i = $index) {
+        <span class="auth__progress-step" [class.is-current]="i === current()" [class.is-past]="i < current()"></span>
+      }
+    </div>
+  </div>
+</section>
+
+<main class="auth__main">
+  <div class="auth__card">
+    <router-outlet />
+  </div>
+
+  <footer class="auth__footer">
+    <span>© {{ year }} BiMap</span>
+    @if (demo) {
+      <span class="auth__footer-demo">Demo · nothing leaves your browser</span>
+    } @else {
+      <span>Heritage survey and registry</span>
+    }
+  </footer>
+</main>

@@ -1,0 +1,146 @@
+@use 'styles/mixins' as *;
+@use 'uplot/dist/uPlot.min';
+
+.bm-live-chart {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  min-width: 0;
+  padding: 16px 18px 12px;
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius-lg);
+  background: var(--bm-surface);
+  box-shadow: var(--bm-shadow-xs);
+}
+
+.bm-live-chart__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+
+.bm-live-chart__titles {
+  display: grid;
+  gap: 2px;
+
+  h3 {
+    font: var(--bm-text-subheading);
+  }
+
+  p {
+    font: var(--bm-text-caption);
+    font-weight: 500;
+    color: var(--bm-text-3);
+  }
+}
+
+.bm-live-chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font: var(--bm-text-caption);
+    color: var(--bm-text-2);
+  }
+
+  strong {
+    min-width: 3ch;
+    font: 650 13px/1.2 var(--bm-font-mono);
+    color: var(--bm-text);
+    text-align: right;
+  }
+}
+
+.bm-live-chart__series {
+  font-weight: 550;
+}
+
+.bm-live-chart__swatch {
+  flex-shrink: 0;
+  width: 10px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.bm-live-chart__plot {
+  position: relative;
+  height: 188px;
+  min-width: 0;
+
+  .uplot {
+    font-family: var(--bm-font-sans);
+  }
+
+  .u-over {
+    cursor: crosshair;
+  }
+
+  .u-cursor-x {
+    border-right: 1px dashed var(--bm-chart-axis);
+  }
+
+  .u-cursor-y {
+    display: none;
+  }
+
+  .u-cursor-pt {
+    border-color: var(--bm-surface) !important;
+    box-shadow: 0 0 0 1px rgba(11, 23, 38, 0.12);
+  }
+}
+
+.bm-live-chart__tooltip {
+  position: absolute;
+  z-index: 5;
+  display: grid;
+  gap: 3px;
+  min-width: 132px;
+  padding: 8px 10px;
+  border-radius: var(--bm-radius-sm);
+  background: #0f1c2e;
+  box-shadow: 0 8px 24px -10px rgba(8, 20, 38, 0.5);
+  color: #f4f7fb;
+  font: var(--bm-text-caption);
+  pointer-events: none;
+  transition:
+    left 80ms linear,
+    top 80ms linear;
+}
+
+.bm-live-chart__time {
+  margin-bottom: 2px;
+  color: rgba(244, 247, 251, 0.64);
+  font: 500 11px/1.3 var(--bm-font-mono);
+}
+
+.bm-live-chart__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  strong {
+    margin-left: auto;
+    padding-left: 12px;
+    font: 650 12px/1.3 var(--bm-font-mono);
+  }
+}
+
+.bm-live-chart__waiting {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: var(--bm-text-caption);
+  font-weight: 600;
+  color: var(--bm-text-3);
+  animation: bm-fade var(--bm-duration-slow) var(--bm-ease-standard) both;
+}

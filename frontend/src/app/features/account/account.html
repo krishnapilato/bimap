@@ -1,0 +1,178 @@
+<div class="bm-page account">
+  <bm-page-header title="Your account" subtitle="Who you are to BiMap, how you sign in, and how this device behaves." />
+
+  @if (user(); as u) {
+    <div class="account__layout">
+      <div class="account__column">
+        <bm-panel class="account__profile">
+          <div class="account__identity">
+            <bm-avatar size="xl" [name]="u.fullName" [src]="u.avatarUrl" />
+            <div class="account__who">
+              <h2>{{ u.fullName }}</h2>
+              <span>{{ u.email }}</span>
+              <div class="account__badges">
+                <span class="account__role"><svg [lucideIcon]="roleInfo[u.role].icon" [size]="14"></svg>{{ roleInfo[u.role].label }}</span>
+                <bm-status size="sm" [label]="statusInfo[u.status].label" [tone]="statusInfo[u.status].tone" />
+              </div>
+            </div>
+          </div>
+
+          <dl class="bm-properties account__facts">
+            <bm-property label="Signs in with" [value]="u.authProvider === 'GOOGLE' ? (u.passwordSet ? 'Google or a password' : 'Google') : 'Email and password'" />
+            <bm-property label="Last sign-in" [value]="u.lastLoginAt ? relativeTime(u.lastLoginAt) : 'This is the first'" />
+            <bm-property label="Member since" [value]="dateTime(u.createdAt)" />
+            <bm-property label="Reference" [value]="u.id" mono copyable />
+          </dl>
+
+          <p class="account__note">
+            <svg lucideIcon="info" [size]="14"></svg>
+            @if (sessions.isAtLeast('ADMINISTRATOR')) {
+              <span>Your name and role are edited like anyone else's, <a [routerLink]="['/people', u.id]">in People</a>.</span>
+            } @else {
+              <span>Your name, address and role are kept by an administrator. Ask one if something here is wrong.</span>
+            }
+          </p>
+        </bm-panel>
+
+        <bm-panel heading="What you can do" [subheading]="roleInfo[u.role].description">
+          <ul class="account__permissions">
+            @for (entry of permissions(); track entry.permission; let i = $index) {
+              <li [class.is-granted]="entry.granted" [style.--bm-i]="i">
+                <span class="account__permission-icon"><svg [lucideIcon]="entry.granted ? entry.icon : 'lock'" [size]="15"></svg></span>
+                <span>{{ entry.label }}</span>
+                @if (!entry.granted) {
+                  <span class="account__permission-note">Not with this role</span>
+                }
+              </li>
+            }
+          </ul>
+        </bm-panel>
+      </div>
+
+      <div class="account__column">
+        <bm-panel heading="Signing in" [subheading]="u.authProvider === 'GOOGLE' ? 'Your Google account opens BiMap' : 'Your email address and a password'">
+          <div class="account__signin">
+            @if (u.authProvider === 'GOOGLE') {
+              <div class="account__google">
+                <span class="account__google-mark" aria-hidden="true">G</span>
+                <div>
+                  <strong>Signed in with Google</strong>
+                  <span>{{ u.email }}</span>
+                </div>
+              </div>
+              @if (!u.passwordSet) {
+                <div class="account__row">
+                  <div>
+                    <strong>Add a password</strong>
+                    <p>Useful where Google is blocked. We email a link to choose one; Google keeps working as before.</p>
+                  </div>
+                  <button type="button" bmButton size="sm" [loading]="sendingLink()" [disabled]="linkCooldown() > 0" (click)="sendPasswordLink()">
+                    <svg lucideIcon="key-round"></svg>
+                    {{ linkCooldown() ? 'Sent · again in ' + linkCooldown() + 's' : 'Email me a link' }}
+                  </button>
+                </div>
+              }
+            }
+
+            @if (u.authProvider === 'LOCAL' || u.passwordSet) {
+              <form class="account__password" novalidate (submit)="changePassword($event)">
+                <h3>Change your password</h3>
+                @if (changedAt()) {
+                  <bm-message-strip tone="positive">Your password was changed {{ relativeClause(changedAt()) }}.</bm-message-strip>
+                }
+                @if (passwordProblem(); as message) {
+                  <bm-message-strip tone="negative">{{ message }}</bm-message-strip>
+                }
+                <input type="email" autocomplete="username" [value]="u.email" hidden />
+                <bm-field label="Current password" [control]="passwordForm.current">
+                  <input bmInput autocomplete="current-password" [type]="reveal() ? 'text' : 'password'" [formField]="passwordForm.current" />
+                </bm-field>
+                <bm-field label="New password" [control]="passwordForm.next">
+                  <input bmInput autocomplete="new-password" [type]="reveal() ? 'text' : 'password'" [formField]="passwordForm.next" />
+                  <button
+                    bmSuffix
+                    type="button"
+                    class="account__reveal"
+                    [attr.aria-label]="reveal() ? 'Hide the passwords' : 'Show the passwords'"
+                    [attr.aria-pressed]="reveal()"
+                    (click)="reveal.set(!reveal())"
+                  >
+                    <svg [lucideIcon]="reveal() ? 'eye-off' : 'eye'" [size]="17"></svg>
+                  </button>
+                </bm-field>
+                @if (passwords().next) {
+                  <bm-password-rules [value]="passwords().next" animate.enter="bm-enter-rise" />
+                }
+                <bm-field label="New password again" [control]="passwordForm.confirm">
+                  <input bmInput autocomplete="new-password" [type]="reveal() ? 'text' : 'password'" [formField]="passwordForm.confirm" />
+                </bm-field>
+                <div class="account__actions">
+                  <button type="submit" bmButton variant="primary" [loading]="changing()">
+                    <svg lucideIcon="key-round"></svg>
+                    Change password
+                  </button>
+                </div>
+              </form>
+            }
+
+            <div class="account__row account__row--danger">
+              <div>
+                <strong>Sign out of every device</strong>
+                <p>Ends every session at once, including this one. Use it after signing in on a shared computer.</p>
+              </div>
+              <button type="button" bmButton size="sm" variant="ghost" class="account__danger" (click)="signOutEverywhere()">
+                <svg lucideIcon="log-out"></svg>
+                Sign out everywhere
+              </button>
+            </div>
+          </div>
+        </bm-panel>
+
+        <bm-panel heading="This device" subheading="Kept in this browser, for you alone">
+          <div bmPanelActions>
+            <button type="button" bmButton size="sm" variant="ghost" (click)="resetPreferences()">
+              <svg lucideIcon="rotate-ccw"></svg>
+              Reset
+            </button>
+          </div>
+          <div class="account__preferences">
+            <div class="account__preference">
+              <div class="account__preference-text">
+                <strong>Motion</strong>
+                <p>{{ motionText() }}</p>
+              </div>
+              <bm-segmented size="sm" ariaLabel="Motion" [options]="motionOptions" [value]="preferences.value().motion" (valueChange)="preferences.set('motion', $event)" />
+            </div>
+
+            <div class="account__preference">
+              <div class="account__preference-text">
+                <strong>Density</strong>
+                <p>Compact fits more rows on screen; comfortable is easier to tap.</p>
+              </div>
+              <bm-segmented size="sm" ariaLabel="Density" [options]="densityOptions" [value]="preferences.density()" (valueChange)="preferences.set('density', $event)" />
+            </div>
+
+            <div class="account__preference">
+              <div class="account__preference-text">
+                <strong>Map to start with</strong>
+                <p>The layer and layout the survey map opens with. Changes made on the map are remembered too.</p>
+              </div>
+              <div class="account__preference-stack">
+                <bm-segmented size="sm" ariaLabel="Map layer" [options]="basemapOptions" [value]="preferences.basemap()" (valueChange)="preferences.set('basemap', $event)" />
+                <bm-segmented size="sm" ariaLabel="Map layout" [options]="modeOptions" [value]="preferences.mapMode()" (valueChange)="preferences.set('mapMode', $event)" />
+              </div>
+            </div>
+
+            <div class="account__preference">
+              <div class="account__preference-text">
+                <strong>Vibration</strong>
+                <p>{{ viewport.isCoarsePointer() ? 'A short buzz when a point is placed, a record saved or an action refused.' : 'Only on phones and tablets; this device has no touch screen.' }}</p>
+              </div>
+              <bm-switch [checked]="preferences.haptics()" [disabled]="!viewport.isCoarsePointer()" ariaLabel="Vibration" (checkedChange)="preferences.set('haptics', $event)" />
+            </div>
+          </div>
+        </bm-panel>
+      </div>
+    </div>
+  }
+</div>

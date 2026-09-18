@@ -1,0 +1,88 @@
+@if (asCards()) {
+  <ul class="bm-table__cards" [attr.aria-label]="caption()">
+    @if (loading()) {
+      @for (index of placeholders; track index) {
+        <li class="bm-table__card is-placeholder">
+          <bm-skeleton width="60%" height="14px" />
+          <bm-skeleton width="85%" height="12px" />
+          <bm-skeleton width="40%" height="12px" />
+        </li>
+      }
+    } @else {
+      @for (row of rows() ?? []; track rowKey()(row); let i = $index) {
+        <li
+          class="bm-table__card"
+          role="button"
+          tabindex="0"
+          bmRipple
+          [class.is-selected]="rowKey()(row) === selectedKey()"
+          [style.--bm-i]="i < 12 ? i : 12"
+          (click)="open(row)"
+          (keydown.enter)="open(row)"
+        >
+          <ng-container *ngTemplateOutlet="card()!.template; context: { $implicit: row }" />
+        </li>
+      }
+    }
+  </ul>
+} @else {
+  <div class="bm-table__scroller">
+    <table>
+      <caption class="bm-visually-hidden">{{ caption() }}</caption>
+      <thead>
+        <tr>
+          @for (column of visibleColumns(); track column.bmColumn()) {
+            <th
+              scope="col"
+              [attr.aria-sort]="column.sortable() ? sortState(column) : null"
+              [attr.data-align]="column.align()"
+              [style.width]="column.width()"
+            >
+              @if (column.sortable()) {
+                <button type="button" class="bm-table__sort" [attr.data-state]="sortState(column)" (click)="toggleSort(column)">
+                  {{ column.header() }}
+                  <svg lucideIcon="arrow-right" [size]="13" aria-hidden="true"></svg>
+                </button>
+              } @else {
+                {{ column.header() }}
+              }
+            </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          @for (index of placeholders; track index) {
+            <tr class="is-placeholder">
+              @for (column of visibleColumns(); track column.bmColumn(); let c = $index) {
+                <td><bm-skeleton [width]="c === 0 ? '72%' : '54%'" height="12px" /></td>
+              }
+            </tr>
+          }
+        } @else {
+          @for (row of rows() ?? []; track rowKey()(row); let i = $index) {
+            <tr
+              [attr.tabindex]="interactive() ? 0 : null"
+              [class.is-interactive]="interactive()"
+              [class.is-selected]="rowKey()(row) === selectedKey()"
+              [attr.aria-selected]="interactive() ? rowKey()(row) === selectedKey() : null"
+              [style.--bm-i]="i < 14 ? i : 14"
+              (click)="open(row)"
+              (keydown.enter)="open(row)"
+            >
+              @for (column of visibleColumns(); track column.bmColumn()) {
+                <td [attr.data-align]="column.align()">
+                  <ng-container *ngTemplateOutlet="column.template; context: { $implicit: row }" />
+                </td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (!loading() && (rows()?.length ?? 0) === 0) {
+  <ng-content select="[bmEmpty]" />
+}

@@ -1,0 +1,69 @@
+<div class="bm-palette">
+  <div class="bm-palette__search">
+    <svg lucideIcon="search" [size]="19" aria-hidden="true"></svg>
+    <input
+      #input
+      type="text"
+      placeholder="Type a command, a registration, a comune or a name"
+      aria-label="Search and commands"
+      role="combobox"
+      aria-expanded="true"
+      aria-controls="bm-palette-list"
+      [attr.aria-activedescendant]="results().length ? 'bm-cmd-' + active() : null"
+      autocomplete="off"
+      spellcheck="false"
+      [value]="query()"
+      (input)="type($any($event.target).value)"
+      (keydown.arrowdown)="move($event, 1)"
+      (keydown.arrowup)="move($event, -1)"
+      (keydown.enter)="runActive($event)"
+    />
+    @if (searching()) {
+      <span class="bm-palette__spinner" aria-hidden="true"></span>
+    }
+    <button type="button" class="bm-palette__esc" (click)="close()">Esc</button>
+  </div>
+
+  <div class="bm-palette__list" id="bm-palette-list" role="listbox" #list>
+    @for (group of groups(); track group.name) {
+      <div class="bm-palette__group" role="group" [attr.aria-label]="group.name">
+        <div class="bm-palette__heading">{{ group.name }}</div>
+        @for (command of group.items; track command.id) {
+          <div
+            class="bm-palette__item"
+            role="option"
+            [id]="'bm-cmd-' + command.index"
+            [attr.data-active]="command.index === active()"
+            [attr.aria-selected]="command.index === active()"
+            [style.--bm-i]="command.index < 10 ? command.index : 10"
+            (pointermove)="active.set(command.index)"
+            (click)="command.run()"
+          >
+            <span class="bm-palette__icon"><svg [lucideIcon]="command.icon" [size]="17"></svg></span>
+            <span class="bm-palette__text">
+              <span class="bm-palette__label">{{ command.label }}</span>
+              @if (command.hint) {
+                <span class="bm-palette__hint">{{ command.hint }}</span>
+              }
+            </span>
+            <svg class="bm-palette__enter" lucideIcon="arrow-right" [size]="15" aria-hidden="true"></svg>
+          </div>
+        }
+      </div>
+    } @empty {
+      <div class="bm-palette__empty">
+        @if (searching()) {
+          Searching…
+        } @else {
+          Nothing matches “{{ query() }}”.
+        }
+      </div>
+    }
+  </div>
+
+  <footer class="bm-palette__footer">
+    <span><kbd>↑</kbd><kbd>↓</kbd> to move</span>
+    <span><kbd>↵</kbd> to open</span>
+    <span><kbd>esc</kbd> to close</span>
+  </footer>
+</div>

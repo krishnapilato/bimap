@@ -16,6 +16,7 @@ public record SentEmailResponse(
         @Schema(example = "Confirm your BiMap account") String subject,
         @Schema(description = "The transactional template, or null for a message composed by hand",
                 example = "ACCOUNT_ACTIVATION") String template,
+        @Schema(description = "The campaign this message belonged to, absent otherwise") String campaignId,
         MailFormat format,
         DeliveryStatus status,
         String body,

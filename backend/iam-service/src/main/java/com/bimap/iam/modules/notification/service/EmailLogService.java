@@ -51,12 +51,26 @@ public class EmailLogService {
                             List<MailAttachment> attachments,
                             DeliveryStatus status,
                             String failureReason) {
+        return record(recipient, subject, template, null, body, attachments, status, failureReason);
+    }
+
+    /// Same as above, for a message sent as part of a campaign.
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public SentEmail record(String recipient,
+                            String subject,
+                            String template,
+                            String campaignId,
+                            String body,
+                            List<MailAttachment> attachments,
+                            DeliveryStatus status,
+                            String failureReason) {
 
         var row = SentEmail.builder()
                 .publicId(UUID.randomUUID().toString())
                 .recipient(recipient)
                 .subject(subject)
                 .template(template)
+                .campaignId(campaignId)
                 .format(formatOf(body))
                 .status(status)
                 .body(truncate(body))
@@ -94,6 +108,7 @@ public class EmailLogService {
                 row.getRecipient(),
                 row.getSubject(),
                 row.getTemplate(),
+                row.getCampaignId(),
                 row.getFormat(),
                 row.getStatus(),
                 row.getBody(),

@@ -101,8 +101,17 @@ public class UserLifecycleService {
                 .isPresent();
 
         if (actingOnSelf && next != AccountStatus.ACTIVE) {
-            throw new BusinessRuleException("You cannot " + next.name().toLowerCase(java.util.Locale.ROOT)
-                    + " your own account.");
+            throw new BusinessRuleException("You cannot %s your own account.".formatted(verbFor(next)));
         }
+    }
+
+    private static String verbFor(AccountStatus target) {
+        return switch (target) {
+            case ACTIVE -> "activate";
+            case PENDING_ACTIVATION -> "deactivate";
+            case LOCKED -> "lock";
+            case DISABLED -> "disable";
+            case DELETED -> "delete";
+        };
     }
 }

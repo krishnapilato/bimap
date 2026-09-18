@@ -10,7 +10,9 @@ public enum Permission {
     REGISTRATION_EXPORT("registration:export"),
     USER_READ("user:read"),
     USER_WRITE("user:write"),
-    USER_LIFECYCLE("user:lifecycle");
+    USER_LIFECYCLE("user:lifecycle"),
+    MAILING_READ("mailing:read"),
+    MAILING_WRITE("mailing:write");
 
     private final String authority;
 

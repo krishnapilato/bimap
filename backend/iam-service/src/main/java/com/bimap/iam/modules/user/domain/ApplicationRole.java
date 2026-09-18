@@ -9,9 +9,11 @@ public enum ApplicationRole {
     /// Registers assets and reads back their own submissions.
     USER(Set.of(Permission.REGISTRATION_READ, Permission.REGISTRATION_WRITE)),
 
-    /// Everything a user can do, plus oversight of every submission and export.
+    /// Everything a user can do, plus oversight of every submission, exports, and read access to
+    /// the people and mailing lists behind them.
     MANAGER(Set.of(Permission.REGISTRATION_READ, Permission.REGISTRATION_WRITE,
-            Permission.REGISTRATION_READ_ALL, Permission.REGISTRATION_EXPORT, Permission.USER_READ)),
+            Permission.REGISTRATION_READ_ALL, Permission.REGISTRATION_EXPORT, Permission.USER_READ,
+            Permission.MAILING_READ)),
 
     /// Full control, including the user lifecycle.
     ADMINISTRATOR(Set.of(Permission.values()));

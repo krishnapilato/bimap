@@ -1,0 +1,234 @@
+<div class="bm-page is-wide list">
+  @if (query.isPending()) {
+    <div class="list__loading" aria-busy="true">
+      <bm-skeleton width="140px" height="12px" />
+      <bm-skeleton width="38%" height="30px" />
+      <bm-skeleton width="54%" height="14px" />
+      <bm-skeleton height="44px" />
+      <div class="list__loading-tiles">
+        @for (placeholder of [0, 1, 2, 3]; track placeholder) {
+          <bm-skeleton height="112px" />
+        }
+      </div>
+    </div>
+  } @else if (query.isError()) {
+    @if (notFound()) {
+      <bm-empty-state icon="scan-search" title="This list is not here" description="It may have been deleted.">
+        <a bmButton routerLink="/audiences">
+          <svg lucideIcon="arrow-left"></svg>
+          Back to audiences
+        </a>
+      </bm-empty-state>
+    } @else {
+      <bm-error-state title="This list could not be loaded" [error]="query.error()" (retry)="query.refetch()" />
+    }
+  } @else if (list(); as l) {
+    <bm-page-header [title]="l.name" [crumbs]="crumbs()" [subtitle]="l.description">
+      <span bmTitleAddon class="list__badges">
+        @if (l.status === 'ARCHIVED') {
+          <bm-status label="Archived" tone="special" />
+        } @else if (l.signupUrl) {
+          <span class="list__chip is-live"><span class="list__live-dot" aria-hidden="true"></span>Sign-up page open</span>
+        }
+        <span class="list__chip">
+          <svg [lucideIcon]="l.doubleOptIn ? 'shield-check' : 'shield'" [size]="13"></svg>
+          {{ l.doubleOptIn ? 'Double opt-in' : 'Single opt-in' }}
+        </span>
+      </span>
+      <div bmActions>
+        @if (writable()) {
+          <button type="button" bmButton [cdkMenuTriggerFor]="addMenu">
+            <svg lucideIcon="user-plus"></svg>
+            Add people
+            <svg lucideIcon="chevron-down" class="list__chevron"></svg>
+          </button>
+          <button type="button" bmButton variant="primary" (click)="newCampaign(l)">
+            <svg lucideIcon="send"></svg>
+            New campaign
+          </button>
+        } @else if (sessions.can('mailing:write') && l.status === 'ARCHIVED') {
+          <button type="button" bmButton (click)="restore(l)">
+            <svg lucideIcon="archive-restore"></svg>
+            Restore
+          </button>
+        }
+        <button type="button" bmButton variant="ghost" iconOnly aria-label="More actions" [cdkMenuTriggerFor]="more">
+          <svg lucideIcon="ellipsis-vertical"></svg>
+        </button>
+      </div>
+    </bm-page-header>
+
+    @if (l.status === 'ARCHIVED') {
+      <bm-message-strip tone="info" icon="archive">
+        <strong>This list is archived.</strong> Nobody can join it and nothing can be sent to it. Its subscribers and campaigns are kept as they were.
+      </bm-message-strip>
+    }
+
+    <bm-tabs ariaLabel="List sections" [tabs]="tabs()" [value]="current()" (valueChange)="select($event)" />
+
+    @switch (current()) {
+      @case ('overview') {
+        <div class="list__overview" role="tabpanel" aria-labelledby="bm-tab-overview">
+          <section class="list__kpis bm-grid" aria-label="Who is on the list">
+            <bm-stat-tile label="Subscribed" icon="users-round" tone="positive" caption="receive every campaign" [value]="l.audience.subscribed" selectable (click)="showSubscribers('SUBSCRIBED')" (keydown.enter)="showSubscribers('SUBSCRIBED')" />
+            <bm-stat-tile label="Unconfirmed" icon="hourglass" tone="critical" caption="have not clicked their link" [value]="l.audience.pending" selectable (click)="showSubscribers('PENDING')" (keydown.enter)="showSubscribers('PENDING')" />
+            <bm-stat-tile label="Unsubscribed" icon="user-minus" tone="neutral" caption="never emailed again" [value]="l.audience.unsubscribed" selectable (click)="showSubscribers('UNSUBSCRIBED')" (keydown.enter)="showSubscribers('UNSUBSCRIBED')" />
+            <bm-stat-tile label="Campaigns" icon="send" [caption]="l.lastSentAt ? 'last sent ' + shortDate(l.lastSentAt) : 'nothing sent yet'" [value]="l.campaignCount" selectable (click)="select('campaigns')" (keydown.enter)="select('campaigns')" />
+          </section>
+
+          <div class="list__overview-grid">
+            <bm-panel class="list__growth">
+              @if (growth.data(); as points) {
+                <bm-growth-chart caption="People per day on this list, last 30 days" [points]="points" />
+              } @else if (growth.isError()) {
+                <bm-error-state title="The chart could not be loaded" [error]="growth.error()" (retry)="growth.refetch()" />
+              } @else {
+                <div class="list__chart-loading">
+                  <bm-skeleton width="40%" height="16px" />
+                  <bm-skeleton height="190px" />
+                </div>
+              }
+            </bm-panel>
+
+            <bm-panel class="list__recent" heading="Latest campaigns" [flush]="true">
+              @if (l.campaignCount > 0) {
+                <button bmPanelActions type="button" bmButton variant="ghost" size="sm" (click)="select('campaigns')">
+                  All campaigns
+                  <svg lucideIcon="arrow-right"></svg>
+                </button>
+              }
+              @if (latest.isPending()) {
+                <div class="list__recent-loading">
+                  @for (placeholder of [0, 1, 2]; track placeholder) {
+                    <bm-skeleton height="44px" />
+                  }
+                </div>
+              } @else if (latest.data()?.content?.length) {
+                <ul class="list__recent-rows">
+                  @for (campaign of latest.data()!.content; track campaign.id; let i = $index) {
+                    <li [style.--bm-i]="i">
+                      <a class="list__recent-row" [routerLink]="['/audiences', l.id, 'campaigns', campaign.id]">
+                        <span class="list__recent-icon" [attr.data-tone]="campaignStatusInfo[campaign.status].tone">
+                          <svg [lucideIcon]="campaignStatusInfo[campaign.status].icon" [size]="16"></svg>
+                        </span>
+                        <span class="list__recent-text">
+                          <strong>{{ campaign.subject }}</strong>
+                          <span>{{ campaignSummary(campaign) }}</span>
+                          @if (campaign.status === 'SENDING' || campaign.status === 'SENT' || campaign.status === 'CANCELLED') {
+                            <span class="list__progress" [class.is-live]="campaign.status === 'SENDING'" aria-hidden="true">
+                              <span [style.transform]="'scaleX(' + campaignProgress(campaign) + ')'"></span>
+                            </span>
+                          }
+                        </span>
+                        <bm-status size="sm" [label]="campaignStatusInfo[campaign.status].label" [tone]="campaignStatusInfo[campaign.status].tone" [live]="campaign.status === 'SENDING'" />
+                      </a>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <bm-empty-state icon="send" title="Nothing written yet" description="Campaigns for this list appear here, with how far each got." compact>
+                  @if (writable()) {
+                    <button type="button" bmButton size="sm" variant="primary" (click)="newCampaign(l)">
+                      <svg lucideIcon="plus"></svg>
+                      Write the first one
+                    </button>
+                  }
+                </bm-empty-state>
+              }
+            </bm-panel>
+          </div>
+
+          <section class="list__join" aria-label="How people join">
+            <span class="list__join-icon" [class.is-open]="!!l.signupUrl" aria-hidden="true">
+              <svg [lucideIcon]="l.signupUrl ? 'globe' : 'user-plus'" [size]="18"></svg>
+            </span>
+            <div class="list__join-text">
+              <strong>{{ l.signupUrl ? 'Anyone with the link can join' : 'People join when you add or import them' }}</strong>
+              @if (l.signupUrl) {
+                <span class="bm-mono">{{ l.signupUrl }}</span>
+              } @else {
+                <span>{{ l.doubleOptIn ? 'New addresses confirm by email before they receive anything.' : 'Addresses are subscribed as soon as they are added.' }}</span>
+              }
+            </div>
+            <div class="list__join-actions">
+              @if (l.signupUrl) {
+                <button type="button" bmButton size="sm" (click)="copySignup(l)">
+                  <svg lucideIcon="copy"></svg>
+                  Copy link
+                </button>
+                <a bmButton size="sm" variant="ghost" [href]="l.signupUrl" target="_blank" rel="noopener">
+                  <svg lucideIcon="external-link"></svg>
+                  Open
+                </a>
+              } @else if (sessions.can('mailing:write')) {
+                <button type="button" bmButton size="sm" variant="ghost" (click)="select('settings')">
+                  <svg lucideIcon="settings"></svg>
+                  Change
+                </button>
+              }
+            </div>
+          </section>
+        </div>
+      }
+      @case ('subscribers') {
+        <bm-list-subscribers role="tabpanel" aria-labelledby="bm-tab-subscribers" [list]="l" [q]="q()" [status]="status()" [page]="page()" [selected]="subscriber()" />
+      }
+      @case ('campaigns') {
+        <bm-list-campaigns role="tabpanel" aria-labelledby="bm-tab-campaigns" [list]="l" [status]="campaignStatus()" [page]="page()" />
+      }
+      @case ('settings') {
+        <bm-list-settings role="tabpanel" aria-labelledby="bm-tab-settings" [list]="l" />
+      }
+    }
+
+    <ng-template #addMenu>
+      <div class="bm-menu" cdkMenu>
+        <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 0" (cdkMenuItemTriggered)="addSubscriber(l)">
+          <svg lucideIcon="user-plus" [size]="17"></svg>
+          Add one address
+        </button>
+        <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 1" (cdkMenuItemTriggered)="importSubscribers(l)">
+          <svg lucideIcon="file-spreadsheet" [size]="17"></svg>
+          Import a spreadsheet
+        </button>
+      </div>
+    </ng-template>
+
+    <ng-template #more>
+      <div class="bm-menu" cdkMenu>
+        <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 0" (cdkMenuItemTriggered)="export(l)">
+          <svg lucideIcon="download" [size]="17"></svg>
+          Export subscribers
+        </button>
+        @if (l.signupUrl) {
+          <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 1" (cdkMenuItemTriggered)="copySignup(l)">
+            <svg lucideIcon="link" [size]="17"></svg>
+            Copy the sign-up link
+          </button>
+        }
+        @if (sessions.can('mailing:write')) {
+          <div class="bm-menu__divider"></div>
+          <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 2" (cdkMenuItemTriggered)="select('settings')">
+            <svg lucideIcon="settings" [size]="17"></svg>
+            Settings
+          </button>
+          @if (l.status === 'ACTIVE') {
+            <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 3" (cdkMenuItemTriggered)="archive(l)">
+              <svg lucideIcon="archive" [size]="17"></svg>
+              Archive the list
+            </button>
+          } @else {
+            <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 3" (cdkMenuItemTriggered)="restore(l)">
+              <svg lucideIcon="archive-restore" [size]="17"></svg>
+              Restore the list
+            </button>
+            <button type="button" class="bm-menu__item" cdkMenuItem data-tone="danger" style="--bm-i: 4" (cdkMenuItemTriggered)="remove(l)">
+              <svg lucideIcon="trash" [size]="17"></svg>
+              Delete for good
+            </button>
+          }
+        }
+      </div>
+    </ng-template>
+  }
+</div>

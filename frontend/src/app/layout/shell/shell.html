@@ -1,0 +1,228 @@
+<a class="bm-skip-link" href="#main">Skip to content</a>
+
+<div class="bm-shell__activity" [class.is-active]="busy()" aria-hidden="true"></div>
+
+<header class="bm-topbar">
+  <a class="bm-topbar__brand" routerLink="/" aria-label="BiMap home">
+    <span class="bm-brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 32 32">
+        <rect width="32" height="32" rx="9" />
+        <circle class="bm-brand-mark__ring" cx="16" cy="16" r="7.25" />
+        <path class="bm-brand-mark__ticks" d="M16 5.5v4M16 22.5v4M5.5 16h4M22.5 16h4" />
+        <circle class="bm-brand-mark__dot" cx="16" cy="16" r="2.6" />
+      </svg>
+    </span>
+    <span class="bm-topbar__wordmark">BiMap</span>
+  </a>
+
+  @if (demo) {
+    <span class="bm-topbar__demo" bmTooltip="Everything runs in your browser. Nothing reaches a server." [bmTooltipLabels]="false">Demo</span>
+  }
+
+  <div class="bm-topbar__center">
+    <bm-command-palette />
+  </div>
+
+  <div class="bm-topbar__actions">
+    @if (!connectivity.online()) {
+      <span class="bm-topbar__offline" role="status">
+        <svg lucideIcon="wifi-off" [size]="15"></svg>
+        <span>Offline</span>
+      </span>
+    }
+
+    @if (sessions.user(); as user) {
+      <button type="button" class="bm-topbar__user" bmRipple [cdkMenuTriggerFor]="userMenu" aria-label="Account menu">
+        <bm-avatar [name]="user.fullName" [src]="user.avatarUrl" size="sm" />
+        @if (viewport.isDesktop()) {
+          <span class="bm-topbar__user-text">
+            <span class="bm-topbar__user-name">{{ user.firstName }}</span>
+            <span class="bm-topbar__user-role">{{ roleInfo[user.role].label }}</span>
+          </span>
+          <svg lucideIcon="chevron-down" [size]="15" class="bm-topbar__chevron"></svg>
+        }
+      </button>
+    }
+  </div>
+</header>
+
+<ng-template #userMenu>
+  <div class="bm-menu bm-user-menu" cdkMenu>
+    @if (sessions.user(); as user) {
+      <div class="bm-user-menu__header">
+        <bm-avatar [name]="user.fullName" [src]="user.avatarUrl" size="lg" />
+        <div>
+          <strong>{{ user.fullName }}</strong>
+          <span>{{ user.email }}</span>
+        </div>
+      </div>
+    }
+    <div class="bm-menu__divider"></div>
+    <a class="bm-menu__item" cdkMenuItem routerLink="/account" style="--bm-i: 0">
+      <svg lucideIcon="circle-user" [size]="17"></svg>
+      Account and preferences
+    </a>
+
+    <div class="bm-menu__divider"></div>
+    <div class="bm-menu__label">Motion</div>
+    @for (option of motionOptions; track option.value; let i = $index) {
+      <button
+        type="button"
+        class="bm-menu__item"
+        cdkMenuItemRadio
+        [cdkMenuItemChecked]="motion() === option.value"
+        [style.--bm-i]="i + 1"
+        (cdkMenuItemTriggered)="setMotion(option.value)"
+      >
+        <svg [lucideIcon]="option.icon" [size]="17"></svg>
+        {{ option.label }}
+        @if (option.value === 'system') {
+          <span class="bm-menu__hint">{{ viewport.prefersReducedMotion() ? 'Reduced' : 'Full' }}</span>
+        }
+      </button>
+    }
+
+    @if (demo) {
+      <div class="bm-menu__divider"></div>
+      <div class="bm-menu__label">View the demo as</div>
+      @for (role of roles; track role; let i = $index) {
+        <button
+          type="button"
+          class="bm-menu__item"
+          cdkMenuItemRadio
+          [cdkMenuItemChecked]="sessions.role() === role"
+          [style.--bm-i]="i + 1"
+          (cdkMenuItemTriggered)="demo.switchTo(role)"
+        >
+          <svg [lucideIcon]="roleInfo[role].icon" [size]="17"></svg>
+          {{ roleInfo[role].label }}
+        </button>
+      }
+      <div class="bm-menu__divider"></div>
+      <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 4" (cdkMenuItemTriggered)="demo.previewSignIn()">
+        <svg lucideIcon="log-out" [size]="17"></svg>
+        Preview the sign-in screen
+      </button>
+      <button type="button" class="bm-menu__item" cdkMenuItem style="--bm-i: 5" (cdkMenuItemTriggered)="demo.reset()">
+        <svg lucideIcon="rotate-ccw" [size]="17"></svg>
+        Reset demo data
+      </button>
+    } @else {
+      <div class="bm-menu__divider"></div>
+      <button type="button" class="bm-menu__item" cdkMenuItem data-tone="danger" style="--bm-i: 1" (cdkMenuItemTriggered)="leave()">
+        <svg lucideIcon="log-out" [size]="17"></svg>
+        Sign out
+      </button>
+    }
+  </div>
+</ng-template>
+
+@if (!viewport.isHandset()) {
+  <nav class="bm-sidenav" aria-label="Main">
+    <span
+      class="bm-sidenav__indicator"
+      aria-hidden="true"
+      [class.is-visible]="indicator().visible"
+      [style.transform]="'translateY(' + indicator().top + 'px)'"
+      [style.height.px]="indicator().height"
+    ></span>
+
+    <div class="bm-sidenav__group">
+      @for (item of workspace(); track item.id) {
+        <a
+          #navLink
+          class="bm-sidenav__link"
+          bmRipple
+          [routerLink]="item.path"
+          [class.is-active]="isActive(item)"
+          [attr.aria-current]="isActive(item) ? 'page' : null"
+          [bmTooltip]="item.label"
+          bmTooltipPlacement="right"
+          [bmTooltipDelay]="collapsed() ? 120 : 99999"
+          [bmTooltipLabels]="false"
+        >
+          <svg [lucideIcon]="item.icon" [size]="19"></svg>
+          <span class="bm-sidenav__label">{{ item.label }}</span>
+        </a>
+      }
+    </div>
+
+    @if (administration().length) {
+      <div class="bm-sidenav__group">
+        <span class="bm-sidenav__heading">Administration</span>
+        @for (item of administration(); track item.id) {
+          <a
+            #navLink
+            class="bm-sidenav__link"
+            bmRipple
+            [routerLink]="item.path"
+            [class.is-active]="isActive(item)"
+            [attr.aria-current]="isActive(item) ? 'page' : null"
+            [bmTooltip]="item.label"
+            bmTooltipPlacement="right"
+            [bmTooltipDelay]="collapsed() ? 120 : 99999"
+            [bmTooltipLabels]="false"
+          >
+            <svg [lucideIcon]="item.icon" [size]="19"></svg>
+            <span class="bm-sidenav__label">{{ item.label }}</span>
+          </a>
+        }
+      </div>
+    }
+
+    @if (viewport.isDesktop()) {
+      <button type="button" class="bm-sidenav__collapse" (click)="toggleCollapsed()" [attr.aria-label]="collapsed() ? 'Expand navigation' : 'Collapse navigation'">
+        <svg [lucideIcon]="collapsed() ? 'panel-left-open' : 'panel-left-close'" [size]="18"></svg>
+        <span class="bm-sidenav__label">Collapse</span>
+      </button>
+    }
+  </nav>
+}
+
+<main class="bm-shell__main" id="main" tabindex="-1">
+  @if (!connectivity.online()) {
+    <div class="bm-shell__offline" role="status">
+      <svg lucideIcon="wifi-off" [size]="16"></svg>
+      You are offline. What you type is kept, but nothing can be saved until the connection returns.
+    </div>
+  }
+  <div class="bm-shell__page">
+    <router-outlet />
+  </div>
+</main>
+
+@if (viewport.isHandset()) {
+  <nav class="bm-bottombar" aria-label="Main">
+    @for (item of primary(); track item.id) {
+      <a class="bm-bottombar__link" bmRipple [routerLink]="item.path" [class.is-active]="isActive(item)" [attr.aria-current]="isActive(item) ? 'page' : null">
+        <span class="bm-bottombar__icon"><svg [lucideIcon]="item.icon" [size]="21"></svg></span>
+        <span class="bm-bottombar__label">{{ item.label }}</span>
+      </a>
+    }
+    <button type="button" class="bm-bottombar__link" bmRipple [class.is-active]="moreActive() || moreOpen()" [attr.aria-expanded]="moreOpen()" (click)="toggleMore()">
+      <span class="bm-bottombar__icon"><svg lucideIcon="layout-grid" [size]="21"></svg></span>
+      <span class="bm-bottombar__label">More</span>
+    </button>
+  </nav>
+
+  @if (moreOpen()) {
+    <div class="bm-more-scrim" animate.enter="bm-enter-fade" animate.leave="bm-leave-fade" (click)="moreOpen.set(false)"></div>
+    <section class="bm-more" animate.enter="bm-more-in" animate.leave="bm-more-out" aria-label="More destinations">
+      <span class="bm-more__grip" aria-hidden="true"></span>
+      <div class="bm-more__grid">
+        @for (item of secondary(); track item.id; let i = $index) {
+          <a class="bm-more__tile" bmRipple [routerLink]="item.path" [style.--bm-i]="i">
+            <span class="bm-more__icon"><svg [lucideIcon]="item.icon" [size]="22"></svg></span>
+            <span class="bm-more__title">{{ item.label }}</span>
+            <span class="bm-more__description">{{ item.description }}</span>
+          </a>
+        }
+        <a class="bm-more__tile" bmRipple routerLink="/account" [style.--bm-i]="secondary().length">
+          <span class="bm-more__icon"><svg lucideIcon="circle-user" [size]="22"></svg></span>
+          <span class="bm-more__title">Account</span>
+          <span class="bm-more__description">Profile, security and preferences</span>
+        </a>
+      </div>
+    </section>
+  }
+}

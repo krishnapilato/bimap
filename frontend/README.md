@@ -1,77 +1,123 @@
 # BiMap — Frontend
 
-The Angular client for BiMap — a geographic data entry application with an interactive map, role-based access control, and a token-driven Angular Material UI with light and dark themes.
+The Angular client: a full-screen map with Street View at its core, and the working screens around
+it for surveyors, reviewers and administrators.
 
-## 🏆 Lighthouse Scores
+**Angular 22 (zoneless, signals, Signal Forms) · TanStack Query · Leaflet · Google Maps JavaScript API ·
+GSAP · uPlot · PapaParse · Lucide · Vitest**
 
-| Performance | Accessibility | Best Practices | SEO |
-|:-----------:|:-------------:|:--------------:|:---:|
-| ![100](https://img.shields.io/badge/100-Performance-brightgreen?style=flat-square&logo=lighthouse&logoColor=white) | ![100](https://img.shields.io/badge/100-Accessibility-brightgreen?style=flat-square&logo=lighthouse&logoColor=white) | ![100](https://img.shields.io/badge/100-Best%20Practices-brightgreen?style=flat-square&logo=lighthouse&logoColor=white) | ![100](https://img.shields.io/badge/100-SEO-brightgreen?style=flat-square&logo=lighthouse&logoColor=white) |
+---
 
-## 🛠️ Tech Stack
+## Running it
 
-[![Angular](https://img.shields.io/badge/Angular-22.0.6-DD0031?style=flat-square&logo=angular&logoColor=white)](https://angular.dev)
-[![TypeScript](https://img.shields.io/badge/TypeScript-6.0.3-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Angular Material](https://img.shields.io/badge/Angular%20Material-22.0.2-FF4081?style=flat-square&logo=angular&logoColor=white)](https://material.angular.io)
-[![Leaflet](https://img.shields.io/badge/Leaflet-1.9.4-199900?style=flat-square&logo=leaflet&logoColor=white)](https://leafletjs.com)
-[![RxJS](https://img.shields.io/badge/RxJS-7.8.2-B7178C?style=flat-square&logo=reactivex&logoColor=white)](https://rxjs.dev)
-[![Vitest](https://img.shields.io/badge/Vitest-4.1.10-6E9F18?style=flat-square&logo=vitest&logoColor=white)](https://vitest.dev)
-[![Node.js](https://img.shields.io/badge/Node.js-26.4.0-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org)
-[![npm](https://img.shields.io/badge/npm-12.0.0-CB3837?style=flat-square&logo=npm&logoColor=white)](https://www.npmjs.com)
+| Command | What it does |
+|---|---|
+| `npm start` | Dev server on <http://localhost:4200>, proxying `/iam` and `/core` to services on `:9843` and `:9844` ([`proxy.conf.json`](proxy.conf.json)). |
+| `npm run start:demo` | The demo: no backend at all, an in-browser one with sample data. |
+| `npm test -- --watch=false` | Unit tests with Vitest. |
+| `npm run build` | Production bundle in `dist/frontend/browser`, talking to `/iam` and `/core` on its own origin. |
+| `npm run build:demo` | The static demo, as GitHub Pages serves it. |
+| `docker build -t bimap/frontend .` | nginx image serving the bundle and proxying both services; see [`nginx.conf`](nginx.conf). |
 
-## 🚀 Development Server
+---
 
-Install dependencies and start the local dev server:
+## Live or demo
 
-```bash
-npm install
-ng serve
+The two builds are the same application with one flag, `demo`, in `src/environments/`:
+
+| | `environment.production.ts` | `environment.demo.ts` |
+|---|---|---|
+| API | the real services, through `/iam` and `/core` | an HTTP interceptor answers every call in the browser |
+| Session | sign in with a password or Google | signed in as an administrator on arrival |
+| Data | MySQL | seeded, kept in local storage until **Reset demo data** |
+| Maps and Street View | real | real |
+
+`main.ts` loads the demo backend with a dynamic import only when `demo` is true, so the live bundle
+never contains it. To point a build at a backend somewhere else, change `api` in its environment
+file. The demo's user menu can switch role (surveyor, manager, administrator), preview the sign-in
+screen, and reset its data.
+
+The demo is deployed to GitHub Pages by [`.github/workflows/frontend-pages.yml`](../.github/workflows/frontend-pages.yml)
+on every push to `main`.
+
+---
+
+## Where things are
+
+```
+src/app
+├── core/        App-wide services with no UI
+│   ├── api/       One typed client per backend area, and the models they exchange
+│   ├── auth/      Session, token refresh, guards, Google Identity, sign-in and sign-out flows
+│   ├── query/     The TanStack Query client and every query key
+│   └── ui/        Preferences, motion, viewport, formatting, haptics, keyboard shortcuts, full screen
+├── ui/          The design system: buttons, fields, lookups, tables, tabs, dialogs, sheets, charts, icons
+├── shared/
+│   ├── map/       The map and Street View canvas, Leaflet and Google Maps glue, geometry
+│   └── mail/      Email rendering and the sandboxed preview frame
+├── layout/      The shell (navigation, top bar, bottom bar), the sign-in layout, the command palette
+├── features/    One folder per screen
+│   ├── auth/            Sign in, sign up, activation, password recovery
+│   ├── home/            What needs attention today
+│   ├── survey/          Registering an asset on the map
+│   ├── registry/        Registrations as a table, cards or a map, and each one's page
+│   ├── geography/       Italy from region to comune, with codes, streets and public bodies
+│   ├── people/          Accounts and their lifecycle
+│   ├── mail/            The delivery log, the message reader and the composer
+│   ├── audiences/       Mailing lists, subscribers, CSV import, campaigns and their reports
+│   ├── health/          Both services live from Actuator
+│   ├── account/         Your profile, permissions, password and this device's preferences
+│   └── subscriptions/   Public pages for signing up to and leaving a list
+└── demo/        The in-browser backend: routes, handlers and seeded data
 ```
 
-Open your browser at `http://localhost:4200/`. The app reloads automatically on file changes.
+Conventions: standalone components, signals for state, `OnPush` everywhere, server state only in
+TanStack Query, forms with Signal Forms, and every route loaded lazily.
 
-## 🏗️ Code Scaffolding
+---
 
-Generate a new component with Angular CLI:
+## The map
 
-```bash
-ng generate component component-name
-```
+The survey, the registry and the geography explorer share one canvas, `shared/map/geo-canvas.ts`:
+a Leaflet map on Google tiles, Street View beside it or instead of it, a camera cone that follows
+the panorama, a context menu, geolocation and full screen. Street View cannot be squeezed to zero
+width without losing its imagery, so in the single modes the hidden pane stays full size underneath.
 
-List all available schematics:
+The Google Maps key is in the environment files. It is public by design: restrict it by HTTP
+referrer to the origins that serve the app. Google sign-in needs the same origins in the OAuth
+client's authorised JavaScript origins.
 
-```bash
-ng generate --help
-```
+---
 
-## 📦 Building
+## Design system
 
-Build for production:
+- **Light only**, on tokens in `src/styles/_tokens.scss`: cobalt for anything you can act on, amber
+  for position and nothing else, and SAP's semantic set for states, always with a word or an icon.
+- **Manrope** for text and **JetBrains Mono** for everything measured: codes, coordinates, counts.
+- **Motion** comes from CSS keyframes, view transitions between routes, and GSAP for scripted
+  moments. Every movement is multiplied by `--bm-motion`, so reduced motion keeps the fades and
+  drops the travel. The account page's **Motion** setting overrides the device: *Like the device*,
+  *Full* or *Reduced*.
+- **Touch**: ripples where a finger lands, gentle haptics for moments that matter, 44 px targets,
+  bottom sheets instead of side panels on phones.
+- **Icons** are [Lucide](https://lucide.dev), drawn by `ui/icon/icon.ts` from the set registered in
+  `ui/icon/icon-set.ts`. Only registered icons reach the bundle: a new icon goes in that file.
 
-```bash
-ng build
-```
+---
 
-Artifacts are output to the `dist/` directory, optimised for performance and speed.
+## Security in the client
 
-## 🧪 Running Unit Tests
+- Access tokens live in memory and storage chosen by *Keep me signed in*; a signed-out tab signs out
+  every tab.
+- Email bodies render in an iframe sandboxed without scripts.
+- nginx sends `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`
+  and a Content Security Policy in report-only mode, ready to enforce once watched against real
+  Google traffic. HTTPS is terminated in front of nginx, not by it.
 
-Run unit tests with [Vitest](https://vitest.dev/):
+---
 
-```bash
-ng test
-```
+## Tests
 
-## 🔬 Running End-to-End Tests
-
-```bash
-ng e2e
-```
-
-Angular CLI does not ship with an e2e framework by default — choose one that suits your needs.
-
-## 📚 Additional Resources
-
-- [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli)
-- [Angular Material Components](https://material.angular.io/components/categories)
-- [Leaflet Documentation](https://leafletjs.com/reference.html)
+Unit tests sit next to the code as `*.spec.ts` and run on Vitest with jsdom: email rendering and
+merge tags, formatting, geometry, the survey form mapping, the demo backend's paging and CSV
+escaping, keyboard shortcuts and audience presentation. CI runs them before every build.

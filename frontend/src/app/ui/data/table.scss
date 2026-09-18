@@ -1,0 +1,227 @@
+@use 'styles/mixins' as *;
+
+.bm-table {
+  display: block;
+  min-width: 0;
+  transition: opacity var(--bm-duration-base) var(--bm-ease-standard);
+
+  &.is-refreshing {
+    opacity: 0.55;
+  }
+}
+
+.bm-table__scroller {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.bm-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font: var(--bm-text-small);
+}
+
+.bm-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 38px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--bm-border);
+  background: var(--bm-surface-2);
+  color: var(--bm-text-3);
+  font: var(--bm-text-overline);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-align: left;
+  white-space: nowrap;
+
+  &[data-align='end'] {
+    text-align: right;
+  }
+
+  &[data-align='center'] {
+    text-align: center;
+  }
+}
+
+.bm-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 -6px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  transition:
+    color var(--bm-duration-fast) var(--bm-ease-standard),
+    background-color var(--bm-duration-fast) var(--bm-ease-standard);
+  @include focus-ring;
+
+  svg {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.7);
+    transition:
+      transform var(--bm-duration-slow) var(--bm-ease-spring),
+      opacity var(--bm-duration-fast) var(--bm-ease-standard);
+  }
+
+  @include hover {
+    color: var(--bm-text);
+    background: var(--bm-surface-3);
+
+    svg {
+      opacity: 0.5;
+    }
+  }
+
+  &[data-state='ascending'],
+  &[data-state='descending'] {
+    color: var(--bm-accent-text);
+
+    svg {
+      opacity: 1;
+    }
+  }
+
+  &[data-state='ascending'] svg {
+    transform: rotate(-90deg);
+  }
+
+  &[data-state='descending'] svg {
+    transform: rotate(90deg);
+  }
+}
+
+.bm-table td {
+  height: 52px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--bm-border-subtle);
+  color: var(--bm-text);
+  vertical-align: middle;
+  transition: background-color var(--bm-duration-fast) var(--bm-ease-standard);
+
+  &[data-align='end'] {
+    text-align: right;
+  }
+
+  &[data-align='center'] {
+    text-align: center;
+  }
+
+  [data-density='compact'] & {
+    height: 40px;
+  }
+
+  @include touch {
+    height: 58px;
+  }
+}
+
+.bm-table tbody tr {
+  position: relative;
+  animation: bm-fade var(--bm-duration-slow) var(--bm-ease-standard) both;
+  animation-delay: calc(var(--bm-i, 0) * 18ms);
+
+  &.is-interactive {
+    cursor: pointer;
+  }
+
+  // The accent that slides in along the row's leading edge.
+  td:first-child {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 10px;
+      bottom: 10px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: var(--bm-accent);
+      transform: scaleY(0);
+      transition: transform var(--bm-duration-base) var(--bm-ease-emphasized);
+    }
+  }
+
+  &.is-interactive:hover td {
+    background: var(--bm-surface-hover);
+  }
+
+  &.is-interactive:hover td:first-child::before {
+    transform: scaleY(0.6);
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    td {
+      background: var(--bm-accent-softer);
+    }
+
+    td:first-child::before {
+      transform: scaleY(1);
+    }
+  }
+
+  &.is-selected td {
+    background: var(--bm-accent-soft);
+  }
+
+  &.is-selected td:first-child::before {
+    transform: scaleY(1);
+  }
+
+  &:last-child td {
+    border-bottom: 0;
+  }
+
+  &.is-placeholder td {
+    cursor: default;
+  }
+}
+
+// ── Cards (handset) ──────────────────────────────────────────────────────────
+
+.bm-table__cards {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+}
+
+.bm-table__card {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius-lg);
+  background: var(--bm-surface);
+  box-shadow: var(--bm-shadow-xs);
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--bm-text);
+  -webkit-tap-highlight-color: transparent;
+  animation: bm-rise var(--bm-duration-slow) var(--bm-ease-emphasized) both;
+  animation-delay: calc(var(--bm-i, 0) * 28ms);
+  @include pressable(0.98);
+
+  &.is-selected {
+    border-color: var(--bm-accent);
+    box-shadow: 0 0 0 3px var(--bm-accent-glow);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--bm-focus-ring);
+  }
+
+  &.is-placeholder {
+    gap: 10px;
+  }
+}

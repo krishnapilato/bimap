@@ -1,0 +1,11 @@
+# The image is built from the source and the lockfile; nothing generated belongs in the context.
+node_modules/
+dist/
+.angular/
+coverage/
+*.log
+.env
+.env.*
+Dockerfile
+.dockerignore
+README.md

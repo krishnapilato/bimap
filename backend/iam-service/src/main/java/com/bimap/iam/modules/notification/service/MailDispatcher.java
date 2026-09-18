@@ -2,6 +2,7 @@ package com.bimap.iam.modules.notification.service;
 
 import com.bimap.iam.modules.notification.domain.DeliveryStatus;
 import com.bimap.iam.modules.notification.domain.MailAttachment;
+import com.bimap.iam.modules.notification.domain.MailFormat;
 import com.bimap.iam.modules.notification.domain.MailMessage;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -37,24 +38,33 @@ public class MailDispatcher {
 
     @Async("mailExecutor")
     public CompletableFuture<Void> send(MailMessage message) {
+        var outcome = deliver(message);
+        return outcome.status() == DeliveryStatus.FAILED
+                ? CompletableFuture.failedFuture(new IllegalStateException(outcome.failureReason()))
+                : CompletableFuture.completedFuture(null);
+    }
+
+    /// The synchronous half of [#send], for a caller that is already off the request thread and
+    /// paces its own messages.
+    public SentEmailOutcome deliver(MailMessage message) {
         var rendered = render(message);
-        var row = deliveryLog.record(message.to(), message.template().subject(), message.template().name(),
+        var row = deliveryLog.record(message.to(), message.resolvedSubject(), message.template().name(),
                 rendered, message.attachments(), DeliveryStatus.QUEUED, null);
 
         if (!properties.enabled()) {
             log.info("Mail disabled, would have sent {} to {}", message.template(), message.to());
-            return CompletableFuture.completedFuture(null);
+            return new SentEmailOutcome(row.getId(), DeliveryStatus.QUEUED, null);
         }
 
         try {
             transport.send(compose(message, rendered));
             deliveryLog.settle(row.getId(), DeliveryStatus.SENT, null);
             log.info("Sent {} to {}", message.template(), message.to());
-            return CompletableFuture.completedFuture(null);
+            return new SentEmailOutcome(row.getId(), DeliveryStatus.SENT, null);
         } catch (Exception failure) {
             deliveryLog.settle(row.getId(), DeliveryStatus.FAILED, failure.getMessage());
             log.error("Could not send {} to {}", message.template(), message.to(), failure);
-            return CompletableFuture.failedFuture(failure);
+            return new SentEmailOutcome(row.getId(), DeliveryStatus.FAILED, failure.getMessage());
         }
     }
 
@@ -74,7 +84,7 @@ public class MailDispatcher {
             helper.setFrom(properties.from(), properties.fromName());
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(body, EmailLogService.formatOf(body) == com.bimap.iam.modules.notification.domain.MailFormat.HTML);
+            helper.setText(body, EmailLogService.formatOf(body) == MailFormat.HTML);
 
             for (var attachment : attachments) {
                 helper.addAttachment(attachment.filename(), attachment.asResource(), attachment.contentType());
@@ -90,8 +100,56 @@ public class MailDispatcher {
         }
     }
 
+    /// One campaign message, already personalised, with the headers that let an inbox offer
+    /// one-click unsubscribe (RFC 8058).
+    public SentEmailOutcome sendCampaign(CampaignEnvelope envelope) {
+        var row = deliveryLog.record(envelope.to(), envelope.subject(), envelope.template(), envelope.campaignId(),
+                envelope.html(), List.of(), DeliveryStatus.QUEUED, null);
+
+        if (!properties.enabled()) {
+            log.info("Mail disabled, would have sent campaign {} to {}", envelope.campaignId(), envelope.to());
+            return new SentEmailOutcome(row.getId(), DeliveryStatus.QUEUED, null);
+        }
+
+        try {
+            var mime = transport.createMimeMessage();
+            var helper = new MimeMessageHelper(mime, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                    StandardCharsets.UTF_8.name());
+            helper.setFrom(properties.from(), properties.fromName());
+            helper.setTo(envelope.to());
+            helper.setSubject(envelope.subject());
+            helper.setText(envelope.text(), envelope.html());
+
+            if (envelope.oneClickUnsubscribeUrl() != null) {
+                mime.setHeader("List-Unsubscribe", "<%s>".formatted(envelope.oneClickUnsubscribeUrl()));
+                mime.setHeader("List-Unsubscribe-Post", "List-Unsubscribe=One-Click");
+            }
+            if (properties.replyTo() != null && !properties.replyTo().isBlank()) {
+                helper.setReplyTo(properties.replyTo());
+            }
+
+            transport.send(mime);
+            deliveryLog.settle(row.getId(), DeliveryStatus.SENT, null);
+            return new SentEmailOutcome(row.getId(), DeliveryStatus.SENT, null);
+        } catch (Exception failure) {
+            deliveryLog.settle(row.getId(), DeliveryStatus.FAILED, failure.getMessage());
+            log.warn("Could not send campaign {} to {}: {}", envelope.campaignId(), envelope.to(), failure.getMessage());
+            return new SentEmailOutcome(row.getId(), DeliveryStatus.FAILED, failure.getMessage());
+        }
+    }
+
     /// What happened, for a caller that is waiting on the answer rather than firing and forgetting.
     public record SentEmailOutcome(Long id, DeliveryStatus status, String failureReason) {
+    }
+
+    /// A campaign message ready for the wire.
+    ///
+    /// @param template               `CAMPAIGN` for a real send, `CAMPAIGN_TEST` for a preview, so
+    ///                               tests never count towards a campaign's results.
+    /// @param oneClickUnsubscribeUrl Absent for a test send, which belongs to nobody's subscription.
+    /// @author Khova Krishna Pilato
+    public record CampaignEnvelope(String to, String subject, String html, String text, String campaignId,
+                                   String template, String oneClickUnsubscribeUrl) {
     }
 
     private MimeMessage compose(MailMessage message, String rendered) throws Exception {
@@ -100,7 +158,7 @@ public class MailDispatcher {
 
         helper.setFrom(properties.from(), properties.fromName());
         helper.setTo(message.to());
-        helper.setSubject(message.template().subject());
+        helper.setSubject(message.resolvedSubject());
         helper.setText(rendered, true);
 
         if (properties.replyTo() != null && !properties.replyTo().isBlank()) {

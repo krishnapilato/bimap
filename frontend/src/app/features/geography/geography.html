@@ -1,0 +1,192 @@
+<bm-geo-canvas
+  [(mode)]="mode"
+  [(basemap)]="basemap"
+  [(coverage)]="coverage"
+  [asset]="streetPin()"
+  [points]="points()"
+  [insets]="insets()"
+  (pointSelected)="onPointSelected($event)"
+/>
+
+@if (!viewport.isHandset()) {
+  <aside #panel class="geography__panel" aria-label="Places" [class.is-open]="panelOpen()" [inert]="!panelOpen()">
+    <ng-container [ngTemplateOutlet]="head" />
+    <div class="geography__body">
+      <ng-container [ngTemplateOutlet]="body" />
+    </div>
+  </aside>
+
+  @if (!panelOpen()) {
+    <button type="button" class="geography__reopen" bmRipple animate.enter="bm-enter-pop" animate.leave="bm-leave-fade" (click)="togglePanel()">
+      <span class="geography__level-icon" aria-hidden="true"><svg [lucideIcon]="levelIcon()" [size]="16"></svg></span>
+      <span class="geography__reopen-text">
+        <strong>{{ title() }}</strong>
+        <span>{{ subtitle() }}</span>
+      </span>
+      <svg lucideIcon="panel-left-open" [size]="18"></svg>
+    </button>
+  }
+} @else {
+  <bm-sheet label="the place" [(snap)]="sheetSnap" (visible)="onSheetHeight($event)">
+    <div bmSheetHeader>
+      <ng-container [ngTemplateOutlet]="head" />
+    </div>
+    <div class="geography__sheet-body">
+      <ng-container [ngTemplateOutlet]="body" />
+    </div>
+  </bm-sheet>
+}
+
+<ng-template #head>
+  <header class="geography__head">
+    <div class="geography__head-top">
+      <nav class="geography__crumbs" aria-label="Where you are">
+        @for (crumb of crumbs(); track $index; let last = $last) {
+          @if (!last) {
+            <button type="button" (click)="go(crumb.params)">{{ crumb.label }}</button>
+            <svg lucideIcon="chevron-right" [size]="12" aria-hidden="true"></svg>
+          } @else {
+            <span aria-current="page">{{ crumb.label }}</span>
+          }
+        }
+      </nav>
+      @if (!viewport.isHandset()) {
+        <button type="button" bmButton variant="ghost" size="sm" iconOnly aria-label="Hide the panel" (click)="togglePanel()">
+          <svg lucideIcon="panel-left-close"></svg>
+        </button>
+      }
+    </div>
+
+    @for (key of [step()]; track key) {
+      <div class="geography__title" animate.enter="bm-enter-rise">
+        <span class="geography__level-icon" [attr.data-level]="level()" aria-hidden="true"><svg [lucideIcon]="levelIcon()" [size]="18"></svg></span>
+        <div class="geography__title-text">
+          @if (title()) {
+            <h1>{{ title() }}</h1>
+          } @else {
+            <bm-skeleton width="60%" height="22px" />
+          }
+          <p>{{ subtitle() }}</p>
+        </div>
+      </div>
+    }
+
+    <bm-field class="geography__search">
+      <bm-lookup
+        icon="search"
+        placeholder="Search a comune, province or region"
+        ariaLabel="Places"
+        emptyText="No place by that name."
+        [search]="search"
+        [minChars]="2"
+        [(value)]="query"
+        (picked)="onPicked($event)"
+      />
+    </bm-field>
+  </header>
+</ng-template>
+
+<ng-template #body>
+  @switch (level()) {
+    @case ('italy') {
+      @if (regions.isError()) {
+        <bm-error-state title="The regions could not be loaded" [error]="regions.error()" (retry)="regions.refetch()" />
+      } @else if (regions.isPending()) {
+        <ng-container [ngTemplateOutlet]="rowsLoading" />
+      } @else {
+        <p class="geography__section-title">Regions</p>
+        <ul class="geography__rows">
+          @for (region of regions.data(); track region.name; let i = $index) {
+            <li [style.--bm-i]="i">
+              <button type="button" class="geography__row" (click)="openRegion(region.name)">
+                <span class="geography__row-icon"><svg lucideIcon="map" [size]="15"></svg></span>
+                <span class="geography__row-text"><strong>{{ region.name }}</strong></span>
+                <svg class="geography__row-go" lucideIcon="chevron-right" [size]="16"></svg>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    }
+
+    @case ('region') {
+      @if (provinces.isError()) {
+        <bm-error-state title="The provinces could not be loaded" [error]="provinces.error()" (retry)="provinces.refetch()" />
+      } @else if (provinces.isPending()) {
+        <ng-container [ngTemplateOutlet]="rowsLoading" />
+      } @else if (provinces.data()?.length) {
+        <p class="geography__section-title">Provinces</p>
+        <ul class="geography__rows">
+          @for (province of provinces.data(); track province.abbreviation; let i = $index) {
+            <li [style.--bm-i]="i">
+              <button type="button" class="geography__row" (click)="openProvince(province)">
+                <span class="geography__row-badge bm-mono">{{ province.abbreviation }}</span>
+                <span class="geography__row-text">
+                  <strong>{{ province.name }}</strong>
+                  <span>ISTAT province {{ province.code }}</span>
+                </span>
+                <svg class="geography__row-go" lucideIcon="chevron-right" [size]="16"></svg>
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <bm-empty-state icon="map" title="No region by this name" description="Go back to Italy and choose one from the list." compact />
+      }
+    }
+
+    @case ('province') {
+      @if (municipalities.isError()) {
+        <bm-error-state title="The comuni could not be loaded" [error]="municipalities.error()" (retry)="municipalities.refetch()" />
+      } @else if (municipalities.isPending()) {
+        <ng-container [ngTemplateOutlet]="rowsLoading" />
+      } @else {
+        <div class="geography__tools">
+          <label class="geography__filter">
+            <svg lucideIcon="list-filter" [size]="15" aria-hidden="true"></svg>
+            <input type="search" placeholder="Filter these comuni" aria-label="Filter these comuni" [value]="filter()" (input)="filter.set($any($event.target).value)" />
+          </label>
+          <bm-segmented size="sm" ariaLabel="Order" [options]="orders" [value]="order()" (valueChange)="order.set($event)" />
+        </div>
+        @if (shownMunicipalities().length) {
+          <ul class="geography__rows">
+            @for (municipality of shownMunicipalities(); track municipality.istatCode; let i = $index) {
+              <li [style.--bm-i]="i < 24 ? i : 24">
+                <button type="button" class="geography__row" (click)="openMunicipality(municipality)">
+                  <span class="geography__row-icon"><svg lucideIcon="landmark" [size]="15"></svg></span>
+                  <span class="geography__row-text">
+                    <strong>{{ municipality.name }}</strong>
+                    <span>{{ municipality.population != null ? formatNumber(municipality.population) + ' people' : 'Population not recorded' }}</span>
+                  </span>
+                  <span class="geography__row-code bm-mono">{{ municipality.istatCode }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <bm-empty-state icon="scan-search" title="No comune matches" description="Try part of the name or of the ISTAT code." compact />
+        }
+      }
+    }
+
+    @case ('municipality') {
+      @if (place.isError()) {
+        <bm-empty-state icon="scan-search" title="No comune has this code" description="The ISTAT code may be mistyped, or the comune may have merged into another.">
+          <button type="button" bmButton size="sm" (click)="go({ region: null, province: null, istat: null })">Back to Italy</button>
+        </bm-empty-state>
+      } @else if (place.data(); as municipality) {
+        <bm-municipality-detail [place]="municipality" (streetChosen)="onStreet($event)" (look)="lookFrom($event)" />
+      } @else {
+        <ng-container [ngTemplateOutlet]="rowsLoading" />
+      }
+    }
+  }
+</ng-template>
+
+<ng-template #rowsLoading>
+  <div class="geography__loading" aria-busy="true">
+    @for (placeholder of [0, 1, 2, 3, 4, 5]; track placeholder) {
+      <bm-skeleton height="44px" />
+    }
+  </div>
+</ng-template>
