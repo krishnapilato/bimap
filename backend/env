@@ -1,0 +1,43 @@
+# BiMap - local development environment.
+#
+# Git-ignored: this file is never committed. Both services import it automatically, and real
+# environment variables always win over anything set here.
+#
+# Author: Khova Krishna Pilato
+
+# ── Database ─────────────────────────────────────────────────────────────────
+# The dedicated application user, created with access to bimap_iam and bimap_core only.
+# Recreate it with:
+#   CREATE USER 'bimap'@'%' IDENTIFIED BY 'bimap-local-dev';
+#   GRANT ALL PRIVILEGES ON bimap_iam.*  TO 'bimap'@'%';
+#   GRANT ALL PRIVILEGES ON bimap_core.* TO 'bimap'@'%';
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_USERNAME=bimap
+DB_PASSWORD=bimap-local-dev
+
+# ── Tokens ───────────────────────────────────────────────────────────────────
+# Minimum 64 characters, identical in both services. Replace before any deployment:
+#   openssl rand -base64 64 | tr -d '\n'
+BIMAP_JWT_SECRET=development-only-secret-please-replace-me-in-every-real-deployment
+
+# ── Seed accounts ────────────────────────────────────────────────────────────
+# Set so the five accounts in seed/users.json are usable straight away.
+# Leave EMPTY in production: they are then created pending activation with no password,
+# and each person sets their own from the activation email.
+BIMAP_SEED_PASSWORD=Cadastr0-Rilievo!
+
+# ── Mail (Mailtrap sandbox) ──────────────────────────────────────────────────
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=587
+MAIL_USERNAME=9a4f765dbe185a
+MAIL_PASSWORD=929d826701bafa
+MAIL_FROM=no-reply@bimap.local
+MAIL_FROM_NAME=BiMap
+MAIL_ENABLED=true
+
+# ── Google sign-in ───────────────────────────────────────────────────────────
+# This is the OAuth 2.0 *client id* from the Google Cloud console: a server setting.
+# It is NOT the id token. The id token is a JWT Google mints for the browser after a real
+# sign-in, and it is what the client posts to /api/v1/auth/google.
+GOOGLE_CLIENT_ID=543470445081-16vr7ola7vh6984uuom30rp7ljv1dl7n.apps.googleusercontent.com

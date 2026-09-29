@@ -6,10 +6,13 @@
 #
 # Author: Khova Krishna Pilato
 
+# The code targets Java 27, but Eclipse Temurin has no 27 images yet, so the image stays on 26
+# until it does. The build compiles for whichever JDK this names.
 ARG JAVA_VERSION=26
 
 # ── Build ────────────────────────────────────────────────────────────────────
 FROM eclipse-temurin:${JAVA_VERSION}-jdk AS build
+ARG JAVA_VERSION
 WORKDIR /build
 
 # Dependency resolution is cached on its own layer: the poms change far less often than the code.
@@ -30,7 +33,7 @@ RUN sed -i 's/\r$//' mvnw \
 
 COPY platform-core/src platform-core/src
 COPY iam-service/src iam-service/src
-RUN ./mvnw -B -q package -pl platform-core,iam-service -am -DskipTests
+RUN ./mvnw -B -q package -pl platform-core,iam-service -am -DskipTests -Djava.version=${JAVA_VERSION}
 
 # Layers, so Docker can cache dependencies separately from application classes.
 RUN java -Djarmode=tools -jar iam-service/target/iam-service-*.jar extract --layers --launcher --destination /build/extracted

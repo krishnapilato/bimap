@@ -2,7 +2,7 @@
 
 Two Spring Boot services on a shared kernel, built as one Maven reactor.
 
-**Java 26 · Spring Boot 4 · Spring Security · Spring Data JPA · Flyway · MySQL · Thymeleaf mail**
+**Java 27 · Spring Boot 4 · Spring Security · Spring Data JPA · Flyway · MySQL · Thymeleaf mail**
 
 | Module | What it owns |
 |---|---|
@@ -17,7 +17,7 @@ the same key and rebuilds the caller from its claims.
 
 ## Running it
 
-You need a JDK 26 and nothing else: the Maven wrapper fetches Maven.
+You need a JDK 27 and nothing else: the Maven wrapper fetches Maven.
 
 ```bash
 docker compose -f ../docker-compose.dev.yml up -d        # MySQL :3306 and Mailpit :8025
@@ -39,7 +39,9 @@ GRANT ALL PRIVILEGES ON bimap_core.* TO 'bimap'@'%';
 ```
 
 Each service has its own production image: `iam-service/Dockerfile` and `business-service/Dockerfile`,
-both multi-stage, layered, running as an unprivileged user.
+both multi-stage, layered, running as an unprivileged user. The images still run Java 26, because
+Eclipse Temurin has not published 27 images yet. The build compiles for whichever JDK `JAVA_VERSION`
+names, so moving them to 27 is a change to that one variable.
 
 ---
 
@@ -195,7 +197,7 @@ transitions, malformed input, refresh-token replay and forged tokens.
 
 ---
 
-## Java 26 in use
+## Java 27 in use
 
 All finalised features, no `--enable-preview`:
 

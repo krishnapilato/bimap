@@ -50,7 +50,7 @@
         <span class="chip">v<span data-bind="version" th:text="${snapshot.version()}">dev</span></span>
         <span class="chip" th:each="profile : ${snapshot.profiles()}" th:text="${profile}">dev</span>
         <span class="chip chip--quiet">:<span th:text="${snapshot.runtime().port()}">9843</span></span>
-        <span class="chip chip--quiet" th:text="'Java ' + ${snapshot.runtime().java()}">Java 26</span>
+        <span class="chip chip--quiet" th:text="'Java ' + ${snapshot.runtime().java()}">Java 27</span>
         <span class="strip-spacer"></span>
         <span class="strip-time">sampled <time data-bind="sampledAt">just now</time></span>
     </div>

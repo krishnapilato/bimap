@@ -12,7 +12,7 @@ the platform reports its own health in real time.
 — the demo runs the real client against an in-browser backend with sample data, signed in as an
 administrator.
 
-**Angular 22 · Java 26 · Spring Boot 4 · MySQL · Leaflet · Google Street View · Docker**
+**Angular 22 · Java 27 · Spring Boot 4 · MySQL · Leaflet · Google Street View · Docker**
 
 ---
 
