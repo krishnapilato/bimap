@@ -20,9 +20,9 @@ Angular client for registering Italian heritage assets on a map, managing users 
 |---|---|---|
 | `/` | Landing page with a fading aerial map of Italy | public |
 | `/login` | Sign in and sign up | public |
-| `/main` | Register an asset: place, address, map pin, and the asset register | signed in |
-| `/streetview` | Road map with Street View coverage and a live panorama | signed in |
-| `/listuser` | User management: create, edit, enable or disable, delete, welcome email | administrator |
+| `/assets` | Register an asset: place, address, map pin, and the asset register | signed in |
+| `/street-view` | Road map with Street View coverage and a live panorama | signed in |
+| `/users` | User management: create, edit, enable or disable, delete, welcome email | administrator |
 
 ## Running
 
@@ -57,6 +57,8 @@ Both write to `dist/frontend/browser`.
 - **`rxResource`** for loading data, including the region → province → municipality chain.
 - **Tailwind CSS and daisyUI** for all styling, with no component stylesheets. The theme lives in `src/tailwind.css`.
 - **Functional guards and interceptors**; the JWT is kept in a signal-based `AuthService`.
+- **Angular style guide naming**: feature folders and component files without a `.component` suffix.
+- **No UI library besides daisyUI**: notifications go through a small `ToastService`.
 
 ## External services
 
@@ -70,12 +72,14 @@ Both write to `dist/frontend/browser`.
 
 ```
 src/app
-├── auth          Sign in, sign up, guards, interceptor, session
-├── demo          Mock data and the interceptor used by the demo build
-├── main          Asset registration page and its API service
-├── streetview    Street View page
-├── user-list     User management page and its API service
-├── hero.component.ts           Landing page
-├── navbar.component.ts         Shared top bar
-└── aerial-map.component.ts     Aerial map used on the landing and sign-in pages
+├── core                 App-wide plumbing
+│   ├── auth             AuthService, guards, interceptor and auth models
+│   └── demo             Mock data and the interceptor used by the demo build
+├── shared               Navbar, aerial map and ToastService
+└── features             One folder per page
+    ├── home             Landing page
+    ├── login            Sign in, sign up and sign out
+    ├── assets           Asset registration, its service and models
+    ├── street-view      Street View page
+    └── users            User management, its service and models
 ```

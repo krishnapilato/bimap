@@ -1,1 +1,7 @@
-<router-outlet></router-outlet>
+<router-outlet />
+
+@if (toast.message(); as message) {
+  <div class="toast toast-end z-[1100]">
+    <div class="alert bg-neutral text-neutral-content">{{ message }}</div>
+  </div>
+}

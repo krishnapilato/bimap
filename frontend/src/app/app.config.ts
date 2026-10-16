@@ -4,8 +4,8 @@ import { provideRouter, withComponentInputBinding, withHashLocation } from '@ang
 
 import { environment } from '../environments/environment';
 import { routes } from './app.routes';
-import { authInterceptor } from './auth/auth.interceptor';
-import { demoInterceptor } from './demo/demo.interceptor';
+import { authInterceptor } from './core/auth/auth.interceptor';
+import { demoInterceptor } from './core/demo/demo.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [

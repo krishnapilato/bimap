@@ -16,6 +16,28 @@ A web application for registering Italian heritage assets on a map: pick a place
 
 ---
 
+## Screenshots
+
+### Frontend
+
+| Landing page | Sign in |
+|---|---|
+| ![Landing page](docs/screenshots/frontend-home.png) | ![Sign in](docs/screenshots/frontend-login.png) |
+
+| Register an asset | Street View |
+|---|---|
+| ![Register an asset](docs/screenshots/frontend-assets.png) | ![Street View](docs/screenshots/frontend-street-view.png) |
+
+| Users | Edit a user |
+|---|---|
+| ![Users](docs/screenshots/frontend-users.png) | ![Edit a user](docs/screenshots/frontend-users-edit.png) |
+
+### Backend
+
+| Landing page | API documentation |
+|---|---|
+| ![Backend landing page](docs/screenshots/backend-landing.png) | ![Swagger UI](docs/screenshots/backend-swagger.png) |
+
 ## Architecture
 
 ```
