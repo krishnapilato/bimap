@@ -1,85 +1,44 @@
 package com.example.core;
 
-import java.util.Date;
+import module java.base;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
+import com.example.model.User;
+import com.example.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Profile;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import com.example.beans.User;
-import com.example.enums.ApplicationRole;
-import com.example.enums.UserStatus;
-import com.example.repository.UserRepository;
-
 @Component
-public class AppInit implements CommandLineRunner {
+@Profile("dev")
+@RequiredArgsConstructor
+public class AppInit {
 
-	// JPA Repository
+    private static final String DEFAULT_PASSWORD = "12345678";
 
-	@Autowired
-	private UserRepository userRepository;
+    private final UserRepository users;
+    private final PasswordEncoder passwordEncoder;
 
-	// Password encoder
+    @EventListener(ApplicationReadyEvent.class)
+    void seedUsers() {
+        seed("Khova Krishna", "Pilato", "krishnak.pilato@gmail.com", User.Role.ADMINISTRATOR, true);
+        seed("Giulia", "Rossi", "giulia.rossi@example.com", User.Role.ADMINISTRATOR, true);
+        seed("Arjun", "Sharma", "arjun.sharma@example.com", User.Role.USER, false);
+        seed("Marco", "Bianchi", "marco.bianchi@example.com", User.Role.USER, true);
+        seed("Priya", "Iyer", "priya.iyer@example.com", User.Role.MANAGER, false);
+    }
 
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-
-	@Override
-	public void run(String... args) {
-
-		 // Saving first administrator
-
-		 Date now = new Date();
-		  
-		 User administrator = new User(); administrator.setName("Khova Krishna");
-		 administrator.setSurname("Pilato");
-		 administrator.setEmail("krishnak.pilato@gmail.com");
-		 administrator.setCreated(now); administrator.setLastModified(now);
-		 administrator.setPassword(passwordEncoder.encode("12345678"));
-		 administrator.setUserStatus(UserStatus.CONFIRMED);
-		 administrator.setApplicationRole(ApplicationRole.ADMINISTRATOR);
-		 administrator.setKey("CIAOO"); saveIfMissing(administrator);
-		 
-		 // Saving other 4 users for testing 
-		 
-		 User user2 = new User();
-		 user2.setName("Test2"); user2.setSurname("Test2");
-		 user2.setEmail("test.test2@gmail.com"); user2.setCreated(now);
-		 user2.setLastModified(now);
-		 user2.setPassword(passwordEncoder.encode("12345678"));
-		 user2.setUserStatus(UserStatus.CONFIRMED);
-		 user2.setApplicationRole(ApplicationRole.ADMINISTRATOR);
-		 user2.setKey("JRU8sE4u3755xBsw"); saveIfMissing(user2);
-		 
-		 User user3 = new User(); user3.setName("Test3"); user3.setSurname("Test");
-		 user3.setEmail("test.test3@gmail.com"); user3.setCreated(now);
-		 user3.setLastModified(now);
-		 user3.setPassword(passwordEncoder.encode("12345678"));
-		 user3.setUserStatus(UserStatus.NOT_CONFIRMED);
-		 user3.setApplicationRole(ApplicationRole.USER);
-		 user3.setKey("J4evnj6ZKqLHJPFA"); saveIfMissing(user3);
-		  
-		 User user4 = new User(); user4.setName("Test4"); user4.setSurname("Test");
-		 user4.setEmail("test.test4@gmail.com"); user4.setCreated(now);
-		 user4.setLastModified(now);
-		 user4.setPassword(passwordEncoder.encode("12345678"));
-		 user4.setUserStatus(UserStatus.CONFIRMED);
-		 user4.setApplicationRole(ApplicationRole.USER);
-		 user4.setKey("FNFr6JbgPhMbxa2U"); saveIfMissing(user4);
-		 
-		 User user5 = new User(); user5.setName("Test5"); user5.setSurname("Test");
-		 user5.setEmail("test.test5@gmail.com"); user5.setCreated(now);
-		 user5.setLastModified(now);
-		 user5.setPassword(passwordEncoder.encode("12345678"));
-		 user5.setUserStatus(UserStatus.NOT_CONFIRMED);
-		 user5.setApplicationRole(ApplicationRole.MANAGER);
-		 user5.setKey("TSPyv7HL7RGwHnMf"); saveIfMissing(user5);
-	}
-
-	private void saveIfMissing(User user) {
-		if (userRepository.findByEmailAddress(user.getEmail()).isEmpty()) {
-			userRepository.save(user);
-		}
-	}
+    private void seed(String name, String surname, String email, User.Role role, boolean enabled) {
+        if (users.existsByEmail(email)) return;
+        var user = new User();
+        user.setName(name);
+        user.setSurname(surname);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(DEFAULT_PASSWORD));
+        user.setRole(role);
+        user.setEnabled(enabled);
+        users.save(user);
+    }
 }

@@ -1,8 +1,6 @@
 package com.example.repository;
 
-import com.example.beans.Tables;
+import com.example.model.Tables;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-@Repository
 public interface TablesRepository extends JpaRepository<Tables, Long> { }

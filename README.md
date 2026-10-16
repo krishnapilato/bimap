@@ -1,167 +1,70 @@
-# Web App Exercise
+# BiMap
 
-This is a project born only with the aim of practicing with the technologies of Spring Boot and Angular.
+A web application for registering Italian heritage assets on a map: pick a place, check it in Street View, save its details. Administrators manage who can use it.
 
-Access to this application is managed by the administrator who, thanks to the UI already implemented to manage users, can create new users, remove or modify the data of existing users. Only the administrators can see the Admin Dashboard button in the main page. 
+![Java](https://img.shields.io/badge/Java-27-ED8B00?logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-26.7-4479A1?logo=mysql&logoColor=white)
+![Angular](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)
+![Angular Material](https://img.shields.io/badge/Angular_Material-22-757575?logo=materialdesign&logoColor=white)
+![OpenLayers](https://img.shields.io/badge/OpenLayers-10-1F6B75?logo=openlayers&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-compose-2496ED?logo=docker&logoColor=white)
 
-In the main screen (and the only one at the moment) of the application it is possible to enter data such as geographic information. At the end of the insertion of all the data the user can save the data.
-The data is written both to a table and to a CSV file, always accessible from the path C:\Simple Map Exercise\csv_file.csv.
+**Frontend:** [krishnapilato.github.io/bimap](https://krishnapilato.github.io/bimap/)
 
-The user can change the type of map displayed between Default, Satellite and Open Street Map according to his personal tastes.
+---
 
-Furthermore, thanks to the button with the Street View icon it is possible, only if the zoom is greater than 15, to view the streetview images of the point clicked twice. At the bottom of the page is the original Street View which is in development.
+## Architecture
 
-## Requirements
+```
+Browser ──▶ Angular frontend (port 4200) ──▶ Spring Boot API (port 8080) ──▶ MySQL
+                                                 │
+                                                 └──▶ SMTP server (emails)
+```
 
-For building and running the application I strongly recommend you to use: 
+- **Frontend** — Angular single-page app with an OpenLayers map and Street View.
+- **Backend** — stateless REST API secured with JWT, documented with OpenAPI.
+- **Database** — MySQL, holding users, saved forms, the asset register and the list of Italian comuni.
 
-- [JDK 17.0.3.1](https://www.oracle.com/java/technologies/downloads/#java17)
-- [Maven 3.8.5](https://maven.apache.org/download.cgi)
-- [MySQL Server 8.0.29](https://dev.mysql.com/downloads/mysql/)
-- [NodeJS 18.3.0](https://nodejs.org/en/)
+## Repository
 
-## Run Locally
+| Folder | What is in it |
+|---|---|
+| [`spring-boot/`](spring-boot/README.md) | The backend: REST API, security, Docker setup. Full documentation in its README. |
+| `frontend/` | The Angular 22 client. |
+| `angular/` | The first version of the client (Angular 14), kept for reference. |
 
-This project for the moment can only be run locally with all the developer tools.
+## Getting started
 
-Clone the project with [Git](https://git-scm.com/downloads) or download the project zip and extract it wherever you want in your computer
+### 1. Backend and database (Docker)
 
 ```bash
-  git clone https://github.com/khovakrishna-pilato/first-full-stack-app.git
+cd spring-boot
+cp .env.example .env
+docker compose up -d --build
 ```
 
-First of all go to the spring-boot folder directory 
+Fill in `.env` first. The API then runs on <http://localhost:8080>, with interactive documentation at <http://localhost:8080/swagger-ui.html>. See the [backend README](spring-boot/README.md) for configuration, the API reference and running without Docker.
+
+### 2. Frontend
+
+Requires Node.js and npm.
 
 ```bash
-  cd first-full-stack-app-main/spring-boot
+cd frontend
+npm install
+npm start
 ```
 
-Start the server if you have Maven installed or go to spring-boot/target and launch JAR file
+Open <http://localhost:4200>. The frontend talks to the API at `http://localhost:8080`, set in `frontend/src/environments/`.
 
-```bash
-  mvn-spring-boot:run
-```
+With the `dev` profile enabled in `.env`, the backend creates demo accounts with the password `12345678`, for example `giulia.rossi@example.com` (administrator) and `marco.bianchi@example.com` (user).
 
-Then go to the Angular folder directory 
+## Status
 
-```bash
-  cd first-full-stack-app-main/angular
-```
+The backend has been rebuilt for production: JWT security, input validation, standard error responses, health checks and containers. The frontend is being updated to the new API endpoints.
 
-Install dependencies with [NodeJS](https://nodejs.org/en/)
+## Author
 
-```bash
-  npm install
-```
-
-Install Angular 13.0.3
-
-```bash
-  npm install -g @angular/cli@13.0.3
-```
-
-Start the client: the web app will open in the browser 
-
-```bash
-  ng serve -o
-```
-
-## API Reference
-
-#### Get regions
-
-```http
-  GET /searchRegion={keyword}
-```
-
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `keyword` | `string` | **Required**. Search keyword in regions and return 4 results |
-
-#### Get provinces
-
-```http
-  GET /searchProvince={keyword}
-```
-
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `keyword`      | `string` | **Required**. Search keyword in provinces and return 4 results |
-
-#### Get municipalities
-
-```http
-  GET /searchMunicipality={keyword}
-```
-
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `keyword`      | `string` | **Required**. Search keyword in municipalities and return 4 results |
-
-#### Post form model data
-
-```http
-  POST /save
-```
-
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `RequestBody FormModel`      | `FormModel Object` | **Required**. Save the object to form table and to csv_file |
-
-#### Get all data in tables table
-
-```http
-  GET /findAll
-```
-
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `-`      | `-` | Return alla data in tables table |
-
-#### Get all data in users table
-
-```http
-  GET /users
-```
-
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `-`      | `-` | Return alla data in users table |
-
-####  Post user data
-
-```http
-  POST /users
-```
-
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `RequestBody User`      | `User Object` | **Required**. Save the user object to table |
-
-####  Update user data
-
-```http
-  PUT /users/{id}
-```
-
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `id`      | `Long` | **Required**. Update the user with id equal to the path variable |
-
-####  Delete user data
-
-```http
-  PUT /users/{id}
-```
-
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `id`      | `Long` | **Required**. Delete the user with id equal to the path variable |
-
-
-## Technologies used:
-
-- [Leaflet 1.8.0](https://leafletjs.com)
-- [Google Maps Data](https://developers.google.com/maps)
-- [Open Street Map Data](https://www.openstreetmap.org/#map=8/45.905/8.990)
-- [OpenLayers Street View](https://github.com/GastonZalba/ol-street-view)
+**Khova Krishna Pilato** — [github.com/krishnapilato](https://github.com/krishnapilato)

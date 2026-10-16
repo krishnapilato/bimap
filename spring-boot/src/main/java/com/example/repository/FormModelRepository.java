@@ -1,8 +1,6 @@
 package com.example.repository;
 
-import com.example.beans.FormModel;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import com.example.model.FormModel;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-@Repository
-public interface FormModelRepository extends CrudRepository<FormModel, Long> { }
+public interface FormModelRepository extends JpaRepository<FormModel, Long> { }

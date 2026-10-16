@@ -1,20 +1,18 @@
 package com.example.repository;
 
-import com.example.beans.ListaComuni;
+import module java.base;
+import com.example.model.ListaComuni;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
-@Repository
 public interface ListaComuniRepository extends JpaRepository<ListaComuni, Long> {
-    @Query(value = "SELECT DISTINCT regione FROM listacomuni WHERE regione LIKE %:keyword% ORDER BY regione ASC LIMIT 4", nativeQuery = true)
+
+    @Query("SELECT DISTINCT c.regione FROM ListaComuni c WHERE c.regione LIKE %:keyword% ORDER BY c.regione LIMIT 4")
     List<String> searchRegion(String keyword);
 
-    @Query(value = "SELECT DISTINCT provincia FROM listacomuni WHERE provincia LIKE %:keyword% ORDER BY provincia ASC LIMIT 4", nativeQuery = true)
+    @Query("SELECT DISTINCT c.provincia FROM ListaComuni c WHERE c.provincia LIKE %:keyword% ORDER BY c.provincia LIMIT 4")
     List<String> searchProvince(String keyword);
 
-    @Query(value = "SELECT comune FROM listacomuni WHERE comune LIKE %:keyword% ORDER BY comune ASC LIMIT 4", nativeQuery = true)
+    @Query("SELECT DISTINCT c.comune FROM ListaComuni c WHERE c.comune LIKE %:keyword% ORDER BY c.comune LIMIT 4")
     List<String> searchMunicipality(String keyword);
 }
