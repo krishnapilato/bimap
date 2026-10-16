@@ -1,22 +1,21 @@
-import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { catchError, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
-@Injectable()
-export class SecurityInterceptor implements HttpInterceptor {
-  constructor(private authenticationService: AuthService) {}
+export const authInterceptor: HttpInterceptorFn = (request, next) => {
+  const authService = inject(AuthService);
+  const token = authService.token();
 
-  public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const loginResponse = this.authenticationService.loginResponseValue;
-
-    const isLoggedIn = loginResponse && loginResponse.jwttoken;
-    const isApiUrl = request.url.startsWith(environment.baseApiUrl);
-
-    if (isLoggedIn && isApiUrl)
-      request = request.clone({ setHeaders: { Authorization: `Bearer ${loginResponse.jwttoken}` } });
-
-    return next.handle(request);
+  if (token && request.url.startsWith(environment.baseApiUrl)) {
+    request = request.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
   }
-}
+
+  return next(request).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401 && token) authService.logout();
+      return throwError(() => error);
+    }),
+  );
+};

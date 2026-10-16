@@ -1,46 +1,12 @@
 import { Routes } from '@angular/router';
-import { AdminAuthGuard } from './auth/admin.auth.guard';
-import { AuthGuard } from './auth/auth.guard';
-import { LoginComponent } from './auth/login.component';
-import { LogoutComponent } from './auth/logout.component';
-import { MainComponent } from './main/main.component';
-import { StreetviewComponent } from './streetview/streetview.component';
-import { UserListComponent } from './user-list/user-list.component';
-import { UserFormComponent } from './user-form/user-form.component';
+import { adminGuard, authGuard } from './auth/auth.guard';
 
 export const routes: Routes = [
-  {
-    path: '',
-    component: MainComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'login',
-    component: LoginComponent,
-  },
-  {
-    path: 'main',
-    component: MainComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'streetview',
-    component: StreetviewComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'logout',
-    component: LogoutComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'adduser',
-    component: UserFormComponent,
-    canActivate: [AdminAuthGuard],
-  },
-  {
-    path: 'listuser',
-    component: UserListComponent,
-    canActivate: [AdminAuthGuard],
-  },
+  { path: '', loadComponent: () => import('./hero.component').then((m) => m.HeroComponent) },
+  { path: 'login', loadComponent: () => import('./auth/login.component').then((m) => m.LoginComponent) },
+  { path: 'main', loadComponent: () => import('./main/main.component').then((m) => m.MainComponent), canActivate: [authGuard] },
+  { path: 'streetview', loadComponent: () => import('./streetview/streetview.component').then((m) => m.StreetviewComponent), canActivate: [authGuard] },
+  { path: 'logout', loadComponent: () => import('./auth/logout.component').then((m) => m.LogoutComponent), canActivate: [authGuard] },
+  { path: 'listuser', loadComponent: () => import('./user-list/user-list.component').then((m) => m.UserListComponent), canActivate: [adminGuard] },
+  { path: '**', redirectTo: '' },
 ];

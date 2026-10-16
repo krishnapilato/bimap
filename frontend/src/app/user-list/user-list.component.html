@@ -1,201 +1,146 @@
-<br /><br /><br /><br /><br />
+<main class="mx-auto flex min-h-dvh max-w-5xl flex-col gap-8 px-6 py-8 sm:px-12 lg:py-12">
+  <app-navbar />
 
-<h1 class="text-center">ADMIN DASHBOARD</h1>
-<p class="text-center">
-  {{ whatuser.user.name }} {{ whatuser.user.surname }} is logged in
-</p>
+  <header class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+    <div class="flex flex-col gap-3">
+      <h1 class="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Users</h1>
+      <p class="text-base text-base-content/70 sm:text-lg">Manage who can access BiMap and what they can do.</p>
+    </div>
+    <button class="btn btn-primary sm:btn-lg" (click)="openForm()">New user</button>
+  </header>
 
-<br /><br />
+  <input #search class="input input-lg w-full sm:max-w-sm" type="search" placeholder="Search by name or email" (input)="query.set(search.value)" />
 
-<div class="d-flex justify-content-center">
-  <mat-form-field class="text-center" appearance="outline" style="width: 50%;">
-    <mat-label>Filter data in table</mat-label>
-    <input
-      matInput
-      autocomplete="off"
-      class="text-center"
-      (keyup)="applyFilter($event)"
-      #input
-      minlength="1"
-      maxlength="40"
-      matTooltip="Filter data in table"
-      matTooltipPosition="above"
-      placeholder="Ex. Krishna"
-    />
-    <mat-icon matSuffix>search</mat-icon>
-  </mat-form-field>
-</div>
-
-<br /><br />
-
-<div class="table-container mat-elevation-z8">
-  @if (dataSource.data.length > 0) {
-    <table
-      mat-table
-      matSort
-      class="justify-content-center"
-      [dataSource]="dataSource"
-    >
-      <ng-container matColumnDef="name">
-        <th
-          mat-header-cell
-          *matHeaderCellDef
-          mat-sort-header
-          matTooltip="Name Column"
-          matTooltipPosition="above"
-        >
-          Name
-        </th>
-        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="surname">
-        <th
-          mat-header-cell
-          *matHeaderCellDef
-          mat-sort-header
-          matTooltip="Surname Column"
-          matTooltipPosition="above"
-        >
-          Surname
-        </th>
-        <td mat-cell *matCellDef="let row">{{ row.surname }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="email">
-        <th
-          mat-header-cell
-          *matHeaderCellDef
-          mat-sort-header
-          matTooltip="Email Column"
-          matTooltipPosition="above"
-        >
-          Email
-        </th>
-        <td mat-cell *matCellDef="let row">
-          <button
-            style="background: transparent; border: none; cursor: pointer;"
-            matTooltip="Click to send email"
-            matTooltipPosition="right"
-            (click)="send(row.email)"
-          >
-            {{ row.email }}
-          </button>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="userStatus">
-        <th
-          mat-header-cell
-          *matHeaderCellDef
-          mat-sort-header
-          matTooltip="Status Column"
-          matTooltipPosition="above"
-        >
-          Status
-        </th>
-        <td mat-cell *matCellDef="let row">{{ row.userStatus.toLowerCase() }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="applicationRole">
-        <th
-          mat-header-cell
-          *matHeaderCellDef
-          mat-sort-header
-          matTooltip="Role Column"
-          matTooltipPosition="above"
-        >
-          Role
-        </th>
-        <td mat-cell *matCellDef="let row">
-          {{ row.applicationRole.toLowerCase() }}
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header></th>
-        <td mat-cell *matCellDef="let row" matTooltip="Remove User" matTooltipPosition="below">
-          <button style="background: transparent; border: none; cursor: pointer;" (click)="deleteRow(row)">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="actions2">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header></th>
-        <td mat-cell *matCellDef="let row" matTooltip="Edit User" matTooltipPosition="below">
-          <button style="background: transparent; border: none; cursor: pointer;" (click)="openDialog(row)">
-            <mat-icon>edit</mat-icon>
-          </button>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" colspan="7">
-          @if (input.value.length > 0) {
-            No data matching the filter "{{ input.value }}"
-          }
-        </td>
-      </tr>
+  <div class="overflow-x-auto">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th class="hidden sm:table-cell">Role</th>
+          <th class="hidden md:table-cell">Status</th>
+          <th><span class="sr-only">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of filtered(); track user.id) {
+          <tr class="hover:bg-base-200">
+            <td class="max-sm:w-full max-sm:max-w-0">
+              <div class="flex items-center gap-3">
+                <div class="avatar avatar-placeholder">
+                  <div class="w-10 rounded-full bg-neutral text-neutral-content">
+                    <span class="text-sm">{{ user.name[0] }}{{ user.surname[0] }}</span>
+                  </div>
+                </div>
+                <div class="min-w-0">
+                  <div class="font-medium">{{ user.name }} {{ user.surname }}</div>
+                  <div class="truncate text-sm text-base-content/60">{{ user.email }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="hidden sm:table-cell">
+              <span class="badge badge-ghost capitalize">{{ user.role.toLowerCase() }}</span>
+            </td>
+            <td class="hidden md:table-cell">
+              <span class="inline-flex items-center gap-2">
+                <span class="status" [class.status-success]="user.enabled"></span>
+                {{ user.enabled ? 'Active' : 'Disabled' }}
+              </span>
+            </td>
+            <td>
+              <div class="flex justify-end gap-1">
+                <button class="btn btn-square btn-ghost btn-sm" title="Send welcome email" (click)="emailing.set(user)">
+                  <span class="material-icons text-xl!">mail_outline</span>
+                </button>
+                <button class="btn btn-square btn-ghost btn-sm" title="Edit" (click)="openForm(user)">
+                  <span class="material-icons text-xl!">edit</span>
+                </button>
+                <button class="btn btn-square btn-ghost btn-sm" title="Delete" [disabled]="user.id === auth.user()?.id" (click)="deleting.set(user)">
+                  <span class="material-icons text-xl!">delete_outline</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" class="py-16 text-center text-base-content/60">
+              {{ users.isLoading() ? 'Loading users…' : 'No users found.' }}
+            </td>
+          </tr>
+        }
+      </tbody>
     </table>
+  </div>
+</main>
 
-    <mat-paginator
-      class="d-flex justify-content-center"
-      matTooltip="PageTable Options"
-      matTooltipPosition="below"
-      showFirstLastButtons
-      [pageSizeOptions]="[5, 10]"
-    ></mat-paginator>
+<div class="modal" role="dialog" [class.modal-open]="formOpen()">
+  <form class="modal-box flex flex-col gap-4" [formRoot]="form">
+    <h2 class="text-2xl font-semibold tracking-tight">{{ editing() ? 'Edit user' : 'New user' }}</h2>
+    <p class="text-base-content/70">
+      {{ editing() ? 'Leave the password empty to keep the current one.' : 'They can sign in right away with this email and password.' }}
+    </p>
+    <div class="grid grid-cols-2 gap-4">
+      <input class="input w-full" placeholder="Name" [formField]="form.name" />
+      <input class="input w-full" placeholder="Surname" [formField]="form.surname" />
+    </div>
+    <input class="input w-full" type="email" placeholder="Email" [formField]="form.email" />
+    <input class="input w-full" type="password" autocomplete="new-password" placeholder="Password, at least 8 characters" [formField]="form.password" />
+    <select class="select w-full capitalize" [formField]="form.role">
+      @for (role of roles; track role) {
+        <option [value]="role">{{ role.toLowerCase() }}</option>
+      }
+    </select>
+    @if (editing()) {
+      <label class="label justify-between text-base-content">
+        <span>
+          <span class="block font-medium">Active</span>
+          <span class="text-sm text-base-content/60">Disabled users can't sign in.</span>
+        </span>
+        <input type="checkbox" class="toggle toggle-success" [formField]="form.enabled" />
+      </label>
+    }
+    @if (error()) {
+      <div role="alert" class="alert alert-error alert-soft">{{ error() }}</div>
+    }
+    <div class="modal-action">
+      <button type="button" class="btn btn-ghost" (click)="close()">Cancel</button>
+      <button class="btn btn-primary" [disabled]="form().invalid() || form().submitting()">
+        {{ editing() ? 'Save changes' : 'Create user' }}
+      </button>
+    </div>
+  </form>
+  <button type="button" class="modal-backdrop" (click)="close()">Close</button>
+</div>
+
+<div class="modal" role="dialog" [class.modal-open]="deleting()">
+  @if (deleting(); as user) {
+    <div class="modal-box flex flex-col gap-4">
+      <h2 class="text-2xl font-semibold tracking-tight">Delete {{ user.name }} {{ user.surname }}?</h2>
+      <p class="text-base-content/70">Their account is removed for good. This can't be undone.</p>
+      <div class="modal-action">
+        <button class="btn btn-ghost" (click)="close()">Cancel</button>
+        <button class="btn btn-error" [disabled]="busy()" (click)="remove(user)">Delete</button>
+      </div>
+    </div>
   }
+  <button type="button" class="modal-backdrop" (click)="close()">Close</button>
 </div>
 
-<br /><br /><br /><br /><br /><br />
-
-<div class="d-flex justify-content-center" style="margin-top: 100px; gap: 20px;">
-  <button
-    mat-raised-button
-    color="primary"
-    style="height: 40px; width: 60px; border-radius: 50px;"
-    matTooltip="Add User"
-    matTooltipPosition="left"
-    routerLink="/adduser"
-  >
-    <mat-icon>person_add</mat-icon>
-  </button>
-  
-  <button
-    mat-raised-button
-    color="primary"
-    style="height: 40px; width: 60px; border-radius: 50px;"
-    matTooltip="Home"
-    matTooltipPosition="below"
-    routerLink="/"
-  >
-    <mat-icon>home</mat-icon>
-  </button>
-  
-  <button
-    mat-raised-button
-    color="primary"
-    style="height: 40px; width: 60px; border-radius: 50px;"
-    matTooltip="StreetView Map"
-    matTooltipPosition="below"
-    routerLink="/streetview"
-  >
-    <mat-icon>streetview</mat-icon>
-  </button>
-  
-  <button
-    mat-raised-button
-    color="accent"
-    style="height: 40px; width: 60px; border-radius: 50px;"
-    matTooltip="Logout"
-    matTooltipPosition="right"
-    routerLink="/logout"
-  >
-    <mat-icon>exit_to_app</mat-icon>
-  </button>
+<div class="modal" role="dialog" [class.modal-open]="emailing()">
+  @if (emailing(); as user) {
+    <div class="modal-box flex flex-col gap-4">
+      <h2 class="text-2xl font-semibold tracking-tight">Send welcome email?</h2>
+      <p class="text-base-content/70">{{ user.name }} gets an email at {{ user.email }} with a link to sign in.</p>
+      <div class="modal-action">
+        <button class="btn btn-ghost" (click)="close()">Cancel</button>
+        <button class="btn btn-primary" [disabled]="busy()" (click)="sendWelcomeEmail(user)">Send email</button>
+      </div>
+    </div>
+  }
+  <button type="button" class="modal-backdrop" (click)="close()">Close</button>
 </div>
+
+@if (notice()) {
+  <div class="toast toast-end z-[1100]">
+    <div class="alert bg-neutral text-neutral-content">{{ notice() }}</div>
+  </div>
+}

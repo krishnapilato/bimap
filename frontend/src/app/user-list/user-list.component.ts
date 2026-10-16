@@ -1,240 +1,111 @@
-import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialog } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterModule } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, computed, inject, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { disabled, email, form, FormField, FormRoot, minLength, required } from '@angular/forms/signals';
+import { firstValueFrom, Observable } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
-import { User } from '../user';
-import { LoginResponse } from './../auth/loginresponse';
+import { NavbarComponent } from '../navbar.component';
+import { Role, ROLES, User } from '../user';
 import { UserService } from './user-service.service';
+
+const EMPTY = { name: '', surname: '', email: '', password: '', role: 'USER' as Role, enabled: true };
 
 @Component({
   selector: 'app-user-list',
-  imports: [
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSnackBarModule,
-    FormsModule,
-    MatTooltipModule,
-    MatIconModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
-    CommonModule,
-    RouterModule,
-  ],
-  standalone: true,
+  imports: [FormField, FormRoot, NavbarComponent],
   templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css'],
-  providers: [UserService],
+  host: { '(document:keydown.escape)': 'close()' },
 })
-export class UserListComponent implements OnInit, AfterViewInit {
-  displayedColumns: string[] = [
-    'name',
-    'surname',
-    'email',
-    'userStatus',
-    'applicationRole',
-    'actions',
-    'actions2',
-  ];
-  dataSource = new MatTableDataSource<User>();
-  public whatuser!: LoginResponse;
+export class UserListComponent {
+  private readonly userService = inject(UserService);
+  protected readonly auth = inject(AuthService);
+  protected readonly roles = ROLES;
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  protected readonly users = rxResource({ stream: () => this.userService.findAll(), defaultValue: [] });
+  protected readonly query = signal('');
+  protected readonly filtered = computed(() => {
+    const query = this.query().trim().toLowerCase();
+    return this.users.value().filter((user) => `${user.name} ${user.surname} ${user.email}`.toLowerCase().includes(query));
+  });
 
-  constructor(
-    private authenticationService: AuthService,
-    private userService: UserService,
-    private _snackbar: MatSnackBar,
-    public dialog: MatDialog,
-  ) {}
+  protected readonly formOpen = signal(false);
+  protected readonly editing = signal<User | null>(null);
+  protected readonly deleting = signal<User | null>(null);
+  protected readonly emailing = signal<User | null>(null);
+  protected readonly busy = signal(false);
+  protected readonly error = signal('');
+  protected readonly notice = signal('');
 
-  ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
+  private readonly account = signal({ ...EMPTY });
+  protected readonly form = form(
+    this.account,
+    (account) => {
+      required(account.name);
+      required(account.surname);
+      required(account.email);
+      email(account.email);
+      required(account.password, { when: () => !this.editing() });
+      minLength(account.password, 8);
+      disabled(account.enabled, () => this.editing()?.id === this.auth.user()?.id);
+    },
+    { submission: { action: () => this.save() } },
+  );
+
+  protected openForm(user: User | null = null): void {
+    this.editing.set(user);
+    this.account.set(user ? { name: user.name, surname: user.surname, email: user.email, password: '', role: user.role, enabled: user.enabled } : { ...EMPTY });
+    this.form().reset();
+    this.error.set('');
+    this.formOpen.set(true);
   }
 
-  applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-    if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
+  protected close(): void {
+    this.formOpen.set(false);
+    this.deleting.set(null);
+    this.emailing.set(null);
   }
 
-  public openDialog(row: any): void {
-    let dialogRef = this.dialog.open(DialogElementsExampleDialog);
-    dialogRef.componentInstance.globalID = row.id;
-    dialogRef.componentInstance.globalDataSource = this.dataSource;
+  protected async remove(user: User): Promise<void> {
+    await this.run(this.userService.delete(user.id), `${user.name} ${user.surname} was deleted.`);
   }
 
-  public openEmailDialog(email: string): void {
-    let dialogRef = this.dialog.open(EditingEmailDialog);
-    dialogRef.componentInstance.globalEmail = email;
+  protected async sendWelcomeEmail(user: User): Promise<void> {
+    await this.run(this.userService.sendWelcomeEmail(user.id), `Welcome email sent to ${user.email}.`);
   }
 
-  ngOnInit(): void {
-    this.whatuser = this.authenticationService.loginResponseValue;
-    this.userService.findAll().subscribe((data) => (this.dataSource.data = data));
-  }
-
-  public send(email: string): void {
-    this.openEmailDialog(email);
-  }
-
-  public deleteRow(row: any): void {
-    if (confirm('Are you sure to delete this record?')) {
-      this.userService.delete(row.id).subscribe(() => {
-        this.dataSource.data = this.dataSource.data.filter((u) => u !== row);
-      });
-      this._snackbar.open('Record deleted successfully', '', {
-        duration: 2000,
-      });
-    } else {
-      this._snackbar.open('Operation cancelled', 'Close', {
-        duration: 2000,
-      });
+  private async save(): Promise<undefined> {
+    const { password, ...user } = this.account();
+    const request = { ...user, password: password || null };
+    const editing = this.editing();
+    try {
+      await firstValueFrom(editing ? this.userService.update(request, editing.id) : this.userService.save(request));
+      this.formOpen.set(false);
+      this.users.reload();
+      this.show(editing ? 'Changes saved.' : `${user.name} ${user.surname} was added.`);
+    } catch (error) {
+      this.error.set((error as HttpErrorResponse).status === 409 ? 'This email is already registered.' : 'Could not save the user. Try again.');
     }
-  }
-}
-
-@Component({
-  selector: 'dialog-elements',
-  templateUrl: 'dialog-elements.html',
-  imports: [
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSnackBarModule,
-    FormsModule,
-    MatTooltipModule,
-    MatIconModule,
-    MatSelectModule,
-    MatIconModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    ReactiveFormsModule,
-    CommonModule,
-    RouterModule,
-  ],
-  providers: [UserService],
-})
-export class DialogElementsExampleDialog {
-  public surname: UntypedFormControl = new UntypedFormControl();
-  public name: UntypedFormControl = new UntypedFormControl();
-  public email: UntypedFormControl = new UntypedFormControl();
-  public applicationRole: UntypedFormControl = new UntypedFormControl();
-  public password: UntypedFormControl = new UntypedFormControl();
-
-  public globalID!: number;
-  public globalDataSource = new MatTableDataSource<User>();
-
-  private newUser: User = new User();
-
-  approles: any[] = [
-    { value: 'USER', viewValue: 'USER' },
-    { value: 'MANAGER', viewValue: 'MANAGER' },
-    { value: 'ADMINISTRATOR', viewValue: 'ADMINISTRATOR' },
-    { value: 'SUPERADMINISTRATOR', viewValue: 'SUPERADMINISTRATOR' },
-  ];
-
-  constructor(
-    private userService: UserService,
-    public dialog: MatDialog,
-    private _snackbar: MatSnackBar,
-  ) {}
-
-  cancel(): void {
-    this.dialog.closeAll();
-    this._snackbar.open('Operation cancelled', 'Close', { duration: 2000 });
+    return undefined;
   }
 
-  onNoClick(event: any): void {
-    if (confirm('Are you sure to update this record?')) {
-      this.newUser.name = this.name.value;
-      this.newUser.surname = this.surname.value;
-      this.newUser.email = this.email.value;
-      this.newUser.applicationRole = this.applicationRole.value;
-      this.newUser.password = this.password.value;
-
-      this.userService.update(this.newUser, this.globalID).subscribe(() => {
-        this.userService.findAll().subscribe((data) => {
-          this.globalDataSource.data = data;
-        });
-        this.dialog.closeAll();
-        this._snackbar.open('Record with ID ' + this.globalID + ' updated successfully', '', {
-          duration: 2000,
-        });
-      });
-    } else {
-      this.dialog.closeAll();
-      this._snackbar.open('Operation cancelled', 'Close', { duration: 2000 });
+  private async run(request: Observable<unknown>, success: string): Promise<void> {
+    this.busy.set(true);
+    try {
+      await firstValueFrom(request);
+      this.users.reload();
+      this.show(success);
+    } catch {
+      this.show('Something went wrong. Try again.');
     }
-  }
-}
-
-@Component({
-  selector: 'editing-email',
-  templateUrl: 'editing-email.html',
-  imports: [
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSnackBarModule,
-    FormsModule,
-    MatTooltipModule,
-    MatIconModule,
-    MatSelectModule,
-    MatIconModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    ReactiveFormsModule,
-    CommonModule,
-    RouterModule,
-  ],
-  providers: [UserService],
-})
-export class EditingEmailDialog {
-  public globalEmail!: string;
-
-  constructor(
-    private userService: UserService,
-    public dialog: MatDialog,
-    private _snackbar: MatSnackBar,
-  ) {}
-
-  public send(): void {
-    this.dialog.closeAll();
-    this._snackbar.open('Trying to send email to ' + this.globalEmail, 'Close', {
-      duration: 1000,
-    });
-    this.userService.sendEmail(this.globalEmail).subscribe({
-      next: (data) => {
-        this._snackbar.open(data.toString(), 'Close', {
-          duration: 2000,
-        });
-      },
-      error: (err) => {
-        this._snackbar.open(err.error.text, 'Close', { duration: 3000 });
-      },
-    });
+    this.busy.set(false);
+    this.close();
   }
 
-  cancel() {
-    this.dialog.closeAll();
-    this._snackbar.open('Operation cancelled', 'Close', { duration: 2000 });
+  private noticeTimer?: ReturnType<typeof setTimeout>;
+
+  private show(notice: string): void {
+    clearTimeout(this.noticeTimer);
+    this.notice.set(notice);
+    this.noticeTimer = setTimeout(() => this.notice.set(''), 3000);
   }
 }

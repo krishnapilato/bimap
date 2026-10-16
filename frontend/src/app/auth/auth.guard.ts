@@ -1,29 +1,16 @@
-import { Injectable } from '@angular/core';
+import { inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router';
+import { CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
+import { environment } from '../../environments/environment';
 import { AuthService } from './auth.service';
 
-@Injectable({ providedIn: 'root' })
-export class AuthGuard implements CanActivate {
-  constructor(
-    private router: Router,
-    private authenticationService: AuthService,
-    private _snackbar: MatSnackBar,
-  ) {}
+export const authGuard: CanActivateFn = (_route, state) =>
+  environment.demo || inject(AuthService).isLoggedIn() || redirectToLogin(state, 'You must be logged in to view that page');
 
-  canActivate(_route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    const user = this.authenticationService.loginResponseValue;
+export const adminGuard: CanActivateFn = (_route, state) =>
+  environment.demo || inject(AuthService).isAdmin() || redirectToLogin(state, 'You are not logged in as administrator');
 
-    if (user.jwttoken) {
-      return true;
-    } else {
-      this._snackbar.open('You must be logged in to view that page', 'Close', {
-        duration: 2000,
-      });
-      this.router.navigate(['/login'], {
-        queryParams: { returnUrl: state.url },
-      });
-      return false;
-    }
-  }
+function redirectToLogin(state: RouterStateSnapshot, message: string) {
+  inject(MatSnackBar).open(message, 'Close', { duration: 2000 });
+  return inject(Router).createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
 }

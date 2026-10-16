@@ -1,102 +1,78 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { afterNextRender, Component, DestroyRef, ElementRef, inject, signal, viewChild } from '@angular/core';
 import * as L from 'leaflet';
-declare var google: any;
+import { NavbarComponent } from '../navbar.component';
+
+const START = L.latLng(45.481, 9.173);
+const GOOGLE_TILES = { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] };
 
 @Component({
   selector: 'app-streetview',
+  imports: [NavbarComponent],
   template: `
-    <div class="map-wrapper">
-      <div id="leafletMap" class="half-screen"></div>
-      <div id="streetView" class="half-screen"></div>
-    </div>
+    <main class="mx-auto flex min-h-dvh max-w-7xl flex-col gap-8 px-6 py-8 sm:px-12 lg:py-12">
+      <app-navbar />
+      <header class="flex flex-col gap-3">
+        <h1 class="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Street View</h1>
+        <p class="text-base text-base-content/70 sm:text-lg">Click a blue street on the map to look around from there.</p>
+      </header>
+      <div class="grid flex-1 gap-4 lg:grid-cols-2">
+        <div #map class="h-[45svh] overflow-hidden rounded-box bg-base-200 shadow-md lg:h-auto lg:min-h-[28rem]"></div>
+        <div class="relative h-[45svh] overflow-hidden rounded-box bg-base-200 shadow-md lg:h-auto lg:min-h-[28rem]">
+          <div #panorama class="absolute inset-0"></div>
+          @if (missing()) {
+            <p class="absolute inset-0 grid place-items-center bg-base-200 px-6 text-center text-base-content/70">
+              No Street View here. Try a blue street.
+            </p>
+          }
+        </div>
+      </div>
+    </main>
   `,
-  styleUrls: ['./streetview.component.css'],
 })
-export class StreetviewComponent implements AfterViewInit {
-  private leafletMap!: L.Map;
-  private streetViewPanorama: any;
-  private currentMarker!: L.Marker;
+export class StreetviewComponent {
+  private readonly mapElement = viewChild.required<ElementRef<HTMLElement>>('map');
+  private readonly panoramaElement = viewChild.required<ElementRef<HTMLElement>>('panorama');
+  protected readonly missing = signal(false);
 
-  private initialLat = 45.481;
-  private initialLng = 9.173;
+  constructor() {
+    const destroyRef = inject(DestroyRef);
 
-  ngAfterViewInit(): void {
-    this.initLeaflet();
+    afterNextRender(async () => {
+      const map = L.map(this.mapElement().nativeElement, { attributionControl: false }).setView(START, 15);
+      L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', GOOGLE_TILES).addTo(map);
+      L.tileLayer('https://{s}.google.com/vt/lyrs=svv|cb_client:apiv3&style=50&x={x}&y={y}&z={z}', GOOGLE_TILES).addTo(map);
+      const marker = L.circleMarker(START, { radius: 8, color: '#fff', weight: 3, fillColor: '#18181b', fillOpacity: 1 }).addTo(map);
+      destroyRef.onDestroy(() => map.remove());
 
-    setTimeout(() => {
-      this.initStreetView();
-      this.syncMaps();
-    }, 100);
-  }
+      while (typeof google === 'undefined') await new Promise((resolve) => setTimeout(resolve, 100));
 
-  private initLeaflet(): void {
-    let googleTerrain = L.tileLayer(
-      'https://{s}.google.com/vt/lyrs=m@221097413,transit&x={x}&y={y}&z={z}',
-      {
-        attribution:
-          '<a target="_blank" href="https://cloud.google.com/maps-platform/terms">Map data ©2022 Google</a>',
-        maxZoom: 20.25,
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-      },
-    );
-
-    let googleStreetViewLayer = L.tileLayer(
-      'https://{s}.google.com/vt/?lyrs=svv|cb_client:apiv3&style=50&x={x}&y={y}&z={z}',
-      {
-        attribution:
-          '<a target="_blank" href="https://cloud.google.com/maps-platform/terms">Map data ©2022 Google</a>',
-        maxZoom: 20.25,
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-      },
-    );
-
-    let cities = L.layerGroup([googleTerrain, googleStreetViewLayer]);
-
-    this.leafletMap = L.map('leafletMap').setView([this.initialLat, this.initialLng], 14);
-    cities.addTo(this.leafletMap);
-
-    this.currentMarker = L.marker([this.initialLat, this.initialLng]).addTo(this.leafletMap);
-  }
-
-  private initStreetView(): void {
-    const streetViewElement = document.getElementById('streetView');
-
-    if (streetViewElement && typeof google !== 'undefined') {
-      this.streetViewPanorama = new google.maps.StreetViewPanorama(streetViewElement, {
-        position: { lat: this.initialLat, lng: this.initialLng },
+      const panorama = new google.maps.StreetViewPanorama(this.panoramaElement().nativeElement, {
         pov: { heading: 165, pitch: 0 },
-        zoom: 1,
         addressControl: false,
-        linksControl: true,
-        panControl: true,
-        enableCloseButton: false,
+        motionTracking: false,
+        motionTrackingControl: false,
+        panControl: false,
+        zoomControl: false,
       });
-    } else {
-      console.error('Google Maps API is not loaded yet!');
-    }
-  }
-
-  private syncMaps(): void {
-    this.leafletMap.on('click', (e: L.LeafletMouseEvent) => {
-      const newLat = e.latlng.lat;
-      const newLng = e.latlng.lng;
-
-      this.currentMarker.setLatLng([newLat, newLng]);
-
-      if (this.streetViewPanorama) {
-        this.streetViewPanorama.setPosition({ lat: newLat, lng: newLng });
-      }
+      const streetView = new google.maps.StreetViewService();
+      const show = async (location: google.maps.LatLngLiteral) => {
+        try {
+          const { data } = await streetView.getPanorama({ location, radius: 50, sources: [google.maps.StreetViewSource.GOOGLE] });
+          panorama.setPano(data.location!.pano);
+          this.missing.set(false);
+        } catch {
+          this.missing.set(true);
+        }
+      };
+      map.on('click', (event) => show(event.latlng));
+      panorama.addListener('position_changed', () => {
+        const position = panorama.getPosition();
+        if (position) {
+          marker.setLatLng([position.lat(), position.lng()]);
+          map.panTo([position.lat(), position.lng()]);
+        }
+      });
+      show(START);
     });
-
-    if (this.streetViewPanorama) {
-      google.maps.event.addListener(this.streetViewPanorama, 'position_changed', () => {
-        const svPosition = this.streetViewPanorama.getPosition();
-        const newLat = svPosition.lat();
-        const newLng = svPosition.lng();
-
-        this.currentMarker.setLatLng([newLat, newLng]);
-        this.leafletMap.panTo([newLat, newLng]);
-      });
-    }
   }
 }

@@ -7,11 +7,12 @@ A web application for registering Italian heritage assets on a map: pick a place
 ![MySQL](https://img.shields.io/badge/MySQL-26.7-4479A1?logo=mysql&logoColor=white)
 ![Angular](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)
-![Angular Material](https://img.shields.io/badge/Angular_Material-22-757575?logo=materialdesign&logoColor=white)
-![OpenLayers](https://img.shields.io/badge/OpenLayers-10-1F6B75?logo=openlayers&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white)
+![daisyUI](https://img.shields.io/badge/daisyUI-5-5A0EF8?logo=daisyui&logoColor=white)
+![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-compose-2496ED?logo=docker&logoColor=white)
 
-**Frontend:** [krishnapilato.github.io/bimap](https://krishnapilato.github.io/bimap/)
+**Live demo:** [krishnapilato.github.io/bimap](https://krishnapilato.github.io/bimap/) — runs entirely in the browser with mock data, no sign-in needed.
 
 ---
 
@@ -19,33 +20,35 @@ A web application for registering Italian heritage assets on a map: pick a place
 
 ```
 Browser ──▶ Angular frontend (port 4200) ──▶ Spring Boot API (port 8080) ──▶ MySQL
-                                                 │
-                                                 └──▶ SMTP server (emails)
+                │                                  │
+                │                                  └──▶ SMTP server (emails)
+                ├──▶ Comuni-ITA API (regions, provinces, municipalities, ISTAT codes)
+                ├──▶ Nominatim (address lookup)
+                └──▶ Google Maps (tiles and Street View)
 ```
 
-- **Frontend** — Angular single-page app with an OpenLayers map and Street View.
+- **Frontend** — Angular 22 single-page app styled with Tailwind CSS and daisyUI, with a Leaflet map and Google Street View.
 - **Backend** — stateless REST API secured with JWT, documented with OpenAPI.
-- **Database** — MySQL, holding users, saved forms, the asset register and the list of Italian comuni.
+- **Database** — MySQL, holding users, saved forms and the asset register.
 
 ## Repository
 
 | Folder | What is in it |
 |---|---|
-| [`spring-boot/`](spring-boot/README.md) | The backend: REST API, security, Docker setup. Full documentation in its README. |
-| `frontend/` | The Angular 22 client. |
-| `angular/` | The first version of the client (Angular 14), kept for reference. |
+| [`backend/`](backend/README.md) | The REST API, security and Docker setup. |
+| [`frontend/`](frontend/README.md) | The Angular client, including the demo build for GitHub Pages. |
 
 ## Getting started
 
 ### 1. Backend and database (Docker)
 
 ```bash
-cd spring-boot
+cd backend
 cp .env.example .env
 docker compose up -d --build
 ```
 
-Fill in `.env` first. The API then runs on <http://localhost:8080>, with interactive documentation at <http://localhost:8080/swagger-ui.html>. See the [backend README](spring-boot/README.md) for configuration, the API reference and running without Docker.
+Fill in `.env` first. The API then runs on <http://localhost:8080>, with interactive documentation at <http://localhost:8080/swagger-ui.html>. See the [backend README](backend/README.md) for configuration, the API reference and running without Docker.
 
 ### 2. Frontend
 
@@ -61,9 +64,11 @@ Open <http://localhost:4200>. The frontend talks to the API at `http://localhost
 
 With the `dev` profile enabled in `.env`, the backend creates demo accounts with the password `12345678`, for example `giulia.rossi@example.com` (administrator) and `marco.bianchi@example.com` (user).
 
-## Status
+To try the frontend without any backend, run `npm run start:demo` instead.
 
-The backend has been rebuilt for production: JWT security, input validation, standard error responses, health checks and containers. The frontend is being updated to the new API endpoints.
+## Deployment
+
+Every push to `main` builds the demo and publishes it to GitHub Pages through [`.github/workflows/pages.yml`](.github/workflows/pages.yml).
 
 ## Author
 

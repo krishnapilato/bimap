@@ -1,47 +1,59 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { BehaviorSubject, map, Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { LoginRequest } from './loginrequest';
+import { DEMO_SESSION } from '../demo/demo-data';
+import { LoginRequest, SignupRequest } from './loginrequest';
 import { LoginResponse } from './loginresponse';
+
+const STORAGE_KEY = 'session';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private loginUrl: string;
-  private loginResponseSubject: BehaviorSubject<LoginResponse>;
-  public loginResponse: Observable<LoginResponse>;
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly snackbar = inject(MatSnackBar);
 
-  constructor(private router: Router, private http: HttpClient, private _snackbar: MatSnackBar) {
-    this.loginUrl = environment.baseApiUrl + '/login';
-    this.loginResponseSubject = new BehaviorSubject<LoginResponse>(JSON.parse(localStorage.getItem('LoginResponse') || '{}'));
-    this.loginResponse = this.loginResponseSubject.asObservable();
+  private readonly session = signal<LoginResponse | null>(readSession());
+
+  readonly token = computed(() => this.session()?.token ?? null);
+  readonly user = computed(() => this.session()?.user ?? null);
+  readonly isLoggedIn = computed(() => this.token() !== null);
+  readonly isAdmin = computed(() => this.user()?.role === 'ADMINISTRATOR');
+
+  login(request: LoginRequest): Observable<LoginResponse> {
+    return this.start('login', request);
   }
 
-  public get loginResponseValue(): LoginResponse {
-    return this.loginResponseSubject.value;
+  signup(request: SignupRequest): Observable<LoginResponse> {
+    return this.start('signup', request);
   }
 
-  public get isLogged(): boolean { 
-    return this.loginResponseValue.jwttoken != null; 
-  }
-
-  public login(loginRequest: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(this.loginUrl, loginRequest).pipe(
-      map((loginResponse: LoginResponse) => {
-        localStorage.setItem('LoginResponse', JSON.stringify(loginResponse));
-        this.loginResponseSubject.next(loginResponse);
-        if (loginResponse) this._snackbar.open('Login successful', 'Close', { duration: 2000 });
-        return loginResponse;
+  private start(path: 'login' | 'signup', request: LoginRequest): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${environment.baseApiUrl}/auth/${path}`, request).pipe(
+      tap((session) => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+        this.session.set(session);
+        this.snackbar.open(`Welcome ${session.user.name}`, 'Close', { duration: 2000 });
       }),
     );
   }
 
-  public logout(): void {
-    localStorage.removeItem('LoginResponse');
-    this.loginResponseSubject.next(new LoginResponse());
+  logout(): void {
+    localStorage.removeItem(STORAGE_KEY);
+    this.session.set(null);
     this.router.navigate(['/login']);
-    this._snackbar.open('Logout successful', 'Close', { duration: 2000 });
+    this.snackbar.open('Logout successful', 'Close', { duration: 2000 });
+  }
+}
+
+function readSession(): LoginResponse | null {
+  try {
+    const session = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as LoginResponse | null;
+    return session?.token ? session : environment.demo ? DEMO_SESSION : null;
+  } catch {
+    return environment.demo ? DEMO_SESSION : null;
   }
 }

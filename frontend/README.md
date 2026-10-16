@@ -1,59 +1,81 @@
-# Frontend
+# BiMap Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.4.
+Angular client for registering Italian heritage assets on a map, managing users and exploring places in Street View.
 
-## Development server
+![Angular](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)
+![Signal Forms](https://img.shields.io/badge/Signal_Forms-22-DD0031?logo=angular&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white)
+![daisyUI](https://img.shields.io/badge/daisyUI-5-5A0EF8?logo=daisyui&logoColor=white)
+![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet&logoColor=white)
+![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-demo-222222?logo=githubpages&logoColor=white)
 
-To start a local development server, run:
+**Live demo:** [krishnapilato.github.io/bimap](https://krishnapilato.github.io/bimap/)
+
+---
+
+## Pages
+
+| Route | Page | Access |
+|---|---|---|
+| `/` | Landing page with a fading aerial map of Italy | public |
+| `/login` | Sign in and sign up | public |
+| `/main` | Register an asset: place, address, map pin, and the asset register | signed in |
+| `/streetview` | Road map with Street View coverage and a live panorama | signed in |
+| `/listuser` | User management: create, edit, enable or disable, delete, welcome email | administrator |
+
+## Running
 
 ```bash
-ng serve
+npm install
+npm start
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Open <http://localhost:4200>. The app expects the [backend](../backend/README.md) on `http://localhost:8080`.
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Demo mode
 
 ```bash
-ng generate component component-name
+npm run start:demo
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
+The demo build needs no backend: an HTTP interceptor answers every API call from in-memory mock data, route guards are off, and you start signed in as an administrator. Comuni-ITA, Nominatim and Google Maps are still called for real. Changes reset on reload.
 
 ## Building
 
-To build the project run:
+| Command | Output |
+|---|---|
+| `npm run build` | Production build against the real backend |
+| `npm run build:demo` | Demo build for GitHub Pages, served from `/bimap/` |
 
-```bash
-ng build
+Both write to `dist/frontend/browser`.
+
+## How it is built
+
+- **Standalone components, signals and zoneless change detection** throughout.
+- **Signal Forms** (`@angular/forms/signals`) for every form, with validation in the schema.
+- **`rxResource`** for loading data, including the region → province → municipality chain.
+- **Tailwind CSS and daisyUI** for all styling, with no component stylesheets. The theme lives in `src/tailwind.css`.
+- **Functional guards and interceptors**; the JWT is kept in a signal-based `AuthService`.
+
+## External services
+
+| Service | Used for |
+|---|---|
+| [Comuni-ITA](https://github.com/Samurai016/Comuni-ITA) | Regions, provinces, municipalities and ISTAT codes |
+| [Nominatim](https://nominatim.org/) | Turning an address into coordinates |
+| Google Maps JavaScript API | Map tiles and Street View |
+
+## Project structure
+
 ```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
+src/app
+├── auth          Sign in, sign up, guards, interceptor, session
+├── demo          Mock data and the interceptor used by the demo build
+├── main          Asset registration page and its API service
+├── streetview    Street View page
+├── user-list     User management page and its API service
+├── hero.component.ts           Landing page
+├── navbar.component.ts         Shared top bar
+└── aerial-map.component.ts     Aerial map used on the landing and sign-in pages
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

@@ -1,4 +1,9 @@
-export class LoginRequest {
-  username!: string;
-  password!: string;
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface SignupRequest extends LoginRequest {
+  name: string;
+  surname: string;
 }

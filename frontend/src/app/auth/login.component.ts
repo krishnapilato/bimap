@@ -1,51 +1,70 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { Router } from '@angular/router';
-
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, inject, input, linkedSignal, signal } from '@angular/core';
+import { email, form, FormField, FormRoot, minLength, required } from '@angular/forms/signals';
+import { Router, RouterLink } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { AerialMapComponent } from '../aerial-map.component';
 import { AuthService } from './auth.service';
-import { LoginRequest } from './loginrequest';
+
+const ERRORS: Record<number, string> = {
+  0: 'Cannot reach the server.',
+  401: 'Wrong email or password.',
+  409: 'This email is already registered.',
+};
 
 @Component({
   selector: 'app-login',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    MatSnackBarModule,
-    MatButtonModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatTooltipModule,
-    MatIconModule,
-  ],
+  imports: [AerialMapComponent, FormField, FormRoot, RouterLink],
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
 })
 export class LoginComponent {
-  loginRequest = new LoginRequest();
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
-  private router = inject(Router);
-  private authService = inject(AuthService);
-  private snackbar = inject(MatSnackBar);
+  readonly mode = input<string>();
+  readonly returnUrl = input<string>();
 
-  hidePassword = true;
+  protected readonly signup = linkedSignal(() => this.mode() === 'signup');
+  protected readonly demo = environment.demo;
+  protected readonly error = signal('');
+  private readonly account = signal({ name: '', surname: '', email: '', password: '' });
 
-  onSubmit(): void {
-    this.authService.login(this.loginRequest).subscribe({
-      next: () => {
-        this.router.navigate(['main']);
+  protected readonly form = form(
+    this.account,
+    (account) => {
+      required(account.name, { when: () => this.signup() });
+      required(account.surname, { when: () => this.signup() });
+      required(account.email);
+      email(account.email);
+      minLength(account.password, 8);
+    },
+    {
+      submission: {
+        action: () => this.send(),
+        onInvalid: () => this.error.set('Fill in every field. The password needs at least 8 characters.'),
       },
-      error: (err) => {
-        console.error(err);
-        this.snackbar.open('Unauthorized. Please login again', 'Close', { duration: 3000 });
-      },
-    });
+    },
+  );
+
+  protected select(signup: boolean): void {
+    this.signup.set(signup);
+    this.error.set('');
+  }
+
+  private async send(): Promise<undefined> {
+    const { name, surname, email, password } = this.account();
+    const session = this.signup()
+      ? this.auth.signup({ name, surname, email, password })
+      : this.auth.login({ email, password });
+    try {
+      await firstValueFrom(session);
+      await this.router.navigateByUrl(this.returnUrl() ?? '/main');
+    } catch (error) {
+      this.error.set(
+        ERRORS[(error as HttpErrorResponse).status] ?? 'Something went wrong. Try again.',
+      );
+    }
+    return undefined;
   }
 }
