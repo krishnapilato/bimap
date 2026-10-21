@@ -57,12 +57,9 @@ public class UserController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     UserView create(@Valid @RequestBody UserRequest request) {
-        if (request.password() == null || request.password().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is required.");
-        }
-        if (users.existsByEmail(request.email())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use.");
-        }
+        if (request.password() == null || request.password().isBlank()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password is required.");
+        if (users.existsByEmail(request.email())) throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use.");
+
         var user = new User();
         apply(request, user);
         return UserView.of(users.save(user));
@@ -71,9 +68,8 @@ public class UserController {
     @PutMapping("/{id}")
     UserView update(@PathVariable Long id, @Valid @RequestBody UserRequest request) {
         var user = find(id);
-        if (!user.getEmail().equals(request.email()) && users.existsByEmail(request.email())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use.");
-        }
+        if (!user.getEmail().equals(request.email()) && users.existsByEmail(request.email())) throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use.");
+
         apply(request, user);
         return UserView.of(users.save(user));
     }
@@ -105,11 +101,8 @@ public class UserController {
         user.setSurname(request.surname());
         user.setEmail(request.email());
         user.setRole(request.role() == null ? User.Role.USER : request.role());
-        if (request.enabled() != null) {
-            user.setEnabled(request.enabled());
-        }
-        if (request.password() != null && !request.password().isBlank()) {
-            user.setPassword(passwordEncoder.encode(request.password()));
-        }
+
+        if (request.enabled() != null) user.setEnabled(request.enabled());
+        if (request.password() != null && !request.password().isBlank()) user.setPassword(passwordEncoder.encode(request.password()));
     }
 }

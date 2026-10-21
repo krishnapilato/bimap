@@ -116,7 +116,7 @@ src/main/java/com/example
 ├── model        JPA entities
 └── repository   Spring Data repositories
 src/main/resources
-├── templates    landing-page.html and error.html (Thymeleaf)
+├── templates    landing-page.html (Thymeleaf)
 ├── data.sql     Reference data loaded on startup
 └── application.properties
 ```

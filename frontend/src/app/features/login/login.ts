@@ -4,8 +4,8 @@ import { email, form, FormField, FormRoot, minLength, required } from '@angular/
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AerialMap } from '../../shared/aerial-map';
 import { AuthService } from '../../core/auth/auth.service';
+import { AerialMap } from '../../shared/aerial-map';
 
 const ERRORS: Record<number, string> = {
   0: 'Cannot reach the server.',

@@ -7,8 +7,8 @@ import { firstValueFrom, of } from 'rxjs';
 import { Navbar } from '../../shared/navbar';
 import { listOf } from '../../shared/resource';
 import { ToastService } from '../../shared/toast.service';
-import { AssetsService } from './assets.service';
 import { Asset } from './asset.models';
+import { AssetsService } from './assets.service';
 
 const PAGE_SIZE = 5;
 const TILES = { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] };

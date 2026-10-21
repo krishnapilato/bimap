@@ -1,16 +1,20 @@
-import { HttpErrorResponse, HttpInterceptorFn, HttpRequest, HttpResponse } from '@angular/common/http';
+import {
+  HttpErrorResponse,
+  HttpInterceptorFn,
+  HttpRequest,
+  HttpResponse,
+} from '@angular/common/http';
 import { delay, Observable, of, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { SignupRequest } from '../auth/auth.models';
 import { AssetForm } from '../../features/assets/asset.models';
 import { User, UserRequest } from '../../features/users/user.models';
+import { SignupRequest } from '../auth/auth.models';
 import { ASSETS, USERS } from './demo-data';
 
 const users = [...USERS];
 const forms: AssetForm[] = [];
 
-export const demoInterceptor: HttpInterceptorFn = (request, next) =>
-  request.url.startsWith(environment.baseApiUrl) ? respond(request) : next(request);
+export const demoInterceptor: HttpInterceptorFn = (request, next) => request.url.startsWith(environment.baseApiUrl) ? respond(request) : next(request);
 
 function respond(request: HttpRequest<unknown>): Observable<HttpResponse<unknown>> {
   const path = request.url.slice(environment.baseApiUrl.length);
@@ -20,7 +24,9 @@ function respond(request: HttpRequest<unknown>): Observable<HttpResponse<unknown
 
   switch (route) {
     case 'POST /auth/:id':
-      return id === 'login' ? login(request.body as SignupRequest) : signup(request.body as SignupRequest);
+      return id === 'login'
+        ? login(request.body as SignupRequest)
+        : signup(request.body as SignupRequest);
     case 'GET /assets':
       return ok(ASSETS);
     case 'POST /forms':
@@ -44,34 +50,64 @@ function respond(request: HttpRequest<unknown>): Observable<HttpResponse<unknown
 }
 
 function login({ email }: SignupRequest) {
-  const user = users.find((user) => user.email.toLowerCase() === email.toLowerCase() && user.enabled);
+  const user = users.find((user) => user.email.toLowerCase() === email.toLowerCase() && user.enabled,);
   return user ? ok(session(user)) : fail(401);
 }
 
 function signup(request: SignupRequest) {
   if (taken(request.email)) return fail(409);
-  const user: User = { id: nextId(), name: request.name, surname: request.surname, email: request.email, role: 'USER', enabled: true };
+  const user: User = {
+    id: nextId(),
+    name: request.name,
+    surname: request.surname,
+    email: request.email,
+    role: 'USER',
+    enabled: true,
+  };
   users.push(user);
   return ok(session(user), 201);
 }
 
 function create(request: UserRequest) {
   if (taken(request.email)) return fail(409);
-  const user: User = { id: nextId(), name: request.name, surname: request.surname, email: request.email, role: request.role, enabled: request.enabled ?? true };
+  const user: User = {
+    id: nextId(),
+    name: request.name,
+    surname: request.surname,
+    email: request.email,
+    role: request.role,
+    enabled: request.enabled ?? true,
+  };
   users.push(user);
   return ok({ ...user }, 201);
 }
 
 function update(user: User, request: UserRequest) {
   if (request.email !== user.email && taken(request.email)) return fail(409);
-  Object.assign(user, { name: request.name, surname: request.surname, email: request.email, role: request.role, enabled: request.enabled ?? user.enabled });
+  Object.assign(user, {
+    name: request.name,
+    surname: request.surname,
+    email: request.email,
+    role: request.role,
+    enabled: request.enabled ?? user.enabled,
+  });
   return ok({ ...user });
 }
 
 function csv(): string {
   const header = 'id,region,province,municipality,address,name,istatCode,latitude,longitude';
   const rows = forms.map((form) =>
-    [form.id, form.region, form.province, form.municipality, form.address, form.goodNaming, form.istatCode ?? '', form.latitude, form.longitude]
+    [
+      form.id,
+      form.region,
+      form.province,
+      form.municipality,
+      form.address,
+      form.goodNaming,
+      form.istatCode ?? '',
+      form.latitude,
+      form.longitude,
+    ]
       .map((value) => `"${String(value).replaceAll('"', '""')}"`)
       .join(','),
   );

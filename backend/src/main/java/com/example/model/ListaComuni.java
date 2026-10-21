@@ -9,6 +9,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "listacomuni")
 public class ListaComuni {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

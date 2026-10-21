@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&display=swap" rel="stylesheet">
     <title th:text="${name}">BiMap</title>
     <style>
         :root {
-            --ink: #0f172a;
-            --muted: #64748b;
-            --line: #e2e8f0;
-            --accent: #2563eb;
+            --ink: #18181b;
+            --muted: rgb(24 24 27 / 0.7);
+            --soft: #f4f4f5;
+            --line: #e4e4e7;
             --up: #16a34a;
             --down: #dc2626;
         }
@@ -20,157 +24,179 @@
         }
 
         body {
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            font-family: Geist, ui-sans-serif, system-ui, sans-serif;
             color: var(--ink);
-            background: #f8fafc;
-            min-height: 100vh;
-            display: grid;
-            place-items: center;
-            padding: 24px;
+            background: #fff;
         }
 
         main {
-            width: 100%;
-            max-width: 640px;
-            background: #fff;
-            border: 1px solid var(--line);
-            border-radius: 16px;
-            padding: 40px;
+            display: grid;
+            min-height: 100dvh;
         }
 
-        header {
+        .map {
+            order: -1;
+            height: 40svh;
+            min-height: 10rem;
+            max-height: 28rem;
+            background: var(--soft) url("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=6.0,36.0,19.0,47.5&bboxSR=4326&imageSR=3857&size=900,1000&format=jpg&f=image") center / cover;
+            mask-image: linear-gradient(to bottom, #000 50%, transparent);
+        }
+
+        .content {
+            position: relative;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: -4rem;
+            padding: 0 1.5rem 3rem;
+        }
+
+        .badge {
+            align-self: flex-start;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            background: var(--soft);
+            font-size: 0.875rem;
         }
 
         h1 {
-            font-size: 28px;
-        }
-
-        .status {
-            font-size: 13px;
+            font-size: 2.25rem;
             font-weight: 600;
-            padding: 6px 12px;
-            border-radius: 999px;
-            color: #fff;
-            background: var(--down);
+            line-height: 1.15;
+            letter-spacing: -0.025em;
+            text-wrap: balance;
         }
 
-        .status.up {
-            background: var(--up);
-        }
-
-        .description {
+        p {
+            max-width: 28rem;
             color: var(--muted);
-            margin: 12px 0 32px;
-            line-height: 1.5;
-        }
-
-        dl {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            padding: 24px 0;
-            border-top: 1px solid var(--line);
-            border-bottom: 1px solid var(--line);
-        }
-
-        dt {
-            font-size: 12px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .05em;
-        }
-
-        dd {
-            font-weight: 600;
-            margin-top: 4px;
+            font-size: 1rem;
+            line-height: 1.6;
         }
 
         nav {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-top: 32px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
 
         nav a {
-            text-align: center;
-            text-decoration: none;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid var(--line);
+            padding: 0.625rem 0.875rem;
+            border-radius: 0.625rem;
             color: var(--ink);
             font-weight: 600;
+            text-decoration: none;
         }
 
         nav a:first-child {
-            background: var(--accent);
-            border-color: var(--accent);
+            background: var(--ink);
             color: #fff;
+            box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
         }
 
-        nav a:hover {
-            border-color: var(--accent);
+        nav a:not(:first-child):hover {
+            background: var(--soft);
         }
 
-        footer {
-            margin-top: 24px;
-            font-size: 13px;
+        .status {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem 1rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--line);
             color: var(--muted);
-            text-align: center;
+            font-size: 0.875rem;
         }
 
-        footer a {
-            color: var(--muted);
+        .status a {
+            color: inherit;
         }
 
-        @media (max-width: 520px) {
-            main {
-                padding: 24px;
+        .dot {
+            display: inline-block;
+            width: 0.5rem;
+            height: 0.5rem;
+            margin-right: 0.375rem;
+            border-radius: 50%;
+            background: var(--down);
+        }
+
+        .dot.up {
+            background: var(--up);
+        }
+
+        @media (min-width: 640px) {
+            .content {
+                padding: 0 3rem 3rem;
             }
 
-            nav, dl {
-                grid-template-columns: 1fr;
+            h1 {
+                font-size: 3rem;
+            }
+
+            p {
+                font-size: 1.125rem;
+            }
+
+            nav a {
+                padding: 0.75rem 1.25rem;
+                font-size: 1.125rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            main {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .map {
+                order: 0;
+                height: auto;
+                max-height: none;
+                mask-image: linear-gradient(to right, transparent, #000 50%);
+            }
+
+            .content {
+                justify-content: center;
+                margin-top: 0;
+                padding: 3rem 4rem;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .content {
+                padding: 3rem 6rem;
+            }
+
+            h1 {
+                font-size: 4.5rem;
             }
         }
     </style>
 </head>
 <body>
 <main>
-    <header>
-        <h1 th:text="${name}">BiMap</h1>
-        <span class="status" th:classappend="${status == 'UP'} ? 'up'" th:text="${status}">UP</span>
-    </header>
-    <p class="description" th:text="${description}">Register Italian heritage assets on a map</p>
-    <dl>
-        <div>
-            <dt>Version</dt>
-            <dd th:text="${version}">1.0.0</dd>
+    <section class="content">
+        <span class="badge" th:text="${name}">BiMap</span>
+        <h1>Powering Italy's heritage map.</h1>
+        <p th:text="${description}">Register Italian heritage assets on a map.</p>
+        <nav>
+            <a href="/swagger-ui.html">API docs</a>
+            <a href="https://krishnapilato.github.io/bimap/">Frontend</a>
+            <a href="https://github.com/krishnapilato/bimap">Source code</a>
+        </nav>
+        <div class="status">
+            <span><span class="dot" th:classappend="${status == 'UP'} ? 'up'"></span><span th:text="${status}">UP</span></span>
+            <span th:text="|Version ${version}|">Version 1.0.0</span>
+            <span th:text="|Java ${javaVersion} · Spring Boot ${springBootVersion}|">Java 27 · Spring Boot 4.1.1</span>
+            <span th:text="|Up ${uptime}|">Up 0d 0h 0m</span>
+            <a href="/actuator/health">Health</a>
+            <a href="/actuator/info">Info</a>
         </div>
-        <div>
-            <dt>Uptime</dt>
-            <dd th:text="${uptime}">0d 0h 0m</dd>
-        </div>
-        <div>
-            <dt>Java</dt>
-            <dd th:text="${javaVersion}">27</dd>
-        </div>
-        <div>
-            <dt>Spring Boot</dt>
-            <dd th:text="${springBootVersion}">4.1.1</dd>
-        </div>
-    </dl>
-    <nav>
-        <a href="/swagger-ui.html">API docs</a>
-        <a href="https://krishnapilato.github.io/bimap/">Frontend</a>
-        <a href="https://github.com/krishnapilato/bimap">Source code</a>
-    </nav>
-    <footer>
-        <a href="/actuator/health">Health</a> · <a href="/actuator/info">Info</a>
-    </footer>
+    </section>
+    <section class="map" aria-hidden="true"></section>
 </main>
 </body>
 </html>

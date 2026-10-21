@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AerialMap } from '../../shared/aerial-map';
 import { AuthService } from '../../core/auth/auth.service';
+import { AerialMap } from '../../shared/aerial-map';
 
 @Component({
   selector: 'app-home',
@@ -29,6 +29,4 @@ import { AuthService } from '../../core/auth/auth.service';
     </main>
   `,
 })
-export class Home {
-  protected readonly auth = inject(AuthService);
-}
+export class Home { protected readonly auth = inject(AuthService); }

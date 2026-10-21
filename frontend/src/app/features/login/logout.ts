@@ -8,7 +8,5 @@ import { AuthService } from '../../core/auth/auth.service';
 export class Logout implements OnInit {
   private readonly authService = inject(AuthService);
 
-  ngOnInit(): void {
-    this.authService.logout();
-  }
+  ngOnInit(): void { this.authService.logout(); }
 }

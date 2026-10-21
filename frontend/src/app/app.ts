@@ -7,6 +7,4 @@ import { ToastService } from './shared/toast.service';
   imports: [RouterOutlet],
   templateUrl: './app.html',
 })
-export class App {
-  protected readonly toast = inject(ToastService);
-}
+export class App { protected readonly toast = inject(ToastService); }

@@ -1,7 +1,5 @@
 package com.example.core;
 
-import module java.base;
-
 import com.example.model.User;
 import com.example.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

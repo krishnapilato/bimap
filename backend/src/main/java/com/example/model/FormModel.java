@@ -10,6 +10,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "form")
 public class FormModel {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

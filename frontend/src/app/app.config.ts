@@ -14,5 +14,5 @@ export const appConfig: ApplicationConfig = {
       ? provideRouter(routes, withComponentInputBinding(), withHashLocation())
       : provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([environment.demo ? demoInterceptor : authInterceptor])),
-  ]
+  ],
 };
