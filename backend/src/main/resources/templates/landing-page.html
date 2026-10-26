@@ -176,7 +176,7 @@
         }
     </style>
 </head>
-<body>
+<body style="margin: 0; user-select: none;" oncontextmenu="return false;">
 <main>
     <section class="content">
         <span class="badge" th:text="${name}">BiMap</span>
@@ -190,7 +190,7 @@
         <div class="status">
             <span><span class="dot" th:classappend="${status == 'UP'} ? 'up'"></span><span th:text="${status}">UP</span></span>
             <span th:text="|Version ${version}|">Version 1.0.0</span>
-            <span th:text="|Java ${javaVersion} · Spring Boot ${springBootVersion}|">Java 27 · Spring Boot 4.1.1</span>
+            <span th:text="|Java ${javaVersion} · Spring Boot ${springBootVersion}|">Java 27 · Spring Boot 4.1.2</span>
             <span th:text="|Up ${uptime}|">Up 0d 0h 0m</span>
             <a href="/actuator/health">Health</a>
             <a href="/actuator/info">Info</a>

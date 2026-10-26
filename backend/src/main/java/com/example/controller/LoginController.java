@@ -58,9 +58,8 @@ public class LoginController {
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     LoginResponse signup(@Valid @RequestBody SignupRequest request) {
-        if (users.existsByEmail(request.email())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use.");
-        }
+        if (users.existsByEmail(request.email())) throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use.");
+
         var user = new User();
         user.setName(request.name());
         user.setSurname(request.surname());
@@ -71,8 +70,7 @@ public class LoginController {
     }
 
     private LoginResponse responseFor(User user) {
-        var view = new UserView(user.getId(), user.getName(), user.getSurname(), user.getEmail(), user.getRole());
-        return new LoginResponse(tokenFor(user), view);
+        return new LoginResponse(tokenFor(user), new UserView(user.getId(), user.getName(), user.getSurname(), user.getEmail(), user.getRole()));
     }
 
     private String tokenFor(User user) {

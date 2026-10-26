@@ -100,7 +100,7 @@ export class Assets {
   constructor() {
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
-      const map = L.map(this.mapElement().nativeElement, { attributionControl: false, layers: [this.road] }).setView([42.5, 12.5], 6);
+      const map = L.map(this.mapElement().nativeElement, { attributionControl: false, maxZoom: 18, minZoom: 8, maxBounds: [[-90, -180], [90, 180]], layers: [this.road] }).setView([45.481, 9.173], 15);
       L.control.scale({ imperial: false }).addTo(map);
       map.on('click', ({ latlng }) =>
         this.streetView()

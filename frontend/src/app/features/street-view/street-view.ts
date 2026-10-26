@@ -39,7 +39,7 @@ export class StreetView {
     const destroyRef = inject(DestroyRef);
 
     afterNextRender(async () => {
-      const map = L.map(this.mapElement().nativeElement, { attributionControl: false }).setView(START, 15);
+      const map = L.map(this.mapElement().nativeElement, { attributionControl: false, maxZoom: 18, minZoom: 8, maxBounds: [[-90, -180], [90, 180]] }).setView(START, 15);
       L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', GOOGLE_TILES).addTo(map);
       L.tileLayer('https://{s}.google.com/vt/lyrs=svv|cb_client:apiv3&style=50&x={x}&y={y}&z={z}', GOOGLE_TILES).addTo(map);
       const marker = L.circleMarker(START, { radius: 8, color: '#fff', weight: 3, fillColor: '#18181b', fillOpacity: 1 }).addTo(map);

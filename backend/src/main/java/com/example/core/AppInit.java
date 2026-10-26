@@ -3,22 +3,26 @@ package com.example.core;
 import com.example.model.User;
 import com.example.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Profile("dev")
 @RequiredArgsConstructor
 public class AppInit {
 
-    private static final String DEFAULT_PASSWORD = "12345678";
+    @Value("${app.seed.default-password:12345678}")
+    private String defaultPassword;
 
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     @EventListener(ApplicationReadyEvent.class)
     void seedUsers() {
         seed("Khova Krishna", "Pilato", "krishnak.pilato@gmail.com", User.Role.ADMINISTRATOR, true);
@@ -34,7 +38,7 @@ public class AppInit {
         user.setName(name);
         user.setSurname(surname);
         user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(DEFAULT_PASSWORD));
+        user.setPassword(passwordEncoder.encode(defaultPassword));
         user.setRole(role);
         user.setEnabled(enabled);
         users.save(user);

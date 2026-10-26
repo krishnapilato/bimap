@@ -1,11 +1,9 @@
 package com.example.controller;
 
 import module java.base;
-
 import com.example.core.MailService;
 import com.example.model.User;
 import com.example.repository.UserRepository;
-import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -82,7 +80,7 @@ public class UserController {
 
     @PostMapping("/{id}/welcome-email")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void sendWelcomeEmail(@PathVariable Long id) throws MessagingException {
+    void sendWelcomeEmail(@PathVariable Long id) {
         var user = find(id);
         var html = """
                 <h1>Hi %s!</h1>

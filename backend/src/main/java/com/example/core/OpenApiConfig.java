@@ -18,10 +18,19 @@ import org.springframework.context.annotation.Configuration;
                 contact = @Contact(
                         name = "Khova Krishna Pilato",
                         email = "krishnak.pilato@gmail.com",
-                        url = "https://github.com/krishnapilato")),
+                        url = "https://github.com/krishnapilato"
+                )
+        ),
         externalDocs = @ExternalDocumentation(
                 description = "Source code on GitHub",
-                url = "https://github.com/krishnapilato/bimap"),
-        security = @SecurityRequirement(name = "bearerAuth"))
-@SecurityScheme(name = "bearerAuth", type = SecuritySchemeType.HTTP, scheme = "bearer", bearerFormat = "JWT")
+                url = "https://github.com/krishnapilato/bimap"
+        ),
+        security = @SecurityRequirement(name = "bearerAuth")
+)
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class OpenApiConfig { }
