@@ -1,37 +1,19 @@
-import { afterNextRender, Component, DestroyRef, ElementRef, inject } from '@angular/core';
-import * as L from 'leaflet';
-
-const ITALY = L.latLngBounds([36.6, 6.6], [47.1, 18.5]);
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-aerial-map',
-  template: '',
+  template: `
+    <img
+      class="h-full w-full object-cover"
+      src="italy-960.webp"
+      srcset="italy-640.webp 640w, italy-960.webp 960w, italy-1280.webp 1280w"
+      sizes="(min-width: 1024px) 50vw, 100vw"
+      width="960"
+      height="1066"
+      fetchpriority="high"
+      alt=""
+    />
+  `,
   host: { class: 'absolute inset-0' },
 })
-export class AerialMap {
-  constructor() {
-    const element = inject(ElementRef).nativeElement;
-    const destroyRef = inject(DestroyRef);
-
-    afterNextRender(() => {
-      const map = L.map(element, {
-        zoomControl: false,
-        dragging: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false,
-        touchZoom: false,
-        boxZoom: false,
-        keyboard: false,
-        zoomSnap: 0,
-        attributionControl: false,
-      }).fitBounds(ITALY);
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
-      const resize = new ResizeObserver(() => map.invalidateSize().fitBounds(ITALY));
-      resize.observe(element);
-      destroyRef.onDestroy(() => {
-        resize.disconnect();
-        map.remove();
-      });
-    });
-  }
-}
+export class AerialMap {}

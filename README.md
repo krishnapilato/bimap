@@ -3,7 +3,7 @@
 A web application for registering Italian heritage assets on a map: pick a place, check it in Street View, save its details. Administrators manage who can use it.
 
 ![Java](https://img.shields.io/badge/Java-27-ED8B00?logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.2-6DB33F?logo=springboot&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-26.10-4479A1?logo=mysql&logoColor=white)
 ![Angular](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)
@@ -11,6 +11,11 @@ A web application for registering Italian heritage assets on a map: pick a place
 ![daisyUI](https://img.shields.io/badge/daisyUI-5-5A0EF8?logo=daisyui&logoColor=white)
 ![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-compose-2496ED?logo=docker&logoColor=white)
+
+[![CI](https://github.com/krishnapilato/bimap/actions/workflows/ci.yml/badge.svg)](https://github.com/krishnapilato/bimap/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Deploy demo](https://github.com/krishnapilato/bimap/actions/workflows/pages.yml/badge.svg)](https://github.com/krishnapilato/bimap/actions/workflows/pages.yml)
+![Lighthouse](https://img.shields.io/badge/Lighthouse-100_A11y_·_100_Best_practices_·_100_SEO-0CCE6B?logo=lighthouse&logoColor=white)
 
 **Live demo:** [krishnapilato.github.io/bimap](https://krishnapilato.github.io/bimap/) — runs entirely in the browser with mock data, no sign-in needed.
 
@@ -37,6 +42,33 @@ A web application for registering Italian heritage assets on a map: pick a place
 | Landing page | API documentation |
 |---|---|
 | ![Backend landing page](docs/screenshots/backend-landing.png) | ![Swagger UI](docs/screenshots/backend-swagger.png) |
+
+## Quality
+
+Every warning is treated as an error: a build with unused code, a lint finding or a compiler warning does not pass, locally or in [CI](.github/workflows/ci.yml).
+
+| Check | Backend | Frontend |
+|---|---|---|
+| Compiler | `javac -Xlint:all -Werror` | TypeScript `strict`, `noUnusedLocals`, `noUnusedParameters` |
+| Static analysis | [PMD 7](backend/pmd-ruleset.xml): unused code, bug patterns, clean-code rules | [ESLint](frontend/eslint.config.mjs): `typescript-eslint` strict type-checked, `angular-eslint`, SonarJS |
+| Templates | — | Angular strict templates, extended diagnostics as errors |
+| Tests | — | Vitest, run in CI |
+| Dependencies | Dependabot, weekly | Dependabot, weekly; `npm audit` clean |
+
+### Lighthouse
+
+Measured with Lighthouse 13 on the production demo build. Mobile uses Lighthouse's simulated slow 4G and a 4× slower CPU.
+
+| Page | Performance (mobile / desktop) | Accessibility | Best practices | SEO |
+|---|:-:|:-:|:-:|:-:|
+| Landing page | 88 / 100 | 100 | 100 | 100 |
+| Sign in | 85 / 99 | 100 | 100 | 100 |
+| Register an asset | 100 / 96 | 100 | 100 | 100 |
+| Street View | 75 / 96 | 100 | 100 | 100 |
+| Users | 100 / 100 | 100 | 100 | 100 |
+| Backend landing page | 96 / 99 | 100 | 100 | 100 |
+
+Street View on mobile is held back by the Google Maps JavaScript API itself, which the page needs to show the panorama.
 
 ## Architecture
 
@@ -91,6 +123,10 @@ To try the frontend without any backend, run `npm run start:demo` instead.
 ## Deployment
 
 Every push to `main` builds the demo and publishes it to GitHub Pages through [`.github/workflows/pages.yml`](.github/workflows/pages.yml).
+
+## License
+
+[MIT](LICENSE) © 2026 Khova Krishna Pilato
 
 ## Author
 

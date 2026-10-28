@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" th:content="${description}" content="Register Italian heritage assets on a map.">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preload" as="image" type="image/webp" href="/images/italy.webp" fetchpriority="high">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&display=swap" rel="stylesheet">
@@ -39,7 +41,7 @@
             height: 40svh;
             min-height: 10rem;
             max-height: 28rem;
-            background: var(--soft) url("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=6.0,36.0,19.0,47.5&bboxSR=4326&imageSR=3857&size=900,1000&format=jpg&f=image") center / cover;
+            background: var(--soft) url("/images/italy.webp") center / cover;
             mask-image: linear-gradient(to bottom, #000 50%, transparent);
         }
 

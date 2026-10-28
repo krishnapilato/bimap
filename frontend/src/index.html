@@ -5,11 +5,26 @@
     <title>BiMap</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Register Italian heritage assets on a map: find a place, check it in Street View and save its details." />
+    <meta name="theme-color" content="#18181b" />
+    <meta property="og:title" content="BiMap" />
+    <meta property="og:description" content="Register Italian heritage assets on a map." />
+    <meta property="og:type" content="website" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <script>
+      const route = location.hash ? location.hash.slice(1) : location.pathname.slice(new URL(document.baseURI).pathname.length - 1);
+      if (route === '/' || route.startsWith('/login')) {
+        document.head.append(Object.assign(document.createElement('link'), {
+          rel: 'preload',
+          as: 'image',
+          type: 'image/webp',
+          href: 'italy-960.webp',
+          imageSrcset: 'italy-640.webp 640w, italy-960.webp 960w, italy-1280.webp 1280w',
+          imageSizes: '(min-width: 1024px) 50vw, 100vw',
+          fetchPriority: 'high',
+        }));
+      }
+    </script>
   </head>
   <body style="margin: 0; user-select: none;" oncontextmenu="return false;">
     <app-root></app-root>

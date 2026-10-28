@@ -3,6 +3,7 @@ WORKDIR /app
 COPY mvnw pom.xml ./
 COPY .mvn .mvn
 RUN ./mvnw -B -q dependency:go-offline
+COPY pmd-ruleset.xml ./
 COPY src src
 RUN ./mvnw -B -q -DskipTests package
 

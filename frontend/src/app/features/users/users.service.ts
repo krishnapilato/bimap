@@ -25,11 +25,11 @@ export class UsersService {
     return this.http.put<User>(`${this.url}/${id}`, user);
   }
 
-  public delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.url}/${id}`);
+  public delete(id: number): Observable<unknown> {
+    return this.http.delete(`${this.url}/${id}`);
   }
 
-  public sendWelcomeEmail(id: number): Observable<void> {
-    return this.http.post<void>(`${this.url}/${id}/welcome-email`, null);
+  public sendWelcomeEmail(id: number): Observable<unknown> {
+    return this.http.post(`${this.url}/${id}/welcome-email`, null);
   }
 }

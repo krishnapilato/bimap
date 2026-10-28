@@ -12,7 +12,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.HtmlUtils;
 
@@ -86,7 +95,7 @@ public class UserController {
                 <h1>Hi %s!</h1>
                 <p>An account with the role <b>%s</b> was created for you on BiMap.</p>
                 <p><a href="%s">Sign in</a> with this email address and the password your administrator gave you.</p>
-                """.formatted(HtmlUtils.htmlEscape(user.getName()), user.getRole().name().toLowerCase(), frontendUrl);
+                """.formatted(HtmlUtils.htmlEscape(user.getName()), user.getRole().name().toLowerCase(Locale.ROOT), frontendUrl);
         mailService.send(user.getEmail(), "Your BiMap account", html);
     }
 

@@ -43,7 +43,7 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(STORAGE_KEY);
     this.session.set(null);
-    this.router.navigate(['/login']);
+    void this.router.navigate(['/login']);
     this.toast.show('You are signed out.');
   }
 }
@@ -51,8 +51,9 @@ export class AuthService {
 function readSession(): LoginResponse | null {
   try {
     const session = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as LoginResponse | null;
-    return session?.token ? session : environment.demo ? DEMO_SESSION : null;
+    if (session?.token) return session;
   } catch {
-    return environment.demo ? DEMO_SESSION : null;
+    localStorage.removeItem(STORAGE_KEY);
   }
+  return environment.demo ? DEMO_SESSION : null;
 }

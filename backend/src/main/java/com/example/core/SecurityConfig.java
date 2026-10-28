@@ -33,7 +33,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 @Configuration
 public class SecurityConfig {
 
-    private static final String[] PUBLIC = {"/auth/login", "/auth/signup", "/", "/error", "/favicon.svg", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health/**", "/actuator/info"};
+    private static final String[] PUBLIC = {"/auth/login", "/auth/signup", "/", "/error", "/favicon.svg", "/images/**", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health/**", "/actuator/info"};
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) {

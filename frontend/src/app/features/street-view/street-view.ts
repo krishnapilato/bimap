@@ -1,10 +1,10 @@
 import { afterNextRender, Component, DestroyRef, ElementRef, inject, signal, viewChild } from '@angular/core';
 import * as L from 'leaflet';
 import { loadStreetView } from '../../shared/google-maps';
+import { googleTiles } from '../../shared/google-tiles';
 import { Navbar } from '../../shared/navbar';
 
 const START = L.latLng(45.481, 9.173);
-const GOOGLE_TILES = { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] };
 
 @Component({
   selector: 'app-street-view',
@@ -35,44 +35,49 @@ export class StreetView {
   private readonly panoramaElement = viewChild.required<ElementRef<HTMLElement>>('panorama');
   protected readonly missing = signal(false);
 
+  private readonly destroyRef = inject(DestroyRef);
+
   constructor() {
-    const destroyRef = inject(DestroyRef);
-
-    afterNextRender(async () => {
-      const map = L.map(this.mapElement().nativeElement, { attributionControl: false, maxZoom: 18, minZoom: 8, maxBounds: [[-90, -180], [90, 180]] }).setView(START, 15);
-      L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', GOOGLE_TILES).addTo(map);
-      L.tileLayer('https://{s}.google.com/vt/lyrs=svv|cb_client:apiv3&style=50&x={x}&y={y}&z={z}', GOOGLE_TILES).addTo(map);
-      const marker = L.circleMarker(START, { radius: 8, color: '#fff', weight: 3, fillColor: '#18181b', fillOpacity: 1 }).addTo(map);
-      destroyRef.onDestroy(() => map.remove());
-
-      const { StreetViewPanorama, StreetViewService } = await loadStreetView();
-      const panorama = new StreetViewPanorama(this.panoramaElement().nativeElement, {
-        pov: { heading: 165, pitch: 0 },
-        addressControl: false,
-        motionTracking: false,
-        motionTrackingControl: false,
-        panControl: false,
-        zoomControl: false,
-      });
-      const streetView = new StreetViewService();
-      const show = async (location: google.maps.LatLngLiteral) => {
-        try {
-          const { data } = await streetView.getPanorama({ location, radius: 50, sources: ['google'] });
-          panorama.setPano(data.location!.pano);
-          this.missing.set(false);
-        } catch {
-          this.missing.set(true);
-        }
-      };
-      map.on('click', (event) => show(event.latlng));
-      panorama.addListener('position_changed', () => {
-        const position = panorama.getPosition();
-        if (position) {
-          marker.setLatLng([position.lat(), position.lng()]);
-          map.panTo([position.lat(), position.lng()]);
-        }
-      });
-      show(START);
+    afterNextRender(() => {
+      this.setUp().catch(() => this.missing.set(true));
     });
+  }
+
+  private async setUp(): Promise<void> {
+    const map = L.map(this.mapElement().nativeElement, { attributionControl: false, maxZoom: 18, minZoom: 8, maxBounds: [[-90, -180], [90, 180]] }).setView(START, 15);
+    googleTiles('roads').addTo(map);
+    googleTiles('street-view').addTo(map);
+    const marker = L.circleMarker(START, { radius: 8, color: '#fff', weight: 3, fillColor: '#18181b', fillOpacity: 1 }).addTo(map);
+    this.destroyRef.onDestroy(() => map.remove());
+
+    const { StreetViewPanorama, StreetViewService } = await loadStreetView();
+    const panorama = new StreetViewPanorama(this.panoramaElement().nativeElement, {
+      pov: { heading: 165, pitch: 0 },
+      addressControl: false,
+      motionTracking: false,
+      motionTrackingControl: false,
+      panControl: false,
+      zoomControl: false,
+    });
+    const streetView = new StreetViewService();
+    const show = async (location: google.maps.LatLngLiteral) => {
+      try {
+        const { data } = await streetView.getPanorama({ location, radius: 50, sources: ['google'] });
+        if (!data.location?.pano) throw new Error('No panorama');
+        panorama.setPano(data.location.pano);
+        this.missing.set(false);
+      } catch {
+        this.missing.set(true);
+      }
+    };
+    map.on('click', (event) => void show(event.latlng));
+    panorama.addListener('position_changed', () => {
+      const position = panorama.getPosition();
+      if (position) {
+        marker.setLatLng([position.lat(), position.lng()]);
+        map.panTo([position.lat(), position.lng()]);
+      }
+    });
+    void show(START);
   }
 }

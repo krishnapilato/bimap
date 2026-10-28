@@ -56,13 +56,13 @@
               <td>
                 <div class="flex justify-end gap-1">
                   <button class="btn btn-square btn-ghost btn-sm" title="Send welcome email" (click)="emailing.set(user)">
-                    <span class="material-icons text-xl!">mail_outline</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
                   </button>
                   <button class="btn btn-square btn-ghost btn-sm" title="Edit" (click)="openForm(user)">
-                    <span class="material-icons text-xl!">edit</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                   </button>
                   <button class="btn btn-square btn-ghost btn-sm" title="Delete" [disabled]="user.id === auth.user()?.id" (click)="deleting.set(user)">
-                    <span class="material-icons text-xl!">delete_outline</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
                   </button>
                 </div>
               </td>

@@ -11,7 +11,7 @@ import { AuthService } from '../core/auth/auth.service';
       <div class="flex items-center gap-2">
         <a class="badge badge-soft badge-primary" routerLink="/">BiMap</a>
         @if (demo) {
-          <span class="badge badge-soft badge-warning">Demo data</span>
+          <span class="badge badge-warning">Demo data</span>
         }
       </div>
       <div class="flex flex-wrap justify-end gap-1">

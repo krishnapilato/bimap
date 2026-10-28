@@ -20,7 +20,7 @@ function respond(request: HttpRequest<unknown>): Observable<HttpResponse<unknown
   const path = request.url.slice(environment.baseApiUrl.length);
   const [, resource, id, action] = path.split('/');
   const user = users.find((user) => user.id === Number(id));
-  const route = `${request.method} /${resource}${id ? '/:id' : ''}${action ? `/${action}` : ''}`;
+  const route = [`${request.method} /${resource}`, id && ':id', action].filter(Boolean).join('/');
 
   switch (route) {
     case 'POST /auth/:id':
@@ -41,7 +41,9 @@ function respond(request: HttpRequest<unknown>): Observable<HttpResponse<unknown
     case 'PUT /users/:id':
       return user ? update(user, request.body as UserRequest) : fail(404);
     case 'DELETE /users/:id':
-      return user ? ok(users.splice(users.indexOf(user), 1) && null, 204) : fail(404);
+      if (!user) return fail(404);
+      users.splice(users.indexOf(user), 1);
+      return ok(null, 204);
     case 'POST /users/:id/welcome-email':
       return user ? ok(null, 204) : fail(404);
     default:

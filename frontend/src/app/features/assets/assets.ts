@@ -4,6 +4,7 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { form, FormField, FormRoot, readonly, required, validate } from '@angular/forms/signals';
 import * as L from 'leaflet';
 import { firstValueFrom, of } from 'rxjs';
+import { googleTiles } from '../../shared/google-tiles';
 import { Navbar } from '../../shared/navbar';
 import { listOf } from '../../shared/resource';
 import { ToastService } from '../../shared/toast.service';
@@ -11,7 +12,6 @@ import { Asset } from './asset.models';
 import { AssetsService } from './assets.service';
 
 const PAGE_SIZE = 5;
-const TILES = { maxZoom: 20, subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] };
 const EMPTY = {
   region: '',
   province: '',
@@ -34,9 +34,9 @@ export class Assets {
   private readonly api = inject(AssetsService);
   private readonly toast = inject(ToastService);
   private readonly mapElement = viewChild.required<ElementRef<HTMLElement>>('map');
-  private readonly road = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', TILES);
-  private readonly aerial = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', TILES);
-  private readonly coverage = L.tileLayer('https://{s}.google.com/vt/lyrs=svv|cb_client:apiv3&style=50&x={x}&y={y}&z={z}', TILES);
+  private readonly road = googleTiles('roads');
+  private readonly aerial = googleTiles('satellite');
+  private readonly coverage = googleTiles('street-view');
   private readonly marker = L.circleMarker([0, 0], { radius: 8, color: '#fff', weight: 3, fillColor: '#18181b', fillOpacity: 1 });
   private map?: L.Map;
 
@@ -102,11 +102,10 @@ export class Assets {
     afterNextRender(() => {
       const map = L.map(this.mapElement().nativeElement, { attributionControl: false, maxZoom: 18, minZoom: 8, maxBounds: [[-90, -180], [90, 180]], layers: [this.road] }).setView([45.481, 9.173], 15);
       L.control.scale({ imperial: false }).addTo(map);
-      map.on('click', ({ latlng }) =>
-        this.streetView()
-          ? window.open(`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latlng.lat},${latlng.lng}`, '_blank', 'noopener')
-          : this.pick(latlng),
-      );
+      map.on('click', ({ latlng }) => {
+        if (this.streetView()) window.open(`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latlng.lat},${latlng.lng}`, '_blank', 'noopener');
+        else this.pick(latlng);
+      });
       this.map = map;
       destroyRef.onDestroy(() => map.remove());
     });
@@ -177,7 +176,7 @@ export class Assets {
 
   private async locate(street: string, number: number | null, city: string): Promise<void> {
     const find = (street: string) => firstValueFrom(this.api.geocode(street, city)).catch(() => undefined);
-    const place = (number && (await find(`${number} ${street}`))) || (await find(street));
+    const place = (number ? await find(`${number} ${street}`) : undefined) ?? (await find(street));
     if (place) {
       this.pick(L.latLng(place.lat, place.lng));
       this.map?.flyTo(place, 17);
@@ -191,9 +190,10 @@ export class Assets {
 
   private async save(): Promise<undefined> {
     const { number, goodID, istatCode, latitude, longitude, ...asset } = this.asset();
+    if (latitude === null || longitude === null) return undefined;
     try {
       await firstValueFrom(
-        this.api.save({ ...asset, number: number ?? 0, goodID: goodID ?? 0, istatCode: istatCode || null, latitude: latitude!, longitude: longitude! }),
+        this.api.save({ ...asset, number: number ?? 0, goodID: goodID ?? 0, istatCode: istatCode || null, latitude, longitude }),
       );
       this.asset.set({ ...EMPTY });
       this.form().reset();

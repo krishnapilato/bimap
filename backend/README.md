@@ -3,10 +3,10 @@
 REST API for registering Italian heritage assets on a map: sign-in with JWT, user management for administrators, an Italian comuni autocomplete, asset data and form submissions with CSV export.
 
 ![Java](https://img.shields.io/badge/Java-27-ED8B00?logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.2-6DB33F?logo=springboot&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white)
 ![Spring Security](https://img.shields.io/badge/Spring_Security-JWT-6DB33F?logo=springsecurity&logoColor=white)
 ![Spring Data JPA](https://img.shields.io/badge/Spring_Data_JPA-Hibernate-59666C?logo=hibernate&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-26.7-4479A1?logo=mysql&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-26.10-4479A1?logo=mysql&logoColor=white)
 ![Actuator](https://img.shields.io/badge/Actuator-health_%7C_info-6DB33F?logo=spring&logoColor=white)
 ![OpenAPI](https://img.shields.io/badge/OpenAPI-springdoc-85EA2D?logo=swagger&logoColor=black)
 ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-templates-005F0F?logo=thymeleaf&logoColor=white)

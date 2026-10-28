@@ -63,7 +63,7 @@
       <div class="relative h-[50svh] overflow-hidden rounded-box bg-base-200 shadow-md lg:h-auto">
         <div #map class="absolute inset-0"></div>
         <button type="button" class="btn btn-square btn-sm absolute top-[5.25rem] left-[10px] z-[1000]" [class.btn-primary]="streetView()" title="Street View mode" (click)="toggleStreetView()">
-          <span class="material-icons text-xl!">streetview</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true"><circle cx="12" cy="5" r="2"/><path d="M10 22v-6H8v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5h-2v6"/></svg>
         </button>
         <div class="join absolute top-3 right-3 z-[1000]">
           <button type="button" class="btn join-item btn-sm" [class.btn-primary]="!satellite()" (click)="setSatellite(false)">Map</button>

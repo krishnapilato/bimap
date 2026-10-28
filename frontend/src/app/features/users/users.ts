@@ -54,7 +54,7 @@ export class Users {
       email(account.email);
       required(account.password, { when: () => !this.editing() });
       minLength(account.password, 8);
-      disabled(account.enabled, () => this.editing()?.id === this.auth.user()?.id);
+      disabled(account.enabled, { when: () => this.editing()?.id === this.auth.user()?.id });
     },
     { submission: { action: () => this.save() } },
   );
