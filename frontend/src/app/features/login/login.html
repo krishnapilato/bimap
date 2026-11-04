@@ -1,0 +1,51 @@
+<main class="grid min-h-dvh bg-base-100 lg:grid-cols-2">
+  <section class="z-10 -mt-16 flex flex-col gap-8 px-6 pb-12 sm:px-12 lg:mt-0 lg:justify-center lg:px-16 lg:py-12 xl:px-24">
+    <a class="badge badge-soft badge-primary self-start" routerLink="/">BiMap</a>
+
+    <div class="flex flex-col gap-3">
+      <h1 class="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
+        {{ signup() ? 'Create your account' : 'Welcome back' }}
+      </h1>
+      <p class="text-base text-base-content/70 sm:text-lg">
+        {{ signup() ? 'Start registering heritage assets in a few minutes.' : 'Sign in to keep mapping Italy\'s heritage.' }}
+      </p>
+    </div>
+
+    @if (demo) {
+      <div role="alert" class="alert alert-soft max-w-md">Demo mode: sign in with any password, for example as giulia.rossi@example.com.</div>
+    }
+
+    <form class="flex w-full max-w-md flex-col gap-4" [formRoot]="form">
+      @if (signup()) {
+        <div class="grid grid-cols-2 gap-4">
+          <input class="input input-lg w-full" placeholder="Name" autocomplete="given-name" [formField]="form.name" />
+          <input class="input input-lg w-full" placeholder="Surname" autocomplete="family-name" [formField]="form.surname" />
+        </div>
+      }
+      <input class="input input-lg w-full" type="email" placeholder="Email" autocomplete="email" [formField]="form.email" />
+      <input class="input input-lg w-full" type="password" placeholder="Password, at least 8 characters" [formField]="form.password" />
+
+      @if (error()) {
+        <div role="alert" class="alert alert-error alert-soft">{{ error() }}</div>
+      }
+
+      <button class="btn btn-primary btn-lg mt-2" [disabled]="form().submitting()">
+        @if (form().submitting()) {
+          <span class="loading loading-spinner loading-sm"></span>
+        }
+        {{ signup() ? 'Create account' : 'Sign in' }}
+      </button>
+    </form>
+
+    <p class="text-base-content/70">
+      {{ signup() ? 'Already have an account?' : 'New to BiMap?' }}
+      <button type="button" class="link link-hover font-medium text-base-content" (click)="select(!signup())">
+        {{ signup() ? 'Sign in' : 'Create an account' }}
+      </button>
+    </p>
+  </section>
+
+  <section class="relative order-first h-[40svh] max-h-112 min-h-40 mask-b-from-50% lg:order-last lg:h-auto lg:max-h-none lg:mask-b-from-100% lg:mask-l-from-50%">
+    <app-aerial-map />
+  </section>
+</main>

@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="BiMap" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="bimap-backend" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.bimap.Main" />
+    <option name="VM_PARAMETERS" value="--enable-native-access=ALL-UNNAMED" />
+    <option name="WORKING_DIRECTORY" value="$MODULE_WORKING_DIR$" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

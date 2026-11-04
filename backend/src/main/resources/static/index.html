@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Register Italian heritage assets on a map.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preload" as="image" type="image/webp" href="images/italy.webp" fetchpriority="high">
+  <link rel="preload" as="font" type="font/woff2" href="fonts/geist.woff2" crossorigin>
+  <link rel="stylesheet" href="landing.css">
+  <title>BiMap API</title>
+</head>
+<body>
+<main>
+  <section class="content">
+    <span class="badge">BiMap</span>
+    <h1>Powering Italy's heritage map.</h1>
+    <p>Register Italian heritage assets on a map.</p>
+    <nav>
+      <a href="swagger-ui.html">API Docs</a>
+      <a href="https://krishnapilato.github.io/bimap/">Live Demo</a>
+      <a href="https://github.com/krishnapilato/bimap">Source Code</a>
+    </nav>
+    <div class="status">
+      <a href="actuator/health">Health</a>
+      <a href="actuator/info">Info</a>
+    </div>
+  </section>
+  <section class="map" aria-hidden="true"></section>
+</main>
+</body>
+</html>

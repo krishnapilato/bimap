@@ -1,0 +1,11 @@
+.git
+.github
+.idea
+.vscode
+docs
+**/.env
+**/node_modules
+**/.angular
+frontend/dist
+backend/target
+backend/*.db*

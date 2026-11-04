@@ -1,0 +1,102 @@
+@font-face {
+  font-family: Geist;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("fonts/geist.woff2") format("woff2");
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  font: 1rem/1.6 Geist, system-ui, sans-serif;
+  color: #18181b;
+  background: #fff;
+  color-scheme: light;
+  user-select: none;
+}
+
+a {
+  color: inherit;
+}
+
+main {
+  display: grid;
+  min-height: 100dvh;
+}
+
+.map {
+  order: -1;
+  height: 40svh;
+  background: #f4f4f5 url("images/italy.webp") center / cover;
+  mask-image: linear-gradient(#000 50%, transparent);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0 clamp(1.5rem, 6vw, 6rem) 3rem;
+}
+
+.badge {
+  align-self: flex-start;
+  padding: 0.125rem 0.75rem;
+  border-radius: 999px;
+  background: #f4f4f5;
+  font-size: 0.875rem;
+}
+
+h1 {
+  font-size: clamp(2.25rem, 6vw, 4.5rem);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+p {
+  max-width: 28rem;
+  color: #52525b;
+}
+
+nav, .status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+nav a {
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.625rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+nav a:first-child {
+  background: #18181b;
+  color: #fff;
+}
+
+.status {
+  padding-top: 1.5rem;
+  border-top: 1px solid #e4e4e7;
+  color: #52525b;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 1024px) {
+  main {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .map {
+    order: 0;
+    height: auto;
+    mask-image: linear-gradient(to right, transparent, #000 50%);
+  }
+}
