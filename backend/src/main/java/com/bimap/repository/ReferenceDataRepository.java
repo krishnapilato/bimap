@@ -17,7 +17,8 @@ public class ReferenceDataRepository {
 
     public List<HeritageAsset> findAssets() {
         return jdbc.sql("""
-                        SELECT id, idbene, prov, comune, indirizzo, civico, localizzazione, denominazione, provv_tutela, proprieta, catato, trascrizione, vincolo
+                        SELECT id, idbene, prov, comune, indirizzo, civico, localizzazione, denominazione, provv_tutela, proprieta, catato, trascrizione,
+                               coalesce(nullif(vincolo, ''), tipo_vincolo) AS vincolo
                         FROM tables ORDER BY id""")
                 .query(HeritageAsset.class)
                 .list();
@@ -25,6 +26,10 @@ public class ReferenceDataRepository {
 
     public List<String> searchRegions(String text) {
         return search("SELECT DISTINCT regione FROM listacomuni WHERE regione LIKE :pattern ESCAPE '\\' ORDER BY regione LIMIT 4", text);
+    }
+
+    public boolean assetExists(int goodID) {
+        return jdbc.sql("SELECT EXISTS(SELECT 1 FROM tables WHERE idbene = :id)").param("id", goodID).query(Boolean.class).single();
     }
 
     public List<String> searchProvinces(String text) {

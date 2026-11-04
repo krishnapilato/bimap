@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Register Italian heritage assets on a map.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="preload" as="image" type="image/webp" href="images/italy.webp" fetchpriority="high">
   <link rel="preload" as="font" type="font/woff2" href="fonts/geist.woff2" crossorigin>
   <link rel="stylesheet" href="landing.css">
+  <link rel="stylesheet" href="landmarks/gallery.css">
+  <script src="landmarks/gallery.js" defer></script>
   <title>BiMap API</title>
 </head>
 <body>
@@ -26,7 +27,7 @@
       <a href="actuator/info">Info</a>
     </div>
   </section>
-  <section class="map" aria-hidden="true"></section>
+  <section class="landmark-panel"><bimap-landmarks data-api="https://commons.wikimedia.org/w/api.php"><p>Loading heritage photographs…</p></bimap-landmarks></section>
 </main>
 </body>
 </html>

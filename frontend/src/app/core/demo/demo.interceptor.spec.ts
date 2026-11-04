@@ -4,7 +4,8 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { LoginResponse } from '../auth/auth.models';
 import { User } from '../../features/users/user.models';
-import { demoInterceptor } from './demo.interceptor';
+import { demoInterceptor, DemoStore } from './demo.interceptor';
+import { Asset } from '../../features/assets/asset.models';
 
 describe('demoInterceptor', () => {
   const api = environment.baseApiUrl;
@@ -14,8 +15,26 @@ describe('demoInterceptor', () => {
     request.then(() => 200).catch((error: unknown) => (error instanceof HttpErrorResponse ? error.status : 0));
 
   beforeEach(() => {
+    sessionStorage.clear();
     TestBed.configureTestingModule({ providers: [provideHttpClient(withInterceptors([demoInterceptor]))] });
     http = TestBed.inject(HttpClient);
+  });
+
+  it('loads all 687 reference assets and restores the session snapshot', async () => {
+    const assets = await firstValueFrom(http.get<Asset[]>(`${api}/assets`));
+    expect(assets).toHaveLength(687);
+    expect(new Set(assets.map((asset) => asset.id)).size).toBe(687);
+    expect(assets.at(-1)?.denominazione).toBe('Palazzo Spinola');
+    expect(JSON.parse(sessionStorage.getItem('bimap-demo-assets:v1') ?? 'null')).toEqual(assets);
+    expect(await new DemoStore().assets).toEqual(assets);
+  });
+
+  it('repairs a corrupt session snapshot and works when storage is blocked', async () => {
+    sessionStorage.setItem('bimap-demo-assets:v1', '{broken');
+    expect(await new DemoStore().assets).toHaveLength(687);
+    const storage = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('Blocked'); });
+    expect(await new DemoStore().assets).toHaveLength(687);
+    storage.mockRestore();
   });
 
   it('signs in an enabled demo user with any password', async () => {

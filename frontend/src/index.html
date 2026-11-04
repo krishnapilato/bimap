@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://*.google.com https://*.googleapis.com https://*.gstatic.com https://*.googleusercontent.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:8080 https://comuni-ita.nicolorebaioli.dev https://nominatim.openstreetmap.org https://*.google.com https://*.googleapis.com https://*.gstatic.com data: blob:; frame-src https://*.google.com; worker-src blob:; media-src 'none'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+      content="style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://*.google.com https://*.googleapis.com https://*.gstatic.com https://*.googleusercontent.com https://thumb.wikimedia.org https://upload.wikimedia.org; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://localhost:8080 https://comuni-ita.nicolorebaioli.dev https://nominatim.openstreetmap.org https://commons.wikimedia.org https://*.google.com https://*.googleapis.com https://*.gstatic.com data: blob:; frame-src https://*.google.com; worker-src blob:; media-src 'none'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
     />
     <title>BiMap</title>
     <base href="/" />
@@ -18,25 +18,6 @@
     <meta property="og:description" content="Register Italian heritage assets on a map." />
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <script>
-      document.addEventListener('contextmenu', (event) => event.preventDefault());
-      const route = location.hash
-        ? location.hash.slice(1)
-        : location.pathname.slice(new URL(document.baseURI).pathname.length - 1);
-      if (route === '/' || route.startsWith('/login')) {
-        document.head.append(
-          Object.assign(document.createElement('link'), {
-            rel: 'preload',
-            as: 'image',
-            type: 'image/webp',
-            href: 'italy-960.webp',
-            imageSrcset: 'italy-640.webp 640w, italy-960.webp 960w, italy-1280.webp 1280w',
-            imageSizes: '(min-width: 1024px) 50vw, 100vw',
-            fetchPriority: 'high',
-          }),
-        );
-      }
-    </script>
   </head>
   <body>
     <app-root></app-root>

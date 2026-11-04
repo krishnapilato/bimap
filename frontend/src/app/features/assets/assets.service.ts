@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { map, Observable, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Asset, AssetForm, Municipality } from './asset.models';
 
@@ -19,23 +19,23 @@ export class AssetsService {
   private readonly url = environment.baseApiUrl;
 
   regions(): Observable<string[]> {
-    return this.http.get<string[]>(`${COMUNI}/regioni`);
+    return this.http.get<string[]>(`${COMUNI}/regioni`).pipe(timeout(10_000));
   }
 
   provinces(region: string): Observable<string[]> {
     return this.http
       .get<{ nome: string }[]>(`${COMUNI}/province/${encodeURIComponent(region)}`, { params: { fields: 'nome', sort: 'nome' } })
-      .pipe(map((provinces) => provinces.map((province) => province.nome)));
+      .pipe(timeout(10_000), map((provinces) => provinces.map((province) => province.nome)));
   }
 
   municipalities(province: string): Observable<Municipality[]> {
-    return this.http.get<Municipality[]>(`${COMUNI}/comuni/provincia/${encodeURIComponent(province)}`, { params: { sort: 'nome' } });
+    return this.http.get<Municipality[]>(`${COMUNI}/comuni/provincia/${encodeURIComponent(province)}`, { params: { sort: 'nome' } }).pipe(timeout(10_000));
   }
 
   findMunicipality(name: string, provinceCode: string): Observable<Municipality | undefined> {
     return this.http
       .get<Municipality[]>(`${COMUNI}/comuni`, { params: { q: name } })
-      .pipe(map((found) => found.find((place) => place.nome.toLowerCase() === name.toLowerCase() && place.provincia.sigla === provinceCode)));
+      .pipe(timeout(10_000), map((found) => found.find((place) => place.nome.toLowerCase() === name.toLowerCase() && place.provincia.sigla === provinceCode)));
   }
 
   findAll(): Observable<Asset[]> {
@@ -54,8 +54,10 @@ export class AssetsService {
     return this.http
       .get<Place[]>(NOMINATIM, { params: { format: 'json', addressdetails: 1, limit: 5, street, city, country: 'Italia', 'accept-language': 'it' } })
       .pipe(
+        timeout(10_000),
         map((places) => places.find(({ address }) => [address.city, address.town, address.village].some((name) => name?.toLowerCase() === city.toLowerCase()))),
         map((place) => place && { lat: Number(place.lat), lng: Number(place.lon) }),
+        map((place) => place && Number.isFinite(place.lat) && Number.isFinite(place.lng) && Math.abs(place.lat) <= 90 && Math.abs(place.lng) <= 180 ? place : undefined),
       );
   }
 }

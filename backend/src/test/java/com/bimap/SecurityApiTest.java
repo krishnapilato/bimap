@@ -15,6 +15,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
@@ -51,15 +52,15 @@ class SecurityApiTest extends ApiTest {
 
     @Test
     void rejectsMalformedForgedExpiredAndUnsignedTokens() throws Exception {
-        createUser("admin@bimap.test", User.Role.ADMINISTRATOR, true);
+        var subject = createUser("admin@bimap.test", User.Role.ADMINISTRATOR, true).getId().toString();
         var now = Instant.now();
-        var valid = claims("admin@bimap.test", now, now.plusSeconds(600));
+        var valid = claims(subject, now, now.plusSeconds(600));
         var forged = NimbusJwtEncoder.withSecretKey(new SecretKeySpec("another-secret-that-is-long-enough!!".getBytes(StandardCharsets.UTF_8), "HmacSHA256")).build();
         var payload = Base64.getUrlEncoder().withoutPadding().encodeToString("{\"sub\":\"admin@bimap.test\",\"exp\":%d}".formatted(now.plusSeconds(600).getEpochSecond()).getBytes(StandardCharsets.UTF_8));
         var unsigned = Base64.getUrlEncoder().withoutPadding().encodeToString("{\"alg\":\"none\"}".getBytes(StandardCharsets.UTF_8)) + "." + payload + ".";
 
-        for (var token : List.of("not-a-jwt", sign(jwtEncoder, claims("admin@bimap.test", now.minusSeconds(7200), now.minusSeconds(3600))),
-                sign(forged, valid), unsigned, sign(jwtEncoder, JwtClaimsSet.builder().subject("admin@bimap.test").issuedAt(now).build()))) {
+        for (var token : List.of("not-a-jwt", sign(jwtEncoder, claims(subject, now.minusSeconds(7200), now.minusSeconds(3600))),
+                sign(forged, valid), unsigned, sign(jwtEncoder, JwtClaimsSet.builder().subject(subject).issuedAt(now).build()))) {
             mvc.perform(get("/users").header(HttpHeaders.AUTHORIZATION, bearer(token))).andExpect(status().isUnauthorized());
         }
         mvc.perform(get("/users").header(HttpHeaders.AUTHORIZATION, bearer(sign(jwtEncoder, valid)))).andExpect(status().isOk());
@@ -67,9 +68,9 @@ class SecurityApiTest extends ApiTest {
 
     @Test
     void roleClaimInTokenCannotEscalatePrivileges() throws Exception {
-        createUser("plain@bimap.test", User.Role.USER, true);
+        var subject = createUser("plain@bimap.test", User.Role.USER, true).getId().toString();
         var now = Instant.now();
-        var token = sign(jwtEncoder, JwtClaimsSet.builder().subject("plain@bimap.test").issuedAt(now).expiresAt(now.plusSeconds(600)).claim("roles", "ADMINISTRATOR").build());
+        var token = sign(jwtEncoder, JwtClaimsSet.builder().subject(subject).claim("ver", "0").issuedAt(now).expiresAt(now.plusSeconds(600)).claim("roles", "ADMINISTRATOR").build());
 
         mvc.perform(get("/users").header(HttpHeaders.AUTHORIZATION, bearer(token))).andExpect(status().isForbidden());
     }
@@ -99,7 +100,9 @@ class SecurityApiTest extends ApiTest {
         mvc.perform(get("/actuator/health")).andExpect(status().isOk()).andExpect(jsonPath("$.status").value("UP"));
         mvc.perform(get("/actuator/health/liveness")).andExpect(status().isOk());
         mvc.perform(get("/actuator/info")).andExpect(status().isOk());
-        mvc.perform(get("/v3/api-docs")).andExpect(status().isOk());
+        mvc.perform(get("/v3/api-docs")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.paths['/auth/login'].post.security", hasSize(0)))
+                .andExpect(jsonPath("$.paths['/auth/signup'].post.security", hasSize(0)));
     }
 
     @Test
@@ -156,8 +159,49 @@ class SecurityApiTest extends ApiTest {
         mvc.perform(attempt.with(request -> { request.setRemoteAddr("203.0.113.8"); return request; })).andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void tokensCannotFollowReassignedEmails() throws Exception {
+        var original = createUser("reused@bimap.test", User.Role.USER, true);
+        var token = bearer(login(original.getEmail(), PASSWORD));
+        original.setEmail("renamed@bimap.test");
+        users.saveAndFlush(original);
+        createUser("reused@bimap.test", User.Role.ADMINISTRATOR, true);
+
+        mvc.perform(get("/assets").header(HttpHeaders.AUTHORIZATION, token)).andExpect(status().isOk());
+        mvc.perform(get("/users").header(HttpHeaders.AUTHORIZATION, token)).andExpect(status().isForbidden());
+        users.delete(original);
+        users.flush();
+        mvc.perform(get("/assets").header(HttpHeaders.AUTHORIZATION, token)).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void rejectsLegacyMissingAndInvalidSubjects() throws Exception {
+        createUser("legacy@bimap.test", User.Role.ADMINISTRATOR, true);
+        var now = Instant.now();
+        for (var subject : List.of("legacy@bimap.test", " ", "0", "-1", "9223372036854775808")) {
+            mvc.perform(get("/users").header(HttpHeaders.AUTHORIZATION, bearer(sign(jwtEncoder, claims(subject, now, now.plusSeconds(600))))))
+                    .andExpect(status().isUnauthorized());
+        }
+        var missing = JwtClaimsSet.builder().issuedAt(now).expiresAt(now.plusSeconds(600)).build();
+        mvc.perform(get("/users").header(HttpHeaders.AUTHORIZATION, bearer(sign(jwtEncoder, missing)))).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void signupsAndFailedLoginsShareTheLimit() throws Exception {
+        for (var i = 0; i < 10; i++) {
+            mvc.perform(json(post("/auth/signup"), """
+                    {"name":"A","surname":"B","email":"shared-%d@bimap.test","password":"%s"}""".formatted(i, PASSWORD))
+                    .with(request -> { request.setRemoteAddr("203.0.113.90"); return request; }))
+                    .andExpect(status().isCreated());
+        }
+        mvc.perform(json(post("/auth/login"), """
+                {"email":"nobody@bimap.test","password":"wrong-password"}""")
+                .with(request -> { request.setRemoteAddr("203.0.113.90"); return request; }))
+                .andExpect(status().isTooManyRequests());
+    }
+
     private static JwtClaimsSet claims(String subject, Instant issued, Instant expires) {
-        return JwtClaimsSet.builder().subject(subject).issuedAt(issued).expiresAt(expires).build();
+        return JwtClaimsSet.builder().subject(subject).claim("ver", "0").issuedAt(issued).expiresAt(expires).build();
     }
 
     private static String sign(JwtEncoder encoder, JwtClaimsSet claims) {

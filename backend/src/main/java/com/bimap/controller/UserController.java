@@ -4,11 +4,13 @@ import module java.base;
 
 import com.bimap.core.MailService;
 import com.bimap.model.User;
+import com.bimap.validation.BcryptSize;
 import com.bimap.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,7 +37,7 @@ public class UserController {
     }
 
     record UserRequest(@NotBlank @Size(max = 100) String name, @NotBlank @Size(max = 100) String surname,
-                       @NotBlank @Email @Size(max = 256) String email, @Size(min = 8, max = 72) String password,
+                       @NotBlank @Email @Size(max = 256) String email, @Size(min = 8, max = 72) @BcryptSize String password,
                        User.Role role, Boolean enabled) {
 
         User.Role roleOrDefault() {
@@ -68,19 +70,19 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    UserView update(@PathVariable long id, @Valid @RequestBody UserRequest request) {
-        return UserView.of(users.update(id, request.name(), request.surname(), request.email(), request.password(), request.roleOrDefault(), request.enabled()));
+    UserView update(@PathVariable @Positive long id, @Valid @RequestBody UserRequest request) {
+        return UserView.of(users.update(id, request.name(), request.surname(), request.email(), request.password(), request.role(), request.enabled()));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void delete(@PathVariable long id) {
+    void delete(@PathVariable @Positive long id) {
         users.delete(id);
     }
 
     @PostMapping("/{id}/welcome-email")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    void sendWelcomeEmail(@PathVariable long id) {
+    void sendWelcomeEmail(@PathVariable @Positive long id) {
         mailService.send(users.welcomeEmail(id));
     }
 }

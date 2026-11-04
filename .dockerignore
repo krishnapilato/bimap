@@ -4,8 +4,12 @@
 .vscode
 docs
 **/.env
+**/.env.*
 **/node_modules
 **/.angular
+**/out-tsc
+**/coverage
+**/*.log
 frontend/dist
 backend/target
 backend/*.db*

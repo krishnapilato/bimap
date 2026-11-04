@@ -16,15 +16,17 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.dataformat.csv.CsvMapper;
 
 @RestController
@@ -46,8 +48,8 @@ public class AssetController {
         @NotBlank @Size(max = 255) String municipality,
         @NotBlank @Size(max = 255) String address,
         @NotBlank @Size(max = 255) String goodNaming,
-        @PositiveOrZero int number,
-        @PositiveOrZero int goodID,
+        @NotNull @PositiveOrZero Integer number,
+        @NotNull @PositiveOrZero Integer goodID,
         @Pattern(regexp = "\\d{6}", message = "must be 6 digits.") String istatCode,
         @NotNull @DecimalMin("-90") @DecimalMax("90") Double latitude,
         @NotNull @DecimalMin("-180") @DecimalMax("180") Double longitude
@@ -82,13 +84,25 @@ public class AssetController {
     @PostMapping("/forms")
     @ResponseStatus(HttpStatus.CREATED)
     SavedForm saveForm(@Valid @RequestBody FormRequest form) {
+        if (form.goodID() > 0 && !referenceData.assetExists(form.goodID())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The selected heritage asset does not exist. Use goodID 0 for an unlisted asset.");
+        }
         return new SavedForm(forms.save(form.toEntity()).getId(), form);
     }
 
     @GetMapping(value = "/forms/export.csv", produces = "text/csv")
-    ResponseEntity<String> exportForms() {
-        var rows = forms.findAllRows().stream().map(AssetFormRow::forSpreadsheet).toList();
-        var csv = CSV.writer(CSV.schemaFor(AssetFormRow.class).withHeader()).writeValueAsString(rows);
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"forms.csv\"").body(csv);
+    void exportForms(HttpServletResponse response) throws IOException {
+        response.setContentType("text/csv;charset=UTF-8");
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"forms.csv\"");
+        var through = forms.maximumId();
+        var after = 0L;
+        try (var csv = CSV.writer(CSV.schemaFor(AssetFormRow.class).withHeader()).writeValues(response.getWriter())) {
+            while (after < through) {
+                var rows = forms.findRowsAfter(after, through, PageRequest.of(0, 500));
+                if (rows.isEmpty()) break;
+                for (var row : rows) csv.write(row.forSpreadsheet());
+                after = rows.getLast().id();
+            }
+        }
     }
 }

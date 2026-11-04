@@ -1,5 +1,5 @@
 <main class="grid min-h-dvh bg-base-100 lg:grid-cols-2">
-  <section class="z-10 -mt-16 flex flex-col gap-8 px-6 pb-12 sm:px-12 lg:mt-0 lg:justify-center lg:px-16 lg:py-12 xl:px-24">
+  <section class="z-10 flex flex-col gap-8 px-6 py-10 sm:px-12 lg:mt-0 lg:justify-center lg:px-16 lg:py-12 xl:px-24">
     <a class="badge badge-soft badge-primary self-start" routerLink="/">BiMap</a>
 
     <div class="flex flex-col gap-3">
@@ -18,12 +18,15 @@
     <form class="flex w-full max-w-md flex-col gap-4" [formRoot]="form">
       @if (signup()) {
         <div class="grid grid-cols-2 gap-4">
-          <input class="input input-lg w-full" placeholder="Name" autocomplete="given-name" [formField]="form.name" />
-          <input class="input input-lg w-full" placeholder="Surname" autocomplete="family-name" [formField]="form.surname" />
+          <input class="input input-lg w-full" aria-label="Name" placeholder="Name" autocomplete="given-name" [formField]="form.name" />
+          <input class="input input-lg w-full" aria-label="Surname" placeholder="Surname" autocomplete="family-name" [formField]="form.surname" />
         </div>
       }
-      <input class="input input-lg w-full" type="email" placeholder="Email" autocomplete="email" [formField]="form.email" />
-      <input class="input input-lg w-full" type="password" placeholder="Password, at least 8 characters" [formField]="form.password" />
+      <input class="input input-lg w-full" type="email" aria-label="Email" placeholder="Email" autocomplete="username" [formField]="form.email" />
+      <input class="input input-lg w-full" type="password" aria-label="Password" [placeholder]="signup() ? 'Password, at least 8 characters' : 'Password'" [autocomplete]="signup() ? 'new-password' : 'current-password'" [formField]="form.password" />
+      @if (form.password().touched() && form.password().invalid()) {
+        <p class="text-sm text-error" role="alert">{{ form.password().errors()[0]?.message ?? 'Check your password.' }}</p>
+      }
 
       @if (error()) {
         <div role="alert" class="alert alert-error alert-soft">{{ error() }}</div>
@@ -39,13 +42,13 @@
 
     <p class="text-base-content/70">
       {{ signup() ? 'Already have an account?' : 'New to BiMap?' }}
-      <button type="button" class="link link-hover font-medium text-base-content" (click)="select(!signup())">
+      <button type="button" class="link link-hover font-medium text-base-content" [disabled]="form().submitting()" (click)="select(!signup())">
         {{ signup() ? 'Sign in' : 'Create an account' }}
       </button>
     </p>
   </section>
 
-  <section class="relative order-first h-[40svh] max-h-112 min-h-40 mask-b-from-50% lg:order-last lg:h-auto lg:max-h-none lg:mask-b-from-100% lg:mask-l-from-50%">
-    <app-aerial-map />
+  <section class="relative order-first h-[44svh] min-h-72 lg:order-last lg:h-auto lg:min-h-dvh">
+    <app-landmark-gallery />
   </section>
 </main>

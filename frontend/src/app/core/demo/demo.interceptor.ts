@@ -4,46 +4,67 @@ import {
   HttpRequest,
   HttpResponse,
 } from '@angular/common/http';
-import { delay, Observable, of, throwError } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { AssetForm } from '../../features/assets/asset.models';
+import { delay, from, map, Observable, of, throwError } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { apiPath } from '../auth/api-path';
+import { Asset, AssetForm } from '../../features/assets/asset.models';
 import { User, UserRequest } from '../../features/users/user.models';
 import { SignupRequest } from '../auth/auth.models';
-import { ASSETS, USERS } from './demo-data';
+import { USERS } from './demo-data';
 
-const users = [...USERS];
-const forms: AssetForm[] = [];
+@Injectable({ providedIn: 'root' })
+export class DemoStore {
+  readonly users = USERS.map((user) => ({ ...user }));
+  private catalog?: Promise<Asset[]>;
+  readonly forms: AssetForm[] = [];
 
-export const demoInterceptor: HttpInterceptorFn = (request, next) => request.url.startsWith(environment.baseApiUrl) ? respond(request) : next(request);
+  get assets(): Promise<Asset[]> {
+    this.catalog ??= import('./demo-assets').then(({ ASSETS }) => this.readAssets(ASSETS));
+    return this.catalog;
+  }
 
-function respond(request: HttpRequest<unknown>): Observable<HttpResponse<unknown>> {
-  const path = request.url.slice(environment.baseApiUrl.length);
+  private readAssets(assets: Asset[]): Asset[] {
+    try {
+      const stored: unknown = JSON.parse(sessionStorage.getItem('bimap-demo-assets:v1') ?? 'null');
+      // Reference data is immutable; discard stale or tampered snapshots.
+      if (JSON.stringify(stored) === JSON.stringify(assets)) return stored as Asset[];
+      sessionStorage.setItem('bimap-demo-assets:v1', JSON.stringify(assets));
+    } catch { /* Storage can be unavailable or full; retain the complete catalog in memory. */ }
+    return assets.map((asset) => ({ ...asset }));
+  }
+}
+
+export const demoInterceptor: HttpInterceptorFn = (request, next) => {
+  const path = apiPath(request.url);
+  return path === null ? next(request) : respond(request, path, inject(DemoStore));
+};
+
+function respond(request: HttpRequest<unknown>, path: string, store: DemoStore): Observable<HttpResponse<unknown>> {
+  const { users, forms } = store;
   const [, resource, id, action] = path.split('/');
   const user = users.find((user) => user.id === Number(id));
   const route = [`${request.method} /${resource}`, id && ':id', action].filter(Boolean).join('/');
 
   switch (route) {
     case 'POST /auth/:id':
-      return id === 'login'
-        ? login(request.body as SignupRequest)
-        : signup(request.body as SignupRequest);
+      return authenticate(id, request.body as SignupRequest, store);
     case 'GET /assets':
-      return ok(ASSETS);
+      return from(store.assets).pipe(map((body) => new HttpResponse({ body })));
     case 'POST /forms':
       forms.push({ ...(request.body as AssetForm), id: forms.length + 1 });
       return ok(forms.at(-1), 201);
     case 'GET /forms/:id':
-      return ok(new Blob([csv()], { type: 'text/csv' }));
+      return id === 'export.csv' ? ok(new Blob([csv(forms)], { type: 'text/csv;charset=UTF-8' })) : fail(404);
+    case 'GET /users/:id':
+      return id === 'exists' ? ok(taken(request.params.get('email') ?? '', store)) : fail(404);
     case 'GET /users':
       return ok(users.map((user) => ({ ...user })));
     case 'POST /users':
-      return create(request.body as UserRequest);
+      return create(request.body as UserRequest, store);
     case 'PUT /users/:id':
-      return user ? update(user, request.body as UserRequest) : fail(404);
+      return user ? update(user, request.body as UserRequest, store) : fail(404);
     case 'DELETE /users/:id':
-      if (!user) return fail(404);
-      users.splice(users.indexOf(user), 1);
-      return ok(null, 204);
+      return remove(user, users);
     case 'POST /users/:id/welcome-email':
       return user ? ok(null, 204) : fail(404);
     default:
@@ -51,15 +72,28 @@ function respond(request: HttpRequest<unknown>): Observable<HttpResponse<unknown
   }
 }
 
-function login({ email }: SignupRequest) {
+function authenticate(action: string | undefined, request: SignupRequest, store: DemoStore) {
+  if (action === 'login') return login(request, store);
+  return action === 'signup' ? signup(request, store) : fail(404);
+}
+
+function remove(user: User | undefined, users: User[]) {
+  if (!user) return fail(404);
+  if (lastAdministrator(user, users)) return fail(409, 'The last active administrator cannot be removed, disabled or demoted.');
+  users.splice(users.indexOf(user), 1);
+  return ok(null, 204);
+}
+
+function login({ email }: SignupRequest, { users }: DemoStore) {
   const user = users.find((user) => user.email.toLowerCase() === email.toLowerCase() && user.enabled,);
   return user ? ok(session(user)) : fail(401);
 }
 
-function signup(request: SignupRequest) {
-  if (taken(request.email)) return fail(409);
+function signup(request: SignupRequest, store: DemoStore) {
+  const { users } = store;
+  if (taken(request.email, store)) return fail(409);
   const user: User = {
-    id: nextId(),
+    id: nextId(users),
     name: request.name,
     surname: request.surname,
     email: request.email,
@@ -70,10 +104,11 @@ function signup(request: SignupRequest) {
   return ok(session(user), 201);
 }
 
-function create(request: UserRequest) {
-  if (taken(request.email)) return fail(409);
+function create(request: UserRequest, store: DemoStore) {
+  const { users } = store;
+  if (taken(request.email, store)) return fail(409);
   const user: User = {
-    id: nextId(),
+    id: nextId(users),
     name: request.name,
     surname: request.surname,
     email: request.email,
@@ -84,8 +119,11 @@ function create(request: UserRequest) {
   return ok({ ...user }, 201);
 }
 
-function update(user: User, request: UserRequest) {
-  if (request.email !== user.email && taken(request.email)) return fail(409);
+function update(user: User, request: UserRequest, store: DemoStore) {
+  if (taken(request.email, store, user.id)) return fail(409, 'This email is already registered.');
+  if (lastAdministrator(user, store.users) && (request.role !== 'ADMINISTRATOR' || request.enabled === false)) {
+    return fail(409, 'The last active administrator cannot be removed, disabled or demoted.');
+  }
   Object.assign(user, {
     name: request.name,
     surname: request.surname,
@@ -96,8 +134,8 @@ function update(user: User, request: UserRequest) {
   return ok({ ...user });
 }
 
-function csv(): string {
-  const header = 'id,region,province,municipality,address,name,istatCode,latitude,longitude';
+function csv(forms: AssetForm[]): string {
+  const header = 'id,region,province,municipality,address,name,istatCode,latitude,longitude,number,goodID';
   const rows = forms.map((form) =>
     [
       form.id,
@@ -109,15 +147,21 @@ function csv(): string {
       form.istatCode ?? '',
       form.latitude,
       form.longitude,
+      form.number,
+      form.goodID,
     ]
-      .map((value) => `"${String(value).replaceAll('"', '""')}"`)
+      .map((value) => {
+        const safe = typeof value === 'string' && /^[=+@\-\t\r\n]/.test(value) ? `'${value}` : String(value);
+        return `"${safe.replaceAll('"', '""')}"`;
+      })
       .join(','),
   );
   return [header, ...rows].join('\n');
 }
 
 const session = ({ enabled, ...user }: User) => ({ token: 'demo', user });
-const taken = (email: string) => users.some((user) => user.email.toLowerCase() === email.toLowerCase());
-const nextId = () => Math.max(0, ...users.map((user) => user.id)) + 1;
+const taken = (email: string, { users }: DemoStore, except?: number) => users.some((user) => user.id !== except && user.email.toLowerCase() === email.toLowerCase());
+const nextId = (users: User[]) => Math.max(0, ...users.map((user) => user.id)) + 1;
 const ok = (body: unknown, status = 200) => of(new HttpResponse({ status, body })).pipe(delay(250));
-const fail = (status: number) => throwError(() => new HttpErrorResponse({ status })).pipe(delay(250));
+const fail = (status: number, detail = 'Demo request failed.') => throwError(() => new HttpErrorResponse({ status, error: { detail } }));
+const lastAdministrator = (user: User, users: User[]) => user.role === 'ADMINISTRATOR' && user.enabled && users.filter((account) => account.role === 'ADMINISTRATOR' && account.enabled).length === 1;

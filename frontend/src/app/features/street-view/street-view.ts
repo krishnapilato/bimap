@@ -17,9 +17,18 @@ const START = L.latLng(45.481, 9.173);
         <p class="text-base text-base-content/70 sm:text-lg">Click a blue street on the map to look around from there.</p>
       </header>
       <div class="grid flex-1 gap-4 lg:grid-cols-2">
-        <div #map class="h-[45svh] overflow-hidden rounded-box bg-base-200 shadow-md lg:h-auto lg:min-h-[28rem]"></div>
+        <div #map role="region" aria-label="Street View location map" class="h-[45svh] overflow-hidden rounded-box bg-base-200 shadow-md lg:h-auto lg:min-h-[28rem]"></div>
         <div class="relative h-[45svh] overflow-hidden rounded-box bg-base-200 shadow-md lg:h-auto lg:min-h-[28rem]">
           <div #panorama class="absolute inset-0"></div>
+          @if (loading()) {
+            <p role="status" class="absolute inset-0 grid place-items-center bg-base-200 px-6 text-center text-base-content/70">Loading Street View…</p>
+          }
+          @if (error()) {
+            <div role="alert" class="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-base-200 px-6 text-center text-base-content/70">
+              <p>{{ error() }}</p>
+              <button class="btn btn-outline btn-sm" (click)="start()">Try again</button>
+            </div>
+          }
           @if (missing()) {
             <p class="absolute inset-0 grid place-items-center bg-base-200 px-6 text-center text-base-content/70">
               No Street View here. Try a blue street.
@@ -34,23 +43,52 @@ export class StreetView {
   private readonly mapElement = viewChild.required<ElementRef<HTMLElement>>('map');
   private readonly panoramaElement = viewChild.required<ElementRef<HTMLElement>>('panorama');
   protected readonly missing = signal(false);
+  protected readonly loading = signal(true);
+  protected readonly error = signal('');
+  private map?: L.Map;
+  private marker?: L.CircleMarker;
+  private panorama?: google.maps.StreetViewPanorama;
+  private requestVersion = 0;
 
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
     afterNextRender(() => {
-      this.setUp().catch(() => this.missing.set(true));
+      void this.start();
+    });
+    this.destroyRef.onDestroy(() => {
+      this.map?.remove();
+      if (this.panorama) {
+        this.panorama.setVisible(false);
+        google.maps.event.clearInstanceListeners(this.panorama);
+      }
     });
   }
 
+  protected async start(): Promise<void> {
+    this.error.set('');
+    this.missing.set(false);
+    this.loading.set(true);
+    try {
+      await this.setUp();
+    } catch (error) {
+      if (!this.destroyRef.destroyed) this.error.set(error instanceof Error ? error.message : 'Street View could not load. Try again.');
+    } finally {
+      if (!this.destroyRef.destroyed) this.loading.set(false);
+    }
+  }
+
   private async setUp(): Promise<void> {
-    const map = L.map(this.mapElement().nativeElement, { attributionControl: false, maxZoom: 18, minZoom: 8, maxBounds: [[-90, -180], [90, 180]] }).setView(START, 15);
-    googleTiles('roads').addTo(map);
-    googleTiles('street-view').addTo(map);
-    const marker = L.circleMarker(START, { radius: 8, color: '#fff', weight: 3, fillColor: '#18181b', fillOpacity: 1 }).addTo(map);
-    this.destroyRef.onDestroy(() => map.remove());
+    if (!this.map) {
+      this.map = L.map(this.mapElement().nativeElement, { attributionControl: false, maxZoom: 18, minZoom: 8, maxBounds: [[-90, -180], [90, 180]] }).setView(START, 15);
+      googleTiles('roads').addTo(this.map);
+      googleTiles('street-view').addTo(this.map);
+    }
+    const map = this.map;
+    const marker = this.marker ??= L.circleMarker(START, { radius: 8, color: '#fff', weight: 3, fillColor: '#18181b', fillOpacity: 1 }).addTo(map);
 
     const { StreetViewPanorama, StreetViewService } = await loadStreetView();
+    if (this.destroyRef.destroyed) return;
     const panorama = new StreetViewPanorama(this.panoramaElement().nativeElement, {
       pov: { heading: 165, pitch: 0 },
       addressControl: false,
@@ -59,18 +97,24 @@ export class StreetView {
       panControl: false,
       zoomControl: false,
     });
+    this.panorama = panorama;
     const streetView = new StreetViewService();
     const show = async (location: google.maps.LatLngLiteral) => {
+      const version = ++this.requestVersion;
+      this.loading.set(true);
       try {
         const { data } = await streetView.getPanorama({ location, radius: 50, sources: ['google'] });
+        if (this.destroyRef.destroyed || version !== this.requestVersion) return;
         if (!data.location?.pano) throw new Error('No panorama');
         panorama.setPano(data.location.pano);
         this.missing.set(false);
       } catch {
-        this.missing.set(true);
+        if (!this.destroyRef.destroyed && version === this.requestVersion) this.missing.set(true);
+      } finally {
+        if (!this.destroyRef.destroyed && version === this.requestVersion) this.loading.set(false);
       }
     };
-    map.on('click', (event) => void show(event.latlng));
+    map.off('click').on('click', (event) => void show(event.latlng));
     panorama.addListener('position_changed', () => {
       const position = panorama.getPosition();
       if (position) {
@@ -78,6 +122,6 @@ export class StreetView {
         map.panTo([position.lat(), position.lng()]);
       }
     });
-    void show(START);
+    await show(START);
   }
 }

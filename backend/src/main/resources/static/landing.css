@@ -16,7 +16,6 @@ body {
   color: #18181b;
   background: #fff;
   color-scheme: light;
-  user-select: none;
 }
 
 a {
@@ -28,11 +27,12 @@ main {
   min-height: 100dvh;
 }
 
-.map {
+.landmark-panel {
   order: -1;
   height: 40svh;
-  background: #f4f4f5 url("images/italy.webp") center / cover;
-  mask-image: linear-gradient(#000 50%, transparent);
+  position: relative;
+  background: #fff;
+
 }
 
 .content {
@@ -94,9 +94,13 @@ nav a:first-child {
     grid-template-columns: 1fr 1fr;
   }
 
-  .map {
+  .landmark-panel {
     order: 0;
     height: auto;
-    mask-image: linear-gradient(to right, transparent, #000 50%);
+
   }
 }
+
+.error-page { display: flex; align-items: center; max-width: 60rem; margin: auto; }
+.error-page .content { padding-top: 3rem; }
+.landmark-panel { min-height: 18rem; }

@@ -48,7 +48,7 @@ class AssetApiTest extends ApiTest {
                 .andExpect(jsonPath("$[0].proprieta").value("Privata + Ente pubblico"))
                 .andExpect(jsonPath("$[0].catato").exists())
                 .andExpect(jsonPath("$[0].trascrizione").value("02/07/2015 ai nn 2279/1717"))
-                .andExpect(jsonPath("$[0].vincolo").isEmpty());
+                .andExpect(jsonPath("$[0].vincolo").value("Vincolo diretto"));
     }
 
     @Test
@@ -101,6 +101,13 @@ class AssetApiTest extends ApiTest {
                 FORM.replace("\"Piemonte\"", "\"  \""),
                 FORM.replace("\"via Umberto I\"", "\"" + "v".repeat(256) + "\""),
                 FORM.replace("\"number\": 3", "\"number\": -1"),
+                FORM.replace("\"number\": 3,", ""),
+                FORM.replace("\"number\": 3", "\"number\": null"),
+                FORM.replace("\"number\": 3", "\"number\": 3.5"),
+                FORM.replace("\"goodID\": 7168,", ""),
+                FORM.replace("\"goodID\": 7168", "\"goodID\": null"),
+                FORM.replace("\"goodID\": 7168", "\"goodID\": 7168.5"),
+                FORM.replace("\"goodID\": 7168", "\"goodID\": 2147483647"),
                 FORM.replace("\"goodID\": 7168", "\"goodID\": -5"),
                 FORM.replace("\"number\": 3", "\"number\": \"three\""),
                 "[]",
@@ -116,6 +123,12 @@ class AssetApiTest extends ApiTest {
     }
 
     @Test
+    void acceptsAnUnlistedAssetWithAnExplicitZeroId() throws Exception {
+        as(json(post("/forms"), FORM.replace("\"goodID\": 7168", "\"goodID\": 0")))
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.goodID").value(0));
+    }
+
+    @Test
     void exportsFormsAsCsvAndNeutralisesFormulas() throws Exception {
         as(json(post("/forms"), FORM));
         as(json(post("/forms"), FORM.replace("\"via Umberto I\"", "\"=HYPERLINK(\\\"http://evil.example\\\")\"").replace("\"Complesso dell antica porta\"", "\"@SUM(1+1)\"")));
@@ -127,9 +140,10 @@ class AssetApiTest extends ApiTest {
                 .andReturn().getResponse().getContentAsString();
 
         var lines = csv.lines().toList();
-        assertThat(lines.getFirst()).isEqualTo("id,region,province,municipality,address,name,istatCode,latitude,longitude");
+        assertThat(lines.getFirst()).isEqualTo("id,region,province,municipality,address,name,istatCode,latitude,longitude,number,goodID");
         assertThat(lines).hasSize(3);
         assertThat(lines.get(1)).contains(",Piemonte,Alessandria,Cremolino,\"via Umberto I\",\"Complesso dell antica porta\",006061,44.637512,8.585214");
+        assertThat(lines.get(1)).endsWith(",3,7168");
         assertThat(lines.get(2)).contains("'=HYPERLINK").contains("'@SUM(1+1)").doesNotContain(",=").doesNotContain(",@");
     }
 

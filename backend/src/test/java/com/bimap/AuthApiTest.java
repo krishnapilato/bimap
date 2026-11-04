@@ -113,4 +113,24 @@ class AuthApiTest extends ApiTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.errors.password", not(nullValue())));
     }
+
+    @Test
+    void rejectsMultibytePasswordsOver72Bytes() throws Exception {
+        var password = "é".repeat(37);
+        mvc.perform(json(post("/auth/signup"), """
+                {"name":"A","surname":"B","email":"unicode-long@bimap.test","password":"%s"}""".formatted(password)))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.password").exists());
+        mvc.perform(json(post("/auth/login"), """
+                {"email":"unicode-long@bimap.test","password":"%s"}""".formatted(password)))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.password").exists());
+    }
+
+    @Test
+    void acceptsMultibytePasswordsAt72Bytes() throws Exception {
+        var password = "é".repeat(36);
+        mvc.perform(json(post("/auth/signup"), """
+                {"name":"A","surname":"B","email":"unicode-valid@bimap.test","password":"%s"}""".formatted(password)))
+                .andExpect(status().isCreated());
+        login("unicode-valid@bimap.test", password);
+    }
 }

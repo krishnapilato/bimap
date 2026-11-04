@@ -33,6 +33,10 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
+import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -42,12 +46,22 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private static final int MIN_SECRET_BYTES = 32;
-    private static final String[] PUBLIC = {"/auth/login", "/auth/signup", "/", "/index.html", "/landing.css", "/error", "/favicon.svg", "/images/**", "/fonts/**",
+    private static final String[] PUBLIC = {"/auth/login", "/auth/signup", "/", "/index.html", "/landing.css", "/error", "/error.html", "/favicon.svg", "/images/**", "/fonts/**", "/landmarks/**",
             "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/actuator/health/**", "/actuator/info"};
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, UserRepository users,
+    SecurityFilterChain securityFilterChain(HttpSecurity http, UserRepository users, HtmlErrorPage errorPage,
                                             @Value("${app.security.content-security-policy}") String contentSecurityPolicy) {
+        var bearerEntry = new BearerTokenAuthenticationEntryPoint();
+        AuthenticationEntryPoint entry = (request, response, exception) -> {
+            bearerEntry.commence(request, response, exception);
+            if (errorPage.acceptsHtml(request)) errorPage.write(request, response, response.getStatus());
+        };
+        var bearerDenied = new BearerTokenAccessDeniedHandler();
+        AccessDeniedHandler denied = (request, response, exception) -> {
+            bearerDenied.handle(request, response, exception);
+            if (errorPage.acceptsHtml(request)) errorPage.write(request, response, response.getStatus());
+        };
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
@@ -59,7 +73,9 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC).permitAll()
                         .requestMatchers("/users/**").hasAuthority("ADMINISTRATOR")
                         .anyRequest().authenticated())
-                .oauth2ResourceServer(server -> server.jwt(jwt -> jwt.jwtAuthenticationConverter(currentAccount(users))))
+                .exceptionHandling(errors -> errors.authenticationEntryPoint(entry).accessDeniedHandler(denied))
+                .oauth2ResourceServer(server -> server.authenticationEntryPoint(entry).accessDeniedHandler(denied)
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(currentAccount(users))))
                 .build();
     }
 
@@ -76,8 +92,9 @@ public class SecurityConfig {
     }
 
     private static Converter<Jwt, AbstractAuthenticationToken> currentAccount(UserRepository users) {
-        return jwt -> users.findByEmail(jwt.getSubject())
+        return jwt -> users.findById(Long.valueOf(Objects.requireNonNull(jwt.getSubject())))
                 .filter(com.bimap.model.User::canSignIn)
+                .filter(user -> Long.toString(user.getTokenVersion()).equals(jwt.getClaimAsString("ver")))
                 .map(user -> new JwtAuthenticationToken(jwt, AuthorityUtils.createAuthorityList(user.getRole().name()), user.getEmail()))
                 .orElseThrow(() -> new InvalidBearerTokenException("The account is no longer active."));
     }
@@ -85,6 +102,9 @@ public class SecurityConfig {
     @Bean
     SecretKeySpec jwtKey(@Value("${jwt.secret}") String secret) {
         var bytes = secret.getBytes(StandardCharsets.UTF_8);
+        if (secret.isBlank() || "at-least-32-random-characters-change-me".equals(secret)) {
+            throw new IllegalStateException("jwt.secret must be a nonblank secret generated for this deployment.");
+        }
         if (bytes.length < MIN_SECRET_BYTES) throw new IllegalStateException("jwt.secret must be at least %d bytes long.".formatted(MIN_SECRET_BYTES));
         return new SecretKeySpec(bytes, "HmacSHA256");
     }
@@ -99,14 +119,23 @@ public class SecurityConfig {
         var decoder = NimbusJwtDecoder.withSecretKey(jwtKey).build();
         decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(JwtValidators.createDefault(),
                 new JwtClaimValidator<Instant>(JwtClaimNames.EXP, _ -> true),
-                new JwtClaimValidator<String>(JwtClaimNames.SUB, subject -> !subject.isBlank())));
+                new JwtClaimValidator<String>(JwtClaimNames.SUB, SecurityConfig::isUserId),
+                new JwtClaimValidator<Object>("ver", value -> value instanceof String version && version.matches("0|[1-9][0-9]{0,18}"))));
         return decoder;
+    }
+
+    private static boolean isUserId(String subject) {
+        try {
+            return subject != null && Long.parseLong(subject) > 0;
+        } catch (NumberFormatException _) {
+            return false;
+        }
     }
 
     @Bean
     UserDetailsService userDetailsService(UserRepository users) {
         return email -> users.findByEmail(email)
-                .map(user -> User.withUsername(user.getEmail())
+                .map(user -> User.withUsername(user.getId().toString())
                         .password(user.getPassword())
                         .authorities(user.getRole().name())
                         .disabled(!user.isEnabled())

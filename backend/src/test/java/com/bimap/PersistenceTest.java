@@ -18,7 +18,7 @@ class PersistenceTest extends ApiTest {
 
     @Test
     void appliesEveryMigrationAndLoadsReferenceData() {
-        assertThat(jdbc.sql("SELECT version FROM flyway_schema_history WHERE success = 1 ORDER BY installed_rank").query(String.class).list()).containsExactly("1", "2");
+        assertThat(jdbc.sql("SELECT version FROM flyway_schema_history WHERE success = 1 ORDER BY installed_rank").query(String.class).list()).containsExactly("1", "2", "3", "4");
         assertThat(jdbc.sql("SELECT count(*) FROM tables").query(Long.class).single()).isEqualTo(687);
         assertThat(jdbc.sql("SELECT count(*) FROM listacomuni").query(Long.class).single()).isEqualTo(3590);
     }
@@ -61,5 +61,14 @@ class PersistenceTest extends ApiTest {
                 .isInstanceOf(DataAccessException.class).hasMessageContaining("CHECK");
         assertThatThrownBy(() -> jdbc.sql("INSERT INTO form (region, province, municipality, address, good_naming, number, goodid, latitude, longitude) VALUES (NULL, 'b', 'c', 'd', 'e', 1, 1, 0, 0)").update())
                 .isInstanceOf(DataAccessException.class).hasMessageContaining("NOT NULL");
+    }
+
+    @Test
+    void repairsReferenceEncodingWithoutDroppingRows() {
+        assertThat(jdbc.sql("SELECT comune FROM listacomuni WHERE id = 1").query(String.class).single()).isEqualTo("Agliè");
+        assertThat(jdbc.sql("SELECT comune FROM listacomuni WHERE id = 85").query(String.class).single()).isEqualTo("Ciriè");
+        assertThat(jdbc.sql("SELECT comune FROM listacomuni WHERE id = 1420").query(String.class).single()).isEqualTo("Cantù");
+        assertThat(jdbc.sql("SELECT indirizzo FROM tables WHERE id = 75").query(String.class).single()).isEqualTo("V.le Unità d'Italia");
+        assertThat(jdbc.sql("SELECT count(*) FROM listacomuni WHERE comune LIKE '%Ã%' OR comune LIKE '%Â%'").query(Long.class).single()).isZero();
     }
 }

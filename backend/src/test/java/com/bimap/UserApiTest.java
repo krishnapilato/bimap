@@ -124,6 +124,8 @@ class UserApiTest extends ApiTest {
             {"name": "A", "surname": "B", "email": "ghost@bimap.test", "role": "USER"}""")).andExpect(status().isNotFound());
         as(get("/users/abc")).andExpect(status().isMethodNotAllowed());
         as(delete("/users/abc")).andExpect(status().isBadRequest());
+        as(delete("/users/0")).andExpect(status().isBadRequest());
+        as(post("/users/-1/welcome-email")).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -159,6 +161,21 @@ class UserApiTest extends ApiTest {
         as(post("/users/" + user.getId() + "/welcome-email"))
             .andExpect(status().isServiceUnavailable())
             .andExpect(content().string(not(containsString("smtp.internal"))));
+    }
+
+    @Test
+    void validatesPasswordBytesOnCreateAndUpdate() throws Exception {
+        var user = createUser("unicode-admin@bimap.test", User.Role.USER, true);
+        var invalid = """
+                {"name":"A","surname":"B","email":"unicode-admin@bimap.test","password":"%s"}""".formatted("é".repeat(37));
+        as(json(post("/users"), invalid)).andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.password").exists());
+        as(json(put("/users/" + user.getId()), invalid)).andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.password").exists());
+        login(user.getEmail(), PASSWORD);
+        var valid = invalid.replace("é".repeat(37), "é".repeat(36));
+        as(json(put("/users/" + user.getId()), valid)).andExpect(status().isOk());
+        login(user.getEmail(), "é".repeat(36));
+        as(json(post("/users"), valid.replace("unicode-admin@bimap.test", "unicode-created@bimap.test"))).andExpect(status().isCreated());
+        login("unicode-created@bimap.test", "é".repeat(36));
     }
 
     private ResultActions as(MockHttpServletRequestBuilder request) throws Exception {

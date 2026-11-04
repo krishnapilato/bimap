@@ -46,6 +46,8 @@ public class User {
 
     private boolean enabled = true;
 
+    private long tokenVersion;
+
     protected User() { }
 
     public User(String name, String surname, String email, String password, Role role) {
@@ -90,6 +92,7 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+        tokenVersion++;
     }
 
     public Role getRole() {
@@ -113,7 +116,12 @@ public class User {
     }
 
     public void setEnabled(boolean enabled) {
+        if (this.enabled != enabled) tokenVersion++;
         this.enabled = enabled;
+    }
+
+    public long getTokenVersion() {
+        return tokenVersion;
     }
 
     public boolean canSignIn() {

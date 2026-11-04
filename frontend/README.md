@@ -2,23 +2,15 @@
 
 Angular client for registering Italian heritage assets on a map, managing users and exploring places in Street View.
 
-![Angular](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)
-![Signal Forms](https://img.shields.io/badge/Signal_Forms-22-DD0031?logo=angular&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white)
-![daisyUI](https://img.shields.io/badge/daisyUI-5-5A0EF8?logo=daisyui&logoColor=white)
-![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet&logoColor=white)
-![GitHub Pages](https://img.shields.io/badge/GitHub_Pages-demo-222222?logo=githubpages&logoColor=white)
-
 **Live demo:** [krishnapilato.github.io/bimap](https://krishnapilato.github.io/bimap/)
 
----
+![Updated asset register](../docs/screenshots/frontend-assets.jpg)
 
 ## Pages
 
 | Route | Page | Access |
 |---|---|---|
-| `/` | Landing page with a fading aerial map of Italy | public |
+| `/` | Landing page with a live Italian heritage photograph | public |
 | `/login` | Sign in and sign up | public |
 | `/assets` | Register an asset: place, address, map pin, and the asset register | signed in |
 | `/street-view` | Road map with Street View coverage and a live panorama | signed in |
@@ -39,7 +31,7 @@ Open <http://localhost:4200>. The app expects the [backend](../backend/README.md
 npm run start:demo
 ```
 
-The demo build needs no backend: an HTTP interceptor answers every API call from in-memory mock data, route guards are off, and you start signed in as an administrator. Comuni-ITA, Nominatim and Google Maps are still called for real. Changes reset on reload.
+The demo build needs no backend and starts signed in as an administrator. Guards still enforce authentication and roles. All 687 real reference assets are loaded lazily on opening the register and cached in sessionStorage; corrupt or unavailable storage falls back to the bundled catalog. User edits and saved forms remain in memory and reset on reload. Comuni-ITA, Nominatim, Wikimedia Commons and Google Maps are called for real.
 
 ## Building
 
@@ -87,7 +79,7 @@ src/app
 ├── core                 App-wide plumbing
 │   ├── auth             AuthService, guards, interceptor and auth models
 │   └── demo             Mock data and the interceptor used by the demo build
-├── shared               Navbar, aerial map and ToastService
+├── shared               Autocomplete, dialogs, gallery, CSV preview, navbar and toasts
 └── features             One folder per page
     ├── home             Landing page
     ├── login            Sign in, sign up and sign out
@@ -95,3 +87,17 @@ src/app
     ├── street-view      Street View page
     └── users            User management, its service and models
 ```
+
+## Reliability and UI
+
+Run `npm run lint` and `npm test -- --watch=false`. The suite covers sessions, late authentication responses, asynchronous place selection, autocomplete keyboard navigation, user actions, demo storage, photographs and CSV parsing/saving. TypeScript targets ESNext with explicit ES2023 and DOM libraries; it remains pinned to the Angular-compatible 6.0 release.
+
+State uses Angular signals and rxResource, with dedicated auth and demo services. Sessions validate expiry, synchronize across tabs and retain an in-memory fallback when storage is blocked. Native dialogs handle focus and background interaction. Place autocomplete supports keyboard selection.
+
+CSV export opens a bounded preview of the first ten records. Save CSV opens the native location picker where supported; other browsers use their configured download behavior. The table scrolls inside the dialog.
+
+## Live heritage photographs
+
+Home and login use the same gallery as the backend landing. The configured Wikimedia Commons API discovers freely licensed Italian Wiki Loves Monuments photographs, without a city list, photo URLs or an API key. One photograph is selected per page load. Titles are cleaned and credits link to the source and license.
+
+The gallery requests 960-pixel thumbnails, keeps a five-photo metadata queue in sessionStorage for six hours, preloads queued images into the browser HTTP cache and replenishes near exhaustion. Image bytes are never written to sessionStorage. Initial retrieval still depends on Commons; requests and image loads time out after ten seconds and offer Retry on failure. The narrowly scoped CSP allows Commons API and image hosts while retaining autoCsp and Google Maps style support.

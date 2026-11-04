@@ -1,7 +1,7 @@
 <router-outlet />
 
 @if (toast.message(); as message) {
-  <div class="toast toast-end z-[1100]">
+  <div class="toast toast-end z-[1100]" role="status" aria-live="polite" aria-atomic="true">
     <div class="alert bg-neutral text-neutral-content">{{ message }}</div>
   </div>
 }

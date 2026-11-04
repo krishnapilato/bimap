@@ -7,52 +7,52 @@
         <h1 class="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Register an asset</h1>
         <p class="text-base text-base-content/70 sm:text-lg">Choose the place, pin it on the map and save its details.</p>
       </div>
-      <button class="btn btn-ghost sm:btn-lg" (click)="exportCsv()">Download CSV</button>
+      <button class="btn btn-ghost sm:btn-lg" [disabled]="exporting()" (click)="exportCsv()">{{ exporting() ? 'Downloading…' : 'Download CSV' }}</button>
     </header>
 
     <div class="grid gap-8 lg:grid-cols-[minmax(0,26rem)_1fr]">
       <form class="flex flex-col gap-4" [formRoot]="form">
+        <fieldset class="contents" [disabled]="form().submitting()">
         <div class="grid grid-cols-2 gap-4">
-          <input #region class="input w-full" list="regions" placeholder="Region" autocomplete="off" [formField]="form.region" (change)="selectRegion(region.value)" />
-          <input #province class="input w-full" list="provinces" placeholder="Province" autocomplete="off" [formField]="form.province" (change)="selectProvince(province.value)" />
+          <app-autocomplete label="Region" [options]="regions()" [available]="regions().length > 0" [formField]="form.region" (selected)="selectRegion($event)" />
+          <app-autocomplete label="Province" [options]="provinces()" [available]="provinces().length > 0" hint="Choose region first" [formField]="form.province" (selected)="selectProvince($event)" />
         </div>
-        <input #municipality class="input w-full" list="municipalities" placeholder="Municipality" autocomplete="off" [formField]="form.municipality" (change)="selectMunicipality(municipality.value)" />
-        <datalist id="regions">
-          @for (name of regions(); track name) {
-            <option [value]="name"></option>
-          }
-        </datalist>
-        <datalist id="provinces">
-          @for (name of provinces(); track name) {
-            <option [value]="name"></option>
-          }
-        </datalist>
-        <datalist id="municipalities">
-          @for (place of municipalities(); track place.codice) {
-            <option [value]="place.nome"></option>
-          }
-        </datalist>
+        <app-autocomplete label="Municipality" [options]="municipalityNames()" [available]="municipalities().length > 0" hint="Choose province first" [formField]="form.municipality" (selected)="selectMunicipality($event)" />
 
         <div class="grid grid-cols-[1fr_6rem] gap-4">
-          <input class="input w-full" placeholder="Address" [formField]="form.address" (blur)="locateAddress()" />
-          <input class="input w-full" type="number" placeholder="No." [formField]="form.number" />
+          <input class="input w-full" aria-label="Address" placeholder="Address" [formField]="form.address" (blur)="locateAddress()" />
+          <input class="input w-full" type="number" aria-label="Street number" step="1" placeholder="No." [formField]="form.number" (blur)="locateAddress()" />
         </div>
-        <input class="input w-full" placeholder="Asset name" [formField]="form.goodNaming" />
+        <input class="input w-full" aria-label="Asset name" placeholder="Asset name" [formField]="form.goodNaming" />
         <div class="grid grid-cols-2 gap-4">
-          <input class="input w-full" type="number" placeholder="Asset ID" [formField]="form.goodID" />
-          <input class="input w-full" placeholder="ISTAT code" [formField]="form.istatCode" />
+          <input class="input w-full" type="number" step="1" aria-label="Asset ID" placeholder="Asset ID" [formField]="form.goodID" />
+          <input class="input w-full" aria-label="ISTAT code" placeholder="ISTAT code" [formField]="form.istatCode" />
         </div>
         <div class="grid grid-cols-2 gap-4">
-          <input class="input w-full" type="number" placeholder="Latitude" [formField]="form.latitude" />
-          <input class="input w-full" type="number" placeholder="Longitude" [formField]="form.longitude" />
+          <input class="input w-full" type="number" aria-label="Latitude" placeholder="Latitude" [formField]="form.latitude" />
+          <input class="input w-full" type="number" aria-label="Longitude" placeholder="Longitude" [formField]="form.longitude" />
         </div>
-        <p class="text-sm text-base-content/60">Click the map to set the coordinates. The ISTAT code fills in from the municipality.</p>
+        <p id="map-help" class="text-sm text-base-content/60">Click the map to set the coordinates, or move it with the arrow keys and choose its centre. The ISTAT code fills in from the municipality. Leave Asset ID blank for an unlisted asset.</p>
+        @if (form.number().touched() && form.number().invalid()) {
+          <p role="alert" class="text-sm text-error">{{ form.number().errors()[0]?.message }}</p>
+        }
+        @if (form.goodID().touched() && form.goodID().invalid()) {
+          <p role="alert" class="text-sm text-error">{{ form.goodID().errors()[0]?.message }}</p>
+        }
+        </fieldset>
+        @if (placesLoading() || locating()) {
+          <p role="status" class="text-sm text-base-content/70">{{ locating() ? 'Finding the address…' : 'Loading places…' }}</p>
+        }
+        @if (placesError()) {
+          <div role="alert" class="alert alert-warning alert-soft">Could not load places. <button type="button" class="btn btn-sm" (click)="retryPlaces()">Try again</button></div>
+        }
+        <button type="button" class="btn btn-outline" [disabled]="form().submitting()" (click)="useMapCentre()">Use map centre</button>
 
         @if (error()) {
           <div role="alert" class="alert alert-error alert-soft">{{ error() }}</div>
         }
 
-        <button class="btn btn-primary btn-lg mt-2" [disabled]="form().submitting()">
+        <button class="btn btn-primary btn-lg mt-2" [disabled]="form().submitting() || locating() || placesLoading()">
           @if (form().submitting()) {
             <span class="loading loading-spinner loading-sm"></span>
           }
@@ -61,13 +61,13 @@
       </form>
 
       <div class="relative h-[50svh] overflow-hidden rounded-box bg-base-200 shadow-md lg:h-auto">
-        <div #map class="absolute inset-0"></div>
-        <button type="button" class="btn btn-square btn-sm absolute top-[5.25rem] left-[10px] z-[1000]" [class.btn-primary]="streetView()" title="Street View mode" (click)="toggleStreetView()">
+        <div #map role="region" aria-label="Asset location map" aria-describedby="map-help" class="absolute inset-0"></div>
+        <button type="button" class="btn btn-square btn-sm absolute top-[5.25rem] left-[10px] z-[1000]" [class.btn-primary]="streetView()" [attr.aria-pressed]="streetView()" title="Street View mode" (click)="toggleStreetView()">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true"><circle cx="12" cy="5" r="2"/><path d="M10 22v-6H8v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5h-2v6"/></svg>
         </button>
         <div class="join absolute top-3 right-3 z-[1000]">
-          <button type="button" class="btn join-item btn-sm" [class.btn-primary]="!satellite()" (click)="setSatellite(false)">Map</button>
-          <button type="button" class="btn join-item btn-sm" [class.btn-primary]="satellite()" (click)="setSatellite(true)">Satellite</button>
+          <button type="button" class="btn join-item btn-sm" [class.btn-primary]="!satellite()" [attr.aria-pressed]="!satellite()" (click)="setSatellite(false)">Map</button>
+          <button type="button" class="btn join-item btn-sm" [class.btn-primary]="satellite()" [attr.aria-pressed]="satellite()" (click)="setSatellite(true)">Satellite</button>
         </div>
       </div>
     </div>
@@ -79,7 +79,7 @@
         <h2 class="text-2xl font-semibold tracking-tight sm:text-3xl">Asset register</h2>
         <p class="text-base-content/70">Choose an asset to copy it into the form.</p>
       </div>
-      <input #search class="input w-full sm:max-w-sm" type="search" placeholder="Search name, municipality or address" (input)="query.set(search.value)" />
+      <input #search class="input w-full sm:max-w-sm" type="search" aria-label="Search assets" placeholder="Search name, municipality or address" (input)="query.set(search.value)" />
     </header>
 
     <div class="overflow-x-auto">
@@ -93,10 +93,13 @@
         </thead>
         <tbody>
           @for (asset of visible(); track asset.id) {
-            <tr class="cursor-pointer hover:bg-base-200" (click)="useAsset(asset)">
+            <tr class="hover:bg-base-200">
               <td class="max-sm:w-full max-sm:max-w-0">
-                <div class="truncate font-medium">{{ asset.denominazione || 'Unnamed asset' }}</div>
-                <div class="truncate text-sm text-base-content/60">{{ asset.indirizzo }} {{ asset.civico || '' }}</div>
+                <button type="button" class="block w-full text-left hover:underline focus-visible:outline-2 focus-visible:outline-offset-4" [disabled]="form().submitting()" (click)="useAsset(asset)">
+                  <span class="block truncate font-medium">{{ asset.denominazione || 'Unnamed asset' }}</span>
+                  <span class="block truncate text-sm text-base-content/60">{{ asset.indirizzo }} {{ asset.civico || '' }}</span>
+                  <span class="block text-sm text-base-content/60 sm:hidden">{{ asset.comune }} {{ asset.prov }}</span>
+                </button>
               </td>
               <td class="hidden capitalize sm:table-cell">{{ asset.comune.toLowerCase() }} <span class="text-base-content/60">{{ asset.prov }}</span></td>
               <td class="hidden md:table-cell">
@@ -109,6 +112,7 @@
             <tr>
               <td colspan="3" class="py-16 text-center text-base-content/60">
                 {{ assets.isLoading() ? 'Loading assets…' : assets.error() ? 'Could not load the assets.' : 'No assets found.' }}
+                @if (assets.error()) { <button class="btn btn-ghost btn-sm" (click)="assets.reload()">Try again</button> }
               </td>
             </tr>
           }
@@ -125,3 +129,27 @@
     </div>
   </section>
 </main>
+
+<dialog class="modal" [appModal]="csvPreview() !== null" aria-labelledby="csv-title" (cancel)="closeCsv($event)">
+  @if (csvPreview(); as preview) {
+    <div class="modal-box flex max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] min-w-0 max-w-5xl flex-col gap-5 overflow-hidden">
+      <h2 id="csv-title" class="text-2xl font-semibold">Preview CSV export</h2>
+      <p class="text-sm text-base-content/70">{{ preview.truncated ? 'Showing the first 10 rows. The download includes every saved form.' : 'Preview of the exported forms.' }} Choose Save CSV to confirm and select a location. Some browsers use their download-folder settings.</p>
+      <div class="min-h-0 min-w-0 flex-1 overflow-auto overscroll-contain rounded-lg border border-base-300">
+        <table class="table table-sm min-w-max">
+          <thead><tr>@for (header of preview.headers; track $index) { <th>{{ header }}</th> }</tr></thead>
+          <tbody>
+            @for (row of preview.rows; track $index) { <tr>@for (cell of row; track $index) { <td class="max-w-64 whitespace-pre-wrap break-words">{{ cell }}</td> }</tr> }
+            @empty { <tr><td [attr.colspan]="preview.headers.length">No saved forms. The CSV contains its header.</td></tr> }
+          </tbody>
+        </table>
+      </div>
+      @if (error()) { <div role="alert" class="alert alert-error alert-soft">{{ error() }}</div> }
+      <div class="modal-action shrink-0">
+        <button type="button" class="btn btn-ghost" [disabled]="savingCsv()" (click)="closeCsv()">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="savingCsv()" (click)="confirmCsv()">{{ savingCsv() ? 'Saving…' : 'Save CSV' }}</button>
+      </div>
+    </div>
+  }
+  <button type="button" class="modal-backdrop" aria-label="Close CSV preview" (click)="closeCsv()">Close</button>
+</dialog>

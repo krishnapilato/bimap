@@ -15,10 +15,10 @@ import { AuthService } from '../core/auth/auth.service';
         }
       </div>
       <div class="flex flex-wrap justify-end gap-1">
-        <a class="btn btn-ghost btn-sm" routerLink="/assets" routerLinkActive="btn-active">Assets</a>
-        <a class="btn btn-ghost btn-sm" routerLink="/street-view" routerLinkActive="btn-active">Street View</a>
+        <a class="btn btn-ghost btn-sm" routerLink="/assets" routerLinkActive="btn-active" ariaCurrentWhenActive="page">Assets</a>
+        <a class="btn btn-ghost btn-sm" routerLink="/street-view" routerLinkActive="btn-active" ariaCurrentWhenActive="page">Street View</a>
         @if (auth.isAdmin()) {
-          <a class="btn btn-ghost btn-sm" routerLink="/users" routerLinkActive="btn-active">Users</a>
+          <a class="btn btn-ghost btn-sm" routerLink="/users" routerLinkActive="btn-active" ariaCurrentWhenActive="page">Users</a>
         }
         <a class="btn btn-ghost btn-sm" routerLink="/logout">Sign out</a>
       </div>

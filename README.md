@@ -2,20 +2,8 @@
 
 A web application for registering Italian heritage assets on a map: pick a place, check it in Street View, save its details. Administrators manage who can use it.
 
-![Java](https://img.shields.io/badge/Java-27-ED8B00?logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-Flyway-003B57?logo=sqlite&logoColor=white)
-![Angular](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-6.0-3178C6?logo=typescript&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.3-06B6D4?logo=tailwindcss&logoColor=white)
-![daisyUI](https://img.shields.io/badge/daisyUI-5-5A0EF8?logo=daisyui&logoColor=white)
-![Leaflet](https://img.shields.io/badge/Leaflet-1.9-199900?logo=leaflet&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-compose-2496ED?logo=docker&logoColor=white)
-
 [![CI](https://github.com/krishnapilato/bimap/actions/workflows/ci.yml/badge.svg)](https://github.com/krishnapilato/bimap/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Deploy demo](https://github.com/krishnapilato/bimap/actions/workflows/pages.yml/badge.svg)](https://github.com/krishnapilato/bimap/actions/workflows/pages.yml)
-![Lighthouse](https://img.shields.io/badge/Lighthouse-100_A11y_·_100_Best_practices_·_100_SEO-0CCE6B?logo=lighthouse&logoColor=white)
 
 **Live demo:** [krishnapilato.github.io/bimap](https://krishnapilato.github.io/bimap/) — runs entirely in the browser with mock data, no sign-in needed.
 
@@ -27,39 +15,45 @@ A web application for registering Italian heritage assets on a map: pick a place
 
 | Landing page | Sign in |
 |---|---|
-| ![Landing page](docs/screenshots/frontend-home.png) | ![Sign in](docs/screenshots/frontend-login.png) |
+| ![Landing page](docs/screenshots/frontend-home.jpg) | ![Sign in](docs/screenshots/frontend-login.jpg) |
 
-| Register an asset | Street View |
+| Register an asset | Street View (local build without a Maps key) |
 |---|---|
-| ![Register an asset](docs/screenshots/frontend-assets.png) | ![Street View](docs/screenshots/frontend-street-view.png) |
+| ![Register an asset](docs/screenshots/frontend-assets.jpg) | ![Street View](docs/screenshots/frontend-street-view.jpg) |
 
 | Users | Edit a user |
 |---|---|
-| ![Users](docs/screenshots/frontend-users.png) | ![Edit a user](docs/screenshots/frontend-users-edit.png) |
+| ![Users](docs/screenshots/frontend-users.jpg) | ![Edit a user](docs/screenshots/frontend-users-edit.jpg) |
+
+| CSV preview | CSV on mobile |
+|---|---|
+| ![CSV preview](docs/screenshots/frontend-csv.jpg) | ![CSV mobile](docs/screenshots/frontend-csv-mobile.jpg) |
 
 ### Backend
 
 | Landing page | API documentation |
 |---|---|
-| ![Backend landing page](docs/screenshots/backend-landing.png) | ![Swagger UI](docs/screenshots/backend-swagger.png) |
+| ![Backend landing page](docs/screenshots/backend-landing.jpg) | ![Swagger UI](docs/screenshots/backend-swagger.jpg) |
+
+![Generic browser error page](docs/screenshots/backend-error.jpg)
 
 ## Quality
 
-Every warning is treated as an error: a build with unused code, a lint finding or a compiler warning does not pass, locally or in [CI](.github/workflows/ci.yml).
+Compiler warnings and static-analysis violations fail the build: unused code, lint findings and compiler warnings do not pass, locally or in [CI](.github/workflows/ci.yml).
 
 | Check | Backend | Frontend |
 |---|---|---|
 | Compiler | `javac -Xlint:all -Werror` | TypeScript `strict`, `noUnusedLocals`, `noUnusedParameters` |
 | Static analysis | [PMD 7](backend/pmd-ruleset.xml): unused code, bug patterns, clean-code rules | [ESLint](frontend/eslint.config.mjs): `typescript-eslint` strict type-checked, `angular-eslint`, SonarJS |
 | Templates | — | Angular strict templates, extended diagnostics as errors |
-| Tests | JUnit 6, MockMvc and Mockito against a real SQLite database (42 tests) | Vitest |
+| Tests | JUnit 6, MockMvc and Mockito against real SQLite, with concurrent account/rate-limit checks and migration/backup coverage (75 tests) | Vitest (39 tests) |
 | Security headers | Strict Content Security Policy, `frame-ancestors 'none'`, `no-referrer` | Content Security Policy with hashed scripts (`autoCsp`) |
 | Docker | Both images built in CI | Both images built in CI |
 | Dependencies | Dependabot, weekly | Dependabot, weekly; `npm audit` clean |
 
 ### Lighthouse
 
-Measured with Lighthouse 13 on the production demo build. Mobile uses Lighthouse's simulated slow 4G and a 4× slower CPU.
+Historical baseline from before the gallery and UI refresh, measured with Lighthouse 13. These scores have not been remeasured for the current UI. Mobile uses Lighthouse's simulated slow 4G and a 4× slower CPU.
 
 | Page | Performance (mobile / desktop) | Accessibility | Best practices | SEO |
 |---|:-:|:-:|:-:|:-:|
@@ -110,7 +104,19 @@ cp backend/.env.example backend/.env
 docker compose up -d --build
 ```
 
-Fill in `backend/.env` first. For Street View, also put `GOOGLE_MAPS_KEY=<your key>` in a `.env` file at the repository root; Git ignores it. Open <http://localhost:8080> for the app; the API is behind it at <http://localhost:8080/api/>, with documentation at <http://localhost:8080/api/swagger-ui.html>. The database lives in the `bimap-data` volume; `docker compose down -v` deletes it.
+Fill in `backend/.env` first. For Street View, also put `GOOGLE_MAPS_KEY=<your key>` in a `.env` file at the repository root; Git ignores it.
+
+Everything goes through one port. nginx serves the app and forwards every path under `/api/` to the backend, which has no port of its own:
+
+| What | Address |
+|---|---|
+| The app | <http://localhost:8080> |
+| Backend landing page | <http://localhost:8080/api/> |
+| Swagger UI | <http://localhost:8080/api/swagger-ui.html> |
+| Health check | <http://localhost:8080/api/actuator/health> |
+| Any API endpoint | `/api` + the path from the [API reference](backend/README.md#api), for example `POST http://localhost:8080/api/auth/login` |
+
+The database lives in the `bimap-data` volume; `docker compose down -v` deletes it.
 
 ### Without Docker
 
