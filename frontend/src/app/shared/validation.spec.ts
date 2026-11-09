@@ -1,5 +1,5 @@
 import { computed, signal } from '@angular/core';
-import { passwordError, integerError } from './validation';
+import { EMAIL, integerError, passwordError, PERSON_NAME, PLAIN_TEXT, singleLine } from './validation';
 import { pageIndex } from './pagination';
 import { safeReturnUrl } from '../features/login/login';
 import { apiPath } from '../core/auth/api-path';
@@ -30,11 +30,22 @@ describe('Frontend validation and navigation', () => {
   });
 
   it('only returns to permitted application pages', () => {
-    expect(safeReturnUrl('/assets?q=house', false)).toBe('/assets?q=house');
+    expect(safeReturnUrl('/street-view?x=<script>', false)).toBe('/street-view');
     expect(safeReturnUrl('/users', true)).toBe('/users');
-    for (const url of ['/users', '/logout', '/login', '//evil.example', '/\\evil.example', 'https://evil.example']) {
+    for (const url of ['/users', '/logout', '/login', '//evil.example', '/\\evil.example', 'https://evil.example', 'javascript:alert(1)', '/street-view%0d%0a']) {
       expect(safeReturnUrl(url, false)).toBe('/assets');
     }
+  });
+
+  it('accepts real names and catalogue text but rejects markup and control characters', () => {
+    for (const name of ["D'Angelo", 'José María', 'Anne-Marie', 'Rossi Jr.']) expect(PERSON_NAME.test(name)).toBe(true);
+    for (const name of ['<b>', 'Robert"); DROP', '=cmd', 'Mario\u0000', '1337']) expect(PERSON_NAME.test(name)).toBe(false);
+    for (const text of ['Palazzo Da Franchi o De Franchi (oggi Palazzo Peloso)', 'Roma , via', 'Valle d\'Aosta/Vallée d\'Aoste']) expect(PLAIN_TEXT.test(text)).toBe(true);
+    for (const text of ['<img src=x onerror=alert(1)>', '=HYPERLINK("x")', '{{ constructor }}', 'a\nb', '${x}', '@SUM(A1)', '-1+1']) expect(PLAIN_TEXT.test(text)).toBe(false);
+    expect(singleLine('  Via\n  Roma  1 ')).toBe('Via Roma 1');
+    expect(EMAIL.test('giulia.rossi@example.com')).toBe(true);
+    expect(EMAIL.test('a@mail.example.co.uk')).toBe(true);
+    for (const email of ['"a b"@example.com', 'a@b', 'a@b..c', 'a@b.c.', 'a@example.com\r\nBcc: x@y.z']) expect(EMAIL.test(email)).toBe(false);
   });
 
   it('scopes API requests by origin and path boundary', () => {

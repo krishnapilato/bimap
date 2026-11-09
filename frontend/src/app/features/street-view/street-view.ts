@@ -10,15 +10,15 @@ const START = L.latLng(45.481, 9.173);
   selector: 'app-street-view',
   imports: [Navbar],
   template: `
-    <main class="mx-auto flex min-h-dvh max-w-7xl flex-col gap-8 px-6 py-8 sm:px-12 lg:py-12">
+    <main class="mx-auto flex h-dvh min-h-[36rem] max-w-7xl flex-col gap-4 px-4 py-4 sm:gap-6 sm:px-12 sm:py-8 lg:py-12">
       <app-navbar />
-      <header class="flex flex-col gap-3">
-        <h1 class="text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">Street View</h1>
-        <p class="text-base text-base-content/70 sm:text-lg">Click a blue street on the map to look around from there.</p>
+      <header class="flex flex-col gap-1 sm:gap-3">
+        <h1 class="text-2xl font-semibold leading-tight tracking-tight sm:text-4xl lg:text-5xl">Street View</h1>
+        <p class="text-sm text-base-content/70 sm:text-lg">Click a blue street on the map to look around from there.</p>
       </header>
-      <div class="grid flex-1 gap-4 lg:grid-cols-2">
-        <div #map role="region" aria-label="Street View location map" class="h-[45svh] overflow-hidden rounded-box bg-base-200 shadow-md lg:h-auto lg:min-h-[28rem]"></div>
-        <div class="relative h-[45svh] overflow-hidden rounded-box bg-base-200 shadow-md lg:h-auto lg:min-h-[28rem]">
+      <div class="grid min-h-0 flex-1 grid-rows-[3fr_2fr] gap-3 sm:gap-4 lg:grid-cols-2 lg:grid-rows-1">
+        <div #map role="region" aria-label="Street View location map" class="order-last min-h-0 overflow-hidden rounded-box bg-base-200 shadow-md lg:order-first"></div>
+        <div class="relative min-h-0 overflow-hidden rounded-box bg-base-200 shadow-md">
           <div #panorama class="absolute inset-0"></div>
           @if (loading()) {
             <p role="status" class="absolute inset-0 grid place-items-center bg-base-200 px-6 text-center text-base-content/70">Loading Street View…</p>
@@ -48,6 +48,7 @@ export class StreetView {
   private map?: L.Map;
   private marker?: L.CircleMarker;
   private panorama?: google.maps.StreetViewPanorama;
+  private resize?: ResizeObserver;
   private requestVersion = 0;
 
   private readonly destroyRef = inject(DestroyRef);
@@ -57,6 +58,7 @@ export class StreetView {
       void this.start();
     });
     this.destroyRef.onDestroy(() => {
+      this.resize?.disconnect();
       this.map?.remove();
       if (this.panorama) {
         this.panorama.setVisible(false);
@@ -83,6 +85,8 @@ export class StreetView {
       this.map = L.map(this.mapElement().nativeElement, { attributionControl: false, maxZoom: 18, minZoom: 8, maxBounds: [[-90, -180], [90, 180]] }).setView(START, 15);
       googleTiles('roads').addTo(this.map);
       googleTiles('street-view').addTo(this.map);
+      this.resize = new ResizeObserver(() => this.map?.invalidateSize());
+      this.resize.observe(this.mapElement().nativeElement);
     }
     const map = this.map;
     const marker = this.marker ??= L.circleMarker(START, { radius: 8, color: '#fff', weight: 3, fillColor: '#18181b', fillOpacity: 1 }).addTo(map);

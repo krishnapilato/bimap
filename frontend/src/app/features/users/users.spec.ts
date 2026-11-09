@@ -14,7 +14,7 @@ describe('Users workflows', () => {
   let host: HTMLElement;
   const service = { findAll: vi.fn(), delete: vi.fn(), update: vi.fn(), save: vi.fn() };
   const accounts: User[] = Array.from({ length: 6 }, (_, i) => ({
-    id: i + 1, name: `User${i + 1}`, surname: 'Test', email: `user${i + 1}@example.com`, role: 'USER', enabled: true,
+    id: i + 1, name: 'User', surname: String.fromCodePoint(65 + i), email: `user${i + 1}@example.com`, role: 'USER', enabled: true,
   }));
 
   beforeEach(async () => {
@@ -58,7 +58,7 @@ describe('Users workflows', () => {
     service.findAll.mockReturnValue(of(accounts.slice(0, 5)));
     await deleteLastUser();
     expect(host.textContent).toContain('Page 1 of 1');
-    expect(host.textContent).toContain('User1');
+    expect(host.textContent).toContain('User A');
   });
 
   it('keeps failed deletion open and explains the server conflict', async () => {

@@ -13,7 +13,7 @@ import { UsersService } from './users.service';
 import { apiError } from '../../shared/api-error';
 import { Modal } from '../../shared/modal';
 import { pageIndex } from '../../shared/pagination';
-import { passwordError } from '../../shared/validation';
+import { EMAIL, NAME_MESSAGE, PERSON_NAME, passwordError, singleLine, textError } from '../../shared/validation';
 
 const PAGE_SIZE = 5;
 const EMPTY = { name: '', surname: '', email: '', password: '', role: 'USER' as Role, enabled: true };
@@ -60,12 +60,20 @@ export class Users {
       maxLength(account.surname, 100);
       maxLength(account.email, 256);
       email(account.email);
+      validate(account.name, ({ value }) => textError(value(), PERSON_NAME, NAME_MESSAGE));
+      validate(account.surname, ({ value }) => textError(value(), PERSON_NAME, NAME_MESSAGE));
+      validate(account.email, ({ value }) => textError(value().trim(), EMAIL, 'Enter a valid email address.'));
       required(account.password, { when: () => !this.editing() });
       minLength(account.password, 8);
       validate(account.password, ({ value }) => passwordError(value()));
       disabled(account.enabled, { when: () => this.editing()?.id === this.auth.user()?.id });
     },
-    { submission: { action: () => this.save() } },
+    {
+      submission: {
+        action: () => this.save(),
+        onInvalid: () => this.error.set(this.form().errorSummary().find((error) => error.kind === 'characters')?.message ?? 'Check the highlighted fields.'),
+      },
+    },
   );
 
   protected openForm(user: User | null = null): void {
@@ -97,7 +105,8 @@ export class Users {
   }
 
   private async save(): Promise<undefined> {
-    const { password, ...user } = this.account();
+    const { password, ...account } = this.account();
+    const user = { ...account, name: singleLine(account.name), surname: singleLine(account.surname), email: account.email.trim() };
     const request = { ...user, password: password || null };
     const editing = this.editing();
     try {

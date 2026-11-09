@@ -5,9 +5,10 @@ import module java.base;
 import com.bimap.core.MailService;
 import com.bimap.model.User;
 import com.bimap.validation.BcryptSize;
+import com.bimap.validation.EmailAddress;
+import com.bimap.validation.PersonName;
 import com.bimap.service.UserService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Positive;
@@ -36,8 +37,8 @@ public class UserController {
         this.mailService = mailService;
     }
 
-    record UserRequest(@NotBlank @Size(max = 100) String name, @NotBlank @Size(max = 100) String surname,
-                       @NotBlank @Email @Size(max = 256) String email, @Size(min = 8, max = 72) @BcryptSize String password,
+    record UserRequest(@NotBlank @PersonName String name, @NotBlank @PersonName String surname,
+                       @NotBlank @EmailAddress String email, @Size(min = 8, max = 72) @BcryptSize String password,
                        User.Role role, Boolean enabled) {
 
         User.Role roleOrDefault() {
@@ -57,7 +58,7 @@ public class UserController {
     }
 
     @GetMapping("/exists")
-    boolean exists(@RequestParam @NotBlank @Email @Size(max = 256) String email) {
+    boolean exists(@RequestParam @NotBlank @EmailAddress String email) {
         return users.exists(email);
     }
 
