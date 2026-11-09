@@ -7,7 +7,7 @@ import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/auth/auth.service';
 import { LandmarkGallery } from '../../shared/landmark-gallery';
 import { apiError } from '../../shared/api-error';
-import { passwordError } from '../../shared/validation';
+import { EMAIL, NAME_MESSAGE, PERSON_NAME, passwordError, singleLine, textError } from '../../shared/validation';
 
 const ERRORS: Record<number, string> = {
   0: 'Cannot reach the server.',
@@ -39,8 +39,11 @@ export class Login {
       required(account.surname, { when: () => this.signup() });
       maxLength(account.name, 100);
       maxLength(account.surname, 100);
+      validate(account.name, ({ value }) => textError(value(), PERSON_NAME, NAME_MESSAGE));
+      validate(account.surname, ({ value }) => textError(value(), PERSON_NAME, NAME_MESSAGE));
       required(account.email);
       email(account.email);
+      validate(account.email, ({ value }) => textError(value().trim(), EMAIL, 'Enter a valid email address.'));
       maxLength(account.email, 256);
       required(account.password);
       minLength(account.password, 8, { when: () => this.signup() });
@@ -49,7 +52,7 @@ export class Login {
     {
       submission: {
         action: () => this.send(),
-        onInvalid: () => this.error.set('Check the fields below. New passwords need at least 8 characters and at most 72 UTF-8 bytes.'),
+        onInvalid: () => this.error.set(this.form().errorSummary().find((error) => error.kind === 'characters')?.message ?? 'Check the fields below. New passwords need at least 8 characters and at most 72 UTF-8 bytes.'),
       },
     },
   );
@@ -61,7 +64,8 @@ export class Login {
   }
 
   private async send(): Promise<undefined> {
-    const { name, surname, email, password } = this.account();
+    const { password, ...account } = this.account();
+    const [name, surname, email] = [singleLine(account.name), singleLine(account.surname), account.email.trim()];
     const session = this.signup()
       ? this.auth.signup({ name, surname, email, password })
       : this.auth.login({ email, password });
@@ -79,7 +83,6 @@ export class Login {
 }
 
 export function safeReturnUrl(value: string | undefined, administrator: boolean): string {
-  if (!value || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) return '/assets';
-  const path = value.split(/[?#]/, 1)[0];
-  return path === '/assets' || path === '/street-view' || (path === '/users' && administrator) ? value : '/assets';
+  const path = value?.split(/[?#]/, 1)[0];
+  return path === '/street-view' || (path === '/users' && administrator) ? path : '/assets';
 }

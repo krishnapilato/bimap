@@ -2,8 +2,8 @@ package com.bimap.core;
 
 import com.bimap.service.UserService;
 import com.bimap.validation.BcryptSize;
+import com.bimap.validation.EmailAddress;
 import jakarta.validation.Validator;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.jspecify.annotations.NonNull;
@@ -27,7 +27,7 @@ public class AdminBootstrap implements ApplicationRunner {
         this.credentials = new Credentials(email, password);
     }
 
-    private record Credentials(@NotBlank @Email @Size(max = 256) String email, @NotBlank @Size(min = 8, max = 72) @BcryptSize String password) { }
+    private record Credentials(@NotBlank @EmailAddress String email, @NotBlank @Size(min = 8, max = 72) @BcryptSize String password) { }
 
     @Override
     public void run(@NonNull ApplicationArguments args) {

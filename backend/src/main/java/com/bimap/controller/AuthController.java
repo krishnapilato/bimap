@@ -6,9 +6,10 @@ import com.bimap.core.LoginAttempts;
 import com.bimap.model.User;
 import com.bimap.service.UserService;
 import com.bimap.validation.BcryptSize;
+import com.bimap.validation.EmailAddress;
+import com.bimap.validation.PersonName;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
@@ -41,12 +42,12 @@ public class AuthController {
         this.loginAttempts = loginAttempts;
     }
 
-    record LoginRequest(@NotBlank @Email @Size(max = 256) String email, @NotBlank @Size(max = 72) @BcryptSize String password) { }
+    record LoginRequest(@NotBlank @EmailAddress String email, @NotBlank @Size(max = 72) @BcryptSize String password) { }
 
     record SignupRequest(
-            @NotBlank @Size(max = 100) String name,
-            @NotBlank @Size(max = 100) String surname,
-            @NotBlank @Email @Size(max = 256) String email,
+            @NotBlank @PersonName String name,
+            @NotBlank @PersonName String surname,
+            @NotBlank @EmailAddress String email,
             @NotBlank @Size(min = 8, max = 72) @BcryptSize String password) { }
 
     record UserView(Long id, String name, String surname, String email, User.Role role) { }

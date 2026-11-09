@@ -2,6 +2,7 @@ package com.bimap;
 
 import com.bimap.model.User;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpHeaders;
 
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.not;
@@ -104,6 +105,25 @@ class AuthApiTest extends ApiTest {
             .andExpect(jsonPath("$.errors.surname").exists())
             .andExpect(jsonPath("$.errors.email").exists())
             .andExpect(jsonPath("$.errors.password").exists());
+    }
+
+    @Test
+    void signupRejectsMarkupControlCharactersAndOddEmails() throws Exception {
+        mvc.perform(json(post("/auth/signup"), """
+                {"name": "<script>alert(1)</script>", "surname": "=HYPERLINK(1)", "email": "\\"a b\\"@example.com", "password": "password1"}"""))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors.name").exists())
+            .andExpect(jsonPath("$.errors.surname").exists())
+            .andExpect(jsonPath("$.errors.email").exists());
+        mvc.perform(json(post("/auth/signup"), """
+                {"name": "Mario\\u0000", "surname": "Rossi\\nBcc", "email": "mario@example.com", "password": "password1"}"""))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors.name").exists())
+            .andExpect(jsonPath("$.errors.surname").exists());
+        mvc.perform(json(post("/users"), """
+                {"name": "José-María", "surname": "D'Angelo", "email": "jose.dangelo@example.com", "password": "password1"}""")
+                .header(HttpHeaders.AUTHORIZATION, bearer(tokenFor(User.Role.ADMINISTRATOR))))
+            .andExpect(status().isCreated());
     }
 
     @Test

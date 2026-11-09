@@ -12,7 +12,7 @@ import { Asset } from './asset.models';
 import { AssetsService } from './assets.service';
 import { apiError } from '../../shared/api-error';
 import { pageIndex } from '../../shared/pagination';
-import { integerError } from '../../shared/validation';
+import { integerError, PLAIN_TEXT, singleLine, TEXT_MESSAGE, textError } from '../../shared/validation';
 import { Autocomplete } from '../../shared/autocomplete';
 import { Modal } from '../../shared/modal';
 import { CsvPreview, parseCsv, saveCsv } from '../../shared/csv';
@@ -30,6 +30,8 @@ const EMPTY = {
   latitude: null as number | null,
   longitude: null as number | null,
 };
+
+const istat = (code?: string) => (code && /^\d{6}$/.test(code) ? code : '');
 
 @Component({
   selector: 'app-assets',
@@ -69,7 +71,10 @@ export class Assets {
       validate(asset.municipality, ({ value }) => this.fromList(value(), this.municipalities().map((place) => place.nome), 'municipality'));
       required(asset.address);
       required(asset.goodNaming);
-      for (const field of [asset.region, asset.province, asset.municipality, asset.address, asset.goodNaming]) maxLength(field, 255);
+      for (const field of [asset.region, asset.province, asset.municipality, asset.address, asset.goodNaming]) {
+        maxLength(field, 255);
+        validate(field, ({ value }) => textError(singleLine(value()), PLAIN_TEXT, TEXT_MESSAGE));
+      }
       validate(asset.number, ({ value }) => integerError(value()));
       validate(asset.goodID, ({ value }) => integerError(value()));
       min(asset.number, 0);
@@ -83,7 +88,7 @@ export class Assets {
     {
       submission: {
         action: () => this.save(),
-        onInvalid: () => this.error.set('Choose the place, fill in the address and asset name, then click the map to set the coordinates.'),
+        onInvalid: () => this.error.set(this.form().errorSummary().find((error) => error.kind === 'characters')?.message ?? 'Choose the place, fill in the address and asset name, then click the map to set the coordinates.'),
       },
     },
   );
@@ -151,7 +156,7 @@ export class Assets {
     this.selectionVersion++;
     this.resetLocation();
     const place = this.municipalities().find((municipality) => municipality.nome === name);
-    this.asset.update((form) => ({ ...form, municipality: name, istatCode: place?.codice ?? '' }));
+    this.asset.update((form) => ({ ...form, municipality: name, istatCode: istat(place?.codice) }));
     if (place) this.map?.flyTo(place.coordinate, 13);
   }
 
@@ -180,7 +185,9 @@ export class Assets {
     const selection = ++this.selectionVersion;
     this.resetLocation();
     this.error.set('');
-    this.asset.set({ ...EMPTY, address: asset.indirizzo, number: asset.civico || null, goodNaming: asset.denominazione, goodID: asset.idbene });
+    const address = singleLine(asset.indirizzo);
+    const goodNaming = singleLine(asset.denominazione);
+    this.asset.set({ ...EMPTY, address, number: asset.civico || null, goodNaming, goodID: asset.idbene });
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const place = await firstValueFrom(asset.prov ? this.api.findMunicipality(asset.comune, asset.prov) : of(undefined)).catch(() => undefined);
     if (selection !== this.selectionVersion || this.destroyRef.destroyed) return;
@@ -189,13 +196,13 @@ export class Assets {
       region: place?.provincia.regione ?? '',
       province: place?.provincia.nome ?? '',
       municipality: place?.nome ?? '',
-      istatCode: place?.codice ?? '',
-      address: asset.indirizzo,
+      istatCode: istat(place?.codice),
+      address,
       number: asset.civico || null,
-      goodNaming: asset.denominazione,
+      goodNaming,
       goodID: asset.idbene,
     }));
-    await this.locate(asset.indirizzo, asset.civico, place?.nome ?? asset.comune);
+    await this.locate(address, asset.civico, place?.nome ?? asset.comune);
   }
 
   protected retryPlaces(): void {
@@ -270,8 +277,9 @@ export class Assets {
 
   private async save(): Promise<undefined> {
     if (this.locating() || this.placesLoading()) return undefined;
-    const { number, goodID, istatCode, latitude, longitude, ...asset } = this.asset();
+    const { number, goodID, istatCode, latitude, longitude, ...fields } = this.asset();
     if (latitude === null || longitude === null) return undefined;
+    const asset = Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, singleLine(value)])) as typeof fields;
     try {
       await firstValueFrom(
         this.api.save({ ...asset, number: number ?? 0, goodID: goodID ?? 0, istatCode: istatCode || null, latitude, longitude }),

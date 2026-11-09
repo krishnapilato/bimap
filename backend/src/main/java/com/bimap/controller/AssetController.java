@@ -7,6 +7,7 @@ import com.bimap.model.AssetFormRow;
 import com.bimap.model.HeritageAsset;
 import com.bimap.repository.AssetFormRepository;
 import com.bimap.repository.ReferenceDataRepository;
+import com.bimap.validation.PlainText;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMax;
@@ -15,7 +16,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -43,11 +43,11 @@ public class AssetController {
     }
 
     record FormRequest(
-        @NotBlank @Size(max = 255) String region,
-        @NotBlank @Size(max = 255) String province,
-        @NotBlank @Size(max = 255) String municipality,
-        @NotBlank @Size(max = 255) String address,
-        @NotBlank @Size(max = 255) String goodNaming,
+        @NotBlank @PlainText String region,
+        @NotBlank @PlainText String province,
+        @NotBlank @PlainText String municipality,
+        @NotBlank @PlainText String address,
+        @NotBlank @PlainText String goodNaming,
         @NotNull @PositiveOrZero Integer number,
         @NotNull @PositiveOrZero Integer goodID,
         @Pattern(regexp = "\\d{6}", message = "must be 6 digits.") String istatCode,
@@ -62,17 +62,17 @@ public class AssetController {
     record SavedForm(Long id, @JsonUnwrapped FormRequest form) { }
 
     @GetMapping("/places/regions")
-    List<String> regions(@RequestParam @NotBlank @Size(max = 100) String q) {
+    List<String> regions(@RequestParam @NotBlank @PlainText(max = 100) String q) {
         return referenceData.searchRegions(q);
     }
 
     @GetMapping("/places/provinces")
-    List<String> provinces(@RequestParam @NotBlank @Size(max = 100) String q) {
+    List<String> provinces(@RequestParam @NotBlank @PlainText(max = 100) String q) {
         return referenceData.searchProvinces(q);
     }
 
     @GetMapping("/places/municipalities")
-    List<String> municipalities(@RequestParam @NotBlank @Size(max = 100) String q) {
+    List<String> municipalities(@RequestParam @NotBlank @PlainText(max = 100) String q) {
         return referenceData.searchMunicipalities(q);
     }
 

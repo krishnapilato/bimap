@@ -1,8 +1,11 @@
 package com.bimap;
 
+import com.bimap.model.AssetForm;
 import com.bimap.model.User;
+import com.bimap.repository.AssetFormRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -23,6 +26,9 @@ class AssetApiTest extends ApiTest {
             {"region": "Piemonte", "province": "Alessandria", "municipality": "Cremolino", "address": "via Umberto I",
              "number": 3, "goodNaming": "Complesso dell antica porta", "goodID": 7168, "istatCode": "006061",
              "latitude": 44.637512, "longitude": 8.585214}""";
+
+    @Autowired
+    private AssetFormRepository forms;
 
     private String token;
 
@@ -57,7 +63,8 @@ class AssetApiTest extends ApiTest {
         as(get("/places/provinces").param("q", "TORI")).andExpect(jsonPath("$", contains("Torino")));
         as(get("/places/municipalities").param("q", "a")).andExpect(jsonPath("$", hasSize(4)));
         as(get("/places/municipalities").param("q", "d'Ivrea")).andExpect(jsonPath("$[0]").value("Albiano d'Ivrea"));
-        as(get("/places/municipalities").param("q", "%")).andExpect(jsonPath("$", hasSize(0)));
+        as(get("/places/municipalities").param("q", "a_b")).andExpect(jsonPath("$", hasSize(0)));
+        as(get("/places/municipalities").param("q", "%")).andExpect(status().isBadRequest());
         as(get("/places/municipalities").param("q", "zzzz")).andExpect(jsonPath("$", hasSize(0)));
     }
 
@@ -66,6 +73,16 @@ class AssetApiTest extends ApiTest {
         as(get("/places/regions")).andExpect(status().isBadRequest());
         as(get("/places/regions").param("q", " ")).andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors.q").exists());
         as(get("/places/regions").param("q", "x".repeat(101))).andExpect(status().isBadRequest());
+        as(get("/places/regions").param("q", "<svg onload=alert(1)>")).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void rejectsMarkupFormulasAndControlCharactersInForms() throws Exception {
+        for (var dirty : new String[] {"<img src=x onerror=alert(1)>", "=cmd|' /C calc'!A0", "@SUM(A1)", "a\\nb", "${jndi:ldap://x}"}) {
+            as(json(post("/forms"), FORM.replace("via Umberto I", dirty)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.errors.address").exists());
+        }
     }
 
     @Test
@@ -131,7 +148,7 @@ class AssetApiTest extends ApiTest {
     @Test
     void exportsFormsAsCsvAndNeutralisesFormulas() throws Exception {
         as(json(post("/forms"), FORM));
-        as(json(post("/forms"), FORM.replace("\"via Umberto I\"", "\"=HYPERLINK(\\\"http://evil.example\\\")\"").replace("\"Complesso dell antica porta\"", "\"@SUM(1+1)\"")));
+        forms.save(new AssetForm("Piemonte", "Alessandria", "Cremolino", "=HYPERLINK(\"http://evil.example\")", "@SUM(1+1)", 3, 7168, "006061", 44.637512, 8.585214));
 
         var csv = as(get("/forms/export.csv"))
                 .andExpect(status().isOk())
