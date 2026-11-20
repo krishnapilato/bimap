@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: .
+      target: backend
+    restart: unless-stopped
+    env_file:
+      - path: backend/.env
+        required: true
+    environment:
+      DB_PATH: /data/bimap.db
+      APP_FRONTEND_URL: http://localhost:8080
+      SERVER_FORWARD_HEADERS_STRATEGY: framework
+    volumes:
+      - bimap-data:/data
+
+  frontend:
+    build:
+      context: .
+      target: frontend
+      args:
+        GOOGLE_MAPS_KEY: ${GOOGLE_MAPS_KEY:-}
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  bimap-data:

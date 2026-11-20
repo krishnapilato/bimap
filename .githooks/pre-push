@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+root=$(git rev-parse --show-toplevel)
+cd "$root/backend" && ./mvnw -B -q verify
+cd "$root/frontend" && npm run check
