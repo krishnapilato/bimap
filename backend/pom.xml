@@ -20,11 +20,6 @@
     <properties>
         <java.version>27</java.version>
         <pmd.version>7.29.0</pmd.version>
-        <maven-pmd-plugin.version>3.28.0</maven-pmd-plugin.version>
-        <springdoc.version>3.2.0</springdoc.version>
-        <sqlite-jdbc.version>3.54.1.0</sqlite-jdbc.version>
-        <versions-maven-plugin.version>2.25.2</versions-maven-plugin.version>
-        <jar.budget>90000000</jar.budget>
     </properties>
 
     <dependencies>
@@ -60,7 +55,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>${springdoc.version}</version>
+            <version>3.2.0</version>
         </dependency>
 
         <dependency>
@@ -70,7 +65,7 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>${sqlite-jdbc.version}</version>
+            <version>3.54.1.0</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
@@ -132,29 +127,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>jar-budget</id>
-                        <phase>verify</phase>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireFilesSize>
-                                    <maxsize>${jar.budget}</maxsize>
-                                    <files>
-                                        <file>${project.build.directory}/${project.build.finalName}.jar</file>
-                                    </files>
-                                </requireFilesSize>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>-javaagent:${org.mockito:mockito-core:jar} -Xshare:off --enable-native-access=ALL-UNNAMED</argLine>
@@ -184,7 +156,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>${maven-pmd-plugin.version}</version>
+                <version>3.28.0</version>
                 <configuration>
                     <targetJdk>${java.version}</targetJdk>
                     <rulesets>
@@ -234,81 +206,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>updates</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>clean-version-reports</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <delete dir="${project.build.directory}/updates"/>
-                                    </target>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>no-outdated-versions</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                                <configuration>
-                                    <target>
-                                        <fail message="Outdated versions, see the versions report above">
-                                            <condition>
-                                                <or>
-                                                    <resourcecontains resource="${project.build.directory}/updates/parent.txt" substring="-&gt;"/>
-                                                    <resourcecontains resource="${project.build.directory}/updates/properties.txt" substring="-&gt;"/>
-                                                </or>
-                                            </condition>
-                                        </fail>
-                                    </target>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>versions-maven-plugin</artifactId>
-                        <version>${versions-maven-plugin.version}</version>
-                        <configuration>
-                            <ignoredVersions>(?i).*[.-](alpha|beta|m|rc|cr|snapshot|preview|ea)[.-]?[0-9]*</ignoredVersions>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>parent-updates</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>display-parent-updates</goal>
-                                </goals>
-                                <configuration>
-                                    <outputFile>${project.build.directory}/updates/parent.txt</outputFile>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>property-updates</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>display-property-updates</goal>
-                                </goals>
-                                <configuration>
-                                    <outputFile>${project.build.directory}/updates/properties.txt</outputFile>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

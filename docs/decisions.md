@@ -88,28 +88,27 @@ Demo users are created at startup only when `dev` is active.
 
 ### Compiler warnings and analysis findings fail the build
 
-`javac -Xlint:all -Werror`, PMD, the tests, the unused-dependency analysis, the update check and the jar budget run on every `mvnw verify`; the update check runs only with `-Pupdates`, in CI. The Docker image skips the tests, which CI runs.
+`javac -Xlint:all -Werror`, PMD, the tests and the unused-dependency analysis run on every `mvnw verify`; the Docker image skips the tests, which CI runs.
 
 - **Why:** a warning that doesn't stop the build gets ignored.
 - **Cost:** an unused import or a wildcard import stops `docker compose up --build`.
 
-### Quick checks on start, full checks before push and in CI
+### Quick checks on start, tests before push, everything in CI
 
-A start runs only the fast, offline checks: compiler and PMD on the backend, type check, ESLint and knip on the frontend. A pre-push hook in `.githooks/` runs `mvnw verify` and `npm run check`, which add the tests, the budgets, the unused-dependency analysis and Lighthouse. CI runs all of that plus the update checks.
+A start runs only the fast, offline checks: compiler and PMD on the backend, type check, ESLint and knip on the frontend. A pre-push hook in `.githooks/` runs both test suites. CI runs everything, adding the bundle budgets, the unused-dependency analysis and Lighthouse.
 
-- **Why:** every check blocking every start made a restart take 45 seconds on the backend and 1.5 minutes on the frontend, and needed the network. Most mistakes are caught in seconds; the slow checks still stop anything unclean before it reaches `main`.
-- **Cost:** a start takes about 10 seconds on each side, a push about two minutes, and the hook can be bypassed with `git push --no-verify`; CI still catches it.
+- **Why:** each check runs once, where it is cheapest: a start stays at about 10 seconds, a push at about 40, and nothing unclean reaches `main`.
+- **Cost:** the hook can be bypassed with `git push --no-verify`; CI still catches it.
 
-### Up to date or explicitly held back
+### No update check of our own
 
-The backend fails when the Spring Boot parent or any version in `<properties>` has a newer release; libraries managed by Boot follow the parent rather than being overridden. The frontend fails when any npm package is behind; a package can only be held back in [`.ncurc.cjs`](../frontend/.ncurc.cjs) with a reason, which is printed on every run.
+Dependabot opens a pull request every week for npm, Maven, Docker and GitHub Actions; there is no separate check that fails the build when a dependency is behind.
 
-- **Why:** updates arrive in small steps instead of one big migration.
-- **Cost:** a new release upstream turns CI red until the dependency is updated. That is why the check runs only in CI and never blocks a start or a push.
+- **Why:** such a check repeats what Dependabot already does and turns CI red for releases outside this repository. Dependabot also holds TypeScript back (see below).
 
 ### Lighthouse at 90 or more, without Wikimedia
 
-The frontend check builds the demo and fails if performance, accessibility, best practices or SEO drop below 90 on the landing and sign-in pages (median of three mobile runs). Wikimedia is blocked during those runs.
+CI builds the demo and fails if performance, accessibility, best practices or SEO drop below 90 on the landing and sign-in pages (median of three mobile runs). Wikimedia is blocked during those runs.
 
 - **Why:** the random Commons photograph is fetched through a third-party API whose latency varies from 0.5 to 2 seconds, so with it the score measures Commons, not this app, and the check would fail at random.
 - **Cost:** the photograph's own loading time is not measured; it is loaded as a high-priority, cookie-free (anonymous CORS) image with preconnected origins.
@@ -146,7 +145,7 @@ The build stage uses the full JDK; the final image has only the JRE and the jar,
 
 ### TypeScript pinned to 6.0
 
-- **Why:** TypeScript 7 is not supported by Angular 22.3 yet: Angular and `typescript-eslint` need a version below 6.1, and a newer one breaks `npm ci`. The update check holds it back in [`.ncurc.cjs`](../frontend/.ncurc.cjs).
+- **Why:** TypeScript 7 is not supported by Angular 22.3 yet: Angular and `typescript-eslint` need a version below 6.1, and a newer one breaks `npm ci`. Dependabot ignores its minor and major updates in [`dependabot.yml`](../.github/dependabot.yml).
 
 ### Comuni-ITA and Nominatim for places
 

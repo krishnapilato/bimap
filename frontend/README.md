@@ -32,8 +32,8 @@ The checks run in three places, each one stricter than the last:
 | When | Command | Steps |
 |---|---|---|
 | `npm start`, `npm run start:demo` | `npm run check:start` | `typecheck`, `lint`, `knip`: about 10 seconds, no network |
-| Before every `git push` | `npm run check` | The start checks, then `ng test`, `ng build` and `lighthouse` |
-| [CI](../.github/workflows/ci.yml) | `npm run check`, `npm run outdated` | Everything, plus the update check |
+| Before every `git push` | `ng test` | The unit tests |
+| [CI](../.github/workflows/ci.yml) | `npm run check`, `npm run lighthouse` | The start checks, then `ng test`, `ng build` and `lighthouse` |
 
 | Step | Fails on |
 |---|---|
@@ -43,9 +43,8 @@ The checks run in three places, each one stricter than the last:
 | `ng test` | Any failing unit test |
 | `ng build` | Any bundle over its budget in [`angular.json`](angular.json) |
 | `lighthouse` | Performance, accessibility, best practices or SEO below 90 on the demo build (median of three mobile runs, needs Chrome; Wikimedia is blocked so the score measures this app, not Commons) |
-| `outdated` | Any dependency behind its latest release; TypeScript is held at 6.0 because TypeScript 7 is not supported by Angular 22.3 yet ([`.ncurc.cjs`](.ncurc.cjs)) |
 
-`npm install` points Git at the shared hooks in [`.githooks/`](../.githooks/pre-push); the pre-push hook runs the backend's `mvnw verify` and this `npm run check`.
+`npm install` points Git at the shared hooks in [`.githooks/`](../.githooks/pre-push); the pre-push hook runs the backend and frontend tests. Updates come from Dependabot, which holds TypeScript at 6.0 because TypeScript 7 is not supported by Angular 22.3 yet.
 
 ### Demo mode
 

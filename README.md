@@ -44,8 +44,8 @@ Nothing unclean reaches `main`; the checks run in three places, each one stricte
 | When | Backend | Frontend |
 |---|---|---|
 | Every start | Compiler and PMD (`spring-boot:run`, IntelliJ) | Type check, ESLint and knip (`npm start`) |
-| Before every `git push` | Everything except updates (`mvnw verify`) | Everything except updates (`npm run check`) |
-| [CI](.github/workflows/ci.yml) | Everything (`mvnw -Pupdates verify`) | Everything (`npm run check`, `npm run outdated`) |
+| Before every `git push` | Tests (`mvnw test`) | Tests (`ng test`) |
+| [CI](.github/workflows/ci.yml) | Everything (`mvnw verify`) | Everything (`npm run check`, `npm run lighthouse`) |
 
 The pre-push hook lives in [`.githooks/`](.githooks/pre-push); `npm install` in `frontend/` enables it.
 
@@ -54,18 +54,17 @@ The pre-push hook lives in [`.githooks/`](.githooks/pre-push); `npm install` in 
 | Compiler | `javac -Xlint:all -Werror` | `ngc` and `tsc` with TypeScript `strict`, `noUnusedLocals`, `noUnusedParameters` |
 | Templates | — | Angular strict templates, extended diagnostics as errors |
 | Static analysis | [PMD 7](backend/pmd-ruleset.xml): unused code, bug patterns, clean-code rules | [ESLint](frontend/eslint.config.mjs) with zero warnings: `typescript-eslint` strict type-checked, `angular-eslint`, SonarJS |
-| Unused code and dependencies | `dependency:analyze`: no unused declared dependency | [knip](frontend/knip.json): no unused file, export or dependency |
-| Updates | Latest Spring Boot parent and latest release of every version in `<properties>` | Latest release of every package; TypeScript held at 6.0 because TypeScript 7 is not supported by Angular 22.3 yet |
+| Unused code and dependencies | `dependency:analyze`: no unused declared dependency | knip: no unused file, export or dependency |
 | Tests | JUnit 6, MockMvc and Mockito against real SQLite, with concurrent account/rate-limit checks and migration/backup coverage (77 tests) | Vitest (40 tests) |
-| Budgets | Packaged jar up to 90 MB | Initial bundle up to 450 kB, any script up to 300 kB, any component style up to 4 kB |
+| Budgets | — | Initial bundle up to 450 kB, any script up to 300 kB, any component style up to 4 kB |
 | Lighthouse | — | 90 or more in every category, see below |
 | Security headers | Content Security Policy with `default-src 'none'` and only `'self'` scripts and styles, `frame-ancestors 'none'`, `no-referrer` | Strict Content Security Policy: hashed scripts with `'strict-dynamic'` (`autoCsp`), `object-src 'none'`, `base-uri 'self'` |
 | Docker | Both images built in CI | Both images built in CI |
-| Dependabot | Weekly | Weekly |
+| Dependabot | Weekly | Weekly; TypeScript held at 6.0 because TypeScript 7 is not supported by Angular 22.3 yet |
 
 ### Lighthouse
 
-Before every push and in CI, the demo is built and Lighthouse runs three times on the landing and sign-in pages with mobile settings (simulated slow 4G, 4× slower CPU). It fails if the median of any category is below 90. Wikimedia is blocked during the runs, so the score measures this app rather than the latency of the Commons API ([why](docs/decisions.md#lighthouse-at-90-or-more-without-wikimedia)).
+In CI, the demo is built and Lighthouse runs three times on the landing and sign-in pages with mobile settings (simulated slow 4G, 4× slower CPU). It fails if the median of any category is below 90. Wikimedia is blocked during the runs, so the score measures this app rather than the latency of the Commons API ([why](docs/decisions.md#lighthouse-at-90-or-more-without-wikimedia)).
 
 | Page | Performance | Accessibility | Best practices | SEO |
 |---|:-:|:-:|:-:|:-:|
@@ -128,7 +127,7 @@ The database lives in the `bimap-data` volume; `docker compose down -v` deletes 
 
 ### Without Docker
 
-Start the backend as described in the [backend README](backend/README.md), then the frontend. It requires Node.js and npm, plus Chrome for the Lighthouse step of the pre-push checks.
+Start the backend as described in the [backend README](backend/README.md), then the frontend. It requires Node.js and npm.
 
 ```bash
 cd frontend

@@ -1,5 +1,5 @@
 #!/bin/sh
 set -e
 root=$(git rev-parse --show-toplevel)
-cd "$root/backend" && ./mvnw -B -q verify
-cd "$root/frontend" && npm run check
+cd "$root/backend" && ./mvnw -B -q test
+cd "$root/frontend" && npx ng test --watch=false

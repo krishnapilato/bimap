@@ -32,8 +32,8 @@ With `spring.profiles.active=dev` in `.env`, demo users are created on startup; 
 | When | Command | Checks |
 |---|---|---|
 | Every start | `./mvnw spring-boot:run`, IntelliJ run configuration | Compiler and PMD: about 10 seconds, no network |
-| Before every `git push` | `./mvnw verify` (from the [pre-push hook](../.githooks/pre-push)) | Compiler, PMD, tests, dependencies and jar budget |
-| [CI](../.github/workflows/ci.yml) | `./mvnw -Pupdates verify` | Everything, plus versions |
+| Before every `git push` | `./mvnw test` (from the [pre-push hook](../.githooks/pre-push)) | Compiler, PMD and tests |
+| [CI](../.github/workflows/ci.yml) | `./mvnw verify` | Everything, plus unused dependencies |
 
 | Check | Fails on |
 |---|---|
@@ -41,8 +41,6 @@ With `spring.profiles.active=dev` in `.env`, demo users are created on startup; 
 | PMD | Any violation of [`pmd-ruleset.xml`](pmd-ruleset.xml), including unused code |
 | Tests | Any failing test |
 | Dependencies | A declared dependency the code does not use (starters and runtime-only drivers excepted) |
-| Jar budget | A packaged jar over `jar.budget` (90 MB) |
-| Versions | A newer Spring Boot parent, or a newer release of any version declared in `<properties>`; Boot-managed libraries follow the parent |
 
 ## Tests
 

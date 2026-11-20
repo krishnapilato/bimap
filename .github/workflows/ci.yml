@@ -26,8 +26,8 @@ jobs:
           distribution: temurin
           java-version: 27
           cache: maven
-      - name: Updates, compile, PMD, tests, unused dependencies and jar budget
-        run: ./mvnw -B -Pupdates verify
+      - name: Compile, PMD, tests and unused dependencies
+        run: ./mvnw -B verify
 
   docker:
     name: Docker images
@@ -51,7 +51,7 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
-      - name: Type check, lint, knip, tests, budgets and Lighthouse
+      - name: Type check, lint, knip, tests and budgets
         run: npm run check
-      - name: Updates
-        run: npm run outdated
+      - name: Lighthouse
+        run: npm run lighthouse
